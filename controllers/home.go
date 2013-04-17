@@ -16,6 +16,8 @@ package controllers
 
 import (
 	"github.com/astaxie/beego"
+	"github.com/unknwon/gowalker/doc"
+	"github.com/unknwon/gowalker/utils"
 )
 
 type HomeController struct {
@@ -30,9 +32,21 @@ func (this *HomeController) Get() {
 	// Set properties
 	this.TplNames = "home.html"
 	this.Layout = "layout.html"
-	// Check if it is home page or query page
+
+	// Check if it is home page
 	if len(q) == 0 {
-		this.Ctx.WriteString(q)
+		this.Render()
+		return
+	}
+
+	// Query page
+	if path, ok := utils.IsBrowseURL(q); ok {
+		q = path
+	}
+
+	// Check remote path
+	if doc.IsValidRemotePath(q) {
+		this.Ctx.WriteString("HOLY SHIT!")
 	}
 	this.Render()
 }
