@@ -25,9 +25,9 @@ const (
 
 func main() {
 	beego.Info("Go Walker " + VERSION)
-	beego.SetStaticPath("/static", "static")
 
 	// Register controllers
 	beego.RegisterController("/", &controllers.HomeController{})
+	beego.RegisterController("/search", &controllers.SearchController{})
 	beego.Run()
 }

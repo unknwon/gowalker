@@ -16,42 +16,25 @@ package controllers
 
 import (
 	"github.com/astaxie/beego"
-	"github.com/unknwon/gowalker/doc"
-	"github.com/unknwon/gowalker/utils"
 )
 
-type HomeController struct {
+type SearchController struct {
 	beego.Controller
 }
 
-// Get implemented Get method for HomeController.
-// It serves home page of Go Walker.
-func (this *HomeController) Get() {
+func (this *SearchController) Get() {
 	// Get query field
 	q := this.Input().Get("q")
-	// Set properties
-	this.TplNames = "home.html"
-	this.Layout = "layout.html"
 
 	// Empty query string shows home page
 	if len(q) == 0 {
-		beego.Info("Show home page")
-		this.Render()
-		return
+		this.Redirect("/", 302)
 	}
 
-	if path, ok := utils.IsBrowseURL(q); ok {
-		q = path
-	}
-
-	// Check remote path
-	if doc.IsValidRemotePath(q) {
-		// Check documentation in database
-		beego.Info("Remote path")
-		this.Render()
-		return
-	}
-
-	// Show search page
-	this.Redirect("/search?q="+q, 302)
+	// Set properties
+	this.TplNames = "search.html"
+	this.Layout = "layout.html"
+	// Set keyword
+	this.Data["keyword"] = q
+	this.Render()
 }
