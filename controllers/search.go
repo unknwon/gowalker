@@ -89,6 +89,9 @@ func generatePage(this *SearchController, pdoc *models.Package, q string) {
 	os.MkdirAll("./docs/"+q[:strings.LastIndex(q, "/")+1], os.ModePerm)
 	// Create file
 	f, _ := os.Create("./docs/" + q + ".html")
+
+	/* TODO */
+
 	s, _ := this.RenderString()
 	f.WriteString(s)
 	f.Close()
