@@ -15,6 +15,8 @@
 package main
 
 import (
+	"os"
+
 	"github.com/astaxie/beego"
 	"github.com/unknwon/gowalker/controllers"
 	"github.com/unknwon/gowalker/models"
@@ -27,10 +29,13 @@ const (
 func main() {
 	beego.Info("Go Walker " + VERSION)
 
+	// Initialization
 	beego.Info("Initialize database")
 	if err := models.InitDb(); err != nil {
 		beego.Error(err)
 	}
+	beego.Info("Initialize directory: docs")
+	os.Mkdir("./docs", os.ModePerm)
 
 	// Set static path
 	beego.SetStaticPath("/github.com", "docs/github.com")
@@ -42,7 +47,7 @@ func main() {
 	beego.Router("/-/index", &controllers.IndexController{})
 	beego.Router("/-/about", &controllers.AboutController{})
 
-	// For 404 pages
+	// For all 404 pages
 	beego.Router("/:all", &controllers.ErrorController{})
 	beego.Run()
 }

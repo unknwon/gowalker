@@ -84,14 +84,12 @@ func (this *SearchController) Get() {
 
 func generatePage(this *SearchController, pdoc *models.Package, q string) {
 	this.TplNames = "gene.html"
-	this.Data["Content"] = pdoc
+	this.Data["Content"] = "hello world" //pdoc
 	// Create directories
 	os.MkdirAll("./docs/"+q[:strings.LastIndex(q, "/")+1], os.ModePerm)
 	// Create file
 	f, _ := os.Create("./docs/" + q + ".html")
-
-	/* TODO */
-
+	// Render content
 	s, _ := this.RenderString()
 	f.WriteString(s)
 	f.Close()
