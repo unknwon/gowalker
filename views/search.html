@@ -14,4 +14,25 @@
 		<button class="btn" type="submit">Go!</button>
 	</div>
 </form>
-<p>No packages found. </p>
+{{if .showpkg}}
+	<table class="table table-condensed">
+		<thead>
+			<tr>
+				<th>Path</th>
+				<th>Synopsis</th>
+			</tr>
+		</thead>
+		<tbody>
+			{{with .pkgs}}
+			{{range .}}
+				<tr>
+					<td><a href="/{{.Path}}">{{.Path}}</a></td>
+					<td>{{.Synopsis}}</td>
+				</tr>
+			{{end}}
+			{{end}}
+		</tbody>
+	</table>
+{{else}}
+	<p>No packages found. </p>
+{{end}}

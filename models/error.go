@@ -12,28 +12,14 @@
 // License for the specific language governing permissions and limitations
 // under the License.
 
-package controllers
+package models
 
 import (
-	"github.com/astaxie/beego"
+	"errors"
 )
 
-type HomeController struct {
-	beego.Controller
-}
-
-// Get implemented Get method for HomeController.
-// It serves home page of Go Walker.
-func (this *HomeController) Get() {
-	// Get query field
-	q := this.Input().Get("q")
-	// Set properties
-	this.TplNames = "home.html"
-	this.Layout = "layout.html"
-
-	// Empty query string shows home page
-	if len(q) > 0 {
-		// Show search page
-		this.Redirect("/search?q="+q, 302)
-	}
-}
+var (
+	errNotModified   = errors.New("package not modified")
+	errNoMatch       = errors.New("no match")
+	errUpdateTimeout = errors.New("update timeout")
+)

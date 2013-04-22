@@ -12,33 +12,20 @@
 // License for the specific language governing permissions and limitations
 // under the License.
 
-package main
+package controllers
 
 import (
 	"github.com/astaxie/beego"
-	"github.com/unknwon/gowalker/controllers"
-	"github.com/unknwon/gowalker/models"
 )
 
-const (
-	VERSION = "0.0.1"
-)
+type AboutController struct {
+	beego.Controller
+}
 
-func main() {
-	beego.Info("Go Walker " + VERSION)
-
-	beego.Info("Initialize database")
-	if err := models.InitDb(); err != nil {
-		beego.Error(err)
-	}
-
-	// Register routers
-	beego.Router("/", &controllers.HomeController{})
-	beego.Router("/search", &controllers.SearchController{})
-	beego.Router("/-/index", &controllers.IndexController{})
-	beego.Router("/-/about", &controllers.AboutController{})
-
-	// For 404 pages
-	beego.Router("/:all", &controllers.ErrorController{})
-	beego.Run()
+// Get implemented Get method for AboutController.
+// It serves about page of Go Walker.
+func (this *AboutController) Get() {
+	// Set properties
+	this.TplNames = "about.html"
+	this.Layout = "layout.html"
 }

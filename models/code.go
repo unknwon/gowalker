@@ -12,28 +12,17 @@
 // License for the specific language governing permissions and limitations
 // under the License.
 
-package controllers
+package models
 
-import (
-	"github.com/astaxie/beego"
-)
+type AnnotationKind int16
 
-type HomeController struct {
-	beego.Controller
+type Annotation struct {
+	Pos, End   int16
+	Kind       AnnotationKind
+	ImportPath string
 }
 
-// Get implemented Get method for HomeController.
-// It serves home page of Go Walker.
-func (this *HomeController) Get() {
-	// Get query field
-	q := this.Input().Get("q")
-	// Set properties
-	this.TplNames = "home.html"
-	this.Layout = "layout.html"
-
-	// Empty query string shows home page
-	if len(q) > 0 {
-		// Show search page
-		this.Redirect("/search?q="+q, 302)
-	}
+type Code struct {
+	Text        string
+	Annotations []Annotation
 }

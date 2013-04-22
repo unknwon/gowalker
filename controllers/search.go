@@ -16,6 +16,8 @@ package controllers
 
 import (
 	"github.com/astaxie/beego"
+	"github.com/unknwon/gowalker/models"
+	"github.com/unknwon/gowalker/utils"
 )
 
 type SearchController struct {
@@ -34,7 +36,31 @@ func (this *SearchController) Get() {
 	// Set properties
 	this.TplNames = "search.html"
 	this.Layout = "layout.html"
-	// Set keyword
+
+	// Check if it is a browse URL, if not means it's a keyword or import path
+	if path, ok := utils.IsBrowseURL(q); ok {
+		q = path
+	}
+
+	// Check if it is a remote path, if not means it's a keyword
+	if utils.IsValidRemotePath(q) {
+		// Check documentation of this import path, and update automatically as needed
+		err := models.CheckDoc(q, models.HUMAN_REQUEST)
+		if err == nil {
+			// Redirect to documentation page
+			this.Redirect("/"+q, 302)
+		} else {
+			beego.Error("SearchController.Get:", err)
+		}
+	}
+
+	// Search packages by the keyword
 	this.Data["keyword"] = q
-	this.Render()
+	// Returns a slice of results
+	pkgs := models.SearchDoc(q)
+	// Show results after searched
+	if len(pkgs) > 0 {
+		this.Data["showpkg"] = true
+		this.Data["pkgs"] = pkgs
+	}
 }

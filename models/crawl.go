@@ -1,4 +1,4 @@
-// Copyright 2011 Gary Burd
+// Copyright 2013 Unknown
 //
 // Licensed under the Apache License, Version 2.0 (the "License"): you may
 // not use this file except in compliance with the License. You may obtain
@@ -12,4 +12,17 @@
 // License for the specific language governing permissions and limitations
 // under the License.
 
-package doc
+package models
+
+import (
+	"errors"
+)
+
+type crawlResult struct {
+	pdoc *Package
+	err  error
+}
+
+func crawlDoc(path string) (*Package, error) {
+	return nil, errors.New("Test function error")
+}
