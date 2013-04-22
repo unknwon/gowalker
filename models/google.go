@@ -56,7 +56,7 @@ func getStandardDoc(client *http.Client, importPath string) (pdoc *Package, err 
 		lineFmt: "#%d",
 		pdoc: &Package{
 			ImportPath:  importPath,
-			ProjectRoot: "",
+			ProjectRoot: "http://code.google.com/p/go/source/browse/src/pkg/",
 			ProjectName: "Go",
 			ProjectURL:  "https://code.google.com/p/go/",
 			BrowseURL:   "http://code.google.com/p/go/source/browse/src/pkg/" + importPath + "?name=release",

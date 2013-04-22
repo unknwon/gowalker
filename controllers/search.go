@@ -16,6 +16,7 @@ package controllers
 
 import (
 	"os"
+	"regexp"
 	"strings"
 
 	"github.com/astaxie/beego"
@@ -50,19 +51,18 @@ func (this *SearchController) Get() {
 		// Check documentation of this import path, and update automatically as needed
 
 		/* TODO:WORKING */
-
+		os.Remove("./docs/" + strings.Replace(q, "http://", "", 1) + ".html")
 		pdoc, err := models.CheckDoc(q, models.HUMAN_REQUEST)
 		q = strings.Replace(q, "http://", "", 1)
 		if err == nil {
-			if pdoc != nil {
-				// Generate static page
+			// Generate static page
 
-				/* TODO */
+			/* TODO */
 
-				generatePage(this, pdoc, q)
+			if generatePage(this, pdoc, q) {
+				// Redirect to documentation page
+				this.Redirect("/"+q+".html", 302)
 			}
-			// Redirect to documentation page
-			this.Redirect("/"+q+".html", 302)
 		} else {
 			beego.Error("SearchController.Get:", err)
 		}
@@ -82,9 +82,48 @@ func (this *SearchController) Get() {
 	}
 }
 
-func generatePage(this *SearchController, pdoc *models.Package, q string) {
-	this.TplNames = "gene.html"
-	this.Data["Content"] = "hello world" //pdoc
+var (
+	urlPattern = regexp.MustCompile(`[a-zA-z]+://[^\s]*`)
+)
+
+func generatePage(this *SearchController, pdoc *models.Package, q string) bool {
+	if pdoc == nil || len(pdoc.Name) == 0 {
+		return utils.IsExist("./docs/" + q + ".html")
+	}
+
+	// Set properties
+	this.TplNames = "docs.html"
+
+	// Set data
+	// Introduction
+	this.Data["proPath"] = pdoc.BrowseURL
+	this.Data["proName"] = pdoc.Name
+	this.Data["pkgDocPath"] = pdoc.BrowseURL[7:strings.Index(pdoc.BrowseURL, pdoc.Name)]
+	this.Data["importPath"] = pdoc.ImportPath
+	this.Data["pkgIntro"] = pdoc.Synopsis
+	synIndex := strings.Index(pdoc.Doc, ".")
+	refIndex := strings.Index(pdoc.Doc, "Ref")
+	if refIndex > -1 {
+		this.Data["isHasRef"] = true
+		this.Data["pkgRefs"] = urlPattern.FindAllString(pdoc.Doc[refIndex:], -1)
+	} else {
+		refIndex = len(pdoc.Doc)
+	}
+	this.Data["pkgFullIntro"] = strings.TrimSpace(pdoc.Doc[synIndex+1 : refIndex])
+
+	// Index
+	this.Data["isHasConst"] = len(pdoc.Consts) > 0
+	this.Data["isHasVar"] = len(pdoc.Vars) > 0
+	this.Data["funcs"] = pdoc.Funcs
+	this.Data["types"] = pdoc.Types
+
+	// Constants
+	this.Data["consts"] = pdoc.Consts
+	// Variables
+	this.Data["vars"] = pdoc.Vars
+	// Files
+	this.Data["files"] = pdoc.Files
+
 	// Create directories
 	os.MkdirAll("./docs/"+q[:strings.LastIndex(q, "/")+1], os.ModePerm)
 	// Create file
@@ -93,4 +132,5 @@ func generatePage(this *SearchController, pdoc *models.Package, q string) {
 	s, _ := this.RenderString()
 	f.WriteString(s)
 	f.Close()
+	return true
 }
