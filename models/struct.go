@@ -15,6 +15,7 @@
 package models
 
 import (
+	"os"
 	"reflect"
 	"time"
 )
@@ -95,10 +96,6 @@ type Package struct {
 	// The time this object was created.
 	Updated time.Time
 
-	// Cache validation tag. This tag is not necessarily an HTTP entity tag.
-	// The tag is "" if there is no meaningful cache validation for the VCS.
-	Etag string
-
 	// Package name or "" if no package for this import path. The proceeding
 	// fields are set even if a package is not found for the import path.
 	Name string
@@ -142,3 +139,17 @@ type Package struct {
 	TestImports  []string
 	XTestImports []string
 }
+
+type source struct {
+	name      string
+	browseURL string
+	rawURL    string
+	data      []byte
+}
+
+func (s *source) Name() string       { return s.name }
+func (s *source) Size() int64        { return int64(len(s.data)) }
+func (s *source) Mode() os.FileMode  { return 0 }
+func (s *source) ModTime() time.Time { return time.Time{} }
+func (s *source) IsDir() bool        { return false }
+func (s *source) Sys() interface{}   { return nil }

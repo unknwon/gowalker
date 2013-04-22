@@ -15,6 +15,9 @@
 package controllers
 
 import (
+	"os"
+	"strings"
+
 	"github.com/astaxie/beego"
 	"github.com/unknwon/gowalker/models"
 	"github.com/unknwon/gowalker/utils"
@@ -45,10 +48,21 @@ func (this *SearchController) Get() {
 	// Check if it is a remote path, if not means it's a keyword
 	if utils.IsValidRemotePath(q) {
 		// Check documentation of this import path, and update automatically as needed
-		err := models.CheckDoc(q, models.HUMAN_REQUEST)
+
+		/* TODO:WORKING */
+
+		pdoc, err := models.CheckDoc(q, models.HUMAN_REQUEST)
+		q = strings.Replace(q, "http://", "", 1)
 		if err == nil {
+			if pdoc != nil {
+				// Generate static page
+
+				/* TODO */
+
+				generatePage(this, pdoc, q)
+			}
 			// Redirect to documentation page
-			this.Redirect("/"+q, 302)
+			this.Redirect("/"+q+".html", 302)
 		} else {
 			beego.Error("SearchController.Get:", err)
 		}
@@ -57,10 +71,25 @@ func (this *SearchController) Get() {
 	// Search packages by the keyword
 	this.Data["keyword"] = q
 	// Returns a slice of results
+
+	/* TODO */
+
 	pkgs := models.SearchDoc(q)
 	// Show results after searched
 	if len(pkgs) > 0 {
 		this.Data["showpkg"] = true
 		this.Data["pkgs"] = pkgs
 	}
+}
+
+func generatePage(this *SearchController, pdoc *models.Package, q string) {
+	this.TplNames = "gene.html"
+	this.Data["Content"] = pdoc
+	// Create directories
+	os.MkdirAll("./docs/"+q[:strings.LastIndex(q, "/")+1], os.ModePerm)
+	// Create file
+	f, _ := os.Create("./docs/" + q + ".html")
+	s, _ := this.RenderString()
+	f.WriteString(s)
+	f.Close()
 }

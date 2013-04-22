@@ -23,14 +23,6 @@ import (
 	"strings"
 )
 
-var (
-	googleRepoRe     = regexp.MustCompile(`id="checkoutcmd">(hg|git|svn)`)
-	googleRevisionRe = regexp.MustCompile(`<h2>(?:[^ ]+ - )?Revision *([^:]+):`)
-	googleEtagRe     = regexp.MustCompile(`^(hg|git|svn)-`)
-	googleFileRe     = regexp.MustCompile(`<li><a href="([^"/]+)"`)
-	googlePattern    = regexp.MustCompile(`^code\.google\.com/p/(?P<repo>[a-z0-9\-]+)(:?\.(?P<subrepo>[a-z0-9\-]+))?(?P<dir>/[a-z0-9A-Z_.\-/]+)?$`)
-)
-
 func getGoogleDoc(client *http.Client, match map[string]string, savedEtag string) (*Package, error) {
 	setupGoogleMatch(match)
 	if m := googleEtagRe.FindStringSubmatch(savedEtag); m != nil {
@@ -109,55 +101,6 @@ func getGoogleVCS(client *http.Client, match map[string]string) error {
 	}
 	match["vcs"] = string(m[1])
 	return nil
-}
-
-func getStandardDoc(client *http.Client, importPath string, savedEtag string) (*Package, error) {
-
-	p, err := httpGetBytes(client, "http://go.googlecode.com/hg-history/release/src/pkg/"+importPath+"/", nil)
-	if err != nil {
-		return nil, err
-	}
-
-	var etag string
-	if m := googleRevisionRe.FindSubmatch(p); m == nil {
-		return nil, errors.New("Could not find revision for " + importPath)
-	} else {
-		etag = string(m[1])
-		if etag == savedEtag {
-			return nil, ErrNotModified
-		}
-	}
-
-	var files []*source
-	for _, m := range googleFileRe.FindAllSubmatch(p, -1) {
-		fname := strings.Split(string(m[1]), "?")[0]
-		if isDocFile(fname) {
-			files = append(files, &source{
-				name:      fname,
-				browseURL: "http://code.google.com/p/go/source/browse/src/pkg/" + importPath + "/" + fname + "?name=release",
-				rawURL:    "http://go.googlecode.com/hg-history/release/src/pkg/" + importPath + "/" + fname,
-			})
-		}
-	}
-
-	if err := fetchFiles(client, files, nil); err != nil {
-		return nil, err
-	}
-
-	w := &walker{
-		lineFmt: "#%d",
-		pdoc: &Package{
-			ImportPath:  importPath,
-			ProjectRoot: "",
-			ProjectName: "Go",
-			ProjectURL:  "https://code.google.com/p/go/",
-			BrowseURL:   "http://code.google.com/p/go/source/browse/src/pkg/" + importPath + "?name=release",
-			Etag:        etag,
-			VCS:         "hg",
-		},
-	}
-
-	return w.build(files)
 }
 
 func getGooglePresentation(client *http.Client, match map[string]string) (*Presentation, error) {

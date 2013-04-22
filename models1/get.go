@@ -20,13 +20,6 @@ import (
 	"time"
 )
 
-const (
-	HUMAN_REQUEST = iota
-	ROBOT_REQUEST
-	QUERY_REQUEST
-	REFRESH_REQUEST
-)
-
 var (
 	robot           = flag.Bool("robot", false, "Robot mode")
 	baseDir         = flag.String("base", defaultBase("github.com/garyburd/gopkgdoc/gddo-server"), "Base directory for templates and static files.")
@@ -64,67 +57,10 @@ func (e NotFoundError) Error() string {
 	return e.Message
 }
 
-type crawlResult struct {
-	pdoc *Package
-	err  error
-}
-
 func defaultBase(path string) string {
 	p, err := build.Default.Import(path, "", build.FindOnly)
 	if err != nil {
 		return "."
 	}
 	return p.Dir
-}
-
-// GetDoc gets the package documentation from the database or from the version
-// control system as needed.
-func GetDoc(path string, requestType int) (*Package, []Package, error) {
-	pdoc, pkgs, nextCrawl, err := GetPkgInfo(path)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	needsCrawl := false
-	switch requestType {
-	case QUERY_REQUEST:
-		needsCrawl = nextCrawl.IsZero() && len(pkgs) == 0
-	case HUMAN_REQUEST:
-		needsCrawl = nextCrawl.Before(time.Now())
-	case ROBOT_REQUEST:
-		needsCrawl = nextCrawl.IsZero() && len(pkgs) > 0
-	}
-
-	if needsCrawl {
-		c := make(chan crawlResult, 1)
-		go func() {
-			pdoc, err := crawlDoc("web  ", path, pdoc, len(pkgs) > 0, nextCrawl)
-			c <- crawlResult{pdoc, err}
-		}()
-		var err error
-		timeout := *getTimeout
-		if pdoc == nil {
-			timeout = *firstGetTimeout
-		}
-		select {
-		case rr := <-c:
-			if rr.err == nil {
-				pdoc = rr.pdoc
-			}
-			err = rr.err
-		case <-time.After(timeout):
-			err = errUpdateTimeout
-		}
-		if err != nil {
-			if pdoc != nil {
-				log.Printf("Serving %q from database after error: %v", path, err)
-				err = nil
-			} else if err == errUpdateTimeout {
-				// Handle timeout on packages never seeen before as not found.
-				log.Printf("Serving %q as not found after timeout", path)
-				err = &web.Error{Status: web.StatusNotFound}
-			}
-		}
-	}
-	return pdoc, pkgs, err
 }

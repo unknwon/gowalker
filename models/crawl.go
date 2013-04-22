@@ -16,6 +16,49 @@ package models
 
 import (
 	"errors"
+	"flag"
+	"net"
+	"net/http"
+	"regexp"
+	"strings"
+	"time"
+
+	"github.com/astaxie/beego"
+	"github.com/unknwon/gowalker/utils"
+)
+
+var (
+	dialTimeout  = flag.Duration("dial_timeout", 5*time.Second, "Timeout for dialing an HTTP connection.")
+	readTimeout  = flag.Duration("read_timeout", 15*time.Second, "Timeoout for reading an HTTP response.")
+	writeTimeout = flag.Duration("write_timeout", 5*time.Second, "Timeout writing an HTTP request.")
+)
+
+type timeoutConn struct {
+	net.Conn
+}
+
+func (c *timeoutConn) Read(p []byte) (int, error) {
+	return c.Conn.Read(p)
+}
+
+func (c *timeoutConn) Write(p []byte) (int, error) {
+	// Reset timeouts when writing a request.
+	c.Conn.SetWriteDeadline(time.Now().Add(*readTimeout))
+	c.Conn.SetWriteDeadline(time.Now().Add(*writeTimeout))
+	return c.Conn.Write(p)
+}
+
+func timeoutDial(network, addr string) (net.Conn, error) {
+	c, err := net.DialTimeout(network, addr, *dialTimeout)
+	if err != nil {
+		return nil, err
+	}
+	return &timeoutConn{Conn: c}, nil
+}
+
+var (
+	httpTransport = &http.Transport{Dial: timeoutDial}
+	httpClient    = &http.Client{Transport: httpTransport}
 )
 
 type crawlResult struct {
@@ -23,6 +66,103 @@ type crawlResult struct {
 	err  error
 }
 
+var nestedProjectPat = regexp.MustCompile(`/(?:github\.com|launchpad\.net|code\.google\.com/p|bitbucket\.org|labix\.org)/`)
+
 func crawlDoc(path string) (*Package, error) {
-	return nil, errors.New("Test function error")
+	var pdoc *Package
+	var err error
+
+	if i := strings.Index(path, "/libgo/go/"); i > 0 && utils.IsGoRepoPath(path[i+len("/libgo/go/"):]) {
+		// Go Frontend source tree mirror.
+		pdoc = nil
+		err = errors.New("Go Frontend source tree mirror.")
+	} else {
+		var pdocNew *Package
+
+		/* TODO:WORKING */
+
+		pdocNew, err = getRepo(httpClient, path)
+
+		// For timeout logic in client.go to work, we cannot leave connections idling. This is ugly.
+		httpTransport.CloseIdleConnections()
+
+		if err != errNotModified {
+			pdoc = pdocNew
+		}
+	}
+
+	// if i := strings.Index(path, "/src/pkg/"); i > 0 && utils.IsGoRepoPath(path[i+len("/src/pkg/"):]) {
+	// 	// Go source tree mirror.
+	// 	pdoc = nil
+	// 	err = errors.New("Go source tree mirror.")
+	// } else if m := nestedProjectPat.FindStringIndex(path); m != nil && exists(path[m[0]+1:]) {
+	// 	pdoc = nil
+	// 	err = errors.New("Copy of other project.")
+	// }
+
+	switch {
+	case err == nil:
+		pkg := pkgInfo{
+			Path:     pdoc.ImportPath,
+			Synopsis: pdoc.Synopsis,
+			Updated:  time.Now()}
+
+		/* TODO */
+
+		if err := savePkgInfo(&pkg); err != nil {
+
+			/* TODO */
+
+			beego.Error("ERROR savePkgInfo(", path, "):", err)
+		}
+	case isNotFound(err):
+
+		/* TODO */
+
+		if err := deletePkg(path); err != nil {
+
+			/* TODO */
+
+			beego.Error("ERROR deletePkg(", path, "):", err)
+		}
+	}
+
+	return pdoc, err
+}
+
+func getRepo(client *http.Client, importPath string) (pdoc *Package, err error) {
+	const VER_PREFIX = PackageVersion + "-"
+	i := strings.Index(importPath, "/src/pkg/")
+
+	switch {
+	case utils.IsGoRepoPath(importPath[i+len("/src/pkg/"):]):
+		pdoc, err = getStandardDoc(client, importPath[i+len("/src/pkg/"):])
+	case utils.IsValidRemotePath(importPath):
+
+		/* TODO */
+
+		pdoc, err = getStatic(client, importPath)
+		if err == errNoMatch {
+
+			/* TODO */
+
+			pdoc, err = getDynamic(client, importPath)
+		}
+	default:
+		err = errNoMatch
+	}
+
+	if err == errNoMatch {
+		err = NotFoundError{"Import path not valid:"}
+	}
+
+	return pdoc, err
+}
+
+func getStatic(client *http.Client, importPath string) (pdoc *Package, err error) {
+	return pdoc, errors.New("Test Error: getStatic")
+}
+
+func getDynamic(client *http.Client, importPath string) (pdoc *Package, err error) {
+	return pdoc, errors.New("Test Error: getDynamic")
 }

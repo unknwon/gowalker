@@ -61,16 +61,49 @@ func InitDb() error {
 	defer mg.Db.Close()
 
 	// Create data tables
-	err = mg.CreateTableIfNotExists(new(pkgInfo))
-	if err != nil {
-		return err
-	}
+	mg.CreateTableIfNotExists(new(pkgInfo))
 
 	return nil
 }
 
+// getDoc returns package documentation in database
 func getDoc(path string) (*Package, error) {
-	return nil, nil
+	q, err := connDb()
+	if err != nil {
+		return nil, err
+	}
+	defer q.Db.Close()
+
+	pdoc := new(Package)
+	err = q.WhereEqual("import_path", path).Find(pdoc)
+
+	return pdoc, nil
+}
+
+// savePkgInfo saves package to database
+func savePkgInfo(pkg *pkgInfo) error {
+	q, err := connDb()
+	if err != nil {
+		return err
+	}
+	defer q.Db.Close()
+
+	_, err = q.Save(pkg)
+	return err
+}
+
+// deletePkg removes package from database
+func deletePkg(path string) error {
+	return nil
+	q, err := connDb()
+	if err != nil {
+		return err
+	}
+	defer q.Db.Close()
+
+	pkg := pkgInfo{Path: path}
+	_, err = q.Delete(&pkg)
+	return err
 }
 
 func SearchDoc(key string) []pkgInfo {

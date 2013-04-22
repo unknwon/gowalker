@@ -16,10 +16,21 @@ package utils
 
 import (
 	"os"
+	"regexp"
+	"strings"
 )
 
 // IsExist returns if a file or directory exists
 func IsExist(path string) bool {
 	_, err := os.Stat(path)
 	return err == nil || os.IsExist(err)
+}
+
+var readmePat = regexp.MustCompile(`^[Rr][Ee][Aa][Dd][Mm][Ee](?:$|\.)`)
+
+func IsDocFile(n string) bool {
+	if strings.HasSuffix(n, ".go") && n[0] != '_' && n[0] != '.' {
+		return true
+	}
+	return readmePat.MatchString(n)
 }

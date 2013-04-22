@@ -1,4 +1,4 @@
-// Copyright 2012 Gary Burd
+// Copyright 2013 Unknown
 //
 // Licensed under the Apache License, Version 2.0 (the "License"): you may
 // not use this file except in compliance with the License. You may obtain
@@ -20,6 +20,8 @@ import (
 	"go/token"
 	"strconv"
 	"strings"
+
+	"github.com/unknwon/gowalker/utils"
 )
 
 // This list of deprecated exports is used to find code that has not been
@@ -71,7 +73,7 @@ func (b *walker) vetPackage(pkg *ast.Package) {
 	for _, file := range pkg.Files {
 		for _, is := range file.Imports {
 			importPath, _ := strconv.Unquote(is.Path.Value)
-			if !IsValidPath(importPath) &&
+			if !utils.IsValidPath(importPath) &&
 				!strings.HasPrefix(importPath, "exp/") &&
 				!strings.HasPrefix(importPath, "appengine") {
 				errors[fmt.Sprintf("Unrecognized import path %q", importPath)] = is.Pos()

@@ -19,6 +19,7 @@ import (
 	"time"
 
 	"github.com/astaxie/beego"
+	"github.com/unknwon/gowalker/utils"
 )
 
 const (
@@ -34,27 +35,35 @@ const (
 
 // CheckDoc checks the package documentation from the database or from the version
 // control system as needed.
-func CheckDoc(path string, requestType int) error {
-	// Get the package documentation
-	pdoc, err := getDoc(path)
-	if err != nil {
-		return err
-	}
-
+func CheckDoc(path string, requestType int) (pdoc *Package, err error) {
 	needsCrawl := false
-	// Check if it is in database or needs to crawl
+	// Check if it is in database or generated or needs to crawl
 	switch requestType {
 	case HUMAN_REQUEST:
-		needsCrawl = (pdoc == nil)
+		// Check static file
+		needsCrawl = !utils.IsExist("./docs/" + path + ".html")
 	case ROBOT_REQUEST:
-		needsCrawl = (pdoc != nil) && pdoc.Updated.Add(_TIME_DAY).Before(time.Now())
+		// Get the package documentation from database
+
+		/* TODO: Need to think about how to save information in database */
+
+		pdoc, err = getDoc(path)
+		if err != nil {
+			return nil, err
+		}
+		needsCrawl = (pdoc != nil) || pdoc.Updated.Add(_TIME_DAY).Before(time.Now())
+	case REFRESH_REQUEST:
+		needsCrawl = true
 	}
 
 	if needsCrawl {
 		// Fetch package from VCS
 		c := make(chan crawlResult, 1)
 		go func() {
-			pdoc, err := crawlDoc(path)
+
+			/* TODO:WORKING */
+
+			pdoc, err = crawlDoc(path)
 			c <- crawlResult{pdoc, err}
 		}()
 
@@ -63,12 +72,12 @@ func CheckDoc(path string, requestType int) error {
 		case cr := <-c:
 			if cr.err == nil {
 				pdoc = cr.pdoc
+
+				/* TODO */
+
 				// Recurse crawl import packages
 
 				// Save to database
-
-				// Generate static page
-				//generatePage(pdoc)
 			}
 			err = cr.err
 		case <-time.After(_FETCH_TIMEOUT):
@@ -76,16 +85,16 @@ func CheckDoc(path string, requestType int) error {
 		}
 		if err != nil {
 			if pdoc != nil {
-				beego.Error("Serving %q from database after error: %v", path, err)
+				beego.Error("Serving", path, "from database after error: ", err)
 				err = nil
 			} else if err == errUpdateTimeout {
 				// Handle timeout on packages never seen before as not found.
-				beego.Error("Serving %q as not found after timeout", path)
+				beego.Error("Serving ", path, "as not found after timeout")
 				err = errors.New("Status not found")
 			}
-			return err
+			return nil, err
 		}
 	}
 
-	return nil
+	return pdoc, nil
 }

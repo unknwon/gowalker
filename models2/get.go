@@ -23,12 +23,6 @@ import (
 	"time"
 )
 
-var (
-	ErrNotModified   = errors.New("package not modified")
-	errNoMatch       = errors.New("no match")
-	errUpdateTimeout = errors.New("refresh timeout")
-)
-
 // generatePage generates documentation page for package
 func generatePage(pkg *Package) error {
 	name := strings.Replace(pkg.ImportPath, "/", ".", -1)
@@ -37,14 +31,6 @@ func generatePage(pkg *Package) error {
 	defer f.Close()
 	f.Write([]byte(name))
 	return nil
-}
-
-type PkgInfo struct {
-	Id       int64
-	Path     string `qbs:"index"`
-	Synopsis string
-	Views    int64     `qbs:"index"`
-	Updated  time.Time `qbs:"index"`
 }
 
 // SearchDoc searchs documentation in database

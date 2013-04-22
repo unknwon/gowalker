@@ -32,6 +32,10 @@ func main() {
 		beego.Error(err)
 	}
 
+	// Set static path
+	beego.SetStaticPath("/github.com", "docs/github.com")
+	beego.SetStaticPath("/code.google.com", "docs/code.google.com")
+
 	// Register routers
 	beego.Router("/", &controllers.HomeController{})
 	beego.Router("/search", &controllers.SearchController{})
