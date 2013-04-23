@@ -49,14 +49,6 @@ var (
 	}
 )
 
-type NotFoundError struct {
-	Message string
-}
-
-func (e NotFoundError) Error() string {
-	return e.Message
-}
-
 func defaultBase(path string) string {
 	p, err := build.Default.Import(path, "", build.FindOnly)
 	if err != nil {

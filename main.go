@@ -23,7 +23,7 @@ import (
 )
 
 const (
-	VERSION = "0.0.1"
+	VERSION = "0.0.2.0423"
 )
 
 func main() {
@@ -31,6 +31,7 @@ func main() {
 
 	// Initialization
 	beego.Info("Initialize database")
+	os.Mkdir("./data", os.ModePerm)
 	if err := models.InitDb(); err != nil {
 		beego.Error(err)
 	}

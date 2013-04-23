@@ -46,6 +46,11 @@ func (this *SearchController) Get() {
 		q = path
 	}
 
+	// Check if it is a short path for standard library
+	if utils.IsGoRepoPath(q) {
+		q = "code.google.com/p/go/source/browse/src/pkg/" + q
+	}
+
 	// Check if it is a remote path, if not means it's a keyword
 	if utils.IsValidRemotePath(q) {
 		// Check documentation of this import path, and update automatically as needed
