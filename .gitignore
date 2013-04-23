@@ -7,6 +7,7 @@
 _obj
 _test
 _docs
+_data
 
 # Architecture specific extensions/prefixes
 *.[568vq]
