@@ -51,7 +51,7 @@ func (this *SearchController) Get() {
 		// Check documentation of this import path, and update automatically as needed
 
 		/* TODO:WORKING */
-		os.Remove("./docs/" + strings.Replace(q, "http://", "", 1) + ".html")
+		//os.Remove("./docs/" + strings.Replace(q, "http://", "", 1) + ".html")
 		pdoc, err := models.CheckDoc(q, models.HUMAN_REQUEST)
 		q = strings.Replace(q, "http://", "", 1)
 		if err == nil {
