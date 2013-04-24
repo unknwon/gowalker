@@ -116,20 +116,18 @@ func generatePage(this *SearchController, pdoc *models.Package, q string) bool {
 	}
 
 	pkgDoc := strings.TrimSpace(pdoc.Doc[synIndex+1 : refIndex])
+	// Format documentation
+	// TODO: need to figure out how to deal with code examples
+	pkgDoc = utils.FormatDoc(pkgDoc)
 
-	// TODO: problems with link check
 	// Replace all links
+	// TODO: problems with link check
 	for _, s := range urlPattern.FindAllString(pkgDoc, -1) {
 		// TODO: CAN BE FIXED BY REGEXP
 		s = strings.Replace(s, ",", "", -1)  // Remove ","
 		s = strings.Replace(s, "\"", "", -1) // Remove "\""
 		pkgDoc = strings.Replace(pkgDoc, s, "<a href=\""+s+"\">"+s+"</a>", 1)
 	}
-	// TODO: need to figure out how to deal with code examples
-	//pkgDoc = strings.Replace(pkgDoc, ":\n\n", "<pre>", -1)
-	//pkgDoc = strings.Replace(pkgDoc, "\n\n", "</pre>", -1)
-	// TODO: need to replace all double returns to <p></p> tags
-	pkgDoc = strings.Replace(pkgDoc, "\n", "<br/>", -1)
 	this.Data["pkgFullIntro"] = pkgDoc
 
 	// Index
