@@ -103,7 +103,9 @@ func generatePage(this *SearchController, pdoc *models.Package, q string) bool {
 	// Introduction
 	this.Data["proPath"] = pdoc.BrowseURL
 	this.Data["proName"] = pdoc.Name
-	this.Data["pkgDocPath"] = pdoc.BrowseURL[7:strings.Index(pdoc.BrowseURL, pdoc.Name)]
+	pkgDocPath := pdoc.BrowseURL[7 : strings.Index(pdoc.BrowseURL, "/"+pdoc.Name)+1]
+	this.Data["pkgSearch"] = pkgDocPath[:len(pkgDocPath)-1]
+	this.Data["pkgDocPath"] = pkgDocPath
 	this.Data["importPath"] = pdoc.ImportPath
 	this.Data["pkgIntro"] = pdoc.Synopsis
 	synIndex := strings.Index(pdoc.Doc, ".")

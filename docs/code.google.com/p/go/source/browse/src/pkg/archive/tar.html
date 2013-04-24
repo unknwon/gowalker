@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+		
+		<meta name="author" content="Unknown"/>
+
+		 
+		<link href="/static/css/bootstrap.css" rel="stylesheet" />
+		<title>Go Walker</title>
+	</head>
+
+	<body>
+		<div class="container">
+			<div class="navbar navbar-inverse">
+				<div class="navbar-inner">
+					<a class="brand" href="/">Go Walker</a>
+							<ul class="nav">
+			<li><a href="/">Home</a></li>
+			<li><a href="/-/index">Index</a></li>
+			<li><a href="/-/about">About</a></li>
+		</ul>
+		<form class="navbar-search pull-right" action="/">
+			<input class="search-query" type="text" placeholder="Search" name="q"></input>
+		</form>
+	</div>
+</div>
+<div class="flat-well well-small">
+	<a href="http://code.google.com/p/go/source/browse/src/pkg/archive/tar?name=release"><strong>tar:</strong></a> <a href="/search?q=code.google.com%2fp%2fgo%2fsource%2fbrowse%2fsrc%2fpkg%2farchive">code.google.com/p/go/source/browse/src/pkg/archive/</a><span class="muted">tar</span>
+	<span class="pull-right"><a href="#_index">Index</a><span class="muted"> | </span><a href="#_files">Files</a><span class="muted"> | </span><a href="#_subdirs">Directories</a></span>
+</div>
+<h2>package tar</h2>
+<p><code>import "archive/tar"</code></p>
+<pre>Package tar implements access to tar archives.</pre>
+<p>It aims to cover most of the variations, including those produced
+by GNU and BSD tars.</p>
+<p></p>
+<p>
+		
+		References:</p>
+<pre>
+<a href="http://www.freebsd.org/cgi/man.cgi?query=tar&amp;sektion=5">http://www.freebsd.org/cgi/man.cgi?query=tar&amp;sektion=5</a>
+<a href="http://www.gnu.org/software/tar/manual/html_node/Standard.html">http://www.gnu.org/software/tar/manual/html_node/Standard.html</a></pre>
+<h3 id="_index">Index</h3>
+<ul class="unstyled">
+<li><a href="#_constants">Constants</a></li>
+<li><a href="#_variables">Variables</a></li>
+
+<li><a href="#Header">type Header</a></li>
+
+<li><a href="#Reader">type Reader</a></li>
+<ul><li><a href="#NewReader">func NewReader(r io.Reader) *Reader</a></li></ul>
+<ul><li><a href="#Next">func (tr *Reader) Next() (*Header, error)</a></li>
+</ul><ul><li><a href="#Read">func (tr *Reader) Read(b []byte) (n int, err error)</a></li>
+</ul><li><a href="#Writer">type Writer</a></li>
+<ul><li><a href="#NewWriter">func NewWriter(w io.Writer) *Writer</a></li></ul>
+<ul><li><a href="#Close">func (tw *Writer) Close() error</a></li>
+</ul><ul><li><a href="#Flush">func (tw *Writer) Flush() error</a></li>
+</ul><ul><li><a href="#Write">func (tw *Writer) Write(b []byte) (n int, err error)</a></li>
+</ul><ul><li><a href="#WriteHeader">func (tw *Writer) WriteHeader(hdr *Header) error</a></li>
+</ul></ul>
+<h3 id="_constants">Constants</h3>
+<pre class="pre-x-scrollable">const (
+
+    // Types
+    TypeReg           = &#39;0&#39;    // regular file
+    TypeRegA          = &#39;\x00&#39; // regular file
+    TypeLink          = &#39;1&#39;    // hard link
+    TypeSymlink       = &#39;2&#39;    // symbolic link
+    TypeChar          = &#39;3&#39;    // character device node
+    TypeBlock         = &#39;4&#39;    // block device node
+    TypeDir           = &#39;5&#39;    // directory
+    TypeFifo          = &#39;6&#39;    // fifo node
+    TypeCont          = &#39;7&#39;    // reserved
+    TypeXHeader       = &#39;x&#39;    // extended header
+    TypeXGlobalHeader = &#39;g&#39;    // global extended header
+)</pre>
+<p></p>
+<h3 id="_variables">Variables</h3>
+<pre class="pre-x-scrollable">var (
+    ErrWriteTooLong    = errors.New(&#34;archive/tar: write too long&#34;)
+    ErrFieldTooLong    = errors.New(&#34;archive/tar: header field too long&#34;)
+    ErrWriteAfterClose = errors.New(&#34;archive/tar: write after close&#34;)
+)</pre><pre class="pre-x-scrollable">var (
+    ErrHeader = errors.New(&#34;archive/tar: invalid tar header&#34;)
+)</pre>
+<p></p>
+
+
+	
+		<h3 id="Header">type <a href="http://code.google.com/p/go/source/browse/src/pkg/archive/tar/common.go?name=release#35">Header</a></h3>
+		<pre class="pre-x-scrollable">type Header struct {
+    Name       string    // name of header file entry
+    Mode       int64     // permission and mode bits
+    Uid        int       // user id of owner
+    Gid        int       // group id of owner
+    Size       int64     // length in bytes
+    ModTime    time.Time // modified time
+    Typeflag   byte      // type of header entry
+    Linkname   string    // target name of link
+    Uname      string    // user name of owner
+    Gname      string    // group name of owner
+    Devmajor   int64     // major number of character or block device
+    Devminor   int64     // minor number of character or block device
+    AccessTime time.Time // access time
+    ChangeTime time.Time // status change time
+}</pre>
+		<p>A Header represents a single header in a tar archive.
+Some fields may not be populated.
+</p>
+		
+		
+	
+		<h3 id="Reader">type <a href="http://code.google.com/p/go/source/browse/src/pkg/archive/tar/reader.go?name=release#42">Reader</a></h3>
+		<pre class="pre-x-scrollable">type Reader struct {
+    // contains filtered or unexported fields
+}</pre>
+		<p>A Reader provides sequential access to the contents of a tar archive.
+A tar archive consists of a sequence of files.
+The Next method advances to the next file in the archive (including the first),
+and then it can be treated as an io.Reader to access the file&#39;s data.
+
+Example:
+	tr := tar.NewReader(r)
+	for {
+		hdr, err := tr.Next()
+		if err == io.EOF {
+			// end of tar archive
+			break
+		}
+		if err != nil {
+			// handle error
+		}
+		io.Copy(data, tr)
+	}
+</p>
+		
+			<h4 id="NewReader">func <a href="http://code.google.com/p/go/source/browse/src/pkg/archive/tar/reader.go?name=release#50">NewReader</a></h4>
+			<pre>func NewReader(r io.Reader) *Reader</pre>
+			<p>NewReader creates a new Reader reading from r.
+</p>
+		
+		
+			<h4 id="Next">func <a href="http://code.google.com/p/go/source/browse/src/pkg/archive/tar/reader.go?name=release#53">Next</a></h4>
+			<pre>func (tr *Reader) Next() (*Header, error)</pre>
+			<p>Next advances to the next entry in the tar archive.
+</p>
+		
+			<h4 id="Read">func <a href="http://code.google.com/p/go/source/browse/src/pkg/archive/tar/reader.go?name=release#206">Read</a></h4>
+			<pre>func (tr *Reader) Read(b []byte) (n int, err error)</pre>
+			<p>Read reads from the current entry in the tar archive.
+It returns 0, io.EOF when it reaches the end of that entry,
+until Next is called to advance to the next entry.
+</p>
+		
+	
+		<h3 id="Writer">type <a href="http://code.google.com/p/go/source/browse/src/pkg/archive/tar/writer.go?name=release#38">Writer</a></h3>
+		<pre class="pre-x-scrollable">type Writer struct {
+    // contains filtered or unexported fields
+}</pre>
+		<p>A Writer provides sequential writing of a tar archive in POSIX.1 format.
+A tar archive consists of a sequence of files.
+Call WriteHeader to begin a new file, and then call Write to supply that file&#39;s data,
+writing at most hdr.Size bytes in total.
+
+Example:
+	tw := tar.NewWriter(w)
+	hdr := new(Header)
+	hdr.Size = length of data in bytes
+	// populate other hdr fields as desired
+	if err := tw.WriteHeader(hdr); err != nil {
+		// handle error
+	}
+	io.Copy(tw, data)
+	tw.Close()
+</p>
+		
+			<h4 id="NewWriter">func <a href="http://code.google.com/p/go/source/browse/src/pkg/archive/tar/writer.go?name=release#48">NewWriter</a></h4>
+			<pre>func NewWriter(w io.Writer) *Writer</pre>
+			<p>NewWriter creates a new Writer writing to w.
+</p>
+		
+		
+			<h4 id="Close">func <a href="http://code.google.com/p/go/source/browse/src/pkg/archive/tar/writer.go?name=release#196">Close</a></h4>
+			<pre>func (tw *Writer) Close() error</pre>
+			<p>Close closes the tar archive, flushing any unwritten
+data to the underlying writer.
+</p>
+		
+			<h4 id="Flush">func <a href="http://code.google.com/p/go/source/browse/src/pkg/archive/tar/writer.go?name=release#51">Flush</a></h4>
+			<pre>func (tw *Writer) Flush() error</pre>
+			<p>Flush finishes writing the current file (optional).
+</p>
+		
+			<h4 id="Write">func <a href="http://code.google.com/p/go/source/browse/src/pkg/archive/tar/writer.go?name=release#174">Write</a></h4>
+			<pre>func (tw *Writer) Write(b []byte) (n int, err error)</pre>
+			<p>Write writes to the current entry in the tar archive.
+Write returns the error ErrWriteTooLong if more than
+hdr.Size bytes are written after WriteHeader.
+</p>
+		
+			<h4 id="WriteHeader">func <a href="http://code.google.com/p/go/source/browse/src/pkg/archive/tar/writer.go?name=release#116">WriteHeader</a></h4>
+			<pre>func (tw *Writer) WriteHeader(hdr *Header) error</pre>
+			<p>WriteHeader writes hdr and prepares to accept the file&#39;s contents.
+WriteHeader calls Flush if it is not the first header.
+Calling after a Close will return ErrWriteAfterClose.
+</p>
+		
+	
+
+<h3 id="_files"><a href="http://code.google.com/p/go/source/browse/src/pkg/archive/tar?name=release">Files</a></h3>
+<p>
+
+
+	<a href="http://code.google.com/p/go/source/browse/src/pkg/archive/tar/common.go?name=release">common.go</a>
+
+	<a href="http://code.google.com/p/go/source/browse/src/pkg/archive/tar/reader.go?name=release">reader.go</a>
+
+	<a href="http://code.google.com/p/go/source/browse/src/pkg/archive/tar/writer.go?name=release">writer.go</a>
+
+
+</p>
+		</div>
+		<div class="container">
+			<div class="flat-well well-small">
+				<a href="https://github.com/Unknwon">@Unknown</a>
+				<span class="muted">|</span>
+				<a href="mailto:joe2010xtmf@163.com">Feedback</a>
+				<span class="muted">|</span>
+				<a href="https://github.com/Unknwon/gowalker/issues">Website Issues</a>
+				<span class="pull-right"><a href="#">Back to top</a></span>
+			</div>
+		</div>
+		<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-40109089-2', 'gowalker.org');
+  ga('send', 'pageview');
+
+</script>
+	</body>
+</html>
