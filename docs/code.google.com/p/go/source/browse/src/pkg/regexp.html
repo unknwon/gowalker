@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+		
+		<meta name="author" content="Unknown"/>
+
+		 
+		<link href="/static/css/bootstrap.css" rel="stylesheet" />
+		<title>Go Walker</title>
+	</head>
+
+	<body>
+		<div class="container">
+			<div class="navbar navbar-inverse">
+				<div class="navbar-inner">
+					<a class="brand" href="/">Go Walker</a>
+							<ul class="nav">
+			<li><a href="/">Home</a></li>
+			<li><a href="/-/index">Index</a></li>
+			<li><a href="/-/about">About</a></li>
+		</ul>
+		<form class="navbar-search pull-right" action="/">
+			<input class="search-query" type="text" placeholder="Search" name="q"></input>
+		</form>
+	</div>
+</div>
+<div class="flat-well well-small">
+	<a href="http://code.google.com/p/go/source/browse/src/pkg/regexp?name=release"><strong>regexp:</strong></a> <a href="/code.google.com/p/go/source/browse/src/pkg/">code.google.com/p/go/source/browse/src/pkg/</a><span class="muted">regexp</span>
+	<span class="pull-right"><a href="#_index">Index</a><span class="muted"> | </span><a href="#_files">Files</a><span class="muted"> | </span><a href="#_subdirs">Directories</a></span>
+</div>
+<h2>package regexp</h2>
+<p><code>import "regexp"</code></p>
+<pre>Package regexp implements regular expression search.</pre>
+<div>The syntax of the regular expressions accepted is the same<br/>general syntax used by Perl, Python, and other languages.<br/>More precisely, it is the syntax accepted by RE2 and described at<br/><a href="http://code.google.com/p/re2/wiki/Syntax">http://code.google.com/p/re2/wiki/Syntax</a>, except for \C.<br/><br/>All characters are UTF-8-encoded code points.<br/><br/>There are 16 methods of Regexp that match a regular expression and identify<br/>the matched text.  Their names are matched by this regular expression:<br/><br/>	Find(All)?(String)?(Submatch)?(Index)?<br/><br/>If 'All' is present, the routine matches successive non-overlapping<br/>matches of the entire expression.  Empty matches abutting a preceding<br/>match are ignored.  The return value is a slice containing the successive<br/>return values of the corresponding non-'All' routine.  These routines take<br/>an extra integer argument, n; if n >= 0, the function returns at most n<br/>matches/submatches.<br/><br/>If 'String' is present, the argument is a string; otherwise it is a slice<br/>of bytes; return values are adjusted as appropriate.<br/><br/>If 'Submatch' is present, the return value is a slice identifying the<br/>successive submatches of the expression.  Submatches are matches of<br/>parenthesized subexpressions within the regular expression, numbered from<br/>left to right in order of opening parenthesis.  Submatch 0 is the match of<br/>the entire expression, submatch 1 the match of the first parenthesized<br/>subexpression, and so on.<br/><br/>If 'Index' is present, matches and submatches are identified by byte index<br/>pairs within the input string: result[2*n:2*n+1] identifies the indexes of<br/>the nth submatch.  The pair for n==0 identifies the match of the entire<br/>expression.  If 'Index' is not present, the match is identified by the<br/>text of the match/submatch.  If an index is negative, it means that<br/>subexpression did not match any string in the input.<br/><br/>There is also a subset of the methods that can be applied to text read<br/>from a RuneReader:<br/><br/>	MatchReader, FindReaderIndex, FindReaderSubmatchIndex<br/><br/>This set may grow.  Note that regular expression matches may need to<br/>examine text beyond the text returned by a match, so the methods that<br/>match text from a RuneReader may read arbitrarily far into the input<br/>before returning.<br/><br/>(There are a few other methods that do not match this pattern.)</div>
+<p></p>
+
+<h3 id="_index">Index</h3>
+<ul class="unstyled">
+
+
+<li><a href="#Match">func Match(pattern string, b []byte) (matched bool, error error)</a></li><li><a href="#MatchReader">func MatchReader(pattern string, r io.RuneReader) (matched bool, error error)</a></li><li><a href="#MatchString">func MatchString(pattern string, s string) (matched bool, error error)</a></li><li><a href="#QuoteMeta">func QuoteMeta(s string) string</a></li>
+<li><a href="#Regexp">type Regexp</a></li>
+<ul><li><a href="#Compile">func Compile(expr string) (*Regexp, error)</a></li></ul><ul><li><a href="#CompilePOSIX">func CompilePOSIX(expr string) (*Regexp, error)</a></li></ul><ul><li><a href="#MustCompile">func MustCompile(str string) *Regexp</a></li></ul><ul><li><a href="#MustCompilePOSIX">func MustCompilePOSIX(str string) *Regexp</a></li></ul>
+<ul><li><a href="#Expand">func (re *Regexp) Expand(dst []byte, template []byte, src []byte, match []int) []byte</a></li>
+</ul><ul><li><a href="#ExpandString">func (re *Regexp) ExpandString(dst []byte, template string, src string, match []int) []byte</a></li>
+</ul><ul><li><a href="#Find">func (re *Regexp) Find(b []byte) []byte</a></li>
+</ul><ul><li><a href="#FindAll">func (re *Regexp) FindAll(b []byte, n int) [][]byte</a></li>
+</ul><ul><li><a href="#FindAllIndex">func (re *Regexp) FindAllIndex(b []byte, n int) [][]int</a></li>
+</ul><ul><li><a href="#FindAllString">func (re *Regexp) FindAllString(s string, n int) []string</a></li>
+</ul><ul><li><a href="#FindAllStringIndex">func (re *Regexp) FindAllStringIndex(s string, n int) [][]int</a></li>
+</ul><ul><li><a href="#FindAllStringSubmatch">func (re *Regexp) FindAllStringSubmatch(s string, n int) [][]string</a></li>
+</ul><ul><li><a href="#FindAllStringSubmatchIndex">func (re *Regexp) FindAllStringSubmatchIndex(s string, n int) [][]int</a></li>
+</ul><ul><li><a href="#FindAllSubmatch">func (re *Regexp) FindAllSubmatch(b []byte, n int) [][][]byte</a></li>
+</ul><ul><li><a href="#FindAllSubmatchIndex">func (re *Regexp) FindAllSubmatchIndex(b []byte, n int) [][]int</a></li>
+</ul><ul><li><a href="#FindIndex">func (re *Regexp) FindIndex(b []byte) (loc []int)</a></li>
+</ul><ul><li><a href="#FindReaderIndex">func (re *Regexp) FindReaderIndex(r io.RuneReader) (loc []int)</a></li>
+</ul><ul><li><a href="#FindReaderSubmatchIndex">func (re *Regexp) FindReaderSubmatchIndex(r io.RuneReader) []int</a></li>
+</ul><ul><li><a href="#FindString">func (re *Regexp) FindString(s string) string</a></li>
+</ul><ul><li><a href="#FindStringIndex">func (re *Regexp) FindStringIndex(s string) (loc []int)</a></li>
+</ul><ul><li><a href="#FindStringSubmatch">func (re *Regexp) FindStringSubmatch(s string) []string</a></li>
+</ul><ul><li><a href="#FindStringSubmatchIndex">func (re *Regexp) FindStringSubmatchIndex(s string) []int</a></li>
+</ul><ul><li><a href="#FindSubmatch">func (re *Regexp) FindSubmatch(b []byte) [][]byte</a></li>
+</ul><ul><li><a href="#FindSubmatchIndex">func (re *Regexp) FindSubmatchIndex(b []byte) []int</a></li>
+</ul><ul><li><a href="#LiteralPrefix">func (re *Regexp) LiteralPrefix() (prefix string, complete bool)</a></li>
+</ul><ul><li><a href="#Match">func (re *Regexp) Match(b []byte) bool</a></li>
+</ul><ul><li><a href="#MatchReader">func (re *Regexp) MatchReader(r io.RuneReader) bool</a></li>
+</ul><ul><li><a href="#MatchString">func (re *Regexp) MatchString(s string) bool</a></li>
+</ul><ul><li><a href="#NumSubexp">func (re *Regexp) NumSubexp() int</a></li>
+</ul><ul><li><a href="#ReplaceAll">func (re *Regexp) ReplaceAll(src, repl []byte) []byte</a></li>
+</ul><ul><li><a href="#ReplaceAllFunc">func (re *Regexp) ReplaceAllFunc(src []byte, repl func([]byte) []byte) []byte</a></li>
+</ul><ul><li><a href="#ReplaceAllLiteral">func (re *Regexp) ReplaceAllLiteral(src, repl []byte) []byte</a></li>
+</ul><ul><li><a href="#ReplaceAllLiteralString">func (re *Regexp) ReplaceAllLiteralString(src, repl string) string</a></li>
+</ul><ul><li><a href="#ReplaceAllString">func (re *Regexp) ReplaceAllString(src, repl string) string</a></li>
+</ul><ul><li><a href="#ReplaceAllStringFunc">func (re *Regexp) ReplaceAllStringFunc(src string, repl func(string) string) string</a></li>
+</ul><ul><li><a href="#String">func (re *Regexp) String() string</a></li>
+</ul><ul><li><a href="#SubexpNames">func (re *Regexp) SubexpNames() []string</a></li>
+</ul></ul>
+
+
+
+	
+		<h3 id="Match">func <a href="http://code.google.com/p/go/source/browse/src/pkg/regexp/regexp.go?name=release#412">Match</a></h3>
+		<pre>func Match(pattern string, b []byte) (matched bool, error error)</pre>
+		<p>Match checks whether a textual regular expression
+matches a byte slice.  More complicated queries need
+to use Compile and the full Regexp interface.
+</p>
+	
+		<h3 id="MatchReader">func <a href="http://code.google.com/p/go/source/browse/src/pkg/regexp/regexp.go?name=release#390">MatchReader</a></h3>
+		<pre>func MatchReader(pattern string, r io.RuneReader) (matched bool, error error)</pre>
+		<p>MatchReader checks whether a textual regular expression matches the text
+read by the RuneReader.  More complicated queries need to use Compile and
+the full Regexp interface.
+</p>
+	
+		<h3 id="MatchString">func <a href="http://code.google.com/p/go/source/browse/src/pkg/regexp/regexp.go?name=release#401">MatchString</a></h3>
+		<pre>func MatchString(pattern string, s string) (matched bool, error error)</pre>
+		<p>MatchString checks whether a textual regular expression
+matches a string.  More complicated queries need
+to use Compile and the full Regexp interface.
+</p>
+	
+		<h3 id="QuoteMeta">func <a href="http://code.google.com/p/go/source/browse/src/pkg/regexp/regexp.go?name=release#560">QuoteMeta</a></h3>
+		<pre>func QuoteMeta(s string) string</pre>
+		<p>QuoteMeta returns a string that quotes all regular expression metacharacters
+inside the argument text; the returned string is a regular expression matching
+the literal text.  For example, QuoteMeta(`[foo]`) returns `\[foo\]`.
+</p>
+	
+
+
+	
+		<h3 id="Regexp">type <a href="http://code.google.com/p/go/source/browse/src/pkg/regexp/regexp.go?name=release#73">Regexp</a></h3>
+		<pre class="pre-x-scrollable">type Regexp struct {
+    // contains filtered or unexported fields
+}</pre>
+		<p>Regexp is the representation of a compiled regular expression.
+The public interface is entirely through methods.
+A Regexp is safe for concurrent use by multiple goroutines.
+</p>
+		
+			<h4 id="Compile">func <a href="http://code.google.com/p/go/source/browse/src/pkg/regexp/regexp.go?name=release#106">Compile</a></h4>
+			<pre>func Compile(expr string) (*Regexp, error)</pre>
+			<p>Compile parses a regular expression and returns, if successful,
+a Regexp object that can be used to match against text.
+
+When matching against text, the regexp returns a match that
+begins as early as possible in the input (leftmost), and among those
+it chooses the one that a backtracking search would have found first.
+This so-called leftmost-first matching is the same semantics
+that Perl, Python, and other implementations use, although this
+package implements it without the expense of backtracking.
+For POSIX leftmost-longest matching, see CompilePOSIX.
+</p>
+		
+			<h4 id="CompilePOSIX">func <a href="http://code.google.com/p/go/source/browse/src/pkg/regexp/regexp.go?name=release#129">CompilePOSIX</a></h4>
+			<pre>func CompilePOSIX(expr string) (*Regexp, error)</pre>
+			<p>CompilePOSIX is like Compile but restricts the regular expression
+to POSIX ERE (egrep) syntax and changes the match semantics to
+leftmost-longest.
+
+That is, when matching against text, the regexp returns a match that
+begins as early as possible in the input (leftmost), and among those
+it chooses a match that is as long as possible.
+This so-called leftmost-longest matching is the same semantics
+that early regular expression implementations used and that POSIX
+specifies.
+
+However, there can be multiple leftmost-longest matches, with different
+submatch choices, and here this package diverges from POSIX.
+Among the possible leftmost-longest matches, this package chooses
+the one that a backtracking search would have found first, while POSIX
+specifies that the match be chosen to maximize the length of the first
+subexpression, then the second, and so on from left to right.
+The POSIX rule is computationally prohibitive and not even well-defined.
+See http://swtch.com/~rsc/regexp/regexp2.html#posix for details.
+</p>
+		
+			<h4 id="MustCompile">func <a href="http://code.google.com/p/go/source/browse/src/pkg/regexp/regexp.go?name=release#194">MustCompile</a></h4>
+			<pre>func MustCompile(str string) *Regexp</pre>
+			<p>MustCompile is like Compile but panics if the expression cannot be parsed.
+It simplifies safe initialization of global variables holding compiled regular
+expressions.
+</p>
+		
+			<h4 id="MustCompilePOSIX">func <a href="http://code.google.com/p/go/source/browse/src/pkg/regexp/regexp.go?name=release#205">MustCompilePOSIX</a></h4>
+			<pre>func MustCompilePOSIX(str string) *Regexp</pre>
+			<p>MustCompilePOSIX is like CompilePOSIX but panics if the expression cannot be parsed.
+It simplifies safe initialization of global variables holding compiled regular
+expressions.
+</p>
+		
+		
+			<h4 id="Expand">func <a href="http://code.google.com/p/go/source/browse/src/pkg/regexp/regexp.go?name=release#736">Expand</a></h4>
+			<pre>func (re *Regexp) Expand(dst []byte, template []byte, src []byte, match []int) []byte</pre>
+			<p>Expand appends template to dst and returns the result; during the
+append, Expand replaces variables in the template with corresponding
+matches drawn from src.  The match slice should have been returned by
+FindSubmatchIndex.
+
+In the template, a variable is denoted by a substring of the form
+$name or ${name}, where name is a non-empty sequence of letters,
+digits, and underscores.  A purely numeric name like $1 refers to
+the submatch with the corresponding index; other names refer to
+capturing parentheses named with the (?P&lt;name&gt;...) syntax.  A
+reference to an out of range or unmatched index or a name that is not
+present in the regular expression is replaced with an empty slice.
+
+In the $name form, name is taken to be as long as possible: $1x is
+equivalent to ${1x}, not ${1}x, and, $10 is equivalent to ${10}, not ${1}0.
+
+To insert a literal $ in the output, use $$ in the template.
+</p>
+		
+			<h4 id="ExpandString">func <a href="http://code.google.com/p/go/source/browse/src/pkg/regexp/regexp.go?name=release#743">ExpandString</a></h4>
+			<pre>func (re *Regexp) ExpandString(dst []byte, template string, src string, match []int) []byte</pre>
+			<p>ExpandString is like Expand but the template and source are strings.
+It appends to and returns a byte slice in order to give the calling
+code control over allocation.
+</p>
+		
+			<h4 id="Find">func <a href="http://code.google.com/p/go/source/browse/src/pkg/regexp/regexp.go?name=release#642">Find</a></h4>
+			<pre>func (re *Regexp) Find(b []byte) []byte</pre>
+			<p>Find returns a slice holding the text of the leftmost match in b of the regular expression.
+A return value of nil indicates no match.
+</p>
+		
+			<h4 id="FindAll">func <a href="http://code.google.com/p/go/source/browse/src/pkg/regexp/regexp.go?name=release#899">FindAll</a></h4>
+			<pre>func (re *Regexp) FindAll(b []byte, n int) [][]byte</pre>
+			<p>FindAll is the &#39;All&#39; version of Find; it returns a slice of all successive
+matches of the expression, as defined by the &#39;All&#39; description in the
+package comment.
+A return value of nil indicates no match.
+</p>
+		
+			<h4 id="FindAllIndex">func <a href="http://code.google.com/p/go/source/browse/src/pkg/regexp/regexp.go?name=release#917">FindAllIndex</a></h4>
+			<pre>func (re *Regexp) FindAllIndex(b []byte, n int) [][]int</pre>
+			<p>FindAllIndex is the &#39;All&#39; version of FindIndex; it returns a slice of all
+successive matches of the expression, as defined by the &#39;All&#39; description
+in the package comment.
+A return value of nil indicates no match.
+</p>
+		
+			<h4 id="FindAllString">func <a href="http://code.google.com/p/go/source/browse/src/pkg/regexp/regexp.go?name=release#935">FindAllString</a></h4>
+			<pre>func (re *Regexp) FindAllString(s string, n int) []string</pre>
+			<p>FindAllString is the &#39;All&#39; version of FindString; it returns a slice of all
+successive matches of the expression, as defined by the &#39;All&#39; description
+in the package comment.
+A return value of nil indicates no match.
+</p>
+		
+			<h4 id="FindAllStringIndex">func <a href="http://code.google.com/p/go/source/browse/src/pkg/regexp/regexp.go?name=release#953">FindAllStringIndex</a></h4>
+			<pre>func (re *Regexp) FindAllStringIndex(s string, n int) [][]int</pre>
+			<p>FindAllStringIndex is the &#39;All&#39; version of FindStringIndex; it returns a
+slice of all successive matches of the expression, as defined by the &#39;All&#39;
+description in the package comment.
+A return value of nil indicates no match.
+</p>
+		
+			<h4 id="FindAllStringSubmatch">func <a href="http://code.google.com/p/go/source/browse/src/pkg/regexp/regexp.go?name=release#1013">FindAllStringSubmatch</a></h4>
+			<pre>func (re *Regexp) FindAllStringSubmatch(s string, n int) [][]string</pre>
+			<p>FindAllStringSubmatch is the &#39;All&#39; version of FindStringSubmatch; it
+returns a slice of all successive matches of the expression, as defined by
+the &#39;All&#39; description in the package comment.
+A return value of nil indicates no match.
+</p>
+		
+			<h4 id="FindAllStringSubmatchIndex">func <a href="http://code.google.com/p/go/source/browse/src/pkg/regexp/regexp.go?name=release#1038">FindAllStringSubmatchIndex</a></h4>
+			<pre>func (re *Regexp) FindAllStringSubmatchIndex(s string, n int) [][]int</pre>
+			<p>FindAllStringSubmatchIndex is the &#39;All&#39; version of
+FindStringSubmatchIndex; it returns a slice of all successive matches of
+the expression, as defined by the &#39;All&#39; description in the package
+comment.
+A return value of nil indicates no match.
+</p>
+		
+			<h4 id="FindAllSubmatch">func <a href="http://code.google.com/p/go/source/browse/src/pkg/regexp/regexp.go?name=release#971">FindAllSubmatch</a></h4>
+			<pre>func (re *Regexp) FindAllSubmatch(b []byte, n int) [][][]byte</pre>
+			<p>FindAllSubmatch is the &#39;All&#39; version of FindSubmatch; it returns a slice
+of all successive matches of the expression, as defined by the &#39;All&#39;
+description in the package comment.
+A return value of nil indicates no match.
+</p>
+		
+			<h4 id="FindAllSubmatchIndex">func <a href="http://code.google.com/p/go/source/browse/src/pkg/regexp/regexp.go?name=release#995">FindAllSubmatchIndex</a></h4>
+			<pre>func (re *Regexp) FindAllSubmatchIndex(b []byte, n int) [][]int</pre>
+			<p>FindAllSubmatchIndex is the &#39;All&#39; version of FindSubmatchIndex; it returns
+a slice of all successive matches of the expression, as defined by the
+&#39;All&#39; description in the package comment.
+A return value of nil indicates no match.
+</p>
+		
+			<h4 id="FindIndex">func <a href="http://code.google.com/p/go/source/browse/src/pkg/regexp/regexp.go?name=release#654">FindIndex</a></h4>
+			<pre>func (re *Regexp) FindIndex(b []byte) (loc []int)</pre>
+			<p>FindIndex returns a two-element slice of integers defining the location of
+the leftmost match in b of the regular expression.  The match itself is at
+b[loc[0]:loc[1]].
+A return value of nil indicates no match.
+</p>
+		
+			<h4 id="FindReaderIndex">func <a href="http://code.google.com/p/go/source/browse/src/pkg/regexp/regexp.go?name=release#692">FindReaderIndex</a></h4>
+			<pre>func (re *Regexp) FindReaderIndex(r io.RuneReader) (loc []int)</pre>
+			<p>FindReaderIndex returns a two-element slice of integers defining the
+location of the leftmost match of the regular expression in text read from
+the RuneReader.  The match text was found in the input stream at
+byte offset loc[0] through loc[1]-1.
+A return value of nil indicates no match.
+</p>
+		
+			<h4 id="FindReaderSubmatchIndex">func <a href="http://code.google.com/p/go/source/browse/src/pkg/regexp/regexp.go?name=release#889">FindReaderSubmatchIndex</a></h4>
+			<pre>func (re *Regexp) FindReaderSubmatchIndex(r io.RuneReader) []int</pre>
+			<p>FindReaderSubmatchIndex returns a slice holding the index pairs
+identifying the leftmost match of the regular expression of text read by
+the RuneReader, and the matches, if any, of its subexpressions, as defined
+by the &#39;Submatch&#39; and &#39;Index&#39; descriptions in the package comment.  A
+return value of nil indicates no match.
+</p>
+		
+			<h4 id="FindString">func <a href="http://code.google.com/p/go/source/browse/src/pkg/regexp/regexp.go?name=release#667">FindString</a></h4>
+			<pre>func (re *Regexp) FindString(s string) string</pre>
+			<p>FindString returns a string holding the text of the leftmost match in s of the regular
+expression.  If there is no match, the return value is an empty string,
+but it will also be empty if the regular expression successfully matches
+an empty string.  Use FindStringIndex or FindStringSubmatch if it is
+necessary to distinguish these cases.
+</p>
+		
+			<h4 id="FindStringIndex">func <a href="http://code.google.com/p/go/source/browse/src/pkg/regexp/regexp.go?name=release#679">FindStringIndex</a></h4>
+			<pre>func (re *Regexp) FindStringIndex(s string) (loc []int)</pre>
+			<p>FindStringIndex returns a two-element slice of integers defining the
+location of the leftmost match in s of the regular expression.  The match
+itself is at s[loc[0]:loc[1]].
+A return value of nil indicates no match.
+</p>
+		
+			<h4 id="FindStringSubmatch">func <a href="http://code.google.com/p/go/source/browse/src/pkg/regexp/regexp.go?name=release#861">FindStringSubmatch</a></h4>
+			<pre>func (re *Regexp) FindStringSubmatch(s string) []string</pre>
+			<p>FindStringSubmatch returns a slice of strings holding the text of the
+leftmost match of the regular expression in s and the matches, if any, of
+its subexpressions, as defined by the &#39;Submatch&#39; description in the
+package comment.
+A return value of nil indicates no match.
+</p>
+		
+			<h4 id="FindStringSubmatchIndex">func <a href="http://code.google.com/p/go/source/browse/src/pkg/regexp/regexp.go?name=release#880">FindStringSubmatchIndex</a></h4>
+			<pre>func (re *Regexp) FindStringSubmatchIndex(s string) []int</pre>
+			<p>FindStringSubmatchIndex returns a slice holding the index pairs
+identifying the leftmost match of the regular expression in s and the
+matches, if any, of its subexpressions, as defined by the &#39;Submatch&#39; and
+&#39;Index&#39; descriptions in the package comment.
+A return value of nil indicates no match.
+</p>
+		
+			<h4 id="FindSubmatch">func <a href="http://code.google.com/p/go/source/browse/src/pkg/regexp/regexp.go?name=release#705">FindSubmatch</a></h4>
+			<pre>func (re *Regexp) FindSubmatch(b []byte) [][]byte</pre>
+			<p>FindSubmatch returns a slice of slices holding the text of the leftmost
+match of the regular expression in b and the matches, if any, of its
+subexpressions, as defined by the &#39;Submatch&#39; descriptions in the package
+comment.
+A return value of nil indicates no match.
+</p>
+		
+			<h4 id="FindSubmatchIndex">func <a href="http://code.google.com/p/go/source/browse/src/pkg/regexp/regexp.go?name=release#852">FindSubmatchIndex</a></h4>
+			<pre>func (re *Regexp) FindSubmatchIndex(b []byte) []int</pre>
+			<p>FindSubmatchIndex returns a slice holding the index pairs identifying the
+leftmost match of the regular expression in b and the matches, if any, of
+its subexpressions, as defined by the &#39;Submatch&#39; and &#39;Index&#39; descriptions
+in the package comment.
+A return value of nil indicates no match.
+</p>
+		
+			<h4 id="LiteralPrefix">func <a href="http://code.google.com/p/go/source/browse/src/pkg/regexp/regexp.go?name=release#364">LiteralPrefix</a></h4>
+			<pre>func (re *Regexp) LiteralPrefix() (prefix string, complete bool)</pre>
+			<p>LiteralPrefix returns a literal string that must begin any match
+of the regular expression re.  It returns the boolean true if the
+literal string comprises the entire regular expression.
+</p>
+		
+			<h4 id="Match">func <a href="http://code.google.com/p/go/source/browse/src/pkg/regexp/regexp.go?name=release#383">Match</a></h4>
+			<pre>func (re *Regexp) Match(b []byte) bool</pre>
+			<p>Match returns whether the Regexp matches the byte slice b.
+The return value is a boolean: true for match, false for no match.
+</p>
+		
+			<h4 id="MatchReader">func <a href="http://code.google.com/p/go/source/browse/src/pkg/regexp/regexp.go?name=release#371">MatchReader</a></h4>
+			<pre>func (re *Regexp) MatchReader(r io.RuneReader) bool</pre>
+			<p>MatchReader returns whether the Regexp matches the text read by the
+RuneReader.  The return value is a boolean: true for match, false for no
+match.
+</p>
+		
+			<h4 id="MatchString">func <a href="http://code.google.com/p/go/source/browse/src/pkg/regexp/regexp.go?name=release#377">MatchString</a></h4>
+			<pre>func (re *Regexp) MatchString(s string) bool</pre>
+			<p>MatchString returns whether the Regexp matches the string s.
+The return value is a boolean: true for match, false for no match.
+</p>
+		
+			<h4 id="NumSubexp">func <a href="http://code.google.com/p/go/source/browse/src/pkg/regexp/regexp.go?name=release#221">NumSubexp</a></h4>
+			<pre>func (re *Regexp) NumSubexp() int</pre>
+			<p>NumSubexp returns the number of parenthesized subexpressions in this Regexp.
+</p>
+		
+			<h4 id="ReplaceAll">func <a href="http://code.google.com/p/go/source/browse/src/pkg/regexp/regexp.go?name=release#517">ReplaceAll</a></h4>
+			<pre>func (re *Regexp) ReplaceAll(src, repl []byte) []byte</pre>
+			<p>ReplaceAll returns a copy of src, replacing matches of the Regexp
+with the replacement text repl.  Inside repl, $ signs are interpreted as
+in Expand, so for instance $1 represents the text of the first submatch.
+</p>
+		
+			<h4 id="ReplaceAllFunc">func <a href="http://code.google.com/p/go/source/browse/src/pkg/regexp/regexp.go?name=release#545">ReplaceAllFunc</a></h4>
+			<pre>func (re *Regexp) ReplaceAllFunc(src []byte, repl func([]byte) []byte) []byte</pre>
+			<p>ReplaceAllFunc returns a copy of src in which all matches of the
+Regexp have been replaced by the return value of function repl applied
+to the matched byte slice.  The replacement returned by repl is substituted
+directly, without using Expand.
+</p>
+		
+			<h4 id="ReplaceAllLiteral">func <a href="http://code.google.com/p/go/source/browse/src/pkg/regexp/regexp.go?name=release#535">ReplaceAllLiteral</a></h4>
+			<pre>func (re *Regexp) ReplaceAllLiteral(src, repl []byte) []byte</pre>
+			<p>ReplaceAllLiteral returns a copy of src, replacing matches of the Regexp
+with the replacement bytes repl.  The replacement repl is substituted directly,
+without using Expand.
+</p>
+		
+			<h4 id="ReplaceAllLiteralString">func <a href="http://code.google.com/p/go/source/browse/src/pkg/regexp/regexp.go?name=release#437">ReplaceAllLiteralString</a></h4>
+			<pre>func (re *Regexp) ReplaceAllLiteralString(src, repl string) string</pre>
+			<p>ReplaceAllStringLiteral returns a copy of src, replacing matches of the Regexp
+with the replacement string repl.  The replacement repl is substituted directly,
+without using Expand.
+</p>
+		
+			<h4 id="ReplaceAllString">func <a href="http://code.google.com/p/go/source/browse/src/pkg/regexp/regexp.go?name=release#423">ReplaceAllString</a></h4>
+			<pre>func (re *Regexp) ReplaceAllString(src, repl string) string</pre>
+			<p>ReplaceAllString returns a copy of src, replacing matches of the Regexp
+with the replacement string repl.  Inside repl, $ signs are interpreted as
+in Expand, so for instance $1 represents the text of the first submatch.
+</p>
+		
+			<h4 id="ReplaceAllStringFunc">func <a href="http://code.google.com/p/go/source/browse/src/pkg/regexp/regexp.go?name=release#447">ReplaceAllStringFunc</a></h4>
+			<pre>func (re *Regexp) ReplaceAllStringFunc(src string, repl func(string) string) string</pre>
+			<p>ReplaceAllStringFunc returns a copy of src in which all matches of the
+Regexp have been replaced by the return value of function repl applied
+to the matched substring.  The replacement returned by repl is substituted
+directly, without using Expand.
+</p>
+		
+			<h4 id="String">func <a href="http://code.google.com/p/go/source/browse/src/pkg/regexp/regexp.go?name=release#92">String</a></h4>
+			<pre>func (re *Regexp) String() string</pre>
+			<p>String returns the source text used to compile the regular expression.
+</p>
+		
+			<h4 id="SubexpNames">func <a href="http://code.google.com/p/go/source/browse/src/pkg/regexp/regexp.go?name=release#230">SubexpNames</a></h4>
+			<pre>func (re *Regexp) SubexpNames() []string</pre>
+			<p>SubexpNames returns the names of the parenthesized subexpressions
+in this Regexp.  The name for the first sub-expression is names[1],
+so that if m is a match slice, the name for m[i] is SubexpNames()[i].
+Since the Regexp as a whole cannot be named, names[0] is always
+the empty string.  The slice should not be modified.
+</p>
+		
+	
+
+<h3 id="_files"><a href="http://code.google.com/p/go/source/browse/src/pkg/regexp?name=release">Files</a></h3>
+<p>
+
+
+	<a href="http://code.google.com/p/go/source/browse/src/pkg/regexp/exec.go?name=release">exec.go</a>
+
+	<a href="http://code.google.com/p/go/source/browse/src/pkg/regexp/regexp.go?name=release">regexp.go</a>
+
+
+</p>
+		</div>
+		<div class="container">
+			<div class="flat-well well-small">
+				<a href="https://github.com/Unknwon">@Unknown</a>
+				<span class="muted">|</span>
+				<a href="mailto:joe2010xtmf@163.com">Feedback</a>
+				<span class="muted">|</span>
+				<a href="https://github.com/Unknwon/gowalker/issues">Website Issues</a>
+				<span class="pull-right"><a href="#">Back to top</a></span>
+			</div>
+		</div>
+		<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-40109089-2', 'gowalker.org');
+  ga('send', 'pageview');
+
+</script>
+	</body>
+</html>
