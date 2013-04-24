@@ -56,7 +56,7 @@ func (this *SearchController) Get() {
 		// Check documentation of this import path, and update automatically as needed
 
 		/* TODO:WORKING */
-		//os.Remove("./docs/" + strings.Replace(q, "http://", "", 1) + ".html")
+		os.Remove("./docs/" + strings.Replace(q, "http://", "", 1) + ".html")
 		pdoc, err := models.CheckDoc(q, models.HUMAN_REQUEST)
 		q = strings.Replace(q, "http://", "", 1)
 		if err == nil {
@@ -103,9 +103,13 @@ func generatePage(this *SearchController, pdoc *models.Package, q string) bool {
 	// Introduction
 	this.Data["proPath"] = pdoc.BrowseURL
 	this.Data["proName"] = pdoc.Name
+<<<<<<< HEAD
 	pkgDocPath := pdoc.BrowseURL[7 : strings.Index(pdoc.BrowseURL, "/"+pdoc.Name)+1]
 	this.Data["pkgSearch"] = pkgDocPath[:len(pkgDocPath)-1]
 	this.Data["pkgDocPath"] = pkgDocPath
+=======
+	this.Data["pkgDocPath"] = pdoc.BrowseURL[7 : strings.Index(pdoc.BrowseURL, "/"+pdoc.Name)+1]
+>>>>>>> 6020741a235e566f77292f34dc3b4771e07cb78e
 	this.Data["importPath"] = pdoc.ImportPath
 	this.Data["pkgIntro"] = pdoc.Synopsis
 	synIndex := strings.Index(pdoc.Doc, ".")
@@ -116,7 +120,21 @@ func generatePage(this *SearchController, pdoc *models.Package, q string) bool {
 	} else {
 		refIndex = len(pdoc.Doc)
 	}
-	this.Data["pkgFullIntro"] = strings.TrimSpace(pdoc.Doc[synIndex+1 : refIndex])
+
+	pkgDoc := strings.TrimSpace(pdoc.Doc[synIndex+1 : refIndex])
+	// Format documentation
+	// TODO: need to figure out how to deal with code examples
+	pkgDoc = utils.FormatDoc(pkgDoc)
+
+	// Replace all links
+	// TODO: problems with link check
+	for _, s := range urlPattern.FindAllString(pkgDoc, -1) {
+		// TODO: CAN BE FIXED BY REGEXP
+		s = strings.Replace(s, ",", "", -1)  // Remove ","
+		s = strings.Replace(s, "\"", "", -1) // Remove "\""
+		pkgDoc = strings.Replace(pkgDoc, s, "<a href=\""+s+"\">"+s+"</a>", 1)
+	}
+	this.Data["pkgFullIntro"] = pkgDoc
 
 	// Index
 	this.Data["isHasConst"] = len(pdoc.Consts) > 0

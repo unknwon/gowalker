@@ -15,7 +15,7 @@
 <h2>package {{.proName}}</h2>
 <p><code>import "{{.importPath}}"</code></p>
 <pre>{{.pkgIntro}}</pre>
-<p>{{.pkgFullIntro}}</p>
+<div>{{str2html .pkgFullIntro}}</div>
 <p>{{.pkgRef}}</p>
 {{if .isHasRef}}<p>
 		

@@ -6,8 +6,8 @@
 # Folders
 _obj
 _test
-_docs
-_data
+docs
+data
 
 # Architecture specific extensions/prefixes
 *.[568vq]
