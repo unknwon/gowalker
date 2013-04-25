@@ -15,6 +15,8 @@
 package controllers
 
 import (
+	"strings"
+
 	"github.com/astaxie/beego"
 )
 
@@ -25,15 +27,30 @@ type HomeController struct {
 // Get implemented Get method for HomeController.
 // It serves home page of Go Walker.
 func (this *HomeController) Get() {
+	// Check language version
+	reqUrl := this.Ctx.Request.RequestURI
+	if len(reqUrl) == 1 {
+		// English is default language version
+		this.Redirect("/en/", 302)
+	}
+
+	lang := ""
+	if i := strings.LastIndex(reqUrl, "/"); i > 2 {
+		lang = reqUrl[1:i]
+	} else {
+		this.Redirect("/en/", 302)
+	}
+
 	// Get query field
 	q := this.Input().Get("q")
+
 	// Set properties
-	this.TplNames = "home.html"
+	this.TplNames = "home_" + lang + ".html"
 	this.Layout = "layout.html"
 
 	// Empty query string shows home page
 	if len(q) > 0 {
 		// Show search page
-		this.Redirect("/search?q="+q, 302)
+		this.Redirect(lang+"/search?q="+q, 302)
 	}
 }

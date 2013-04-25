@@ -1,76 +1,97 @@
-		<ul class="nav">
-			<li><a href="/">Home</a></li>
-			<li><a href="/-/index">Index</a></li>
-			<li><a href="/-/about">About</a></li>
-		</ul>
-		<form class="navbar-search pull-right" action="/">
-			<input class="search-query" type="text" placeholder="Search" name="q"></input>
-		</form>
-	</div>
-</div>
-<div class="flat-well well-small">
-	<a href="{{.proPath}}"><strong>{{.proName}}:</strong></a> <a href="/search?q={{.pkgSearch}}">{{.pkgDocPath}}</a><span class="muted">{{.proName}}</span>
-	<span class="pull-right"><a href="#_index">Index</a><span class="muted"> | </span><a href="#_files">Files</a><span class="muted"> | </span><a href="#_subdirs">Directories</a></span>
-</div>
-<h2>package {{.proName}}</h2>
-<p><code>import "{{.importPath}}"</code></p>
-{{str2html .pkgFullIntro}}
-<h3 id="_index">Index</h3>
-<ul class="unstyled">
-{{if .isHasConst}}<li><a href="#_constants">Constants</a></li>{{end}}
-{{if .isHasVar}}<li><a href="#_variables">Variables</a></li>{{end}}
-{{with .funcs}}{{range .}}<li><a href="#{{.Name}}">{{.Decl.Text}}</a></li>{{end}}{{end}}
-{{with .types}}{{range .}}<li><a href="#{{.Name}}">type {{.Name}}</a></li>
-{{range .Funcs}}<ul><li><a href="#{{.Name}}">{{.Decl.Text}}</a></li></ul>{{end}}
-{{range .Methods}}<ul><li><a href="#{{.Name}}">{{.Decl.Text}}</a></li>
-</ul>{{end}}{{end}}{{end}}</ul>
-{{if .isHasConst}}
-	<h3 id="_constants">Constants</h3>
-	{{with .consts}}
-		{{range .}}
-			<pre class="pre-x-scrollable">{{.Decl.Text}}</pre>
-			<p>{{str2html .Doc}}</p>
-		{{end}}
-	{{end}}
-{{end}}
-{{if .isHasVar}}
-	<h3 id="_variables">Variables</h3>
-	{{with .vars}}
-		{{range .}}
-			<pre class="pre-x-scrollable">{{.Decl.Text}}</pre>
-			<p>{{str2html .Doc}}</p>
-		{{end}}
-	{{end}}
-{{end}}
-{{with .funcs}}
-	{{range .}}
-		<h3 id="{{.Name}}">func <a href="{{.URL}}">{{.Name}}</a></h3>
-		<pre>{{.Decl.Text}}</pre>
-		<p>{{str2html .Doc}}</p>
-	{{end}}
-{{end}}
-{{with .types}}
-	{{range .}}
-		<h3 id="{{.Name}}">type <a href="{{.URL}}">{{.Name}}</a></h3>
-		<pre class="pre-x-scrollable">{{.Decl.Text}}</pre>
-		<p>{{str2html .Doc}}</p>
-		{{range .Funcs}}
-			<h4 id="{{.Name}}">func <a href="{{.URL}}">{{.Name}}</a></h4>
-			<pre>{{.Decl.Text}}</pre>
-			<p>{{str2html .Doc}}</p>
-		{{end}}
-		{{range .Methods}}
-			<h4 id="{{.Name}}">func <a href="{{.URL}}">{{.Name}}</a></h4>
-			<pre>{{.Decl.Text}}</pre>
-			<p>{{str2html .Doc}}</p>
-		{{end}}
-	{{end}}
-{{end}}
-<h3 id="_files"><a href="{{.proPath}}">Files</a></h3>
-<p>
-{{with .files}}
-{{range .}}
-	<a href="{{.URL}}">{{.Name}}</a>
-{{end}}
-{{end}}
-</p>
+		<title>Go Walker</title>
+	</head>
+
+	<body>
+		<div class="container">
+			<div class="navbar navbar-inverse">
+				<div class="navbar-inner">
+					<a class="brand" href="/en/">Go Walker</a>
+					<ul class="nav">
+						<li class="active"><a href="/en/">Home</a></li>
+						<li><a href="/en/index">Index</a></li>
+						<li><a href="/en/about">About</a></li>
+					</ul>
+					<form class="navbar-search pull-right" action="/en/search">
+						<input class="search-query" type="text" placeholder="Search" name="q"></input>
+					</form>
+				</div>
+			</div>
+			<div class="flat-well well-small">
+				<a href="{{.proPath}}"><strong>{{.proName}}:</strong></a> <a href="/search?q={{.pkgSearch}}">{{.pkgDocPath}}</a><span class="muted">{{.proName}}</span>
+				<span class="pull-right"><a href="#_index">Index</a><span class="muted"> | </span><a href="#_files">Files</a><span class="muted"> | </span><a href="#_subdirs">Directories</a></span>
+			</div>
+			<h2>package {{.proName}}</h2>
+			<p><code>import "{{.importPath}}"</code></p>
+			{{str2html .pkgFullIntro}}
+			<h3 id="_index">Index</h3>
+			<ul class="unstyled">
+			{{if .isHasConst}}<li><a href="#_constants">Constants</a></li>{{end}}
+			{{if .isHasVar}}<li><a href="#_variables">Variables</a></li>{{end}}
+			{{with .funcs}}{{range .}}<li><a href="#{{.Name}}">{{.Decl.Text}}</a></li>{{end}}{{end}}
+			{{with .types}}{{range .}}<li><a href="#{{.Name}}">type {{.Name}}</a></li>
+			{{range .Funcs}}<ul><li><a href="#{{.Name}}">{{.Decl.Text}}</a></li></ul>{{end}}
+			{{range .Methods}}<ul><li><a href="#{{.Name}}">{{.Decl.Text}}</a></li>
+			</ul>{{end}}{{end}}{{end}}</ul>
+			{{if .isHasConst}}
+				<h3 id="_constants">Constants</h3>
+				{{with .consts}}
+					{{range .}}
+						<pre class="pre-x-scrollable">{{.Decl.Text}}</pre>
+						<p>{{str2html .Doc}}</p>
+					{{end}}
+				{{end}}
+			{{end}}
+			{{if .isHasVar}}
+				<h3 id="_variables">Variables</h3>
+				{{with .vars}}
+					{{range .}}
+						<pre class="pre-x-scrollable">{{.Decl.Text}}</pre>
+						<p>{{str2html .Doc}}</p>
+					{{end}}
+				{{end}}
+			{{end}}
+			{{with .funcs}}
+				{{range .}}
+					<h3 id="{{.Name}}">func <a href="{{.URL}}">{{.Name}}</a></h3>
+					<pre>{{.Decl.Text}}</pre>
+					<p>{{str2html .Doc}}</p>
+				{{end}}
+			{{end}}
+			{{with .types}}
+				{{range .}}
+					<h3 id="{{.Name}}">type <a href="{{.URL}}">{{.Name}}</a></h3>
+					<pre class="pre-x-scrollable">{{.Decl.Text}}</pre>
+					<p>{{str2html .Doc}}</p>
+					{{range .Funcs}}
+						<h4 id="{{.Name}}">func <a href="{{.URL}}">{{.Name}}</a></h4>
+						<pre>{{.Decl.Text}}</pre>
+						<p>{{str2html .Doc}}</p>
+					{{end}}
+					{{range .Methods}}
+						<h4 id="{{.Name}}">func <a href="{{.URL}}">{{.Name}}</a></h4>
+						<pre>{{.Decl.Text}}</pre>
+						<p>{{str2html .Doc}}</p>
+					{{end}}
+				{{end}}
+			{{end}}
+			<h3 id="_files"><a href="{{.proPath}}">Files</a></h3>
+			<p>
+			{{with .files}}
+			{{range .}}
+				<a href="{{.URL}}">{{.Name}}</a>
+			{{end}}
+			{{end}}
+			</p>
+			<div class="container">
+				<div class="flat-well well-small">
+					<a href="https://github.com/Unknwon">@Unknown</a>
+					<span class="muted">|</span>
+					<a href="mailto:joe2010xtmf@163.com">Feedback</a>
+					<span class="muted">|</span>
+					<a href="https://github.com/Unknwon/gowalker/issues">Website Issues</a>
+					<span class="muted">|</span>
+					<a href="/zh/">中文版</a>
+					<span class="pull-right"><a href="#">Back to top</a></span>
+				</div>
+			</div>
+		</div>

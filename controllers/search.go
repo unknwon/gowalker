@@ -30,16 +30,31 @@ type SearchController struct {
 }
 
 func (this *SearchController) Get() {
+	// Check language version
+	reqUrl := this.Ctx.Request.RequestURI
+	beego.Info(reqUrl)
+	if len(reqUrl) == 1 {
+		// English is default language version
+		this.Redirect("/en/search", 302)
+	}
+
+	lang := ""
+	if i := strings.LastIndex(reqUrl, "/"); i > 2 {
+		lang = reqUrl[1:i]
+	} else {
+		this.Redirect("/en/search", 302)
+	}
+
 	// Get query field
 	q := this.Input().Get("q")
 
 	// Empty query string shows home page
 	if len(q) == 0 {
-		this.Redirect("/", 302)
+		this.Redirect("/"+lang+"/", 302)
 	}
 
 	// Set properties
-	this.TplNames = "search.html"
+	this.TplNames = "search_" + lang + ".html"
 	this.Layout = "layout.html"
 
 	// Check if it is a browse URL, if not means it's a keyword or import path

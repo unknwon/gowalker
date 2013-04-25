@@ -15,6 +15,8 @@
 package controllers
 
 import (
+	"strings"
+
 	"github.com/astaxie/beego"
 )
 
@@ -25,7 +27,21 @@ type IndexController struct {
 // Get implemented Get method for IndexController.
 // It serves index page of Go Walker.
 func (this *IndexController) Get() {
+	// Check language version
+	reqUrl := this.Ctx.Request.RequestURI
+	if len(reqUrl) == 1 {
+		// English is default language version
+		this.Redirect("/en/index", 302)
+	}
+
+	lang := ""
+	if i := strings.LastIndex(reqUrl, "/"); i > 2 {
+		lang = reqUrl[1:i]
+	} else {
+		this.Redirect("/en/index", 302)
+	}
+
 	// Set properties
-	this.TplNames = "index.html"
+	this.TplNames = "index_" + lang + ".html"
 	this.Layout = "layout.html"
 }

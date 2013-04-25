@@ -23,19 +23,19 @@ import (
 )
 
 const (
-	VERSION = "0.0.3.0425"
+	VERSION = "0.0.4.0425"
 )
 
 func main() {
 	beego.Info("Go Walker " + VERSION)
 
 	// Initialization
-	beego.Info("Initialize database")
+	beego.Info("Initialize database: gowalker.db")
 	os.Mkdir("./data", os.ModePerm)
 	if err := models.InitDb(); err != nil {
 		beego.Error(err)
 	}
-	beego.Info("Initialize directory: docs")
+	beego.Info("Initialize directory: docs/")
 	os.Mkdir("./docs", os.ModePerm)
 
 	// Set static path
@@ -43,10 +43,17 @@ func main() {
 	beego.SetStaticPath("/code.google.com", "docs/code.google.com")
 
 	// Register routers
+	// English version
 	beego.Router("/", &controllers.HomeController{})
-	beego.Router("/search", &controllers.SearchController{})
-	beego.Router("/-/index", &controllers.IndexController{})
-	beego.Router("/-/about", &controllers.AboutController{})
+	beego.Router("/en", &controllers.HomeController{})
+	beego.Router("/en/search", &controllers.SearchController{})
+	beego.Router("/en/index", &controllers.IndexController{})
+	beego.Router("/en/about", &controllers.AboutController{})
+	// Chinese version
+	beego.Router("/zh", &controllers.HomeController{})
+	beego.Router("/zh/search", &controllers.SearchController{})
+	beego.Router("/zh/index", &controllers.IndexController{})
+	beego.Router("/zh/about", &controllers.AboutController{})
 
 	// For all 404 pages
 	beego.Router("/:all", &controllers.ErrorController{})

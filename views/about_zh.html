@@ -1,0 +1,46 @@
+		<title>Go 步行者 - 关于</title>
+	</head>
+
+	<body>
+		<div class="container">
+			<div class="navbar navbar-inverse">
+				<div class="navbar-inner">
+					<a class="brand" href="/zh/">Go 步行者</a>
+					<ul class="nav">
+						<li><a href="/zh">首页</a></li>
+						<li><a href="/zh/index">索引</a></li>
+						<li class="active"><a href="/zh/about">关于</a></li>
+					</ul>
+					<form class="navbar-search pull-right" action="/zh/search">
+						<input class="search-query" type="text" placeholder="搜索项目" name="q"></input>
+					</form>
+				</div>
+			</div>
+			<h1>关于</h1>
+			<p>Go Walker displays documentation for <a href="http://golang.org/">Go</a> projects on <a href="https://bitbucket.org/">Bitbucket</a>, <a href="https://github.com/">Github</a>, <a href="https://launchpad.net/">Launchpad</a> and <a href="http://code.google.com/hosting/">Google Project Hosting</a>.  
+			<p>The source code for Go Walker is available <a href="https://github.com/Unknwon/gowalker">on Github</a>.  
+			<h4 id="howto">Add a project to Go Walker</h4> 
+			<p>Go Walker generates documentation from Go source code. The <a href="http://golang.org/doc/articles/godoc_documenting_go_code.html">guidelines</a> for writing documentation for the <a href="http://golang.org/cmd/godoc/">godoc</a> tool apply to Go Walker and display object relationships between packages in your project. 
+			<p>It's important to write a good summary of the package in the first sentence of the package comment. Go Walker indexes the first sentence and displays the sentence in package lists.
+			<p>To add a package to Go Walker, <a href="/">search</a> for the package by import path. If Go Walker does not already have the documentation for the package, then Go Walker will fetch the source from the version control system on the fly and add the documentation, as well as all dependencies packages.
+			<p>Go Walker checks for package updates once per day. You can force Go Walker to refresh the documentation immediately by clicking the refresh link at the bottom of the package documentation page. 
+			<h4 id="remove">Remove a package from Go Walker</h4>
+			<p>Go Walker automatically removes packages deleted from the version control system when Go Walker checks for updates to the package. You can force Go Walker to remove a deleted package immediately by clicking the refresh link at the bottom of the package documentation page, but be aware that this operation will not delete dependencies packages in case other packages use some of them.</p>
+			<p>If you do not want Go Walker to display documentation for your package, send mail to info@gowalker.org with the import path of the path of the package that you want to remove. </p>
+			<h4>Feedback</h4> 
+			<p>Send your ideas, feature requests and questions to info@gowalker.org.  Report bugs using the <a href="https://github.com/Unknwon/gowalker/issues">Github Issue Tracker</a>.  Join the discussion at the <a href="https://groups.google.com/d/forum/gowalker">Go Walker group</a>.
+			<h4>Bookmarklet</h4>
+			<p>The Go Walker bookmarklet navigates from pages on Bitbucket, Github Launchpad and Google Project Hosting to the package documentation. To install the bookmarklet, click and drag the following link to your bookmark bar: <a  href="javascript:window.location='http://gowalker.org/?q='+encodeURIComponent(window.location)">Go Walker</a></p>
+			<div class="container">
+				<div class="flat-well well-small">
+					<a href="https://github.com/Unknwon">@Unknown</a>
+					<span class="muted">|</span>
+					<a href="mailto:joe2010xtmf@163.com">反馈</a>
+					<span class="muted">|</span>
+					<a href="https://github.com/Unknwon/gowalker/issues">问题提交</a>
+					<span class="muted">|</span>
+					<a href="/en/abtou">English</a>
+					<span class="pull-right"><a href="#">返回顶部</a></span>
+				</div>
+			</div>
+		</div>
