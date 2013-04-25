@@ -57,7 +57,7 @@ func (this *SearchController) Get() {
 		// Check documentation of this import path, and update automatically as needed
 
 		/* TODO:WORKING */
-		os.Remove("./docs/" + strings.Replace(q, "http://", "", 1) + ".html")
+		//os.Remove("./docs/" + strings.Replace(q, "http://", "", 1) + ".html")
 		pdoc, err := models.CheckDoc(q, models.HUMAN_REQUEST)
 		q = strings.Replace(q, "http://", "", 1)
 		if err == nil {
@@ -104,7 +104,6 @@ func generatePage(this *SearchController, pdoc *models.Package, q string) bool {
 	this.Data["pkgSearch"] = pkgDocPath[:len(pkgDocPath)-1]
 	this.Data["pkgDocPath"] = pkgDocPath
 	this.Data["importPath"] = pdoc.ImportPath
-	this.Data["pkgIntro"] = pdoc.Synopsis
 
 	// Main introduction
 	/*if synIndex := strings.Index(pdoc.Doc, "."); synIndex > -1 {
@@ -114,7 +113,10 @@ func generatePage(this *SearchController, pdoc *models.Package, q string) bool {
 	// Full introduction
 	var buf bytes.Buffer
 	doc.ToHTML(&buf, pdoc.Doc, nil)
-	this.Data["pkgFullIntro"] = buf.String()
+	pkgInfo := buf.String()
+	pkgInfo = strings.Replace(pkgInfo, "<p>", "<p><b>", 1)
+	pkgInfo = strings.Replace(pkgInfo, "</p>", "</b></p>", 1)
+	this.Data["pkgFullIntro"] = pkgInfo
 
 	// Index
 	this.Data["isHasConst"] = len(pdoc.Consts) > 0
