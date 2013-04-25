@@ -15,8 +15,9 @@
 package controllers
 
 import (
+	"bytes"
+	"go/doc"
 	"os"
-	"regexp"
 	"strings"
 
 	"github.com/astaxie/beego"
@@ -87,8 +88,6 @@ func (this *SearchController) Get() {
 	}
 }
 
-var urlPattern = regexp.MustCompile(`[a-zA-z]+://[^\s]*`)
-
 func generatePage(this *SearchController, pdoc *models.Package, q string) bool {
 	if pdoc == nil || len(pdoc.Name) == 0 {
 		return utils.IsExist("./docs/" + q + ".html")
@@ -106,42 +105,46 @@ func generatePage(this *SearchController, pdoc *models.Package, q string) bool {
 	this.Data["pkgDocPath"] = pkgDocPath
 	this.Data["importPath"] = pdoc.ImportPath
 	this.Data["pkgIntro"] = pdoc.Synopsis
-	synIndex := strings.Index(pdoc.Doc, ".")
-	refIndex := strings.Index(pdoc.Doc, "Ref")
-	if refIndex > -1 {
-		this.Data["isHasRef"] = true
-		this.Data["pkgRefs"] = urlPattern.FindAllString(pdoc.Doc[refIndex:], -1)
-	} else {
-		refIndex = len(pdoc.Doc)
-	}
 
-	pkgDoc := strings.TrimSpace(pdoc.Doc[synIndex+1 : refIndex])
-	// Format documentation
-	pkgDoc = utils.ParseDoc(pkgDoc)
+	// Main introduction
+	/*if synIndex := strings.Index(pdoc.Doc, "."); synIndex > -1 {
+		pdoc.Doc = pdoc.Doc[synIndex+1:]
+	}*/
 
-	this.Data["pkgFullIntro"] = pkgDoc
+	// Full introduction
+	var buf bytes.Buffer
+	doc.ToHTML(&buf, pdoc.Doc, nil)
+	this.Data["pkgFullIntro"] = buf.String()
 
 	// Index
 	this.Data["isHasConst"] = len(pdoc.Consts) > 0
 	this.Data["isHasVar"] = len(pdoc.Vars) > 0
 	this.Data["funcs"] = pdoc.Funcs
-	// for i, f := range pdoc.Funcs {
-	// 	f.Doc = utils.ParseDoc(f.Doc)
-	// 	pdoc.Funcs[i] = f
-	// }
+	for i, f := range pdoc.Funcs {
+		buf.Reset()
+		doc.ToHTML(&buf, f.Doc, nil)
+		f.Doc = buf.String()
+		pdoc.Funcs[i] = f
+	}
 	this.Data["types"] = pdoc.Types
-	// for i, t := range pdoc.Types {
-	// 	for j, f := range t.Funcs {
-	// 		f.Doc = utils.ParseDoc(f.Doc)
-	// 		t.Funcs[j] = f
-	// 	}
-	// 	for j, m := range t.Methods {
-	// 		m.Doc = utils.ParseDoc(m.Doc)
-	// 		t.Methods[j] = m
-	// 	}
-	// 	t.Doc = utils.ParseDoc(t.Doc)
-	// 	pdoc.Types[i] = t
-	// }
+	for i, t := range pdoc.Types {
+		for j, f := range t.Funcs {
+			buf.Reset()
+			doc.ToHTML(&buf, f.Doc, nil)
+			f.Doc = buf.String()
+			t.Funcs[j] = f
+		}
+		for j, m := range t.Methods {
+			buf.Reset()
+			doc.ToHTML(&buf, m.Doc, nil)
+			m.Doc = buf.String()
+			t.Methods[j] = m
+		}
+		buf.Reset()
+		doc.ToHTML(&buf, t.Doc, nil)
+		t.Doc = buf.String()
+		pdoc.Types[i] = t
+	}
 
 	// Constants
 	this.Data["consts"] = pdoc.Consts

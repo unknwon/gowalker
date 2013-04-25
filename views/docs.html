@@ -16,12 +16,6 @@
 <p><code>import "{{.importPath}}"</code></p>
 <p><b>{{.pkgIntro}}</b></p>
 {{str2html .pkgFullIntro}}
-<p>{{.pkgRef}}</p>
-{{if .isHasRef}}<p>
-		
-		References:</p>
-<pre>{{range .pkgRefs}}
-<a href="{{.}}">{{.}}</a>{{end}}</pre>{{end}}
 <h3 id="_index">Index</h3>
 <ul class="unstyled">
 {{if .isHasConst}}<li><a href="#_constants">Constants</a></li>{{end}}
