@@ -14,8 +14,8 @@
 </div>
 <h2>package {{.proName}}</h2>
 <p><code>import "{{.importPath}}"</code></p>
-<pre>{{.pkgIntro}}</pre>
-<div>{{str2html .pkgFullIntro}}</div>
+<p><b>{{.pkgIntro}}</b></p>
+{{str2html .pkgFullIntro}}
 <p>{{.pkgRef}}</p>
 {{if .isHasRef}}<p>
 		
@@ -31,33 +31,45 @@
 {{range .Funcs}}<ul><li><a href="#{{.Name}}">{{.Decl.Text}}</a></li></ul>{{end}}
 {{range .Methods}}<ul><li><a href="#{{.Name}}">{{.Decl.Text}}</a></li>
 </ul>{{end}}{{end}}{{end}}</ul>
-{{if .isHasConst}}<h3 id="_constants">Constants</h3>
-{{with .consts}}{{range .}}<pre class="pre-x-scrollable">{{.Decl.Text}}</pre>{{end}}{{end}}
-<p>{{.Doc}}</p>{{end}}
-{{if .isHasVar}}<h3 id="_variables">Variables</h3>
-{{with .vars}}{{range .}}<pre class="pre-x-scrollable">{{.Decl.Text}}</pre>{{end}}{{end}}
-<p>{{.Doc}}</p>{{end}}
+{{if .isHasConst}}
+	<h3 id="_constants">Constants</h3>
+	{{with .consts}}
+		{{range .}}
+			<pre class="pre-x-scrollable">{{.Decl.Text}}</pre>
+			<p>{{str2html .Doc}}</p>
+		{{end}}
+	{{end}}
+{{end}}
+{{if .isHasVar}}
+	<h3 id="_variables">Variables</h3>
+	{{with .vars}}
+		{{range .}}
+			<pre class="pre-x-scrollable">{{.Decl.Text}}</pre>
+			<p>{{str2html .Doc}}</p>
+		{{end}}
+	{{end}}
+{{end}}
 {{with .funcs}}
 	{{range .}}
 		<h3 id="{{.Name}}">func <a href="{{.URL}}">{{.Name}}</a></h3>
 		<pre>{{.Decl.Text}}</pre>
-		<p>{{.Doc}}</p>
+		<p>{{str2html .Doc}}</p>
 	{{end}}
 {{end}}
 {{with .types}}
 	{{range .}}
 		<h3 id="{{.Name}}">type <a href="{{.URL}}">{{.Name}}</a></h3>
 		<pre class="pre-x-scrollable">{{.Decl.Text}}</pre>
-		<p>{{.Doc}}</p>
+		<p>{{str2html .Doc}}</p>
 		{{range .Funcs}}
 			<h4 id="{{.Name}}">func <a href="{{.URL}}">{{.Name}}</a></h4>
 			<pre>{{.Decl.Text}}</pre>
-			<p>{{.Doc}}</p>
+			<p>{{str2html .Doc}}</p>
 		{{end}}
 		{{range .Methods}}
 			<h4 id="{{.Name}}">func <a href="{{.URL}}">{{.Name}}</a></h4>
 			<pre>{{.Decl.Text}}</pre>
-			<p>{{.Doc}}</p>
+			<p>{{str2html .Doc}}</p>
 		{{end}}
 	{{end}}
 {{end}}

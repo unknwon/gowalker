@@ -87,9 +87,7 @@ func (this *SearchController) Get() {
 	}
 }
 
-var (
-	urlPattern = regexp.MustCompile(`[a-zA-z]+://[^\s]*`)
-)
+var urlPattern = regexp.MustCompile(`[a-zA-z]+://[^\s]*`)
 
 func generatePage(this *SearchController, pdoc *models.Package, q string) bool {
 	if pdoc == nil || len(pdoc.Name) == 0 {
@@ -103,13 +101,9 @@ func generatePage(this *SearchController, pdoc *models.Package, q string) bool {
 	// Introduction
 	this.Data["proPath"] = pdoc.BrowseURL
 	this.Data["proName"] = pdoc.Name
-<<<<<<< HEAD
 	pkgDocPath := pdoc.BrowseURL[7 : strings.Index(pdoc.BrowseURL, "/"+pdoc.Name)+1]
 	this.Data["pkgSearch"] = pkgDocPath[:len(pkgDocPath)-1]
 	this.Data["pkgDocPath"] = pkgDocPath
-=======
-	this.Data["pkgDocPath"] = pdoc.BrowseURL[7 : strings.Index(pdoc.BrowseURL, "/"+pdoc.Name)+1]
->>>>>>> 6020741a235e566f77292f34dc3b4771e07cb78e
 	this.Data["importPath"] = pdoc.ImportPath
 	this.Data["pkgIntro"] = pdoc.Synopsis
 	synIndex := strings.Index(pdoc.Doc, ".")
@@ -123,24 +117,31 @@ func generatePage(this *SearchController, pdoc *models.Package, q string) bool {
 
 	pkgDoc := strings.TrimSpace(pdoc.Doc[synIndex+1 : refIndex])
 	// Format documentation
-	// TODO: need to figure out how to deal with code examples
-	pkgDoc = utils.FormatDoc(pkgDoc)
+	pkgDoc = utils.ParseDoc(pkgDoc)
 
-	// Replace all links
-	// TODO: problems with link check
-	for _, s := range urlPattern.FindAllString(pkgDoc, -1) {
-		// TODO: CAN BE FIXED BY REGEXP
-		s = strings.Replace(s, ",", "", -1)  // Remove ","
-		s = strings.Replace(s, "\"", "", -1) // Remove "\""
-		pkgDoc = strings.Replace(pkgDoc, s, "<a href=\""+s+"\">"+s+"</a>", 1)
-	}
 	this.Data["pkgFullIntro"] = pkgDoc
 
 	// Index
 	this.Data["isHasConst"] = len(pdoc.Consts) > 0
 	this.Data["isHasVar"] = len(pdoc.Vars) > 0
 	this.Data["funcs"] = pdoc.Funcs
+	// for i, f := range pdoc.Funcs {
+	// 	f.Doc = utils.ParseDoc(f.Doc)
+	// 	pdoc.Funcs[i] = f
+	// }
 	this.Data["types"] = pdoc.Types
+	// for i, t := range pdoc.Types {
+	// 	for j, f := range t.Funcs {
+	// 		f.Doc = utils.ParseDoc(f.Doc)
+	// 		t.Funcs[j] = f
+	// 	}
+	// 	for j, m := range t.Methods {
+	// 		m.Doc = utils.ParseDoc(m.Doc)
+	// 		t.Methods[j] = m
+	// 	}
+	// 	t.Doc = utils.ParseDoc(t.Doc)
+	// 	pdoc.Types[i] = t
+	// }
 
 	// Constants
 	this.Data["consts"] = pdoc.Consts

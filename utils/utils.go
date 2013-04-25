@@ -15,11 +15,12 @@
 package utils
 
 import (
+	"bytes"
+	"fmt"
+	"io"
 	"os"
 	"regexp"
 	"strings"
-
-	"github.com/astaxie/beego"
 )
 
 // IsExist returns if a file or directory exists
@@ -37,28 +38,143 @@ func IsDocFile(n string) bool {
 	return readmePat.MatchString(n)
 }
 
-// FormatDoc formats documentation in HTML format
-func FormatDoc(pkgDoc string) (pkgHTML string) {
-	cutIndex := -1
-	prefix := true // Indicates if should be replaced by start tag
+var urlPattern = regexp.MustCompile(`[a-zA-z]+://[^\s]*`)
+
+// ParseDoc converts two line breaks("\n\n") to <p></p> tags,
+// finds code blocks with <pre></pre> tags
+func ParseDoc1(doc string) string {
+	docBuf := bytes.NewBufferString(doc)
+	htmlBuf := new(bytes.Buffer)
+	preTag := false // Indicates begin of code block
+	inCode := false // Indicates if need to check code block
+	indentLevel := 0
+
+	htmlBuf.WriteString("<p>")
 	for {
-		index := strings.Index(pkgDoc[cutIndex+1:], "\n\n") + 1
-		beego.Info("index", cutIndex)
-		if index > -1 {
-			cutIndex += index + 1
-			if prefix {
-				pkgDoc += pkgDoc[:cutIndex] + strings.Replace(pkgDoc[cutIndex:], "\n\n", "<p>", 1)
-				prefix = false
-			} else {
-				pkgDoc += pkgDoc[:cutIndex] + strings.Replace(pkgDoc[cutIndex:], "\n\n", "</p>", 1)
-				prefix = true
+		line, err := docBuf.ReadString('\n')
+		fmt.Println(line)
+		if err != nil {
+			// Unexpected error
+			if err != io.EOF {
+				return doc
 			}
-			continue
+
+			// Reached end of documentation, if nothing to read then break,
+			// otherwise handle the last line.
+			if len(line) == 0 {
+				break
+			}
 		}
 
-		break
+		switch {
+		case len(line) == 0: // Empty line
+			continue
+		case len(line) > 1 && line[len(line)-2] == ':':
+			htmlBuf.WriteString(line + "</p>")
+			i := 0
+			for {
+				if line[i] == '\t' {
+					indentLevel = i
+				} else {
+					break
+				}
+				i++
+			}
+			indentLevel++
+			preTag = true
+			inCode = true
+		case line == "\n":
+		case preTag && len(line) > indentLevel && line[indentLevel] == '\t':
+			htmlBuf.WriteString("<pre>" + line)
+			preTag = false
+		case inCode && len(line) > indentLevel && line[indentLevel] == '\t':
+			htmlBuf.WriteString(line)
+		case inCode && len(line) > indentLevel && line[indentLevel] != '\t':
+			htmlBuf.WriteString("</pre><p>" + line)
+		default:
+			htmlBuf.WriteString(line + "</p>")
+		}
+
+		// Reached end of documentation
+		if err == io.EOF {
+			break
+		}
 	}
 
-	pkgHTML = pkgDoc
-	return pkgHTML
+	return htmlBuf.String()
+}
+
+func ParseDoc(doc string) string {
+	tagDoc := new(bytes.Buffer)
+	code := false
+	contCode := false // Indicates if this paragraph can also be code block
+	// Get paragraphs
+	paras := strings.Split(doc, "\n\n")
+	for i, p := range paras {
+		fmt.Println(p)
+		links := urlPattern.FindAllString(p, -1)
+		// Check links
+		for _, s := range links {
+			if i := strings.Index(s, "\""); i > -1 {
+				s = s[:i]
+			}
+			p = strings.Replace(p, s, "<a href=\""+s+"\">"+s+"</a>", 1)
+		}
+
+		// Check if this paragraph is code example
+		if code {
+			tagDoc.WriteString("<pre>" + p)
+			code = false
+			// End of the documentation
+			if i == len(paras)-1 {
+				tagDoc.WriteString("</pre>")
+			}
+		} else if contCode {
+			if strings.Index(p, ":=") > -1 || isHasKeyword(p) {
+				tagDoc.WriteString("\n\n" + p)
+				// End of the documentation
+				if i == len(paras)-1 {
+					tagDoc.WriteString("</pre>")
+				}
+			} else {
+				tagDoc.WriteString("</pre><p>" + p + "</p>")
+				contCode = false
+				if len(p) > 0 && p[len(p)-1] == ':' {
+					code = true
+					contCode = true
+				}
+			}
+		} else {
+			isHasSymbol := len(p) > 0 && p[len(p)-1] == ':'
+			if j := strings.Index(p, "xample:"); j > -1 && !isHasSymbol {
+				tagDoc.WriteString("<p>" + p[:j+7] + "</p><pre>" + p[j+7:])
+				// End of the documentation
+				if i == len(paras)-1 {
+					tagDoc.WriteString("</pre>")
+				}
+				contCode = true
+			} else {
+				tagDoc.WriteString("<p>" + p + "</p>")
+				if isHasSymbol {
+					code = true
+					contCode = true
+				}
+			}
+		}
+	}
+
+	return tagDoc.String()
+}
+
+var keywords = []string{"func ", "import ", "log.", "http."}
+
+func isHasKeyword(str string) bool {
+	isCode := false
+	for _, k := range keywords {
+		if strings.Index(str, k) > -1 {
+			isCode = true
+			break
+		}
+	}
+	return isCode
 }
