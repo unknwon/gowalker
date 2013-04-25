@@ -32,7 +32,6 @@ type SearchController struct {
 func (this *SearchController) Get() {
 	// Check language version
 	reqUrl := this.Ctx.Request.RequestURI
-	beego.Info(reqUrl)
 	if len(reqUrl) == 1 {
 		// English is default language version
 		this.Redirect("/en/search", 302)
@@ -40,7 +39,7 @@ func (this *SearchController) Get() {
 
 	lang := ""
 	if i := strings.LastIndex(reqUrl, "/"); i > 2 {
-		lang = reqUrl[1:i]
+		lang = reqUrl[1:3]
 	} else {
 		this.Redirect("/en/search", 302)
 	}
