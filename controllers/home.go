@@ -28,17 +28,11 @@ type HomeController struct {
 // It serves home page of Go Walker.
 func (this *HomeController) Get() {
 	// Check language version
-	reqUrl := this.Ctx.Request.RequestURI
-	if len(reqUrl) == 1 {
+	lang, ok := isValidLanguage(this.Ctx.Request.RequestURI)
+	if !ok {
 		// English is default language version
 		this.Redirect("/en/", 302)
-	}
-
-	lang := ""
-	if i := strings.LastIndex(reqUrl, "/"); i > 2 {
-		lang = reqUrl[1:i]
-	} else {
-		this.Redirect("/en/", 302)
+		return
 	}
 
 	// Get query field
@@ -53,4 +47,20 @@ func (this *HomeController) Get() {
 		// Show search page
 		this.Redirect(lang+"/search?q="+q, 302)
 	}
+}
+
+// isValidLanguage checks if URL has correct language version.
+func isValidLanguage(reqUrl string) (string, bool) {
+	var lang string
+
+	if len(reqUrl) == 1 {
+		return lang, false
+	}
+	if i := strings.LastIndex(reqUrl, "/"); i > 2 {
+		lang = reqUrl[1:3]
+	} else {
+		return lang, false
+	}
+
+	return lang, true
 }

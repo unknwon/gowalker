@@ -18,6 +18,7 @@ import (
 	"bytes"
 	"go/doc"
 	"os"
+	"runtime"
 	"strings"
 
 	"github.com/astaxie/beego"
@@ -31,17 +32,11 @@ type SearchController struct {
 
 func (this *SearchController) Get() {
 	// Check language version
-	reqUrl := this.Ctx.Request.RequestURI
-	if len(reqUrl) == 1 {
+	lang, ok := isValidLanguage(this.Ctx.Request.RequestURI)
+	if !ok {
 		// English is default language version
-		this.Redirect("/en/search", 302)
-	}
-
-	lang := ""
-	if i := strings.LastIndex(reqUrl, "/"); i > 2 {
-		lang = reqUrl[1:3]
-	} else {
-		this.Redirect("/en/search", 302)
+		this.Redirect("/en/", 302)
+		return
 	}
 
 	// Get query field
@@ -56,22 +51,20 @@ func (this *SearchController) Get() {
 	this.TplNames = "search_" + lang + ".html"
 	this.Layout = "layout.html"
 
-	// Check if it is a browse URL, if not means it's a keyword or import path
-	if path, ok := utils.IsBrowseURL(q); ok {
-		q = path
-	}
-
-	// Check if it is a short path for standard library
+	// Check if it is a import path for standard library
 	if utils.IsGoRepoPath(q) {
 		q = "code.google.com/p/go/source/browse/src/pkg/" + q
 	}
 
 	// Check if it is a remote path, if not means it's a keyword
 	if utils.IsValidRemotePath(q) {
+		// This is for regenerating documentation every time in develop mode
+		//os.Remove("./docs/" + strings.Replace(q, "http://", "", 1) + ".html")
+
 		// Check documentation of this import path, and update automatically as needed
 
 		/* TODO:WORKING */
-		//os.Remove("./docs/" + strings.Replace(q, "http://", "", 1) + ".html")
+
 		pdoc, err := models.CheckDoc(q, models.HUMAN_REQUEST)
 		q = strings.Replace(q, "http://", "", 1)
 		if err == nil {
@@ -119,11 +112,6 @@ func generatePage(this *SearchController, pdoc *models.Package, q string) bool {
 	this.Data["pkgDocPath"] = pkgDocPath
 	this.Data["importPath"] = pdoc.ImportPath
 
-	// Main introduction
-	/*if synIndex := strings.Index(pdoc.Doc, "."); synIndex > -1 {
-		pdoc.Doc = pdoc.Doc[synIndex+1:]
-	}*/
-
 	// Full introduction
 	var buf bytes.Buffer
 	doc.ToHTML(&buf, pdoc.Doc, nil)
@@ -131,6 +119,15 @@ func generatePage(this *SearchController, pdoc *models.Package, q string) bool {
 	pkgInfo = strings.Replace(pkgInfo, "<p>", "<p><b>", 1)
 	pkgInfo = strings.Replace(pkgInfo, "</p>", "</b></p>", 1)
 	this.Data["pkgFullIntro"] = pkgInfo
+
+	links := make([]*utils.Link, 0, len(pdoc.Types)+len(pdoc.Imports))
+	// Get all types and import packages
+	for _, t := range pdoc.Types {
+		links = append(links, &utils.Link{
+			Name:    t.Name,
+			Comment: t.Doc,
+		})
+	}
 
 	// Index
 	this.Data["isHasConst"] = len(pdoc.Consts) > 0
@@ -140,6 +137,9 @@ func generatePage(this *SearchController, pdoc *models.Package, q string) bool {
 		buf.Reset()
 		doc.ToHTML(&buf, f.Doc, nil)
 		f.Doc = buf.String()
+		buf.Reset()
+		utils.FormatCode(&buf, f.Decl.Text, links)
+		f.FmtDecl = buf.String()
 		pdoc.Funcs[i] = f
 	}
 	this.Data["types"] = pdoc.Types
@@ -148,26 +148,55 @@ func generatePage(this *SearchController, pdoc *models.Package, q string) bool {
 			buf.Reset()
 			doc.ToHTML(&buf, f.Doc, nil)
 			f.Doc = buf.String()
+			buf.Reset()
+			utils.FormatCode(&buf, f.Decl.Text, links)
+			f.FmtDecl = buf.String()
 			t.Funcs[j] = f
 		}
 		for j, m := range t.Methods {
 			buf.Reset()
 			doc.ToHTML(&buf, m.Doc, nil)
 			m.Doc = buf.String()
+			buf.Reset()
+			utils.FormatCode(&buf, m.Decl.Text, links)
+			m.FmtDecl = buf.String()
 			t.Methods[j] = m
 		}
 		buf.Reset()
 		doc.ToHTML(&buf, t.Doc, nil)
 		t.Doc = buf.String()
+		buf.Reset()
+		utils.FormatCode(&buf, t.Decl.Text, links)
+		t.FmtDecl = buf.String()
 		pdoc.Types[i] = t
 	}
 
 	// Constants
 	this.Data["consts"] = pdoc.Consts
+	for i, v := range pdoc.Consts {
+		buf.Reset()
+		utils.FormatCode(&buf, v.Decl.Text, links)
+		v.FmtDecl = buf.String()
+		pdoc.Consts[i] = v
+	}
 	// Variables
 	this.Data["vars"] = pdoc.Vars
+	for i, v := range pdoc.Vars {
+		buf.Reset()
+		utils.FormatCode(&buf, v.Decl.Text, links)
+		v.FmtDecl = buf.String()
+		pdoc.Vars[i] = v
+	}
 	// Files
 	this.Data["files"] = pdoc.Files
+
+	// Import packages
+	this.Data["ImportPkgNum"] = len(pdoc.Imports)
+	// Generated time
+	this.Data["UtcTime"] = pdoc.Updated.Local()
+	// System info
+	this.Data["GOOS"] = runtime.GOOS
+	this.Data["GOARCH"] = runtime.GOARCH
 
 	// Create directories
 	os.MkdirAll("./docs/"+q[:strings.LastIndex(q, "/")+1], os.ModePerm)

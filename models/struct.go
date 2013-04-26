@@ -21,15 +21,17 @@ import (
 )
 
 type Value struct {
-	Decl Code
-	URL  string
-	Doc  string
+	Decl    Code
+	FmtDecl string
+	URL     string
+	Doc     string
 }
 
 type Type struct {
 	Doc      string
 	Name     string
 	Decl     Code
+	FmtDecl  string
 	URL      string
 	Kind     reflect.Kind
 	Consts   []*Value
@@ -42,6 +44,7 @@ type Type struct {
 
 type Func struct {
 	Decl     Code
+	FmtDecl  string
 	URL      string
 	Doc      string
 	Name     string

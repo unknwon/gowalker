@@ -138,9 +138,6 @@ func getRepo(client *http.Client, importPath string) (pdoc *Package, err error) 
 	case utils.IsGoRepoPath(importPath[i+len("/src/pkg/"):]):
 		pdoc, err = getStandardDoc(client, importPath[i+len("/src/pkg/"):])
 	case utils.IsValidRemotePath(importPath):
-
-		/* TODO */
-
 		pdoc, err = getStatic(client, importPath)
 		if err == errNoMatch {
 
@@ -159,8 +156,42 @@ func getRepo(client *http.Client, importPath string) (pdoc *Package, err error) 
 	return pdoc, err
 }
 
+// service represents a source code control service.
+type service struct {
+	pattern *regexp.Regexp
+	prefix  string
+	get     func(*http.Client, map[string]string, string) (*Package, error)
+}
+
+// services is the list of source code control services handled by gopkgdoc.
+var services = []*service{
+	{googlePattern, "code.google.com/", getGoogleDoc},
+	{vcsPattern, "", getVCSDoc},
+}
+
+// getStatic gets a document from a statically known service. getStatic
+// returns errNoMatch if the import path is not recognized.
 func getStatic(client *http.Client, importPath string) (pdoc *Package, err error) {
-	return pdoc, errors.New("Test Error: getStatic")
+	for _, s := range services {
+		if s.get == nil || !strings.HasPrefix(importPath, s.prefix) {
+			continue
+		}
+		m := s.pattern.FindStringSubmatch(importPath)
+		if m == nil {
+			if s.prefix != "" {
+				return nil, NotFoundError{"Import path prefix matches known service, but regexp does not."}
+			}
+			continue
+		}
+		match := map[string]string{"importPath": importPath}
+		for i, n := range s.pattern.SubexpNames() {
+			if n != "" {
+				match[n] = m[i]
+			}
+		}
+		return s.get(client, match, "")
+	}
+	return nil, errNoMatch
 }
 
 func getDynamic(client *http.Client, importPath string) (pdoc *Package, err error) {

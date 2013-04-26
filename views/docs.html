@@ -36,7 +36,7 @@
 				<h3 id="_constants">Constants</h3>
 				{{with .consts}}
 					{{range .}}
-						<pre class="pre-x-scrollable">{{.Decl.Text}}</pre>
+						<pre class="pre-x-scrollable">{{str2html .FmtDecl}}</pre>
 						<p>{{str2html .Doc}}</p>
 					{{end}}
 				{{end}}
@@ -45,7 +45,7 @@
 				<h3 id="_variables">Variables</h3>
 				{{with .vars}}
 					{{range .}}
-						<pre class="pre-x-scrollable">{{.Decl.Text}}</pre>
+						<pre class="pre-x-scrollable">{{str2html .FmtDecl}}</pre>
 						<p>{{str2html .Doc}}</p>
 					{{end}}
 				{{end}}
@@ -53,23 +53,23 @@
 			{{with .funcs}}
 				{{range .}}
 					<h3 id="{{.Name}}">func <a href="{{.URL}}">{{.Name}}</a></h3>
-					<pre>{{.Decl.Text}}</pre>
+					<pre>{{str2html .FmtDecl}}</pre>
 					<p>{{str2html .Doc}}</p>
 				{{end}}
 			{{end}}
 			{{with .types}}
 				{{range .}}
 					<h3 id="{{.Name}}">type <a href="{{.URL}}">{{.Name}}</a></h3>
-					<pre class="pre-x-scrollable">{{.Decl.Text}}</pre>
+					<pre class="pre-x-scrollable">{{str2html .FmtDecl}}</pre>
 					<p>{{str2html .Doc}}</p>
 					{{range .Funcs}}
 						<h4 id="{{.Name}}">func <a href="{{.URL}}">{{.Name}}</a></h4>
-						<pre>{{.Decl.Text}}</pre>
+						<pre>{{str2html .FmtDecl}}</pre>
 						<p>{{str2html .Doc}}</p>
 					{{end}}
 					{{range .Methods}}
 						<h4 id="{{.Name}}">func <a href="{{.URL}}">{{.Name}}</a></h4>
-						<pre>{{.Decl.Text}}</pre>
+						<pre>{{str2html .FmtDecl}}</pre>
 						<p>{{str2html .Doc}}</p>
 					{{end}}
 				{{end}}
@@ -81,6 +81,9 @@
 				<a href="{{.URL}}">{{.Name}}</a>
 			{{end}}
 			{{end}}
+			</p>
+			<p>
+			Package <b>{{.proName}}</b> imports {{.ImportPkgNum}} packages. Go Walker generated this page in <i>{{.UtcTime}}</i> with GOOS={{.GOOS}} and GOARCH={{.GOARCH}}. <a href="/en/refresh?q={{.importPath}}">Refresh</a>.
 			</p>
 			<div class="container">
 				<div class="flat-well well-small">

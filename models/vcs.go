@@ -24,6 +24,8 @@ import (
 	"path"
 	"regexp"
 	"strings"
+
+	"github.com/unknwon/gowalker/utils"
 )
 
 // TODO: specify with command line flag
@@ -114,7 +116,7 @@ func downloadGit(schemes []string, repo, savedEtag string) (string, string, erro
 	etag := scheme + "-" + commit
 
 	if etag == savedEtag {
-		return "", "", ErrNotModified
+		return "", "", errNotModified
 	}
 
 	dir := path.Join(repoRoot, repo+".git")
@@ -177,7 +179,7 @@ func getVCSDoc(client *http.Client, match map[string]string, etagSaved string) (
 
 	// Download and checkout.
 
-	tag, etag, err := cmd.download(schemes, match["repo"], etagSaved)
+	tag, _, err := cmd.download(schemes, match["repo"], etagSaved)
 	if err != nil {
 		return nil, err
 	}
@@ -203,7 +205,7 @@ func getVCSDoc(client *http.Client, match map[string]string, etagSaved string) (
 
 	var files []*source
 	for _, fi := range fis {
-		if fi.IsDir() || !isDocFile(fi.Name()) {
+		if fi.IsDir() || !utils.IsDocFile(fi.Name()) {
 			continue
 		}
 		b, err := ioutil.ReadFile(path.Join(d, fi.Name()))
@@ -227,10 +229,21 @@ func getVCSDoc(client *http.Client, match map[string]string, etagSaved string) (
 			ProjectName: path.Base(match["repo"]),
 			ProjectURL:  "",
 			BrowseURL:   "",
-			Etag:        etag,
 			VCS:         match["vcs"],
 		},
 	}
 
 	return w.build(files)
+}
+
+var defaultTags = map[string]string{"git": "master", "hg": "default"}
+
+func bestTag(tags map[string]string, defaultTag string) (string, string, error) {
+	if commit, ok := tags["go1"]; ok {
+		return "go1", commit, nil
+	}
+	if commit, ok := tags[defaultTag]; ok {
+		return defaultTag, commit, nil
+	}
+	return "", "", NotFoundError{"Tag or branch not found."}
 }

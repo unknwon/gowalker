@@ -16,6 +16,7 @@ package main
 
 import (
 	"os"
+	"strings"
 
 	"github.com/astaxie/beego"
 	"github.com/unknwon/gowalker/controllers"
@@ -23,7 +24,7 @@ import (
 )
 
 const (
-	VERSION = "0.0.4.0425"
+	VERSION = "0.0.5.0426"
 )
 
 func main() {
@@ -38,24 +39,30 @@ func main() {
 	beego.Info("Initialize directory: docs/")
 	os.Mkdir("./docs", os.ModePerm)
 
+	// Load VCS
+	vcs := strings.Split(beego.AppConfig.String("VCS"), "|")
 	// Set static path
-	beego.SetStaticPath("/github.com", "docs/github.com")
-	beego.SetStaticPath("/code.google.com", "docs/code.google.com")
+	for _, v := range vcs {
+		beego.SetStaticPath("/"+v, "docs/"+v)
+	}
+
+	// Load languages
+	langs := strings.Split(beego.AppConfig.String("language"), "|")
 
 	// Register routers
-	// English version
 	beego.Router("/", &controllers.HomeController{})
-	beego.Router("/en", &controllers.HomeController{})
-	beego.Router("/en/search", &controllers.SearchController{})
-	beego.Router("/en/index", &controllers.IndexController{})
-	beego.Router("/en/about", &controllers.AboutController{})
-	// Chinese version
-	beego.Router("/zh", &controllers.HomeController{})
-	beego.Router("/zh/search", &controllers.SearchController{})
-	beego.Router("/zh/index", &controllers.IndexController{})
-	beego.Router("/zh/about", &controllers.AboutController{})
+	// Languages
+	for _, v := range langs {
+		lang := "/" + v
+		beego.Router(lang, &controllers.HomeController{})
+		beego.Router(lang+"/search", &controllers.SearchController{})
+		beego.Router(lang+"/index", &controllers.IndexController{})
+		beego.Router(lang+"/about", &controllers.AboutController{})
+	}
 
 	// For all 404 pages
 	beego.Router("/:all", &controllers.ErrorController{})
+
+	// Template functions
 	beego.Run()
 }

@@ -15,6 +15,8 @@
 package utils
 
 import (
+	"fmt"
+	"io"
 	"os"
 	"regexp"
 	"strings"
@@ -33,4 +35,82 @@ func IsDocFile(n string) bool {
 		return true
 	}
 	return readmePat.MatchString(n)
+}
+
+// A link describes the (HTML) link information for an identifier.
+// The zero value of a link represents "no link".
+//
+type Link struct {
+	Path, Name, Comment string // package path, identifier name, and comments
+}
+
+func FormatCode(w io.Writer, code string, links []*Link) {
+	isString := false   // Indicates if right now is checking string
+	isComment := false  // Indicates if right now is checking comments
+	length := len(code) // Length of whole code
+	last := 0           // Start index of the word
+	pos := 0            // Current index
+
+	for {
+		// Cut words
+	CutWords:
+		for {
+			if code[pos] < 'A' || code[pos] > 'z' || (code[pos] > 'Z' && code[pos] < 'a') {
+				switch {
+				case code[pos] == '"':
+					isString = !isString
+				case !isString && code[pos] == '/':
+					isComment = true
+				case isComment:
+					if code[pos] == '\n' {
+						break CutWords
+					}
+				case !isString && (code[pos] != '.' || code[pos] == '\n'):
+					break CutWords
+				}
+			}
+
+			if pos == length-1 {
+				break CutWords
+			}
+			pos++
+		}
+
+		seg := code[last:pos]
+		switch {
+		case isComment:
+			isComment = false
+			fmt.Fprintf(w, `%s<span class="com">%s</span>`, seg[:1], seg[1:])
+		case pos-last > 1 && !isString:
+			// Check links
+			link, ok := findType(seg[1:], links)
+			if ok {
+				switch {
+				case len(link.Path) == 0 && len(link.Name) > 0:
+					fmt.Fprintf(w, `%s<a title="%s" href="#%s">%s</a>`, seg[:1], link.Comment, link.Name, link.Name)
+				}
+			} else {
+				fmt.Fprintf(w, "%s", seg)
+			}
+		default:
+			fmt.Fprintf(w, "%s", seg)
+		}
+
+		last = pos
+		pos++
+		// End of code
+		if pos == length {
+			fmt.Fprintf(w, "%s", code[last:])
+			break
+		}
+	}
+}
+
+func findType(name string, links []*Link) (Link, bool) {
+	for _, l := range links {
+		if l.Name == name {
+			return *l, true
+		}
+	}
+	return Link{}, false
 }

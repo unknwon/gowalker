@@ -15,8 +15,6 @@
 package controllers
 
 import (
-	"strings"
-
 	"github.com/astaxie/beego"
 )
 
@@ -28,17 +26,11 @@ type AboutController struct {
 // It serves about page of Go Walker.
 func (this *AboutController) Get() {
 	// Check language version
-	reqUrl := this.Ctx.Request.RequestURI
-	if len(reqUrl) == 1 {
+	lang, ok := isValidLanguage(this.Ctx.Request.RequestURI)
+	if !ok {
 		// English is default language version
 		this.Redirect("/en/about", 302)
-	}
-
-	lang := ""
-	if i := strings.LastIndex(reqUrl, "/"); i > 2 {
-		lang = reqUrl[1:i]
-	} else {
-		this.Redirect("/en/about", 302)
+		return
 	}
 
 	// Set properties
