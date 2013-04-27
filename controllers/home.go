@@ -22,7 +22,7 @@ import (
 )
 
 const (
-	recentViewsPkgNum = 25
+	recentViewsPkgNum = 24
 )
 
 var (
@@ -30,7 +30,7 @@ var (
 )
 
 func init() {
-	recentViewedPkgs = make([]string, 0, 25)
+	recentViewedPkgs = make([]string, 0, recentViewsPkgNum)
 	pkginfos, _ := models.GetRecentPkgs(recentViewsPkgNum)
 	for _, p := range pkginfos {
 		recentViewedPkgs = append(recentViewedPkgs, p.Path)
