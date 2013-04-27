@@ -22,7 +22,7 @@ import (
 )
 
 const (
-	recentViewsPkgNum = 24
+	recentViewsPkgNum = 22
 )
 
 var (
