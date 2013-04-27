@@ -114,16 +114,28 @@ func generatePage(this *SearchController, pdoc *models.Package, q string) bool {
 	if urlLen := len(pdoc.BrowseURL); pdoc.BrowseURL[urlLen-1] == '/' {
 		pdoc.BrowseURL = pdoc.BrowseURL[:urlLen-1]
 	}
-	lastIndex := strings.LastIndex(pdoc.BrowseURL, "/")
-	pkgName := pdoc.BrowseURL[lastIndex+1:]
-	if i := strings.Index(pkgName, "?"); i > -1 {
-		pkgName = pkgName[:i]
+
+	if utils.IsGoRepoPath(pdoc.ImportPath) {
+		lastIndex := strings.LastIndex(pdoc.BrowseURL, "/")
+		pkgName := pdoc.BrowseURL[lastIndex+1:]
+		if i := strings.Index(pkgName, "?"); i > -1 {
+			pkgName = pkgName[:i]
+		}
+		this.Data["proName"] = pkgName
+		pkgDocPath := pdoc.BrowseURL[:lastIndex+1]
+		this.Data["pkgSearch"] = pkgDocPath[:len(pkgDocPath)-1]
+		this.Data["pkgDocPath"] = pkgDocPath
+	} else {
+		lastIndex := strings.LastIndex(pdoc.ImportPath, "/")
+		pkgName := pdoc.ImportPath[lastIndex+1:]
+		if i := strings.Index(pkgName, "?"); i > -1 {
+			pkgName = pkgName[:i]
+		}
+		this.Data["proName"] = pkgName
+		pkgDocPath := pdoc.ImportPath[:lastIndex+1]
+		this.Data["pkgSearch"] = pkgDocPath[:len(pkgDocPath)-1]
+		this.Data["pkgDocPath"] = pkgDocPath
 	}
-	this.Data["proName"] = pkgName
-	cutIndex := strings.Index(pdoc.BrowseURL, "://")
-	pkgDocPath := pdoc.BrowseURL[cutIndex+3 : lastIndex+1]
-	this.Data["pkgSearch"] = pkgDocPath[:len(pkgDocPath)]
-	this.Data["pkgDocPath"] = pkgDocPath
 	this.Data["importPath"] = pdoc.ImportPath
 
 	// Full introduction
