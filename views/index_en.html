@@ -18,6 +18,25 @@
 			</div>
 			<h1>Index</h1>
 			<p>The following is a list of '<a href="http://golang.org/cmd/go/#hdr-Download_and_install_packages_and_dependencies">go get</a>' able packages viewed previously on godoc.org. A  <a href="/-/go">list of Go standard packages</a>  is also available.<!--Please use http://api.godoc.org/packages instead of scraping this page.--></p>
+			<table class="table table-condensed">
+				<thead>
+					<tr>
+						<th>Path</th>
+						<th>Synopsis</th>
+					</tr>
+				</thead>
+				<tbody>
+					{{with .pkgs}}
+					{{range .}}
+					<tr>
+						<td><a href="/{{.Path}}">{{.Path}}</a></td>
+						<td>{{.Synopsis}}</td>
+					</tr>
+					{{end}}
+					{{end}}
+				</tbody>
+			</table>
+			<p>Number of packages: {{.PkgNum}}.</p>
 			<div class="container">
 				<div class="flat-well well-small">
 					<a href="https://github.com/Unknwon">@Unknown</a>

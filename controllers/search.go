@@ -51,8 +51,19 @@ func (this *SearchController) Get() {
 	this.TplNames = "search_" + lang + ".html"
 	this.Layout = "layout.html"
 
-	// Check if it is a import path for standard library
-	if utils.IsGoRepoPath(q) {
+	rawPath := q // Raw path
+	// Check special usage of keyword
+	switch {
+	case q == "gorepo":
+		this.Data["keyword"] = q
+		pkgs, _ := models.GetGoRepo()
+		// Show results after searched
+		if len(pkgs) > 0 {
+			this.Data["showpkg"] = true
+			this.Data["pkgs"] = pkgs
+		}
+		return
+	case utils.IsGoRepoPath(q):
 		q = "code.google.com/p/go/source/browse/src/pkg/" + q
 	}
 
@@ -77,6 +88,8 @@ func (this *SearchController) Get() {
 			/* TODO */
 
 			if generatePage(this, pdoc, q) {
+				// Updated views
+				models.AddViews(rawPath)
 				// Redirect to documentation page
 				this.Redirect("/"+q+".html", 302)
 			}
@@ -87,11 +100,9 @@ func (this *SearchController) Get() {
 
 	// Search packages by the keyword
 	this.Data["keyword"] = q
+
 	// Returns a slice of results
-
-	/* TODO */
-
-	pkgs := models.SearchDoc(q)
+	pkgs, _ := models.SearchDoc(rawPath)
 	// Show results after searched
 	if len(pkgs) > 0 {
 		this.Data["showpkg"] = true

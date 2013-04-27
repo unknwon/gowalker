@@ -16,6 +16,7 @@ package models
 
 import (
 	"database/sql"
+	"fmt"
 	"time"
 
 	"github.com/coocood/qbs"
@@ -33,6 +34,7 @@ type pkgInfo struct {
 	Synopsis string
 	Views    int64     `qbs:"index"`
 	Updated  time.Time `qbs:"index"`
+	ProName  string
 }
 
 func connDb() (*qbs.Qbs, error) {
@@ -75,7 +77,7 @@ func getDoc(path string) (*Package, error) {
 	defer q.Db.Close()
 
 	pdoc := new(Package)
-	err = q.WhereEqual("import_path", path).Find(pdoc)
+	err = q.WhereEqual("path", path).Find(pdoc)
 
 	return pdoc, nil
 }
@@ -88,6 +90,7 @@ func savePkgInfo(pkg *pkgInfo) error {
 	}
 	defer q.Db.Close()
 
+	err = q.Find(pkg)
 	_, err = q.Save(pkg)
 	return err
 }
@@ -106,6 +109,89 @@ func deletePkg(path string) error {
 	return err
 }
 
-func SearchDoc(key string) []pkgInfo {
-	return nil
+// GetRecentPkgs gets recent updated packages from database
+func GetRecentPkgs() ([]*pkgInfo, error) {
+	q, err := connDb()
+	if err != nil {
+		return nil, err
+	}
+	defer q.Db.Close()
+
+	var pkgInfos []*pkgInfo
+	err = q.Where("views > ?", 0).Limit(25).OrderByDesc("updated").FindAll(&pkgInfos)
+	return pkgInfos, err
+}
+
+// AddViews add views in database by 1 each time
+func AddViews(path string) error {
+	q, err := connDb()
+	if err != nil {
+		return err
+	}
+	defer q.Db.Close()
+
+	info := new(pkgInfo)
+	err = q.WhereEqual("path", path).Find(info)
+	if err != nil {
+		return err
+	}
+
+	info.Views++
+	_, err = q.Save(info)
+	return err
+}
+
+// GetPopularPkgs gets most viewed packages from database
+func GetPopularPkgs() ([]*pkgInfo, error) {
+	q, err := connDb()
+	if err != nil {
+		return nil, err
+	}
+	defer q.Db.Close()
+
+	var pkgInfos []*pkgInfo
+	err = q.Where("views > ?", 0).Limit(15).OrderByDesc("views").FindAll(&pkgInfos)
+	return pkgInfos, err
+}
+
+// GetAllPkgs gets all packages in database
+func GetAllPkgs() ([]*pkgInfo, error) {
+	q, err := connDb()
+	if err != nil {
+		return nil, err
+	}
+	defer q.Db.Close()
+
+	var pkgInfos []*pkgInfo
+	err = q.Where("views > ?", 0).OrderBy("path").FindAll(&pkgInfos)
+	return pkgInfos, err
+}
+
+// SearchDoc gets packages that contain keyword
+func SearchDoc(key string) ([]*pkgInfo, error) {
+	q, err := connDb()
+	if err != nil {
+		return nil, err
+	}
+	defer q.Db.Close()
+
+	var pkgInfos []*pkgInfo
+	fmt.Println(key)
+	condition := qbs.NewCondition("path like ?", "%"+key+"%").And("views > ?", 0)
+	err = q.Condition(condition).OrderBy("path").FindAll(&pkgInfos)
+	return pkgInfos, err
+}
+
+// GetGoRepo gets go standard library
+func GetGoRepo() ([]*pkgInfo, error) {
+	q, err := connDb()
+	if err != nil {
+		return nil, err
+	}
+	defer q.Db.Close()
+
+	var pkgInfos []*pkgInfo
+	condition := qbs.NewCondition("pro_name = ?", "Go").And("views > ?", 0)
+	err = q.Condition(condition).OrderBy("path").FindAll(&pkgInfos)
+	return pkgInfos, err
 }

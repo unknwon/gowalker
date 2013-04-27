@@ -32,34 +32,25 @@
 				<div class="span6">
 					<h4>最近浏览项目</h4>
 					<ul class="unstyled">
-						<li><a href="/en/search?q=code.google.com/p/go/source/browse/src/pkg/archive">code.google.com/p/go/source/browse/src/pkg/archive</a></li>
-						<li><a href="/en/search?q=code.google.com/p/go/source/browse/src/pkg/archive/tar">code.google.com/p/go/source/browse/src/pkg/archive/tar</a></li>
-						<li><a href="/bitbucket.org/jaybill/sawsij/framework">bitbucket.org/jaybill/sawsij/framework</a></li>
-						<li><a href="/en/search?q=code.google.com/p/go/source/browse/src/pkg/regexp">code.google.com/p/go/source/browse/src/pkg/regexp</a></li>
-						<li><a href="/en/search?q=code.google.com/p/go/source/browse/src/pkg/regexp">code.google.com/p/go/source/browse/src/pkg/regexp</a></li>
-						<li><a href="/en/search?q=code.google.com/p/go/source/browse/src/pkg/regexp">code.google.com/p/go/source/browse/src/pkg/regexp</a></li>
-						<li><a href="/en/search?q=code.google.com/p/go/source/browse/src/pkg/regexp">code.google.com/p/go/source/browse/src/pkg/regexp</a></li>
-						<li><a href="/en/search?q=code.google.com/p/go/source/browse/src/pkg/regexp">code.google.com/p/go/source/browse/src/pkg/regexp</a></li>
-						<li><a href="/en/search?q=code.google.com/p/go/source/browse/src/pkg/regexp">code.google.com/p/go/source/browse/src/pkg/regexp</a></li>
-						<li><a href="/en/search?q=code.google.com/p/go/source/browse/src/pkg/regexp">code.google.com/p/go/source/browse/src/pkg/regexp</a></li>
-						<li><a href="/en/search?q=code.google.com/p/go/source/browse/src/pkg/regexp">code.google.com/p/go/source/browse/src/pkg/regexp</a></li>
+						{{range .RecentPkgs}}
+						<li><a href="/zh/search?q={{.Path}}">{{.Path}}</a></li>
+						{{end}}
 					</ul>
 				</div>
 				<div class="span6">
 					<div class="span6">
 						<h4>热门项目</h4>
 						<ul class="unstyled">
-							<li><a href="/zh/index">索引</a></li>
-							<li><a href="/zh/go">标准库</a></li>
-							<li><a href="https://code.google.com/p/go-wiki/wiki/Projects">Projects @ go-wiki</a></li>
-							<li><a href="http://godoc.org/">GoDoc</a></li>
+							{{range .PopularPkgs}}
+							<li><a href="/zh/search?q={{.Path}}">{{.Path}}</a></li>
+							{{end}}
 						</ul>
 					</div>
 					<div class="span6">
 						<h4>更多项目</h4>
 						<ul class="unstyled">
 							<li><a href="/zh/index">索引</a></li>
-							<li><a href="/zh/go">标准库</a></li>
+							<li><a href="/zh/search?q=gorepo">标准库</a></li>
 							<li><a href="https://code.google.com/p/go-wiki/wiki/Projects">Projects @ go-wiki</a></li>
 							<li><a href="http://godoc.org/">GoDoc</a></li>
 						</ul>

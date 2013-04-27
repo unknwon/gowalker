@@ -15,10 +15,13 @@
 package models
 
 import (
+	"encoding/xml"
 	"errors"
 	"flag"
+	"io"
 	"net"
 	"net/http"
+	"path"
 	"regexp"
 	"strings"
 	"time"
@@ -78,9 +81,6 @@ func crawlDoc(path string) (*Package, error) {
 		err = errors.New("Go Frontend source tree mirror.")
 	} else {
 		var pdocNew *Package
-
-		/* TODO:WORKING */
-
 		pdocNew, err = getRepo(httpClient, path)
 
 		// For timeout logic in client.go to work, we cannot leave connections idling. This is ugly.
@@ -105,14 +105,12 @@ func crawlDoc(path string) (*Package, error) {
 		pkg := pkgInfo{
 			Path:     pdoc.ImportPath,
 			Synopsis: pdoc.Synopsis,
-			Updated:  time.Now()}
+			Updated:  time.Now(),
+			ProName:  pdoc.ProjectName}
 
-		/* TODO */
+		/* TODO:WORKING */
 
 		if err := savePkgInfo(&pkg); err != nil {
-
-			/* TODO */
-
 			beego.Error("ERROR savePkgInfo(", path, "):", err)
 		}
 	case isNotFound(err):
@@ -120,9 +118,6 @@ func crawlDoc(path string) (*Package, error) {
 		/* TODO */
 
 		if err := deletePkg(path); err != nil {
-
-			/* TODO */
-
 			beego.Error("ERROR deletePkg(", path, "):", err)
 		}
 	}
@@ -140,9 +135,6 @@ func getRepo(client *http.Client, importPath string) (pdoc *Package, err error) 
 	case utils.IsValidRemotePath(importPath):
 		pdoc, err = getStatic(client, importPath)
 		if err == errNoMatch {
-
-			/* TODO */
-
 			pdoc, err = getDynamic(client, importPath)
 		}
 	default:
@@ -198,5 +190,135 @@ func getStatic(client *http.Client, importPath string) (pdoc *Package, err error
 }
 
 func getDynamic(client *http.Client, importPath string) (pdoc *Package, err error) {
-	return pdoc, errors.New("Test Error: getDynamic")
+	match, err := fetchMeta(client, importPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if match["projectRoot"] != importPath {
+		rootMatch, err := fetchMeta(client, match["projectRoot"])
+		if err != nil {
+			return nil, err
+		}
+		if rootMatch["projectRoot"] != match["projectRoot"] {
+			return nil, NotFoundError{"Project root mismatch."}
+		}
+	}
+
+	pdoc, err = getStatic(client, expand("{repo}{dir}", match))
+	if err == errNoMatch {
+		pdoc, err = getVCSDoc(client, match, "")
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	if pdoc != nil {
+		pdoc.ImportPath = importPath
+		pdoc.ProjectRoot = match["projectRoot"]
+		pdoc.ProjectName = match["projectName"]
+		pdoc.ProjectURL = match["projectURL"]
+	}
+
+	return pdoc, err
+}
+
+func fetchMeta(client *http.Client, importPath string) (map[string]string, error) {
+	uri := importPath
+	if !strings.Contains(uri, "/") {
+		// Add slash for root of domain.
+		uri = uri + "/"
+	}
+	uri = uri + "?go-get=1"
+
+	scheme := "https"
+	resp, err := client.Get(scheme + "://" + uri)
+	if err != nil || resp.StatusCode != 200 {
+		if err == nil {
+			resp.Body.Close()
+		}
+		scheme = "http"
+		resp, err = client.Get(scheme + "://" + uri)
+		if err != nil {
+			return nil, &RemoteError{strings.SplitN(importPath, "/", 2)[0], err}
+		}
+	}
+	defer resp.Body.Close()
+	return parseMeta(scheme, importPath, resp.Body)
+}
+
+func attrValue(attrs []xml.Attr, name string) string {
+	for _, a := range attrs {
+		if strings.EqualFold(a.Name.Local, name) {
+			return a.Value
+		}
+	}
+	return ""
+}
+
+func parseMeta(scheme, importPath string, r io.Reader) (map[string]string, error) {
+	var match map[string]string
+
+	d := xml.NewDecoder(r)
+	d.Strict = false
+metaScan:
+	for {
+		t, tokenErr := d.Token()
+		if tokenErr != nil {
+			break metaScan
+		}
+		switch t := t.(type) {
+		case xml.EndElement:
+			if strings.EqualFold(t.Name.Local, "head") {
+				break metaScan
+			}
+		case xml.StartElement:
+			if strings.EqualFold(t.Name.Local, "body") {
+				break metaScan
+			}
+			if !strings.EqualFold(t.Name.Local, "meta") ||
+				attrValue(t.Attr, "name") != "go-import" {
+				continue metaScan
+			}
+			f := strings.Fields(attrValue(t.Attr, "content"))
+			if len(f) != 3 ||
+				!strings.HasPrefix(importPath, f[0]) ||
+				!(len(importPath) == len(f[0]) || importPath[len(f[0])] == '/') {
+				continue metaScan
+			}
+			if match != nil {
+				return nil, NotFoundError{"More than one <meta> found at " + scheme + "://" + importPath}
+			}
+
+			projectRoot, vcs, repo := f[0], f[1], f[2]
+
+			repo = strings.TrimSuffix(repo, "."+vcs)
+			i := strings.Index(repo, "://")
+			if i < 0 {
+				return nil, NotFoundError{"Bad repo URL in <meta>."}
+			}
+			proto := repo[:i]
+			repo = repo[i+len("://"):]
+
+			match = map[string]string{
+				// Used in getVCSDoc, same as vcsPattern matches.
+				"importPath": importPath,
+				"repo":       repo,
+				"vcs":        vcs,
+				"dir":        importPath[len(projectRoot):],
+
+				// Used in getVCSDoc
+				"scheme": proto,
+
+				// Used in getDynamic.
+				"projectRoot": projectRoot,
+				"projectName": path.Base(projectRoot),
+				"projectURL":  scheme + "://" + projectRoot,
+			}
+		}
+	}
+	if match == nil {
+		return nil, NotFoundError{"<meta> not found."}
+	}
+	return match, nil
 }

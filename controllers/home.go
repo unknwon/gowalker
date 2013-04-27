@@ -18,6 +18,7 @@ import (
 	"strings"
 
 	"github.com/astaxie/beego"
+	"github.com/unknwon/gowalker/models"
 )
 
 type HomeController struct {
@@ -38,15 +39,22 @@ func (this *HomeController) Get() {
 	// Get query field
 	q := this.Input().Get("q")
 
-	// Set properties
-	this.TplNames = "home_" + lang + ".html"
-	this.Layout = "layout.html"
-
 	// Empty query string shows home page
 	if len(q) > 0 {
 		// Show search page
 		this.Redirect(lang+"/search?q="+q, 302)
+		return
 	}
+
+	// Set properties
+	this.TplNames = "home_" + lang + ".html"
+	this.Layout = "layout.html"
+
+	// Get packages
+	pkgInfos, _ := models.GetRecentPkgs()
+	this.Data["RecentPkgs"] = pkgInfos
+	pkgInfos, _ = models.GetPopularPkgs()
+	this.Data["PopularPkgs"] = pkgInfos
 }
 
 // isValidLanguage checks if URL has correct language version.

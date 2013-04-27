@@ -16,6 +16,7 @@ package controllers
 
 import (
 	"github.com/astaxie/beego"
+	"github.com/unknwon/gowalker/models"
 )
 
 type IndexController struct {
@@ -36,4 +37,9 @@ func (this *IndexController) Get() {
 	// Set properties
 	this.TplNames = "index_" + lang + ".html"
 	this.Layout = "layout.html"
+
+	// Get all packages
+	pkgInfos, _ := models.GetAllPkgs()
+	this.Data["pkgs"] = pkgInfos
+	this.Data["PkgNum"] = len(pkgInfos)
 }

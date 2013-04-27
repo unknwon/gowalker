@@ -15,7 +15,6 @@
 package models
 
 import (
-	"fmt"
 	"net/http"
 	"path"
 	"regexp"
