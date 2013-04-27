@@ -428,7 +428,6 @@ func IsValidRemotePath(importPath string) bool {
 	if !validHost.MatchString(parts[0]) {
 		return false
 	}
-
 	for _, part := range parts[1:] {
 		if !validPathElement.MatchString(part) || part == "testdata" {
 			return false

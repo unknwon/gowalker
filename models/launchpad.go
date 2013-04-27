@@ -26,6 +26,8 @@ import (
 	"regexp"
 	"sort"
 	"strings"
+
+	"github.com/unknwon/gowalker/utils"
 )
 
 type byHash []byte
@@ -51,7 +53,7 @@ func getLaunchpadDoc(client *http.Client, match map[string]string, savedEtag str
 		case err == nil:
 			rc.Close()
 			// The structure of the import path is launchpad.net/{root}/{dir}.
-		case IsNotFound(err):
+		case isNotFound(err):
 			// The structure of the import path is is launchpad.net/{project}/{dir}.
 			match["repo"] = match["project"]
 			match["dir"] = expand("{series}{dir}", match)
@@ -86,7 +88,7 @@ func getLaunchpadDoc(client *http.Client, match map[string]string, savedEtag str
 			return nil, err
 		}
 		d, f := path.Split(h.Name)
-		if !isDocFile(f) {
+		if !utils.IsDocFile(f) {
 			continue
 		}
 		b := make([]byte, h.Size)
@@ -120,7 +122,7 @@ func getLaunchpadDoc(client *http.Client, match map[string]string, savedEtag str
 	hash = m.Sum(hash[:0])
 	etag := hex.EncodeToString(hash)
 	if etag == savedEtag {
-		return nil, ErrNotModified
+		return nil, errNotModified
 	}
 
 	w := &walker{
@@ -131,7 +133,6 @@ func getLaunchpadDoc(client *http.Client, match map[string]string, savedEtag str
 			ProjectName: match["repo"],
 			ProjectURL:  expand("https://launchpad.net/{repo}/", match),
 			BrowseURL:   expand("http://bazaar.launchpad.net/+branch/{repo}/view/head:{dir}/", match),
-			Etag:        etag,
 			VCS:         "bzr",
 		},
 	}

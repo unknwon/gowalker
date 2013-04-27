@@ -56,6 +56,11 @@ func (this *SearchController) Get() {
 		q = "code.google.com/p/go/source/browse/src/pkg/" + q
 	}
 
+	if path, ok := utils.IsBrowseURL(q); ok {
+		q = path
+	}
+
+	q = strings.Replace(q, "http://", "", 1)
 	// Check if it is a remote path, if not means it's a keyword
 	if utils.IsValidRemotePath(q) {
 		// This is for regenerating documentation every time in develop mode
@@ -66,7 +71,6 @@ func (this *SearchController) Get() {
 		/* TODO:WORKING */
 
 		pdoc, err := models.CheckDoc(q, models.HUMAN_REQUEST)
-		q = strings.Replace(q, "http://", "", 1)
 		if err == nil {
 			// Generate static page
 
@@ -106,9 +110,16 @@ func generatePage(this *SearchController, pdoc *models.Package, q string) bool {
 	// Set data
 	// Introduction
 	this.Data["proPath"] = pdoc.BrowseURL
-	this.Data["proName"] = pdoc.Name
-	pkgDocPath := pdoc.BrowseURL[7 : strings.Index(pdoc.BrowseURL, "/"+pdoc.Name)+1]
-	this.Data["pkgSearch"] = pkgDocPath[:len(pkgDocPath)-1]
+
+	if urlLen := len(pdoc.BrowseURL); pdoc.BrowseURL[urlLen-1] == '/' {
+		pdoc.BrowseURL = pdoc.BrowseURL[:urlLen-1]
+	}
+	lastIndex := strings.LastIndex(pdoc.BrowseURL, "/")
+	pkgName := pdoc.BrowseURL[lastIndex+1:]
+	this.Data["proName"] = pkgName
+	cutIndex := strings.Index(pdoc.BrowseURL, "://")
+	pkgDocPath := pdoc.BrowseURL[cutIndex+3 : lastIndex+1]
+	this.Data["pkgSearch"] = pkgDocPath[:len(pkgDocPath)]
 	this.Data["pkgDocPath"] = pkgDocPath
 	this.Data["importPath"] = pdoc.ImportPath
 

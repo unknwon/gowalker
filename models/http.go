@@ -15,6 +15,7 @@
 package models
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -100,4 +101,17 @@ func fetchFiles(client *http.Client, files []*source, header http.Header) error 
 		}
 	}
 	return nil
+}
+
+func httpGetJSON(client *http.Client, url string, v interface{}) error {
+	rc, err := httpGet(client, url, nil)
+	if err != nil {
+		return err
+	}
+	defer rc.Close()
+	err = json.NewDecoder(rc).Decode(v)
+	if _, ok := err.(*json.SyntaxError); ok {
+		err = NotFoundError{"JSON syntax error at " + url}
+	}
+	return err
 }

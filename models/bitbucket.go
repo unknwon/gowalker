@@ -18,6 +18,8 @@ import (
 	"net/http"
 	"path"
 	"regexp"
+
+	"github.com/unknwon/gowalker/utils"
 )
 
 var bitbucketPattern = regexp.MustCompile(`^bitbucket\.org/(?P<owner>[a-z0-9A-Z_.\-]+)/(?P<repo>[a-z0-9A-Z_.\-]+)(?P<dir>/[a-z0-9A-Z_.\-/]*)?$`)
@@ -58,7 +60,7 @@ func getBitbucketDoc(client *http.Client, match map[string]string, savedEtag str
 
 	etag := expand("{vcs}-{commit}", match)
 	if etag == savedEtag {
-		return nil, ErrNotModified
+		return nil, errNotModified
 	}
 
 	var directory struct {
@@ -74,7 +76,7 @@ func getBitbucketDoc(client *http.Client, match map[string]string, savedEtag str
 	var files []*source
 	for _, f := range directory.Files {
 		_, name := path.Split(f.Path)
-		if isDocFile(name) {
+		if utils.IsDocFile(name) {
 			files = append(files, &source{
 				name:      name,
 				browseURL: expand("https://bitbucket.org/{owner}/{repo}/src/{tag}/{0}", match, f.Path),
@@ -95,7 +97,6 @@ func getBitbucketDoc(client *http.Client, match map[string]string, savedEtag str
 			ProjectName: match["repo"],
 			ProjectURL:  expand("https://bitbucket.org/{owner}/{repo}/", match),
 			BrowseURL:   expand("https://bitbucket.org/{owner}/{repo}/src/{tag}{dir}", match),
-			Etag:        etag,
 			VCS:         match["vcs"],
 		},
 	}

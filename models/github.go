@@ -17,10 +17,11 @@ package models
 import (
 	"fmt"
 	"net/http"
-	"net/url"
 	"path"
 	"regexp"
 	"strings"
+
+	"github.com/unknwon/gowalker/utils"
 )
 
 var githubRawHeader = http.Header{"Accept": {"application/vnd.github-blob.raw"}}
@@ -67,7 +68,7 @@ func getGithubDoc(client *http.Client, match map[string]string, savedEtag string
 	}
 
 	if commit == savedEtag {
-		return nil, ErrNotModified
+		return nil, errNotModified
 	}
 
 	var tree struct {
@@ -101,7 +102,7 @@ func getGithubDoc(client *http.Client, match map[string]string, savedEtag string
 			continue
 		}
 		inTree = true
-		if d, f := path.Split(node.Path); d == dirPrefix && isDocFile(f) {
+		if d, f := path.Split(node.Path); d == dirPrefix && utils.IsDocFile(f) {
 			files = append(files, &source{
 				name:      f,
 				browseURL: expand("https://github.com/{owner}/{repo}/blob/{tag}/{0}", match, node.Path),
@@ -131,57 +132,9 @@ func getGithubDoc(client *http.Client, match map[string]string, savedEtag string
 			ProjectName: match["repo"],
 			ProjectURL:  expand("https://github.com/{owner}/{repo}", match),
 			BrowseURL:   browseURL,
-			Etag:        commit,
 			VCS:         "git",
 		},
 	}
 
 	return w.build(files)
-}
-
-func getGithubPresentation(client *http.Client, match map[string]string) (*Presentation, error) {
-
-	match["cred"] = githubCred
-
-	p, err := httpGetBytes(client, expand("https://api.github.com/repos/{owner}/{repo}/contents{dir}/{file}?{cred}", match), githubRawHeader)
-	if err != nil {
-		return nil, err
-	}
-
-	apiBase, err := url.Parse(expand("https://api.github.com/repos/{owner}/{repo}/contents{dir}/?{cred}", match))
-	if err != nil {
-		return nil, err
-	}
-	rawBase, err := url.Parse(expand("https://raw.github.com/{owner}/{repo}/master{dir}/", match))
-	if err != nil {
-		return nil, err
-	}
-
-	b := &presBuilder{
-		data:     p,
-		filename: match["file"],
-		fetch: func(files []*source) error {
-			for _, f := range files {
-				u, err := apiBase.Parse(f.name)
-				if err != nil {
-					return err
-				}
-				u.RawQuery = apiBase.RawQuery
-				f.rawURL = u.String()
-			}
-			return fetchFiles(client, files, githubRawHeader)
-		},
-		resolveURL: func(fname string) string {
-			u, err := rawBase.Parse(fname)
-			if err != nil {
-				return "/notfound"
-			}
-			if strings.HasSuffix(fname, ".svg") {
-				u.Host = "rawgithub.com"
-			}
-			return u.String()
-		},
-	}
-
-	return b.build()
 }
