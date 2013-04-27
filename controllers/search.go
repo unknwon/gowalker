@@ -116,6 +116,9 @@ func generatePage(this *SearchController, pdoc *models.Package, q string) bool {
 	}
 	lastIndex := strings.LastIndex(pdoc.BrowseURL, "/")
 	pkgName := pdoc.BrowseURL[lastIndex+1:]
+	if i := strings.Index(pkgName, "?"); i > -1 {
+		pkgName = pkgName[:i]
+	}
 	this.Data["proName"] = pkgName
 	cutIndex := strings.Index(pdoc.BrowseURL, "://")
 	pkgDocPath := pdoc.BrowseURL[cutIndex+3 : lastIndex+1]
