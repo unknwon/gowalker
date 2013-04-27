@@ -56,9 +56,9 @@ func CheckDoc(path string, requestType int) (pdoc *Package, err error) {
 		if err != nil {
 			needsCrawl = true
 		} else {
-			needsCrawl = (pdoc != nil) && pdoc.Updated.Add(time.Hour).Before(time.Now().UTC())
+			needsCrawl = (pdoc != nil) && pdoc.Updated.Add(time.Hour).Local().Before(time.Now().Local())
 			if !needsCrawl {
-				return nil, errors.New(pdoc.Updated.Add(time.Hour).String())
+				return nil, errors.New(pdoc.Updated.Add(time.Hour).Local().String())
 			}
 			os.Remove("./docs/" + path + ".html")
 		}

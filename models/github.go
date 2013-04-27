@@ -32,6 +32,7 @@ func SetGithubCredentials(id, secret string) {
 }
 
 func getGithubDoc(client *http.Client, match map[string]string, savedEtag string) (*Package, error) {
+	SetGithubCredentials("1862bcb265171f37f36c", "308d71ab53ccd858416cfceaed52d5d5b7d53c5f")
 	match["cred"] = githubCred
 
 	var refs []*struct {
