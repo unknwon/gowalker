@@ -30,6 +30,8 @@ type SearchController struct {
 	beego.Controller
 }
 
+// Get implemented Get method for SearchController.
+// It serves search page of Go Walker.
 func (this *SearchController) Get() {
 	// Check language version
 	lang, ok := isValidLanguage(this.Ctx.Request.RequestURI)
@@ -72,6 +74,7 @@ func (this *SearchController) Get() {
 	}
 
 	q = strings.Replace(q, "http://", "", 1)
+	q = strings.Replace(q, "https://", "", 1)
 	// Check if it is a remote path, if not means it's a keyword
 	if utils.IsValidRemotePath(q) {
 		// This is for regenerating documentation every time in develop mode
@@ -81,15 +84,19 @@ func (this *SearchController) Get() {
 
 		/* TODO:WORKING */
 
-		pdoc, err := models.CheckDoc(q, models.HUMAN_REQUEST)
+		rawPath = strings.Replace(rawPath, "http://", "", 1)
+		rawPath = strings.Replace(rawPath, "https://", "", 1)
+		pdoc, err := models.CheckDoc(rawPath, models.HUMAN_REQUEST)
 		if err == nil {
 			// Generate static page
 
 			/* TODO */
 
 			if generatePage(this, pdoc, q) {
+				// Update recent packages
+				updateRecentPkgs(pdoc.ImportPath)
 				// Updated views
-				models.AddViews(rawPath)
+				models.AddViews(pdoc)
 				// Redirect to documentation page
 				this.Redirect("/"+q+".html", 302)
 			}
@@ -244,4 +251,32 @@ func generatePage(this *SearchController, pdoc *models.Package, q string) bool {
 	f.WriteString(s)
 	f.Close()
 	return true
+}
+
+func updateRecentPkgs(path string) {
+	index := -1
+	listLen := len(recentViewedPkgs)
+	// Check if in the list
+	for i, s := range recentViewedPkgs {
+		if s == path {
+			index = i
+			break
+		}
+	}
+
+	s := make([]string, 0, recentViewsPkgNum)
+	s = append(s, path)
+	switch {
+	case index == -1 && listLen < recentViewsPkgNum:
+		// Not found and list is not full
+		s = append(s, recentViewedPkgs...)
+	case index == -1 && listLen >= recentViewsPkgNum:
+		// Not found but list is full
+		s = append(s, recentViewedPkgs[:recentViewsPkgNum-1]...)
+	case index > -1:
+		// Found
+		s = append(s, recentViewedPkgs[:index]...)
+		s = append(s, recentViewedPkgs[index+1:]...)
+	}
+	recentViewedPkgs = s
 }

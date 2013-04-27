@@ -27,13 +27,13 @@ const (
 	_SQLITE3_DRIVER = "sqlite3"
 )
 
-type pkgInfo struct {
-	Id       int64
-	Path     string `qbs:"index"`
-	Synopsis string
-	Views    int64     `qbs:"index"`
-	Updated  time.Time `qbs:"index"`
-	ProName  string
+type PkgInfo struct {
+	Id        int64
+	Path      string `qbs:"index"`
+	Synopsis  string
+	Views     int64     `qbs:"index"`
+	Generated time.Time `qbs:"index"`
+	ProName   string
 }
 
 func connDb() (*qbs.Qbs, error) {
@@ -62,7 +62,7 @@ func InitDb() error {
 	defer mg.Db.Close()
 
 	// Create data tables
-	mg.CreateTableIfNotExists(new(pkgInfo))
+	mg.CreateTableIfNotExists(new(PkgInfo))
 
 	return nil
 }
@@ -75,24 +75,34 @@ func getDoc(path string) (*Package, error) {
 	}
 	defer q.Db.Close()
 
-	pdoc := new(Package)
-	err = q.WhereEqual("path", path).Find(pdoc)
+	info := new(PkgInfo)
+	err = q.WhereEqual("path", path).Find(info)
 
-	return pdoc, nil
+	pdoc := &Package{
+		ImportPath:  info.Path,
+		Synopsis:    info.Synopsis,
+		Updated:     info.Generated,
+		ProjectName: info.ProName,
+	}
+	return pdoc, err
 }
 
 // savePkgInfo saves package to database
-func savePkgInfo(pkg *pkgInfo) error {
+func savePkgInfo(pkg *PkgInfo) error {
 	q, err := connDb()
 	if err != nil {
 		return err
 	}
 	defer q.Db.Close()
 
-	info := new(pkgInfo)
+	info := new(PkgInfo)
 	err = q.WhereEqual("path", pkg.Path).Find(info)
-	if info.Synopsis != pkg.Synopsis {
+	if err != nil {
 		_, err = q.Save(pkg)
+	} else {
+		info.Synopsis = pkg.Synopsis
+		info.Generated = pkg.Generated
+		_, err = q.Save(info)
 	}
 	return err
 }
@@ -106,35 +116,42 @@ func deletePkg(path string) error {
 	}
 	defer q.Db.Close()
 
-	pkg := pkgInfo{Path: path}
+	pkg := PkgInfo{Path: path}
 	_, err = q.Delete(&pkg)
 	return err
 }
 
 // GetRecentPkgs gets recent updated packages from database
-func GetRecentPkgs() ([]*pkgInfo, error) {
+func GetRecentPkgs(num int) ([]*PkgInfo, error) {
 	q, err := connDb()
 	if err != nil {
 		return nil, err
 	}
 	defer q.Db.Close()
 
-	var pkgInfos []*pkgInfo
-	err = q.Where("views > ?", 0).Limit(25).OrderByDesc("updated").FindAll(&pkgInfos)
+	var pkgInfos []*PkgInfo
+	err = q.Where("views > ?", 0).Limit(num).OrderByDesc("generated").FindAll(&pkgInfos)
 	return pkgInfos, err
 }
 
 // AddViews add views in database by 1 each time
-func AddViews(path string) error {
+func AddViews(pdoc *Package) error {
 	q, err := connDb()
 	if err != nil {
 		return err
 	}
 	defer q.Db.Close()
 
-	info := new(pkgInfo)
-	err = q.WhereEqual("path", path).Find(info)
+	info := new(PkgInfo)
+	err = q.WhereEqual("path", pdoc.ImportPath).Find(info)
 	if err != nil {
+		pkg := PkgInfo{
+			Path:      pdoc.ImportPath,
+			Synopsis:  pdoc.Synopsis,
+			Generated: time.Now().Local(),
+			ProName:   pdoc.ProjectName,
+			Views:     1}
+		err = savePkgInfo(&pkg)
 		return err
 	}
 
@@ -144,54 +161,54 @@ func AddViews(path string) error {
 }
 
 // GetPopularPkgs gets most viewed packages from database
-func GetPopularPkgs() ([]*pkgInfo, error) {
+func GetPopularPkgs() ([]*PkgInfo, error) {
 	q, err := connDb()
 	if err != nil {
 		return nil, err
 	}
 	defer q.Db.Close()
 
-	var pkgInfos []*pkgInfo
+	var pkgInfos []*PkgInfo
 	err = q.Where("views > ?", 0).Limit(15).OrderByDesc("views").FindAll(&pkgInfos)
 	return pkgInfos, err
 }
 
 // GetAllPkgs gets all packages in database
-func GetAllPkgs() ([]*pkgInfo, error) {
+func GetAllPkgs() ([]*PkgInfo, error) {
 	q, err := connDb()
 	if err != nil {
 		return nil, err
 	}
 	defer q.Db.Close()
 
-	var pkgInfos []*pkgInfo
+	var pkgInfos []*PkgInfo
 	err = q.Where("views > ?", 0).OrderBy("path").FindAll(&pkgInfos)
 	return pkgInfos, err
 }
 
 // SearchDoc gets packages that contain keyword
-func SearchDoc(key string) ([]*pkgInfo, error) {
+func SearchDoc(key string) ([]*PkgInfo, error) {
 	q, err := connDb()
 	if err != nil {
 		return nil, err
 	}
 	defer q.Db.Close()
 
-	var pkgInfos []*pkgInfo
+	var pkgInfos []*PkgInfo
 	condition := qbs.NewCondition("path like ?", "%"+key+"%").And("views > ?", 0)
 	err = q.Condition(condition).OrderBy("path").FindAll(&pkgInfos)
 	return pkgInfos, err
 }
 
 // GetGoRepo gets go standard library
-func GetGoRepo() ([]*pkgInfo, error) {
+func GetGoRepo() ([]*PkgInfo, error) {
 	q, err := connDb()
 	if err != nil {
 		return nil, err
 	}
 	defer q.Db.Close()
 
-	var pkgInfos []*pkgInfo
+	var pkgInfos []*PkgInfo
 	condition := qbs.NewCondition("pro_name = ?", "Go").And("views > ?", 0)
 	err = q.Condition(condition).OrderBy("path").FindAll(&pkgInfos)
 	return pkgInfos, err

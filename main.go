@@ -24,7 +24,7 @@ import (
 )
 
 const (
-	VERSION = "0.0.7.0427"
+	VERSION = "0.0.8.0427"
 )
 
 func main() {
@@ -58,6 +58,7 @@ func main() {
 		beego.Router(lang+"/search", &controllers.SearchController{})
 		beego.Router(lang+"/index", &controllers.IndexController{})
 		beego.Router(lang+"/about", &controllers.AboutController{})
+		beego.Router(lang+"/refresh", &controllers.RefreshController{})
 	}
 
 	// For all 404 pages

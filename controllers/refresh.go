@@ -15,35 +15,17 @@
 package controllers
 
 import (
-	"strings"
-
 	"github.com/astaxie/beego"
 	"github.com/unknwon/gowalker/models"
 )
 
-const (
-	recentViewsPkgNum = 25
-)
-
-var (
-	recentViewedPkgs []string
-)
-
-func init() {
-	recentViewedPkgs = make([]string, 0, 25)
-	pkginfos, _ := models.GetRecentPkgs(recentViewsPkgNum)
-	for _, p := range pkginfos {
-		recentViewedPkgs = append(recentViewedPkgs, p.Path)
-	}
-}
-
-type HomeController struct {
+type RefreshController struct {
 	beego.Controller
 }
 
-// Get implemented Get method for HomeController.
-// It serves home page of Go Walker.
-func (this *HomeController) Get() {
+// Get implemented Get method for RefreshController.
+// It serves refresh page of Go Walker.
+func (this *RefreshController) Get() {
 	// Check language version
 	lang, ok := isValidLanguage(this.Ctx.Request.RequestURI)
 	if !ok {
@@ -56,34 +38,21 @@ func (this *HomeController) Get() {
 	q := this.Input().Get("q")
 
 	// Empty query string shows home page
-	if len(q) > 0 {
-		// Show search page
-		this.Redirect(lang+"/search?q="+q, 302)
+	if len(q) == 0 {
+		this.Redirect("/"+lang+"/", 302)
+	}
+
+	_, err := models.CheckDoc(q, models.REFRESH_REQUEST)
+	if err == nil {
+		this.Redirect("/"+lang+"/search?q="+q, 302)
 		return
 	}
 
 	// Set properties
-	this.TplNames = "home_" + lang + ".html"
+	this.TplNames = "refresh_" + lang + ".html"
 	this.Layout = "layout.html"
 
-	// Recent packages
-	this.Data["RecentPkgs"] = recentViewedPkgs
-	pkgInfos, _ := models.GetPopularPkgs()
-	this.Data["PopularPkgs"] = pkgInfos
-}
-
-// isValidLanguage checks if URL has correct language version.
-func isValidLanguage(reqUrl string) (string, bool) {
-	var lang string
-
-	if len(reqUrl) == 1 {
-		return lang, false
-	}
-	if i := strings.LastIndex(reqUrl, "/"); i > 2 {
-		lang = reqUrl[1:3]
-	} else {
-		return lang, false
-	}
-
-	return lang, true
+	// Set data
+	this.Data["Path"] = q
+	this.Data["LimitTime"] = err.Error()
 }

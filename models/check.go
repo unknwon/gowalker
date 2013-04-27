@@ -16,6 +16,7 @@ package models
 
 import (
 	"errors"
+	"os"
 	"time"
 
 	"github.com/astaxie/beego"
@@ -24,7 +25,6 @@ import (
 
 const (
 	HUMAN_REQUEST = iota
-	ROBOT_REQUEST
 	REFRESH_REQUEST
 )
 
@@ -37,23 +37,31 @@ const (
 // control system as needed.
 func CheckDoc(path string, requestType int) (pdoc *Package, err error) {
 	needsCrawl := false
-	// Check if it is in database or generated or needs to crawl
+	// Get the package documentation from database
+	pdoc, err = getDoc(path)
+	if utils.IsGoRepoPath(path) {
+		path = "code.google.com/p/go/source/browse/src/pkg/" + path
+	}
+
 	switch requestType {
 	case HUMAN_REQUEST:
-		// Check static file
-		needsCrawl = !utils.IsExist("./docs/" + path + ".html")
-	case ROBOT_REQUEST:
-		// Get the package documentation from database
-
-		/* TODO: Need to think about how to save information in database */
-
-		pdoc, err = getDoc(path)
 		if err != nil {
-			return nil, err
+			needsCrawl = true
+			os.Remove("./docs/" + path + ".html")
+		} else {
+			// Check static file
+			needsCrawl = !utils.IsExist("./docs/" + path + ".html")
 		}
-		needsCrawl = (pdoc != nil) || pdoc.Updated.Add(_TIME_DAY).Before(time.Now())
 	case REFRESH_REQUEST:
-		needsCrawl = true
+		if err != nil {
+			needsCrawl = true
+		} else {
+			needsCrawl = (pdoc != nil) && pdoc.Updated.Add(time.Hour).Before(time.Now().UTC())
+			if !needsCrawl {
+				return nil, errors.New(pdoc.Updated.Add(time.Hour).String())
+			}
+			os.Remove("./docs/" + path + ".html")
+		}
 	}
 
 	if needsCrawl {

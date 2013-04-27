@@ -102,11 +102,11 @@ func crawlDoc(path string) (*Package, error) {
 
 	switch {
 	case err == nil:
-		pkg := pkgInfo{
-			Path:     pdoc.ImportPath,
-			Synopsis: pdoc.Synopsis,
-			Updated:  time.Now(),
-			ProName:  pdoc.ProjectName}
+		pkg := PkgInfo{
+			Path:      pdoc.ImportPath,
+			Synopsis:  pdoc.Synopsis,
+			Generated: time.Now().Local(),
+			ProName:   pdoc.ProjectName}
 
 		/* TODO:WORKING */
 

@@ -1,4 +1,4 @@
-		<title>Go Walker - Index</title>
+		<title>Go Walker - Refresh</title>
 	</head>
 		
 	<body>
@@ -8,7 +8,7 @@
 					<a class="brand" href="/en/">Go Walker</a>
 					<ul class="nav">
 						<li><a href="/en/">Home</a></li>
-						<li class="active"><a href="/en/index">Index</a></li>
+						<li><a href="/en/index">Index</a></li>
 						<li><a href="/en/about">About</a></li>
 					</ul>
 					<form class="navbar-search pull-right" action="/en/search">
@@ -16,27 +16,9 @@
 					</form>
 				</div>
 			</div>
-			<h1>Index</h1>
-			<p>The following is a list of '<a href="http://golang.org/cmd/go/#hdr-Download_and_install_packages_and_dependencies">go get</a>' able packages viewed previously on godoc.org. A  <a href="/-/go">list of Go standard packages</a>  is also available.<!--Please use http://api.godoc.org/packages instead of scraping this page.--></p>
-			<table class="table table-condensed">
-				<thead>
-					<tr>
-						<th>Path</th>
-						<th>Synopsis</th>
-					</tr>
-				</thead>
-				<tbody>
-					{{with .pkgs}}
-					{{range .}}
-					<tr>
-						<td><a href="/en/search?q={{.Path}}">{{.Path}}</a></td>
-						<td>{{.Synopsis}}</td>
-					</tr>
-					{{end}}
-					{{end}}
-				</tbody>
-			</table>
-			<p>Number of packages: {{.PkgNum}}.</p>
+			<h1>Refresh</h1>
+			<p>Sorry, for some reasons, you cannot refresh documentation of same package until <i>{{.LimitTime}}</i>(an hour).</p>
+			<p>Click <a href="/en/search?q={{.Path}}">Here</a> to return previous page.</p>
 			<div class="container">
 				<div class="flat-well well-small">
 					<a href="https://github.com/Unknwon">@Unknown</a>
@@ -45,7 +27,7 @@
 					<span class="muted">|</span>
 					<a href="https://github.com/Unknwon/gowalker/issues">Website Issues</a>
 					<span class="muted">|</span>
-					<a href="/zh/index">中文版</a>
+					<a href="/zh/">中文版</a>
 					<span class="pull-right"><a href="#">Back to top</a></span>
 				</div>
 			</div>
