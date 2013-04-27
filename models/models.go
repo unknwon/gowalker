@@ -16,7 +16,6 @@ package models
 
 import (
 	"database/sql"
-	"fmt"
 	"time"
 
 	"github.com/coocood/qbs"
@@ -90,8 +89,11 @@ func savePkgInfo(pkg *pkgInfo) error {
 	}
 	defer q.Db.Close()
 
-	err = q.Find(pkg)
-	_, err = q.Save(pkg)
+	info := new(pkgInfo)
+	err = q.WhereEqual("path", pkg.Path).Find(info)
+	if info.Synopsis != pkg.Synopsis {
+		_, err = q.Save(pkg)
+	}
 	return err
 }
 
@@ -176,7 +178,6 @@ func SearchDoc(key string) ([]*pkgInfo, error) {
 	defer q.Db.Close()
 
 	var pkgInfos []*pkgInfo
-	fmt.Println(key)
 	condition := qbs.NewCondition("path like ?", "%"+key+"%").And("views > ?", 0)
 	err = q.Condition(condition).OrderBy("path").FindAll(&pkgInfos)
 	return pkgInfos, err
