@@ -439,6 +439,12 @@ func (w *walker) build(srcs []*source) (*Package, error) {
 			w.pdoc.Files = append(w.pdoc.Files, &File{Name: name, URL: w.srcs[name].browseURL})
 			w.pdoc.SourceSize += len(w.srcs[name].data)
 			files[name] = file
+			for k, v := range file.Scope.Objects {
+				fmt.Println(k, v.Kind, int(v.Pos())-len(v.Kind.String())-2)
+			}
+			for _, v := range file.Comments {
+				fmt.Println(v.End(), v.Text())
+			}
 		}
 	}
 
