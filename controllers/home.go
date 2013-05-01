@@ -12,28 +12,32 @@
 // License for the specific language governing permissions and limitations
 // under the License.
 
+// Package controllers implemented controller methods of beego.
+
 package controllers
 
 import (
-	"strings"
+	"time"
 
+	"github.com/Unknwon/gowalker/utils"
 	"github.com/astaxie/beego"
-	"github.com/unknwon/gowalker/models"
-)
-
-const (
-	recentViewsPkgNum = 22
 )
 
 var (
-	recentViewedPkgs []string
+	langTypes []*langType // Languages that are supported.
 )
 
-func init() {
-	recentViewedPkgs = make([]string, 0, recentViewsPkgNum)
-	pkginfos, _ := models.GetRecentPkgs(recentViewsPkgNum)
-	for _, p := range pkginfos {
-		recentViewedPkgs = append(recentViewedPkgs, p.Path)
+type langType struct {
+	Lang, Name string
+}
+
+func InitLangs(langs []string, names []string) {
+	langTypes = make([]*langType, 0, len(langs))
+	for i, v := range langs {
+		langTypes = append(langTypes, &langType{
+			Lang: v,
+			Name: names[i],
+		})
 	}
 }
 
@@ -44,46 +48,57 @@ type HomeController struct {
 // Get implemented Get method for HomeController.
 // It serves home page of Go Walker.
 func (this *HomeController) Get() {
-	// Check language version
-	lang, ok := isValidLanguage(this.Ctx.Request.RequestURI)
-	if !ok {
-		// English is default language version
-		this.Redirect("/en/", 302)
-		return
-	}
-
-	// Get query field
-	q := this.Input().Get("q")
-
-	// Empty query string shows home page
-	if len(q) > 0 {
-		// Show search page
-		this.Redirect(lang+"/search?q="+q, 302)
-		return
-	}
+	// Get language version
+	curLang, restLangs := getLangVer(this.Input().Get("lang"))
 
 	// Set properties
-	this.TplNames = "home_" + lang + ".html"
 	this.Layout = "layout.html"
+	this.TplNames = "home_" + curLang.Lang + ".html"
 
-	// Recent packages
-	this.Data["RecentPkgs"] = recentViewedPkgs
-	pkgInfos, _ := models.GetPopularPkgs()
-	this.Data["PopularPkgs"] = pkgInfos
+	temp := []recentPro{}
+	t := time.Now().String()
+	temp = append(temp, recentPro{
+		Path:       "github.com/Unknwon/gowalker",
+		Views:      3218,
+		ViewedTime: t[:19],
+	})
+	temp = append(temp, recentPro{
+		Path:       "net/http",
+		IsGoRepo:   true,
+		Views:      597,
+		ViewedTime: t[:19],
+	})
+
+	this.Data["DataSrc"] = utils.GoRepoSet
+	this.Data["RecentPros"] = temp
+	this.Data["PopPros"] = temp
+	this.Data["Lang"] = curLang.Lang
+	this.Data["CurLang"] = curLang.Name
+	this.Data["RestLangs"] = restLangs
 }
 
-// isValidLanguage checks if URL has correct language version.
-func isValidLanguage(reqUrl string) (string, bool) {
-	var lang string
+type recentPro struct {
+	Path, ViewedTime string
+	IsGoRepo         bool
+	Views            int64
+}
 
-	if len(reqUrl) == 1 {
-		return lang, false
+// getLangVer returns current language version and list of rest languages.
+func getLangVer(lang string) (*langType, []*langType) {
+	if len(lang) == 0 {
+		lang = "en"
 	}
-	if i := strings.LastIndex(reqUrl, "/"); i > 2 {
-		lang = reqUrl[1:3]
-	} else {
-		return lang, false
+	curLang := &langType{
+		Lang: lang,
 	}
 
-	return lang, true
+	restLangs := make([]*langType, 0, len(langTypes)-1)
+	for _, v := range langTypes {
+		if lang != v.Lang {
+			restLangs = append(restLangs, v)
+		} else {
+			curLang.Name = v.Name
+		}
+	}
+	return curLang, restLangs
 }

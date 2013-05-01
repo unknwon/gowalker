@@ -12,12 +12,16 @@
 // License for the specific language governing permissions and limitations
 // under the License.
 
+// Package models implemented database access funtions.
+
 package models
 
 import (
 	"database/sql"
+	"os"
 	"time"
 
+	"github.com/astaxie/beego"
 	"github.com/coocood/qbs"
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -27,13 +31,43 @@ const (
 	_SQLITE3_DRIVER = "sqlite3"
 )
 
+// PkgInfo is package information.
 type PkgInfo struct {
-	Id        int64
-	Path      string `qbs:"index"`
-	Synopsis  string
-	Views     int64     `qbs:"index"`
-	Generated time.Time `qbs:"index"`
-	ProName   string
+	Path     string `qbs:"pk,index"` // Import path of package.
+	Synopsis string
+	Views    int64     `qbs:"index"`
+	Created  time.Time `qbs:"index"` // Time when information last updated.
+	ProName  string    // Name of the project.
+	Etag     string    // Revision tag.
+}
+
+// PkgDecl is package declaration in database acceptable form.
+type PkgDecl struct {
+	Path      string `qbs:"pk,index"` // Import path of package.
+	Doc       string // Package documentation.
+	Truncated bool   // True if package documentation is incomplete.
+
+	// Environment.
+	Goos, Goarch string
+
+	// Top-level declarations.
+	Consts, Funcs, Types, Vars string
+
+	// Internal declarations.
+	Iconsts, Ifuncs, Itypes, Ivars string
+
+	Notes            string // Source code notes.
+	Files, TestFiles string // Source files.
+	Dirs             string // Subdirectories
+
+	Imports, TestImports string // Imports.
+}
+
+// PkgDoc is package documentation for multi-language usage.
+type PkgDoc struct {
+	Path string `qbs:"pk,index"` // Import path of package.
+	Lang string // Documentation language.
+	Doc  string // Documentataion.
 }
 
 func connDb() (*qbs.Qbs, error) {
@@ -48,168 +82,114 @@ func setMg() (*qbs.Migration, error) {
 	return mg, err
 }
 
-func InitDb() error {
+func init() {
+	// Initialize database.
+	beego.Info("Initialize database:", DB_NAME)
+
+	os.Mkdir("./data", os.ModePerm)
+
+	// Connect to database.
 	q, err := connDb()
 	if err != nil {
-		return err
+		beego.Info("models.init():", err)
 	}
 	defer q.Db.Close()
 
 	mg, err := setMg()
 	if err != nil {
-		return err
+		beego.Info("models.init():", err)
 	}
 	defer mg.Db.Close()
 
-	// Create data tables
+	// Create data tables.
 	mg.CreateTableIfNotExists(new(PkgInfo))
-
-	return nil
+	mg.CreateTableIfNotExists(new(PkgDecl))
+	mg.CreateTableIfNotExists(new(PkgDoc))
 }
 
-// getDoc returns package documentation in database
-func getDoc(path string) (*Package, error) {
+// GetProInfo returns package information from database.
+func GetPkgInfo(path string) (*PkgInfo, error) {
+	// Connect to database.
 	q, err := connDb()
 	if err != nil {
-		return nil, err
+		beego.Info("models.GetPkgInfo():", err)
 	}
 	defer q.Db.Close()
 
-	info := new(PkgInfo)
-	err = q.WhereEqual("path", path).Find(info)
+	pinfo := new(PkgInfo)
+	err = q.WhereEqual("path", path).Find(pinfo)
 
-	pdoc := &Package{
-		ImportPath:  info.Path,
-		Synopsis:    info.Synopsis,
-		Updated:     info.Generated,
-		ProjectName: info.ProName,
-	}
-	return pdoc, err
+	return pinfo, err
 }
 
-// savePkgInfo saves package to database
-func savePkgInfo(pkg *PkgInfo) error {
+// SaveProject save package information, declaration, documentation to database.
+func SaveProject(pinfo *PkgInfo, pdecl *PkgDecl, pdoc *PkgDoc) error {
+	// Connect to database.
 	q, err := connDb()
 	if err != nil {
-		return err
+		beego.Info("models.SaveProject():", err)
 	}
 	defer q.Db.Close()
 
+	// Save package information.
 	info := new(PkgInfo)
-	err = q.WhereEqual("path", pkg.Path).Find(info)
+	err = q.WhereEqual("path", pinfo.Path).Find(info)
 	if err != nil {
-		_, err = q.Save(pkg)
+		_, err = q.Save(pinfo)
 	} else {
-		info.Synopsis = pkg.Synopsis
-		info.Generated = pkg.Generated
+		info.Synopsis = pinfo.Synopsis
+		info.Created = pinfo.Created
+		info.ProName = pinfo.ProName
 		_, err = q.Save(info)
 	}
-	return err
-}
+	if err != nil {
+		beego.Info("models.SaveProject(): Information:", err)
+	}
 
-// deletePkg removes package from database
-func deletePkg(path string) error {
+	// Save package declaration
+	_, err = q.Save(pdecl)
+	if err != nil {
+		beego.Info("models.SaveProject(): Declaration:", err)
+	}
+
+	// Save package documentation
+	_, err = q.Save(pdoc)
+	if err != nil {
+		beego.Info("models.SaveProject(): Documentation:", err)
+	}
+
 	return nil
-	q, err := connDb()
-	if err != nil {
-		return err
-	}
-	defer q.Db.Close()
-
-	pkg := PkgInfo{Path: path}
-	_, err = q.Delete(&pkg)
-	return err
 }
 
-// GetRecentPkgs gets recent updated packages from database
-func GetRecentPkgs(num int) ([]*PkgInfo, error) {
+// DeleteProject deletes everything about the path in database.
+func DeleteProject(path string) error {
+	// Connect to database.
 	q, err := connDb()
 	if err != nil {
-		return nil, err
+		beego.Info("models.SaveProject():", err)
 	}
 	defer q.Db.Close()
 
-	var pkgInfos []*PkgInfo
-	err = q.Where("views > ?", 0).Limit(num).OrderByDesc("generated").FindAll(&pkgInfos)
-	return pkgInfos, err
-}
-
-// AddViews add views in database by 1 each time
-func AddViews(pdoc *Package) error {
-	q, err := connDb()
+	// Delete package information.
+	info := &PkgInfo{Path: path}
+	_, err = q.Delete(&info)
 	if err != nil {
-		return err
-	}
-	defer q.Db.Close()
-
-	info := new(PkgInfo)
-	err = q.WhereEqual("path", pdoc.ImportPath).Find(info)
-	if err != nil {
-		pkg := PkgInfo{
-			Path:      pdoc.ImportPath,
-			Synopsis:  pdoc.Synopsis,
-			Generated: time.Now().Local(),
-			ProName:   pdoc.ProjectName,
-			Views:     1}
-		err = savePkgInfo(&pkg)
-		return err
+		beego.Info("models.DeleteProject(): Information:", err)
 	}
 
-	info.Views++
-	_, err = q.Save(info)
-	return err
-}
-
-// GetPopularPkgs gets most viewed packages from database
-func GetPopularPkgs() ([]*PkgInfo, error) {
-	q, err := connDb()
+	// Delete package declaration
+	pdecl := &PkgDecl{Path: path}
+	_, err = q.Delete(&pdecl)
 	if err != nil {
-		return nil, err
+		beego.Info("models.DeleteProject(): Declaration:", err)
 	}
-	defer q.Db.Close()
 
-	var pkgInfos []*PkgInfo
-	err = q.Where("views > ?", 0).Limit(15).OrderByDesc("views").FindAll(&pkgInfos)
-	return pkgInfos, err
-}
-
-// GetAllPkgs gets all packages in database
-func GetAllPkgs() ([]*PkgInfo, error) {
-	q, err := connDb()
+	// Delete package documentation
+	pdoc := &PkgDoc{Path: path}
+	_, err = q.Delete(&pdoc)
 	if err != nil {
-		return nil, err
+		beego.Info("models.DeleteProject(): Documentation:", err)
 	}
-	defer q.Db.Close()
 
-	var pkgInfos []*PkgInfo
-	err = q.Where("views > ?", 0).OrderBy("path").FindAll(&pkgInfos)
-	return pkgInfos, err
-}
-
-// SearchDoc gets packages that contain keyword
-func SearchDoc(key string) ([]*PkgInfo, error) {
-	q, err := connDb()
-	if err != nil {
-		return nil, err
-	}
-	defer q.Db.Close()
-
-	var pkgInfos []*PkgInfo
-	condition := qbs.NewCondition("path like ?", "%"+key+"%").And("views > ?", 0)
-	err = q.Condition(condition).OrderBy("path").FindAll(&pkgInfos)
-	return pkgInfos, err
-}
-
-// GetGoRepo gets go standard library
-func GetGoRepo() ([]*PkgInfo, error) {
-	q, err := connDb()
-	if err != nil {
-		return nil, err
-	}
-	defer q.Db.Close()
-
-	var pkgInfos []*PkgInfo
-	condition := qbs.NewCondition("pro_name = ?", "Go").And("views > ?", 0)
-	err = q.Condition(condition).OrderBy("path").FindAll(&pkgInfos)
-	return pkgInfos, err
+	return nil
 }

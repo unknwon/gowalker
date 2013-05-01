@@ -12,15 +12,16 @@
 // License for the specific language governing permissions and limitations
 // under the License.
 
-package models
+// Package doc implemented fetch projects from VCS and genarate AST.
+
+package doc
 
 import (
 	"errors"
-	"os"
 	"time"
 
+	"github.com/Unknwon/gowalker/models"
 	"github.com/astaxie/beego"
-	"github.com/unknwon/gowalker/utils"
 )
 
 const (
@@ -33,45 +34,46 @@ const (
 	_FETCH_TIMEOUT = 10 * time.Second
 )
 
-// CheckDoc checks the package documentation from the database or from the version
+// CheckDoc checks the project documentation from the database or from the version
 // control system as needed.
-func CheckDoc(path string, requestType int) (pdoc *Package, err error) {
-	needsCrawl := false
-	// Get the package documentation from database
-	pdoc, err = getDoc(path)
-	if utils.IsGoRepoPath(path) {
-		path = "code.google.com/p/go/source/browse/src/pkg/" + path
-	}
+func CheckDoc(path string, requestType int) (*Package, error) {
+	// Package documentation and crawl sign.
+	pdoc, needsCrawl := &Package{}, false
 
-	switch requestType {
-	case HUMAN_REQUEST:
-		if err != nil {
-			needsCrawl = true
-			os.Remove("./docs/" + path + ".html")
-		} else {
-			// Check static file
-			needsCrawl = !utils.IsExist("./docs/" + path + ".html")
-		}
-	case REFRESH_REQUEST:
-		if err != nil {
-			needsCrawl = true
-		} else {
-			needsCrawl = (pdoc != nil) && pdoc.Updated.Add(time.Hour).Local().Before(time.Now().Local())
-			if !needsCrawl {
-				return nil, errors.New(pdoc.Updated.Add(time.Hour).Local().String())
+	// Get the package documentation from database.
+	pinfo, err := models.GetPkgInfo(path)
+
+	if err != nil {
+		needsCrawl = true
+	} else {
+		// Check request type.
+		switch requestType {
+		case HUMAN_REQUEST:
+			// Error means it does not exist.
+			if err != nil {
+				needsCrawl = true
+			} else {
+				// Check if the documentation is too old (1 day ago).
+				needsCrawl = pinfo.Created.Add(_TIME_DAY).Local().Before(time.Now().Local())
 			}
-			os.Remove("./docs/" + path + ".html")
+		case REFRESH_REQUEST:
+			// Check if the documentation is too frequently (within 1 hour).
+			needsCrawl = pinfo.Created.Add(_TIME_DAY).Local().Before(time.Now().Local())
+			if !needsCrawl {
+				return &Package{}, errors.New("doc.CheckDoc(): Package cannot be refreshed until" +
+					pdoc.Created.Add(time.Hour).Local().String())
+			}
 		}
 	}
 
 	if needsCrawl {
-		// Fetch package from VCS
+		// Fetch package from VCS.
 		c := make(chan crawlResult, 1)
 		go func() {
 
 			/* TODO:WORKING */
 
-			pdoc, err = crawlDoc(path)
+			pdoc, err = crawlDoc(path, pinfo.Etag)
 			c <- crawlResult{pdoc, err}
 		}()
 
@@ -80,24 +82,19 @@ func CheckDoc(path string, requestType int) (pdoc *Package, err error) {
 		case cr := <-c:
 			if cr.err == nil {
 				pdoc = cr.pdoc
-
-				/* TODO */
-
-				// Recurse crawl import packages
-
-				// Save to database
 			}
 			err = cr.err
 		case <-time.After(_FETCH_TIMEOUT):
 			err = errUpdateTimeout
 		}
+
 		if err != nil {
 			if pdoc != nil {
 				beego.Error("Serving", path, "from database after error: ", err)
 				err = nil
 			} else if err == errUpdateTimeout {
 				// Handle timeout on packages never seen before as not found.
-				beego.Error("Serving ", path, "as not found after timeout")
+				beego.Error("Serving", path, "as not found after timeout")
 				err = errors.New("Status not found")
 			}
 			return nil, err

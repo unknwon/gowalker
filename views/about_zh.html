@@ -3,44 +3,54 @@
 
 	<body>
 		<div class="container">
-			<div class="navbar navbar-inverse">
+			<div class="navbar" style="margin-top: 20px">
 				<div class="navbar-inner">
-					<a class="brand" href="/zh/">Go 步行者</a>
+					<a class="brand" href="/?lang={{.Lang}}">Go 步行者</a>
 					<ul class="nav">
-						<li><a href="/zh">首页</a></li>
-						<li><a href="/zh/index">索引</a></li>
-						<li class="active"><a href="/zh/about">关于</a></li>
+						<li><a href="/?lang={{.Lang}}">首页</a></li>
+						<li><a href="/index?lang={{.Lang}}">索引</a></li>
+						<li class="active"><a href="/about?lang={{.Lang}}">关于</a></li>
 					</ul>
-					<form class="navbar-search pull-right" action="/zh/search">
+					<form class="navbar-search pull-right" action="/search">
+						<input type="hidden" name="lang" value="{{.Lang}}" />
 						<input class="search-query" type="text" placeholder="搜索项目" name="q"></input>
 					</form>
 				</div>
 			</div>
 			<h1>关于</h1>
-			<p>Go Walker displays documentation for <a href="http://golang.org/">Go</a> projects on <a href="https://bitbucket.org/">Bitbucket</a>, <a href="https://github.com/">Github</a>, <a href="https://launchpad.net/">Launchpad</a> and <a href="http://code.google.com/hosting/">Google Project Hosting</a>.  
-			<p>The source code for Go Walker is available <a href="https://github.com/Unknwon/gowalker">on Github</a>.  
-			<h4 id="howto">Add a project to Go Walker</h4> 
-			<p>Go Walker generates documentation from Go source code. The <a href="http://golang.org/doc/articles/godoc_documenting_go_code.html">guidelines</a> for writing documentation for the <a href="http://golang.org/cmd/godoc/">godoc</a> tool apply to Go Walker and display object relationships between packages in your project. 
-			<p>It's important to write a good summary of the package in the first sentence of the package comment. Go Walker indexes the first sentence and displays the sentence in package lists.
-			<p>To add a package to Go Walker, <a href="/">search</a> for the package by import path. If Go Walker does not already have the documentation for the package, then Go Walker will fetch the source from the version control system on the fly and add the documentation, as well as all dependencies packages.
-			<p>Go Walker checks for package updates once per day. You can force Go Walker to refresh the documentation immediately by clicking the refresh link at the bottom of the package documentation page. 
-			<h4 id="remove">Remove a package from Go Walker</h4>
-			<p>Go Walker automatically removes packages deleted from the version control system when Go Walker checks for updates to the package. You can force Go Walker to remove a deleted package immediately by clicking the refresh link at the bottom of the package documentation page, but be aware that this operation will not delete dependencies packages in case other packages use some of them.</p>
-			<p>If you do not want Go Walker to display documentation for your package, send mail to info@gowalker.org with the import path of the path of the package that you want to remove. </p>
-			<h4>Feedback</h4> 
-			<p>Send your ideas, feature requests and questions to info@gowalker.org.  Report bugs using the <a href="https://github.com/Unknwon/gowalker/issues">Github Issue Tracker</a>.  Join the discussion at the <a href="https://groups.google.com/d/forum/gowalker">Go Walker group</a>.
-			<h4>Bookmarklet</h4>
-			<p>The Go Walker bookmarklet navigates from pages on Bitbucket, Github Launchpad and Google Project Hosting to the package documentation. To install the bookmarklet, click and drag the following link to your bookmark bar: <a  href="javascript:window.location='http://gowalker.org/zh/search?q='+encodeURIComponent(window.location)">Go Walker</a></p>
+			<p>Go 步行者用于为托管在版本控制系统上的 <a target="_blank" href="http://golang.org/">Go</a> 开源项目生成在线源码文档，目前支持的平台包括 <a target="_blank" href="https://bitbucket.org/">Bitbucket</a>、<a target="_blank" href="https://github.com/">Github</a>、<a target="_blank" href="https://launchpad.net/">Launchpad</a> 和 <a target="_blank" href="http://code.google.com/hosting/">Google Project Hosting</a>。</p>
+			<p>您可以在 <a target="_blank" href="https://github.com/Unknwon/gowalker">Github</a> 上浏览并下载该项目的源代码。  
+			<h4 id="howto">添加新的项目到 Go 步行者</h4> 
+			<p>Go 步行者是一个用于生成 Go 项目源码文档的服务器，有关文档注释规范，请参考官方给出的 <a target="_blank" href="http://golang.org/doc/articles/godoc_documenting_go_code.html">大纲</a>。Go 步行者兼容所有 <a href="http://golang.org/cmd/godoc/">godoc</a> 工具所支持的标准，同时 Go 步行者还将会显示类型在不同包之间的关联。</p>
+			<p>对于一个具有良好可读性的项目而言，规范完整的文档说明是极其重要的。Go 步行者会截取每个项目的包的首行文字作为该包的纲要，并在搜索项目时展现给阅读者。</p>
+			<p>如果您打算将某个项目添加到 Go 步行者，可以通过 <a href="/">搜索</a> 该项目的导入路径来通知服务器。如果该项目的文档已经存在，则将直接呈现给您，否则会从相关的版本控制系统上即时下载并生成文档。如果您的操作是添加新的项目，则最多可能需要 20 秒的时间来完成，因为 Go 步行者会将源码和文档展示在相同页面上。</p>
+			<p>Go 步行者每天都会检查各个项目的更新情况，你也可以通过底部的刷新按钮来进行强制刷新。</p>
+			<h4>使用多语言文档</h4>
+			<p>Go 步行者允许您为您的项目撰写多国语言的文档，您不需要对现有的任何文档进行任何修改，服务器会自动使用与用户语言选项相同的文档语言版本，您可以通过底部的语言选项功能来切换您的浏览语言。如果您想要使用此功能，务必仔细阅读 <a target="_blank" href="#">多语言文档支持</a>。</p>
+			<h4 id="remove">从 Go 步行者中删除项目</h4>
+			<p>Go 步行者将会在每日检查更新时自动删除更新失败的项目，您也可以在删除托管在版本控制系统上的项目后，通过强制刷新的方式来完成删除操作。</p>
+			<p>如果您只是单纯的想要禁止他人通过本服务器产生您的项目源码文档，请通过邮件的形式发送有效身份证明以及项目路径到 info@gowalker.org。</p>
+			<h4>反馈</h4> 
+			<p>如果您有好的建议或想法，请发送邮件到 info@gowalker.org。网站问题反馈请通过 <a target="_blank" href="https://github.com/Unknwon/gowalker/issues">Github Issue Tracker</a>。您也可以加入到 <a target="_blank" href="https://groups.google.com/d/forum/gowalker">Go Walker group</a> 来讨论相关话题。
+			<h4>书签工具</h4>
+			<p>Go 步行者书签工具通过 JavaScript 脚本来动态获取您当前浏览的项目地址，并自动跳转到本网站的相关页面。请将该链接保存至您的收藏夹来使用此功能： <a  target="_blank" href="javascript:window.location='http://gowalker.org/search?lang=zh&q='+encodeURIComponent(window.location)">Go 步行者</a></p>
 			<div class="container">
-				<div class="flat-well well-small">
-					<a href="https://github.com/Unknwon">@Unknown</a>
+				<div class="flat-well well-small" style="background-color: #f5f5f5">
+					<a target="_blank" href="https://github.com/Unknwon"><i class="icon-user"></i> @Unknown</a>
 					<span class="muted">|</span>
-					<a href="mailto:joe2010xtmf@163.com">反馈</a>
+					<a href="mailto:joe2010xtmf@163.com"><i class="icon-envelope"></i> 反馈</a>
 					<span class="muted">|</span>
-					<a href="https://github.com/Unknwon/gowalker/issues">问题提交</a>
+					<a target="_blank" href="https://github.com/Unknwon/gowalker/issues"><i class="icon-tasks"></i> 问题提交</a>
 					<span class="muted">|</span>
-					<a href="/en/about">English</a>
-					<span class="pull-right"><a href="#">返回顶部</a></span>
+					    <div class="btn-group dropup ">
+						    <a class="btn dropdown-toggle" data-toggle="dropdown">{{.CurLang}} <span class="caret"></span></a>
+						    <ul class="dropdown-menu">
+						    	{{range .RestLangs}}
+						    	<li><a href="/about?lang={{.Lang}}">{{.Name}}</a></li>
+						    	{{end}}
+						    </ul>
+					    </div>
+					<span class="pull-right"><a class="btn" href="#">返回顶部</a></span>
 				</div>
 			</div>
 		</div>

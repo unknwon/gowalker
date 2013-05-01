@@ -12,17 +12,53 @@
 // License for the specific language governing permissions and limitations
 // under the License.
 
-package models
+package doc
 
 import (
 	"encoding/json"
+	"flag"
 	"fmt"
 	"io"
 	"io/ioutil"
+	"net"
 	"net/http"
+	"time"
 )
 
 var userAgent = "go application"
+
+var (
+	dialTimeout  = flag.Duration("dial_timeout", 5*time.Second, "Timeout for dialing an HTTP connection.")
+	readTimeout  = flag.Duration("read_timeout", 10*time.Second, "Timeoout for reading an HTTP response.")
+	writeTimeout = flag.Duration("write_timeout", 5*time.Second, "Timeout writing an HTTP request.")
+)
+
+type timeoutConn struct {
+	net.Conn
+}
+
+func (c *timeoutConn) Read(p []byte) (int, error) {
+	return c.Conn.Read(p)
+}
+
+func (c *timeoutConn) Write(p []byte) (int, error) {
+	// Reset timeouts when writing a request.
+	c.Conn.SetWriteDeadline(time.Now().Add(*readTimeout))
+	c.Conn.SetWriteDeadline(time.Now().Add(*writeTimeout))
+	return c.Conn.Write(p)
+}
+func timeoutDial(network, addr string) (net.Conn, error) {
+	c, err := net.DialTimeout(network, addr, *dialTimeout)
+	if err != nil {
+		return nil, err
+	}
+	return &timeoutConn{Conn: c}, nil
+}
+
+var (
+	httpTransport = &http.Transport{Dial: timeoutDial}
+	httpClient    = &http.Client{Transport: httpTransport}
+)
 
 // httpGet gets the specified resource. ErrNotFound is returned if the server
 // responds with status 404.

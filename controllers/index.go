@@ -16,7 +16,6 @@ package controllers
 
 import (
 	"github.com/astaxie/beego"
-	"github.com/unknwon/gowalker/models"
 )
 
 type IndexController struct {
@@ -26,20 +25,30 @@ type IndexController struct {
 // Get implemented Get method for IndexController.
 // It serves index page of Go Walker.
 func (this *IndexController) Get() {
-	// Check language version
-	lang, ok := isValidLanguage(this.Ctx.Request.RequestURI)
-	if !ok {
-		// English is default language version
-		this.Redirect("/en/index", 302)
-		return
-	}
+	// Get language version
+	curLang, restLangs := getLangVer(this.Input().Get("lang"))
 
 	// Set properties
-	this.TplNames = "index_" + lang + ".html"
 	this.Layout = "layout.html"
+	this.TplNames = "index_" + curLang.Lang + ".html"
 
-	// Get all packages
-	pkgInfos, _ := models.GetAllPkgs()
-	this.Data["pkgs"] = pkgInfos
-	this.Data["PkgNum"] = len(pkgInfos)
+	temp := []proSyno{}
+	temp = append(temp, proSyno{
+		Path:     "github.com/Unknwon/gowalker",
+		Synopsis: "fucking aswone project",
+	})
+	temp = append(temp, proSyno{
+		Path:     "github.com/coocood/qbs",
+		Synopsis: "Package net/http is for http operations",
+	})
+
+	this.Data["AllPros"] = temp
+	this.Data["ProNum"] = len(temp)
+	this.Data["Lang"] = curLang.Lang
+	this.Data["CurLang"] = curLang.Name
+	this.Data["RestLangs"] = restLangs
+}
+
+type proSyno struct {
+	Path, Synopsis string
 }

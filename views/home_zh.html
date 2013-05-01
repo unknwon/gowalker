@@ -3,70 +3,108 @@
 
 	<body>
 		<div class="container">
-			<div class="navbar navbar-inverse">
+			<div class="navbar" style="margin-top: 20px">
 				<div class="navbar-inner">
-					<a class="brand" href="/zh/">Go 步行者</a>
+					<a class="brand" href="/?lang={{.Lang}}">Go 步行者</a>
 					<ul class="nav">
-						<li class="active"><a href="/zh">首页</a></li>
-						<li><a href="/zh/index">索引</a></li>
-						<li><a href="/zh/about">关于</a></li>
+						<li class="active"><a href="/?lang={{.Lang}}">首页</a></li>
+						<li><a href="/index?lang={{.Lang}}">索引</a></li>
+						<li><a href="/about?lang={{.Lang}}">关于</a></li>
 					</ul>
-					<form class="navbar-search pull-right" action="/zh/search">
+					<form class="navbar-search pull-right" action="/search">
+						<input type="hidden" name="lang" value="{{.Lang}}" />
 						<input class="search-query" type="text" placeholder="搜索项目" name="q"></input>
 					</form>
 				</div>
 			</div>
-			<div class="flat-well well-large"> 
-				<h2 style="margin-top: 0">搜索 Go 项目</h2>
-				<form action="/zh/search">
+			<div class="alert">
+				<button type="button" class="close" data-dismiss="alert">&times;</button><strong>注意！</strong> 该程序版本目前为 <span class="label label-important">测试</span> 版，因此随时都可能发生意外错误。
+			</div>
+    		<div class="page-header">
+				<h2 style="margin-top: 0">搜索 Go 项目 <small>开源，让世界更加和谐！</small></h2>
+				<form action="/search">
 					<div class="input-append">
-						<input class="span6" type="text" placeholder="请输入导入路径或关键字" value="{{.keyword}}" autofocus="autofocus" name="q"></input>
-						<button class="btn" type="submit">手气不错</button>
+						<input type="hidden" name="lang" value="{{.Lang}}" />
+						<input autocomplete="off" class="span6" type="text" placeholder="请输入项目路径或关键字" value="{{.Keyword}}" autofocus="autofocus" name="q" data-source="[{{str2html .DataSrc}}]" data-items="8" data-provide="typeahead"></input>
+						<button class="btn" type="submit"><i class="icon-search"></i> 手气不错</button>
 					</div>
 				</form>
+    		</div>
+    		<div>
+				<h4>什么是 Go 步行者？</h4>
+				<p>Go 步行者是一个用于在线生成并浏览 <a target="_blank" href="http://golang.org/">Go</a> 项目 <b>源码</b> 文档的 Web 服务器，目前仅支持 Bitbucket、Github、Google Project Hosting 和 Launchpad 四大版本控制系统。该服务器所产生的 <b>不只是</b> API 文档， 如果您仅希望查看此类文档，<a target="_blank" href="http://godoc.org/">GoDoc</a> 才是最合适的地方。</p>
+				<p class="text-success">如果您想了解如何向 Go 步行者添加开源项目或查看所有给力的功能，请仔细阅读 <a href="/about?lang={{.Lang}}">关于</a> 页面。</p>
 			</div>
-			<h4>什么是 Go 步行者？</h4>
-			<p>Go 步行者是一款用于抓取 <a href="http://golang.org/">Go</a> 开源项目代码并在线生成文档的文档浏览服务器，目前支持托管在 Bitbucket、Github、Google Project Hosting 和 Launchpad 四大版本控制系统上的开源项目。该项目目前的用户界面和开发初衷均基于 <a href="http://godoc.org/">GoDoc</a>，但提供更多的功能。</p>
-			<p>请仔细阅读  <a href="/zh/about">关于页面</a> 以了解如何向 Go 步行者添加或删除您的开源项目和以及其它相关信息。</p>
 			<div class="row">
 				<div class="span6">
-					<h4>最近浏览项目</h4>
-					<ul class="unstyled">
-						{{range .RecentPkgs}}
-						<li><a href="/zh/search?q={{.}}">{{.}}</a></li>
-						{{end}}
-					</ul>
+					<h4>看看其他人都在关注什么。</h4>
+					<table class="table table-bordered table-hover">
+						<thead>
+							<tr>
+								<th>项目路径</th>
+								<th>浏览时间</th>
+							</tr>
+						</thead>
+						<tbody>
+							{{$lang := .Lang}}
+							{{range .RecentPros}}
+							<tr>
+								<td><a href="/{{.Path}}?lang={{$lang}}">{{.Path}}</a>{{if .IsGoRepo}} <span class="label label-info">标准库</span>{{end}}</td>
+								<td>{{.ViewedTime}}</td>
+							</tr>
+							{{end}}
+						</tbody>
+					</table>
+					<h4>站点开发进度：9%</h4>
+					<div class="span6" style="width:90%">
+    					<div class="progress progress-striped active">
+    						<div class="bar" style="width: 9%;"></div>
+    					</div>
+    				</div>
 				</div>
 				<div class="span6">
 					<div class="span6">
 						<h4>热门项目</h4>
 						<ul class="unstyled">
-							{{range .PopularPkgs}}
-							<li><a href="/zh/search?q={{.Path}}">{{.Path}}</a></li>
+							{{$lang := .Lang}}
+							{{range .PopPros}}
+							<li><a href="/{{.Path}}?lang={{$lang}}">{{.Path}}</a> <span class="badge badge-important">{{.Views}}</span></li>
 							{{end}}
 						</ul>
 					</div>
 					<div class="span6">
 						<h4>更多项目</h4>
 						<ul class="unstyled">
-							<li><a href="/zh/index">索引</a></li>
-							<li><a href="/zh/search?q=gorepo">标准库</a></li>
-							<li><a href="https://code.google.com/p/go-wiki/wiki/Projects">Projects @ go-wiki</a></li>
-							<li><a href="http://godoc.org/">GoDoc</a></li>
+							<li><a href="/index?lang={{.Lang}}">索引</a></li>
+							<li><a href="/search?lang={{.Lang}}&q=gorepo">标准库</a></li>
+							<li><a target="_blank" href="https://code.google.com/p/go-wiki/wiki/Projects">Projects @ go-wiki</a></li>
+						</ul>
+					</div>
+					<div class="span6">
+						<h4>API 文档</h4>
+						<ul class="unstyled">
+							<li><a target="_blank" href="http://godoc.org/">GoDoc</a></li>
 						</ul>
 					</div>
 				</div>
 			</div>
 			<div class="container">
-				<div class="flat-well well-small">
-					<a href="https://github.com/Unknwon">@Unknown</a>
+				<div class="flat-well well-small" style="background-color: #f5f5f5">
+					<a target="_blank" href="https://github.com/Unknwon"><i class="icon-user"></i> @Unknown</a>
 					<span class="muted">|</span>
-					<a href="mailto:joe2010xtmf@163.com">反馈</a>
+					<a href="mailto:joe2010xtmf@163.com"><i class="icon-envelope"></i> 反馈</a>
 					<span class="muted">|</span>
-					<a href="https://github.com/Unknwon/gowalker/issues">问题提交</a>
+					<a target="_blank" href="https://github.com/Unknwon/gowalker/issues"><i class="icon-tasks"></i> 问题提交</a>
 					<span class="muted">|</span>
-					<a href="/en/">English</a>
-					<span class="pull-right"><a href="#">返回顶部</a></span>
+					    <div class="btn-group dropup ">
+						    <a class="btn dropdown-toggle" data-toggle="dropdown">{{.CurLang}} <span class="caret"></span></a>
+						    <ul class="dropdown-menu">
+						    	{{range .RestLangs}}
+						    	<li><a href="/?lang={{.Lang}}">{{.Name}}</a></li>
+						    	{{end}}
+						    </ul>
+					    </div>
+					<span class="pull-right"><a class="btn" href="#">返回顶部</a></span>
 				</div>
 			</div>
 		</div>

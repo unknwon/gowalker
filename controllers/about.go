@@ -25,15 +25,14 @@ type AboutController struct {
 // Get implemented Get method for AboutController.
 // It serves about page of Go Walker.
 func (this *AboutController) Get() {
-	// Check language version
-	lang, ok := isValidLanguage(this.Ctx.Request.RequestURI)
-	if !ok {
-		// English is default language version
-		this.Redirect("/en/about", 302)
-		return
-	}
+	// Get language version
+	curLang, restLangs := getLangVer(this.Input().Get("lang"))
 
 	// Set properties
-	this.TplNames = "about_" + lang + ".html"
 	this.Layout = "layout.html"
+	this.TplNames = "about_" + curLang.Lang + ".html"
+
+	this.Data["Lang"] = curLang.Lang
+	this.Data["CurLang"] = curLang.Name
+	this.Data["RestLangs"] = restLangs
 }
