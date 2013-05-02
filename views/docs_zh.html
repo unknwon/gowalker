@@ -39,10 +39,12 @@
 			{{if .IsHasConst}}<li><a href="#_constants">Constants</a></li>{{end}}
 			{{if .IsHasVar}}<li><a href="#_variables">Variables</a></li>{{end}}
 			{{with .Funcs}}{{range .}}<li><a href="#{{.Name}}">{{.Decl}}</a></li>{{end}}{{end}}
-			{{with .Types}}{{range .}}<li><a href="#{{.Name}}">type {{.Name}}</a></li>
-			{{range .Funcs}}<ul><li><a href="#{{.Name}}">{{.Decl}}</a></li></ul>{{end}}
-			{{range .Methods}}<ul><li><a href="#{{.Name}}">{{.Decl}}</a></li>
-			</ul>{{end}}{{end}}{{end}}</ul>
+			{{range .Types}}
+				{{$typeName := .Name}}
+				<li><a href="#{{.Name}}">type {{.Name}}</a></li>
+				{{range .Funcs}}<ul><li><a href="#{{$typeName}}_{{.Name}}">{{.Decl}}</a></li></ul>{{end}}
+				{{range .Methods}}<ul><li><a href="#{{$typeName}}_{{.Name}}">{{.Decl}}</a></li></ul>{{end}}
+			{{end}}</ul>
 			{{if .IsHasConst}}
 				<h3 id="_constants">Constants</h3>
 				{{with .Consts}}
@@ -63,26 +65,40 @@
 			{{end}}
 			{{with .Funcs}}
 				{{range .}}
-					<h3 id="{{.Name}}">func <a target="_blank" href="{{.URL}}">{{.Name}}</a></h3>
+					<h3 id="{{.Name}}">func <a target="_blank" href="{{.URL}}">{{.Name}}</a> <small><a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion" href="#collapse_{{.Name}}">查看代码</a></small></h3>
 					<pre>{{str2html .FmtDecl}}</pre>
 					<p>{{str2html .Doc}}</p>
+	    			<div class="accordion" id="accordion">
+	 					<div id="collapse_{{.Name}}" class="accordion-body collapse">
+							<pre class="accordion-inner">{{.Code}}</pre>
+						</div>
+	    			</div>
 				{{end}}
 			{{end}}
-			{{with .Types}}
-				{{range .}}
-					<h3 id="{{.Name}}">type <a target="_blank" href="{{.URL}}">{{.Name}}</a></h3>
-					<pre class="pre-x-scrollable">{{str2html .FmtDecl}}</pre>
+			{{range .Types}}
+				{{$typeName := .Name}}
+				<h3 id="{{.Name}}">type <a target="_blank" href="{{.URL}}">{{.Name}}</a></h3>
+				<pre class="pre-x-scrollable">{{str2html .FmtDecl}}</pre>
+				<p>{{str2html .Doc}}</p>
+				{{range .Funcs}}
+					<h4 id="{{$typeName}}_{{.Name}}">func <a target="_blank" href="{{.URL}}">{{.Name}}</a> <small><a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion" href="#collapse_{{$typeName}}_{{.Name}}">查看代码</a></small></h4>
+					<pre>{{str2html .FmtDecl}}</pre>
 					<p>{{str2html .Doc}}</p>
-					{{range .Funcs}}
-						<h4 id="{{.Name}}">func <a target="_blank" href="{{.URL}}">{{.Name}}</a></h4>
-						<pre>{{str2html .FmtDecl}}</pre>
-						<p>{{str2html .Doc}}</p>
-					{{end}}
-					{{range .Methods}}
-						<h4 id="{{.Name}}">func <a target="_blank" href="{{.URL}}">{{.Name}}</a></h4>
-						<pre>{{str2html .FmtDecl}}</pre>
-						<p>{{str2html .Doc}}</p>
-					{{end}}
+		    		<div class="accordion" id="accordion">
+	 					<div id="collapse_{{$typeName}}_{{.Name}}" class="accordion-body collapse">
+							<pre class="accordion-inner">{{.Code}}</pre>
+						</div>
+		   			</div>
+				{{end}}
+				{{range .Methods}}
+					<h4 id="{{$typeName}}_{{.Name}}">func <a target="_blank" href="{{.URL}}">{{.Name}}</a> <small><a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion" href="#collapse_{{$typeName}}_{{.Name}}">查看代码</a></small></h4>
+					<pre>{{str2html .FmtDecl}}</pre>
+					<p>{{str2html .Doc}}</p>
+		   			<div class="accordion" id="accordion">
+		 				<div id="collapse_{{$typeName}}_{{.Name}}" class="accordion-body collapse">
+							<pre class="accordion-inner">{{.Code}}</pre>
+						</div>
+		    		</div>
 				{{end}}
 			{{end}}
 			<h3 id="_files"><a target="_blank" href="{{.ProPath}}">Files</a></h3>

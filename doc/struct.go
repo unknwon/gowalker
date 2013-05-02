@@ -114,10 +114,11 @@ func (s *source) Sys() interface{}   { return nil }
 
 // walker holds the state used when building the documentation.
 type walker struct {
-	lineFmt string
-	pdoc    *Package
-	srcs    map[string]*source // Source files.
-	mldocs  map[string]*source // Multi-language documentation.
-	fset    *token.FileSet
-	buf     []byte // scratch space for printNode method.
+	lineFmt  string
+	pdoc     *Package
+	srcLines map[string][]string // Source files with line arrays.
+	srcs     map[string]*source  // Source files.
+	mldocs   map[string]*source  // Multi-language documentation.
+	fset     *token.FileSet
+	buf      []byte // scratch space for printNode method.
 }

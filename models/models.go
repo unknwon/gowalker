@@ -251,7 +251,7 @@ func GetPopularPros() ([]*PkgInfo, error) {
 	defer q.Db.Close()
 
 	var pkgInfos []*PkgInfo
-	err = q.Where("views > ?", 0).Limit(15).OrderByDesc("views").FindAll(&pkgInfos)
+	err = q.Where("views > ?", 0).Limit(25).OrderByDesc("views").FindAll(&pkgInfos)
 	return pkgInfos, err
 }
 

@@ -173,24 +173,56 @@ func (b *walker) printNode(node interface{}) string {
 	return string(b.buf)
 }
 
-func (b *walker) printDecl(decl ast.Node) string {
+func (w *walker) printDecl(decl ast.Node) string {
 	var d Code
-	d, b.buf = printDecl(decl, b.fset, b.buf)
+	d, w.buf = printDecl(decl, w.fset, w.buf)
 	return d.Text
 }
 
-func (b *walker) printPos(pos token.Pos) string {
-	position := b.fset.Position(pos)
-	src := b.srcs[position.Filename]
+func (w *walker) printPos(pos token.Pos) string {
+	position := w.fset.Position(pos)
+	src := w.srcs[position.Filename]
 	if src == nil || src.browseURL == "" {
 		// src can be nil when line comments are used (//line <file>:<line>).
 		return ""
 	}
-	return src.browseURL + fmt.Sprintf(b.lineFmt, position.Line)
+	return src.browseURL + fmt.Sprintf(w.lineFmt, position.Line)
 }
 
 func (w *walker) printCode(decl ast.Node) string {
-	return "doc.printCode(): Test Error."
+	pos := decl.Pos()
+	posPos := w.fset.Position(pos)
+	src := w.srcs[posPos.Filename]
+	if src == nil || src.browseURL == "" {
+		// src can be nil when line comments are used (//line <file>:<line>).
+		return ""
+	}
+
+	var code []string
+	code, ok := w.srcLines[posPos.Filename]
+	// Check source file line arrays.
+	if !ok {
+		w.srcLines[posPos.Filename] = strings.Split(string(src.data), "\n")
+		code = w.srcLines[posPos.Filename]
+	}
+
+	// Get code.
+	var buf bytes.Buffer
+	l := len(code)
+	for i := posPos.Line; i < l; i++ {
+		// Check end of code block.
+		switch {
+		case code[i] == "}":
+			break
+		case i < (l-1) && len(code[i+1]) == 0 && code[i][len(code[i])] == '}':
+			buf.WriteString(code[i])
+			break
+		}
+
+		buf.WriteString(code[i])
+		buf.WriteByte('\n')
+	}
+	return buf.String()
 }
 
 func (w *walker) values(vdocs []*doc.Value) []*Value {
@@ -358,6 +390,7 @@ func (w *walker) build(srcs []*source) (*Package, error) {
 	w.pdoc.GOOS = ctxt.GOOS
 	w.pdoc.GOARCH = ctxt.GOARCH
 
+	w.srcLines = make(map[string][]string)
 	w.pdoc.Consts = w.values(pdoc.Consts)
 	w.pdoc.Funcs = w.funcs(pdoc.Funcs)
 	w.pdoc.Types = w.types(pdoc.Types)
