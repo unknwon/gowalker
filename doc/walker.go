@@ -176,7 +176,7 @@ func (b *walker) printNode(node interface{}) string {
 func (w *walker) printDecl(decl ast.Node) string {
 	var d Code
 	d, w.buf = printDecl(decl, w.fset, w.buf)
-	return d.Text
+	return strings.Replace(d.Text, "\"", "'", -1)
 }
 
 func (w *walker) printPos(pos token.Pos) string {
