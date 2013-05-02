@@ -216,7 +216,7 @@ CutCode:
 		case code[i] == "}": // Normal end.
 			break CutCode
 		case (len(code[i]) == 0 && len(code[i-1]) == 1 && code[i-1][0] == '}') ||
-			(len(code[i]) > 4 && code[i][:4] == "func"): // One line functions.
+			(len(code[i]) > 4 && (code[i][:4] == "func" || code[i][0] == '/')): // One line functions.
 			line := code[i-1]
 			buf.WriteString("   ")
 			buf.WriteString(line[strings.Index(line, "{")+1 : len(line)-1])
