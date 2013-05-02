@@ -215,10 +215,9 @@ CutCode:
 		switch {
 		case code[i] == "}": // Normal end.
 			break CutCode
-		case (len(code[i]) == 0 && code[i-1][len(code[i-1])-1] == '}') ||
+		case (len(code[i]) == 0 && len(code[i-1]) == 1 && code[i-1][0] == '}') ||
 			(len(code[i]) > 4 && code[i][:4] == "func"): // One line functions.
 			line := code[i-1]
-			fmt.Println(line)
 			buf.WriteString("   ")
 			buf.WriteString(line[strings.Index(line, "{")+1 : len(line)-1])
 			buf.WriteByte('\n')
@@ -229,6 +228,10 @@ CutCode:
 		buf.WriteByte('\n')
 	}
 	return buf.String()
+}
+
+func writeSingleLineFunc(buf *bytes.Buffer, line string) {
+
 }
 
 func (w *walker) values(vdocs []*doc.Value) []*Value {
