@@ -96,8 +96,6 @@ func (this *HomeController) Get() {
 	this.Data["PopPros"] = pkgInfos
 
 	this.Data["DataSrc"] = utils.GoRepoSet
-	this.Data["RecentPros"] = recentViewedPros
-	//this.Data["PopPros"] = temp
 	this.Data["Lang"] = curLang.Lang
 	this.Data["CurLang"] = curLang.Name
 	this.Data["RestLangs"] = restLangs

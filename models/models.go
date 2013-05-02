@@ -254,3 +254,47 @@ func GetPopularPros() ([]*PkgInfo, error) {
 	err = q.Where("views > ?", 0).Limit(15).OrderByDesc("views").FindAll(&pkgInfos)
 	return pkgInfos, err
 }
+
+// GetGoRepo gets go standard library
+func GetGoRepo() ([]*PkgInfo, error) {
+	// Connect to database.
+	q, err := connDb()
+	if err != nil {
+		beego.Info("models.GetGoRepo():", err)
+	}
+	defer q.Db.Close()
+
+	var pkgInfos []*PkgInfo
+	condition := qbs.NewCondition("pro_name = ?", "Go").And("views > ?", 0)
+	err = q.Condition(condition).OrderBy("path").FindAll(&pkgInfos)
+	return pkgInfos, err
+}
+
+// SearchDoc gets packages that contain keyword
+func SearchDoc(key string) ([]*PkgInfo, error) {
+	// Connect to database.
+	q, err := connDb()
+	if err != nil {
+		beego.Info("models.SearchDoc():", err)
+	}
+	defer q.Db.Close()
+
+	var pkgInfos []*PkgInfo
+	condition := qbs.NewCondition("path like ?", "%"+key+"%").And("views > ?", 0)
+	err = q.Condition(condition).OrderBy("path").FindAll(&pkgInfos)
+	return pkgInfos, err
+}
+
+// GetAllPkgs gets all packages in database
+func GetAllPkgs() ([]*PkgInfo, error) {
+	// Connect to database.
+	q, err := connDb()
+	if err != nil {
+		beego.Info("models.GetAllPkgs():", err)
+	}
+	defer q.Db.Close()
+
+	var pkgInfos []*PkgInfo
+	err = q.Where("views > ?", 0).OrderBy("path").FindAll(&pkgInfos)
+	return pkgInfos, err
+}

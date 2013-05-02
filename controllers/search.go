@@ -103,10 +103,13 @@ func (this *SearchController) Get() {
 		}
 	}
 
-	// Returns a slice of results.
-
-	/* TODO */
-
+	// Returns a slice of results
+	pkgInfos, _ := models.SearchDoc(rawPath)
+	// Show results after searched
+	if len(pkgInfos) > 0 {
+		this.Data["IsFindPro"] = true
+		this.Data["AllPros"] = pkgInfos
+	}
 }
 
 // checkSpecialUsage checks special usage of keywords.
@@ -115,9 +118,12 @@ func checkSpecialUsage(this *SearchController, q string) bool {
 	switch {
 	case q == "gorepo":
 		// Show list of standard library
-
-		/* TODO */
-
+		pkgInfos, _ := models.GetGoRepo()
+		// Show results after searched
+		if len(pkgInfos) > 0 {
+			this.Data["IsFindPro"] = true
+			this.Data["AllPros"] = pkgInfos
+		}
 		return true
 	}
 

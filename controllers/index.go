@@ -15,6 +15,7 @@
 package controllers
 
 import (
+	"github.com/Unknwon/gowalker/models"
 	"github.com/astaxie/beego"
 )
 
@@ -32,23 +33,12 @@ func (this *IndexController) Get() {
 	this.Layout = "layout.html"
 	this.TplNames = "index_" + curLang.Lang + ".html"
 
-	temp := []proSyno{}
-	temp = append(temp, proSyno{
-		Path:     "github.com/Unknwon/gowalker",
-		Synopsis: "fucking aswone project",
-	})
-	temp = append(temp, proSyno{
-		Path:     "github.com/coocood/qbs",
-		Synopsis: "Package net/http is for http operations",
-	})
+	// Get all packages
+	pkgInfos, _ := models.GetAllPkgs()
+	this.Data["AllPros"] = pkgInfos
+	this.Data["ProNum"] = len(pkgInfos)
 
-	this.Data["AllPros"] = temp
-	this.Data["ProNum"] = len(temp)
 	this.Data["Lang"] = curLang.Lang
 	this.Data["CurLang"] = curLang.Name
 	this.Data["RestLangs"] = restLangs
-}
-
-type proSyno struct {
-	Path, Synopsis string
 }
