@@ -13,7 +13,7 @@
 					</ul>
 					<form class="navbar-search pull-right" action="/search">
 						<input type="hidden" name="lang" value="{{.Lang}}" />
-						<input class="search-query" type="text" placeholder="搜索项目" name="q"></input>
+						<input class="search-query" type="text" placeholder="搜索项目" autofocus="autofocus" name="q"></input>
 					</form>
 				</div>
 			</div>
@@ -25,7 +25,7 @@
 				<form action="/search">
 					<div class="input-append">
 						<input type="hidden" name="lang" value="{{.Lang}}" />
-						<input autocomplete="off" class="span6" type="text" placeholder="请输入项目路径或关键字" value="{{.Keyword}}" autofocus="autofocus" name="q" data-source="[{{str2html .DataSrc}}]" data-items="8" data-provide="typeahead"></input>
+						<input autocomplete="off" class="span6" type="text" placeholder="请输入项目路径或关键字" value="{{.Keyword}}" name="q" data-source="[{{str2html .DataSrc}}]" data-items="8" data-provide="typeahead"></input>
 						<button class="btn" type="submit"><i class="icon-search"></i> 手气不错</button>
 					</div>
 				</form>
