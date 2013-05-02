@@ -209,14 +209,20 @@ func (w *walker) printCode(decl ast.Node) string {
 	// Get code.
 	var buf bytes.Buffer
 	l := len(code)
+CutCode:
 	for i := posPos.Line; i < l; i++ {
 		// Check end of code block.
 		switch {
-		case code[i] == "}":
-			break
-		case i < (l-1) && len(code[i+1]) == 0 && code[i][len(code[i])] == '}':
-			buf.WriteString(code[i])
-			break
+		case code[i] == "}": // Normal end.
+			break CutCode
+		case (len(code[i]) == 0 && code[i-1][len(code[i-1])-1] == '}') ||
+			(len(code[i]) > 4 && code[i][:4] == "func"): // One line functions.
+			line := code[i-1]
+			fmt.Println(line)
+			buf.WriteString("   ")
+			buf.WriteString(line[strings.Index(line, "{")+1 : len(line)-1])
+			buf.WriteByte('\n')
+			break CutCode
 		}
 
 		buf.WriteString(code[i])

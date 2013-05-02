@@ -68,13 +68,13 @@
 				<p>{{str2html .Doc}}</p>	
     			<div class="accordion" id="accordion">
  					<div id="collapse_{{.Name}}" class="accordion-body collapse">
-						<pre class="accordion-inner">{{.Code}}</pre>
+						<pre class="accordion-inner">{{str2html .FmtDecl}} {<br />{{.Code}}}</pre>
 					</div>
     			</div>
 			{{end}}
 			{{range .Types}}
 				{{$typeName := .Name}}
-				<h3 id="{{$typeName}}_{{.Name}}">type <a target="_blank" href="{{.URL}}">{{.Name}}</a></h3>
+				<h3 id="{{.Name}}">type <a target="_blank" href="{{.URL}}">{{.Name}}</a></h3>
 				<pre class="pre-x-scrollable">{{str2html .FmtDecl}}</pre>
 				<p>{{str2html .Doc}}</p>
 				{{range .Funcs}}
@@ -83,7 +83,7 @@
 					<p>{{str2html .Doc}}</p>
 		    		<div class="accordion" id="accordion">
 		 				<div id="collapse_{{$typeName}}_{{.Name}}" class="accordion-body collapse">
-							<pre class="accordion-inner">{{.Code}}</pre>
+							<pre class="accordion-inner">{{str2html .FmtDecl}} {<br />{{.Code}}}</pre>
 						</div>
 	    			</div>
 				{{end}}
@@ -93,7 +93,7 @@
 					<p>{{str2html .Doc}}</p>
 		   			<div class="accordion" id="accordion">
 		 				<div id="collapse_{{$typeName}}_{{.Name}}" class="accordion-body collapse">
-							<pre class="accordion-inner">{{.Code}}</pre>
+							<pre class="accordion-inner">{{str2html .FmtDecl}} {<br />{{.Code}}}</pre>
 						</div>
 		   			</div>
 				{{end}}
