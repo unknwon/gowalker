@@ -49,18 +49,12 @@
 							{{$lang := .Lang}}
 							{{range .RecentPros}}
 							<tr>
-								<td><a href="/{{.Path}}?lang={{$lang}}">{{.Path}}</a>{{if .IsGoRepo}} <span class="label label-info">标准库</span>{{end}}</td>
+								<td><a href="/search?lang={{$lang}}&q={{.Path}}">{{.Path}}</a>{{if .IsGoRepo}} <span class="label label-info">标准库</span>{{end}}</td>
 								<td>{{.ViewedTime}}</td>
 							</tr>
 							{{end}}
 						</tbody>
 					</table>
-					<h4>站点开发进度：9%</h4>
-					<div class="span6" style="width:90%">
-    					<div class="progress progress-striped active">
-    						<div class="bar" style="width: 9%;"></div>
-    					</div>
-    				</div>
 				</div>
 				<div class="span6">
 					<div class="span6">
@@ -68,7 +62,7 @@
 						<ul class="unstyled">
 							{{$lang := .Lang}}
 							{{range .PopPros}}
-							<li><a href="/{{.Path}}?lang={{$lang}}">{{.Path}}</a> <span class="badge badge-important">{{.Views}}</span></li>
+							<li><a href="/search?lang={{$lang}}&q={{.Path}}">{{.Path}}</a> <span class="badge badge-important">{{.Views}}</span></li>
 							{{end}}
 						</ul>
 					</div>
@@ -86,6 +80,12 @@
 							<li><a target="_blank" href="http://godoc.org/">GoDoc</a></li>
 						</ul>
 					</div>
+					<h4>站点开发进度：18%</h4>
+					<div class="span6" style="width:90%">
+    					<div class="progress progress-striped active">
+    						<div class="bar" style="width: 9%;"></div>
+    					</div>
+    				</div>
 				</div>
 			</div>
 			<div class="container">
@@ -99,9 +99,9 @@
 					    <div class="btn-group dropup ">
 						    <a class="btn dropdown-toggle" data-toggle="dropdown">{{.CurLang}} <span class="caret"></span></a>
 						    <ul class="dropdown-menu">
-						    	{{range .RestLangs}}
-						    	<li><a href="/?lang={{.Lang}}">{{.Name}}</a></li>
-						    	{{end}}
+						    {{range .RestLangs}}
+								<li><a href="/?lang={{.Lang}}">{{.Name}}</a></li>
+						    {{end}}
 						    </ul>
 					    </div>
 					<span class="pull-right"><a class="btn" href="#">返回顶部</a></span>

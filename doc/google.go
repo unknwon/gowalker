@@ -68,20 +68,16 @@ func getStandardDoc(client *http.Client, importPath string, savedEtag string) (p
 		return nil, err
 	}
 
-	/* TODO:WORKING */
-
-	/*w := &walker{
+	// Start generating data.
+	w := &walker{
 		lineFmt: "#%d",
 		pdoc: &Package{
 			ImportPath:  importPath,
-			ProjectRoot: "http://code.google.com/p/go/source/browse/src/pkg/",
 			ProjectName: "Go",
-			ProjectURL:  "https://code.google.com/p/go/",
-			BrowseURL:   "http://code.google.com/p/go/source/browse/src/pkg/" + importPath + "?name=release",
-			VCS:         "hg",
 		},
 	}
 
-	return w.build(files)*/
-	return nil, errors.New("doc.getStandardDoc(): Test Error.")
+	/* TODO:WORKING */
+
+	return w.build(files)
 }

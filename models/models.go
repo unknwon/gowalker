@@ -33,12 +33,13 @@ const (
 
 // PkgInfo is package information.
 type PkgInfo struct {
-	Path     string `qbs:"pk,index"` // Import path of package.
-	Synopsis string
-	Views    int64     `qbs:"index"`
-	Created  time.Time `qbs:"index"` // Time when information last updated.
-	ProName  string    // Name of the project.
-	Etag     string    // Revision tag.
+	Path       string `qbs:"pk,index"` // Import path of package.
+	Synopsis   string
+	Views      int64     `qbs:"index"`
+	Created    time.Time `qbs:"index"` // Time when information last updated.
+	ViewedTime string    // User viewed time.
+	ProName    string    // Name of the project.
+	Etag       string    // Revision tag.
 }
 
 // PkgDecl is package declaration in database acceptable form.
@@ -137,8 +138,10 @@ func SaveProject(pinfo *PkgInfo, pdecl *PkgDecl, pdoc *PkgDoc) error {
 	if err != nil {
 		_, err = q.Save(pinfo)
 	} else {
+		t := pinfo.Created.String()
 		info.Synopsis = pinfo.Synopsis
 		info.Created = pinfo.Created
+		info.ViewedTime = t[:19]
 		info.ProName = pinfo.ProName
 		_, err = q.Save(info)
 	}
@@ -153,9 +156,11 @@ func SaveProject(pinfo *PkgInfo, pdecl *PkgDecl, pdoc *PkgDoc) error {
 	}
 
 	// Save package documentation
-	_, err = q.Save(pdoc)
-	if err != nil {
-		beego.Info("models.SaveProject(): Documentation:", err)
+	if len(pdoc.Doc) > 0 {
+		_, err = q.Save(pdoc)
+		if err != nil {
+			beego.Info("models.SaveProject(): Documentation:", err)
+		}
 	}
 
 	return nil
@@ -192,4 +197,60 @@ func DeleteProject(path string) error {
 	}
 
 	return nil
+}
+
+// LoadProject gets package declaration from database.
+func LoadProject(path string) (*PkgDecl, error) {
+	// Connect to database.
+	q, err := connDb()
+	if err != nil {
+		beego.Info("models.SaveProject():", err)
+	}
+	defer q.Db.Close()
+
+	pdecl := &PkgDecl{Path: path}
+	err = q.WhereEqual("path", path).Find(pdecl)
+	return pdecl, err
+}
+
+// GetRecentPros gets recent viewed projects from database
+func GetRecentPros(num int) ([]*PkgInfo, error) {
+	// Connect to database.
+	q, err := connDb()
+	if err != nil {
+		beego.Info("models.GetRecentPros():", err)
+	}
+	defer q.Db.Close()
+
+	var pkgInfos []*PkgInfo
+	err = q.Where("views > ?", 0).Limit(num).OrderByDesc("viewed_time").FindAll(&pkgInfos)
+	return pkgInfos, err
+}
+
+// AddViews add views in database by 1 each time
+func AddViews(pinfo *PkgInfo) error {
+	// Connect to database.
+	q, err := connDb()
+	if err != nil {
+		beego.Info("models.AddViews():", err)
+	}
+	defer q.Db.Close()
+
+	pinfo.Views++
+	_, err = q.Save(pinfo)
+	return err
+}
+
+// GetPopularPros gets most viewed projects from database
+func GetPopularPros() ([]*PkgInfo, error) {
+	// Connect to database.
+	q, err := connDb()
+	if err != nil {
+		beego.Info("models.GetPopularPros():", err)
+	}
+	defer q.Db.Close()
+
+	var pkgInfos []*PkgInfo
+	err = q.Where("views > ?", 0).Limit(15).OrderByDesc("views").FindAll(&pkgInfos)
+	return pkgInfos, err
 }

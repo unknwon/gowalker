@@ -76,18 +76,24 @@ func FormatCode(w io.Writer, code string, links []*Link) {
 			pos++
 		}
 
-		seg := code[last:pos]
+		seg := code[last : pos+1]
 		switch {
 		case isComment:
 			isComment = false
-			fmt.Fprintf(w, `%s<span class="com">%s</span>`, seg[:1], seg[1:])
+			fmt.Fprintf(w, `<span class="com">%s</span>`, seg)
 		case pos-last > 1 && !isString:
+			// Check if the last word of the paragraphy
+			l := len(seg)
+			if pos+1 == length {
+				l++
+			}
 			// Check links
-			link, ok := findType(seg[1:], links)
+			link, ok := findType(seg[:l-1], links)
 			if ok {
 				switch {
 				case len(link.Path) == 0 && len(link.Name) > 0:
-					fmt.Fprintf(w, `%s<a title="%s" href="#%s">%s</a>`, seg[:1], link.Comment, link.Name, link.Name)
+					fmt.Fprintf(w, `<a title="%s" href="#%s">%s</a>%s`,
+						link.Comment, link.Name, link.Name, seg[l-1:])
 				}
 			} else {
 				fmt.Fprintf(w, "%s", seg)
@@ -96,12 +102,12 @@ func FormatCode(w io.Writer, code string, links []*Link) {
 			fmt.Fprintf(w, "%s", seg)
 		}
 
-		last = pos
+		last = pos + 1
 		pos++
 		// End of code
 		if pos == length {
 			fmt.Fprintf(w, "%s", code[last:])
-			break
+			return
 		}
 	}
 }

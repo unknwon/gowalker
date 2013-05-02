@@ -33,10 +33,6 @@ type crawlResult struct {
 
 // crawlDoc fetchs package from VCS
 func crawlDoc(path string, etag string) (pdoc *Package, err error) {
-	if utils.IsGoRepoPath(path) {
-		path = "code.google.com/p/go/source/browse/src/pkg/" + path
-	}
-
 	// I have no idea what the fuck does this mean.
 	if i := strings.Index(path, "/libgo/go/"); i > 0 && utils.IsGoRepoPath(path[i+len("/libgo/go/"):]) {
 		// Go Frontend source tree mirror.
@@ -82,26 +78,29 @@ func getRepo(client *http.Client, importPath string, etag string) (pdoc *Package
 		etag = ""
 	}
 
-	i := strings.Index(importPath, "/src/pkg/")
-
 	switch {
-	case utils.IsGoRepoPath(importPath[i+len("/src/pkg/"):]):
+	case utils.IsGoRepoPath(importPath):
 
 		/* TODO:WORKING */
 
-		pdoc, err = getStandardDoc(client, importPath[i+len("/src/pkg/"):], etag)
+		pdoc, err = getStandardDoc(client, importPath, etag)
+	default:
+		return nil, errors.New("doc.getRepo(): Test Error.")
 	}
 	return pdoc, err
 }
 
 // SaveProject saves project information to database.
 func SaveProject(pdoc *Package) error {
+
+	t := time.Now().UTC().String()
 	// Save package information.
 	pinfo := &models.PkgInfo{
-		Path:     pdoc.ImportPath,
-		Synopsis: pdoc.Synopsis,
-		Created:  time.Now().Local(),
-		ProName:  pdoc.ProjectName,
+		Path:       pdoc.ImportPath,
+		Synopsis:   pdoc.Synopsis,
+		Created:    time.Now().UTC(),
+		ViewedTime: t[:19],
+		ProName:    pdoc.ProjectName,
 	}
 
 	// Save package declaration.
@@ -137,13 +136,39 @@ func SaveProject(pdoc *Package) error {
 		buf.WriteString(v.Name)
 		buf.WriteString("&T#")
 		buf.WriteString(v.Doc)
-		buf.WriteString("&F#")
+		buf.WriteString("&T#")
 		buf.WriteString(v.Decl)
 		buf.WriteString("&T#")
-		buf.WriteString(v.FmtDecl)
-		buf.WriteString("&T#")
 		buf.WriteString(v.URL)
-		buf.WriteString("&T#")
+		buf.WriteString("&$#")
+		// Functions.
+		for _, m := range v.Funcs {
+			buf.WriteString(m.Name)
+			buf.WriteString("&F#")
+			buf.WriteString(m.Doc)
+			buf.WriteString("&F#")
+			buf.WriteString(m.Decl)
+			buf.WriteString("&F#")
+			buf.WriteString(m.URL)
+			buf.WriteString("&F#")
+			buf.WriteString(m.Code)
+			buf.WriteString("&M#")
+		}
+		buf.WriteString("&$#")
+		for _, m := range v.IFuncs {
+			buf.WriteString(m.Name)
+			buf.WriteString("&F#")
+			buf.WriteString(m.Doc)
+			buf.WriteString("&F#")
+			buf.WriteString(m.Decl)
+			buf.WriteString("&F#")
+			buf.WriteString(m.URL)
+			buf.WriteString("&F#")
+			buf.WriteString(m.Code)
+			buf.WriteString("&M#")
+		}
+		buf.WriteString("&$#")
+
 		// Methods.
 		for _, m := range v.Methods {
 			buf.WriteString(m.Name)
@@ -152,22 +177,18 @@ func SaveProject(pdoc *Package) error {
 			buf.WriteString("&F#")
 			buf.WriteString(m.Decl)
 			buf.WriteString("&F#")
-			buf.WriteString(m.FmtDecl)
-			buf.WriteString("&F#")
 			buf.WriteString(m.URL)
 			buf.WriteString("&F#")
 			buf.WriteString(m.Code)
 			buf.WriteString("&M#")
 		}
-		buf.WriteString("&T#")
+		buf.WriteString("&$#")
 		for _, m := range v.IMethods {
 			buf.WriteString(m.Name)
 			buf.WriteString("&F#")
 			buf.WriteString(m.Doc)
 			buf.WriteString("&F#")
 			buf.WriteString(m.Decl)
-			buf.WriteString("&F#")
-			buf.WriteString(m.FmtDecl)
 			buf.WriteString("&F#")
 			buf.WriteString(m.URL)
 			buf.WriteString("&F#")
@@ -259,8 +280,6 @@ func addValues(buf *bytes.Buffer, pvals *string, vals []*Value) {
 		buf.WriteString("&V#")
 		buf.WriteString(v.Decl)
 		buf.WriteString("&V#")
-		buf.WriteString(v.FmtDecl)
-		buf.WriteString("&V#")
 		buf.WriteString(v.URL)
 		buf.WriteString("&$#")
 	}
@@ -274,8 +293,6 @@ func addFuncs(buf *bytes.Buffer, pfuncs *string, funcs []*Func) {
 		buf.WriteString(v.Doc)
 		buf.WriteString("&F#")
 		buf.WriteString(v.Decl)
-		buf.WriteString("&F#")
-		buf.WriteString(v.FmtDecl)
 		buf.WriteString("&F#")
 		buf.WriteString(v.URL)
 		buf.WriteString("&F#")

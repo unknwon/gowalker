@@ -1,0 +1,118 @@
+		<title>{{.ProName}} - Go 步行者</title>
+	</head>
+		
+	<body>
+		<div class="container">
+			<div class="navbar" style="margin-top: 20px">
+				<div class="navbar-inner">
+					<a class="brand" href="/?lang={{.Lang}}">Go 步行者</a>
+					<ul class="nav">
+						<li><a href="/?lang={{.Lang}}">首页</a></li>
+						<li><a href="/index?lang={{.Lang}}">索引</a></li>
+						<li><a href="/about?lang={{.Lang}}">关于</a></li>
+					</ul>
+					<form class="navbar-search pull-right" action="/search">
+						<input type="hidden" name="lang" value="{{.Lang}}" />
+						<input class="search-query" type="text" placeholder="搜索项目" name="q"></input>
+					</form>
+				</div>
+			</div>
+			{{if .IsRefresh}}
+			<div class="alert alert-success">
+				<button type="button" class="close" data-dismiss="alert">&times;</button><strong>  恭喜您！</strong> 您已经成功于 <i>{{.UtcTime}}</i> 刷新本项目文档！
+			</div>
+			{{end}}
+			{{if .IsGoRepo}}
+			<div class="alert alert-info">
+				<button type="button" class="close" data-dismiss="alert">&times;</button><strong>友情提示：</strong> Asta谢 在 github 上发起了 <strong>Go </strong> 标准库函数 <span class="label label-info">示例</span> 项目，每个函数都有相应操作示例，您绝对不容错过！点击这里访问：<a target="_blank" href="https://github.com/astaxie/gopkg/tree/master/{{.ImportPath}}" class="label label-success">gopkg</a>.
+			</div>
+			{{end}}
+			<div class="flat-well well-small" style="background-color: #f5f5f5">
+				<a target="_blank" href="http://{{.ProPath}}"><strong>{{.ProName}}:</strong></a> <a href="/search?q={{.ProDocPath}}">{{.ProDocPath}}</a><span class="muted">/{{.ProName}}</span>
+				<span class="pull-right"><span >您是本页面的第 <b>{{.Views}}</b> 位访问者。</span><span class="muted"> | </span><a href="#_index">索引</a><span class="muted"> | </span><a href="#_files">文件</a><span class="muted"> | </span><a href="#_subdirs">目录</a></span>
+			</div>
+			<h2>package {{.ProName}}</h2>
+			<p><code>import "{{.ImportPath}}"</code></p>
+			{{str2html .PkgFullIntro}}
+			<h3 id="_index">Index</h3>
+			<ul class="unstyled">
+			{{if .IsHasConst}}<li><a href="#_constants">Constants</a></li>{{end}}
+			{{if .IsHasVar}}<li><a href="#_variables">Variables</a></li>{{end}}
+			{{with .Funcs}}{{range .}}<li><a href="#{{.Name}}">{{.Decl}}</a></li>{{end}}{{end}}
+			{{with .Types}}{{range .}}<li><a href="#{{.Name}}">type {{.Name}}</a></li>
+			{{range .Funcs}}<ul><li><a href="#{{.Name}}">{{.Decl}}</a></li></ul>{{end}}
+			{{range .Methods}}<ul><li><a href="#{{.Name}}">{{.Decl}}</a></li>
+			</ul>{{end}}{{end}}{{end}}</ul>
+			{{if .IsHasConst}}
+				<h3 id="_constants">Constants</h3>
+				{{with .Consts}}
+					{{range .}}
+						<pre class="pre-x-scrollable">{{str2html .FmtDecl}}</pre>
+						<p>{{str2html .Doc}}</p>
+					{{end}}
+				{{end}}
+			{{end}}
+			{{if .IsHasVar}}
+				<h3 id="_variables">Variables</h3>
+				{{with .Vars}}
+					{{range .}}
+						<pre class="pre-x-scrollable">{{str2html .FmtDecl}}</pre>
+						<p>{{str2html .Doc}}</p>
+					{{end}}
+				{{end}}
+			{{end}}
+			{{with .Funcs}}
+				{{range .}}
+					<h3 id="{{.Name}}">func <a target="_blank" href="{{.URL}}">{{.Name}}</a></h3>
+					<pre>{{str2html .FmtDecl}}</pre>
+					<p>{{str2html .Doc}}</p>
+				{{end}}
+			{{end}}
+			{{with .Types}}
+				{{range .}}
+					<h3 id="{{.Name}}">type <a target="_blank" href="{{.URL}}">{{.Name}}</a></h3>
+					<pre class="pre-x-scrollable">{{str2html .FmtDecl}}</pre>
+					<p>{{str2html .Doc}}</p>
+					{{range .Funcs}}
+						<h4 id="{{.Name}}">func <a target="_blank" href="{{.URL}}">{{.Name}}</a></h4>
+						<pre>{{str2html .FmtDecl}}</pre>
+						<p>{{str2html .Doc}}</p>
+					{{end}}
+					{{range .Methods}}
+						<h4 id="{{.Name}}">func <a target="_blank" href="{{.URL}}">{{.Name}}</a></h4>
+						<pre>{{str2html .FmtDecl}}</pre>
+						<p>{{str2html .Doc}}</p>
+					{{end}}
+				{{end}}
+			{{end}}
+			<h3 id="_files"><a target="_blank" href="{{.ProPath}}">Files</a></h3>
+			<p>
+			{{$proPath := .ProPath}}
+			{{range .Files}}
+				<a target="_blank" href="http://{{$proPath}}/{{.}}">{{.}}</a>
+			{{end}}
+			</p>
+			<p>
+			项目 <b>{{.ProName}}</b> 共计导入 {{.ImportPkgNum}} 个外部包。Go 步行者在 <i>{{.UtcTime}}</i> 使用操作系统 GOOS={{.GOOS}} 和系统类型 GOARCH={{.GOARCH}} 生成了此页面。 <a href="/refresh?q={{.ImportPath}}">刷新文档</a>.
+			</p>
+			<div class="container">
+				<div class="flat-well well-small" style="background-color: #f5f5f5">
+					<a target="_blank" href="https://github.com/Unknwon"><i class="icon-user"></i> @Unknown</a>
+					<span class="muted">|</span>
+					<a href="mailto:joe2010xtmf@163.com"><i class="icon-envelope"></i> 反馈</a>
+					<span class="muted">|</span>
+					<a target="_blank" href="https://github.com/Unknwon/gowalker/issues"><i class="icon-tasks"></i> 问题提交</a>
+					<span class="muted">|</span>
+					<div class="btn-group dropup">
+						<a class="btn dropdown-toggle" data-toggle="dropdown">{{.CurLang}} <span class="caret"></span></a>
+						<ul class="dropdown-menu">
+						{{$keyword := .Keyword}}
+						{{range .RestLangs}}
+							<li><a href="/search?lang={{.Lang}}&q={{$keyword}}">{{.Name}}</a></li>
+						{{end}}
+						</ul>
+				    </div>
+					<span class="pull-right"><a class="btn" href="#">返回顶部</a></span>
+				</div>
+			</div>
+		</div>

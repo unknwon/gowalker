@@ -15,6 +15,7 @@
 package doc
 
 import (
+	"go/token"
 	"os"
 	"time"
 )
@@ -42,6 +43,8 @@ type Type struct {
 	Doc           string
 	Decl, FmtDecl string  // Normal and formatted form of declaration.
 	URL           string  // VCS URL.
+	Funcs         []*Func // Exported functions that return this type.
+	IFuncs        []*Func // Internal functions that return this type.
 	Methods       []*Func // Exported methods.
 	IMethods      []*Func // Internal methods.
 }
@@ -69,6 +72,9 @@ type Package struct {
 
 	// Time when information last updated.
 	Created time.Time `qbs:"index"`
+
+	Views      int64
+	ViewedTime string
 
 	// Top-level declarations.
 	Consts []*Value
@@ -105,3 +111,13 @@ func (s *source) Mode() os.FileMode  { return 0 }
 func (s *source) ModTime() time.Time { return time.Time{} }
 func (s *source) IsDir() bool        { return false }
 func (s *source) Sys() interface{}   { return nil }
+
+// walker holds the state used when building the documentation.
+type walker struct {
+	lineFmt string
+	pdoc    *Package
+	srcs    map[string]*source // Source files.
+	mldocs  map[string]*source // Multi-language documentation.
+	fset    *token.FileSet
+	buf     []byte // scratch space for printNode method.
+}

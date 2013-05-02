@@ -17,18 +17,43 @@
 package controllers
 
 import (
-	"time"
-
+	"github.com/Unknwon/gowalker/models"
 	"github.com/Unknwon/gowalker/utils"
 	"github.com/astaxie/beego"
 )
 
-var (
-	langTypes []*langType // Languages that are supported.
+const (
+	recentViewsProNum = 25
 )
+
+var (
+	recentViewedPros []*recentPro // Recent viewed projects.
+	langTypes        []*langType  // Languages that are supported.
+)
+
+type recentPro struct {
+	Path, ViewedTime string
+	IsGoRepo         bool
+	Views            int64
+}
 
 type langType struct {
 	Lang, Name string
+}
+
+func init() {
+	// Initialized recent viewed projects.
+	recentViewedPros = make([]*recentPro, 0, recentViewsProNum)
+	proinfos, _ := models.GetRecentPros(recentViewsProNum)
+	for _, p := range proinfos {
+		recentViewedPros = append(recentViewedPros,
+			&recentPro{
+				Path:       p.Path,
+				ViewedTime: p.ViewedTime,
+				IsGoRepo:   p.ProName == "Go",
+				Views:      p.Views,
+			})
+	}
 }
 
 func InitLangs(langs []string, names []string) {
@@ -51,36 +76,31 @@ func (this *HomeController) Get() {
 	// Get language version
 	curLang, restLangs := getLangVer(this.Input().Get("lang"))
 
+	// Get query field
+	q := this.Input().Get("q")
+
+	// Not empty query string shows search page
+	if len(q) > 0 {
+		// Show search page
+		this.Redirect("/search?lang="+curLang.Lang+"&q="+q, 302)
+		return
+	}
+
 	// Set properties
 	this.Layout = "layout.html"
 	this.TplNames = "home_" + curLang.Lang + ".html"
 
-	temp := []recentPro{}
-	t := time.Now().String()
-	temp = append(temp, recentPro{
-		Path:       "github.com/Unknwon/gowalker",
-		Views:      3218,
-		ViewedTime: t[:19],
-	})
-	temp = append(temp, recentPro{
-		Path:       "net/http",
-		IsGoRepo:   true,
-		Views:      597,
-		ViewedTime: t[:19],
-	})
+	// Recent projects
+	this.Data["RecentPros"] = recentViewedPros
+	pkgInfos, _ := models.GetPopularPros()
+	this.Data["PopPros"] = pkgInfos
 
 	this.Data["DataSrc"] = utils.GoRepoSet
-	this.Data["RecentPros"] = temp
-	this.Data["PopPros"] = temp
+	this.Data["RecentPros"] = recentViewedPros
+	//this.Data["PopPros"] = temp
 	this.Data["Lang"] = curLang.Lang
 	this.Data["CurLang"] = curLang.Name
 	this.Data["RestLangs"] = restLangs
-}
-
-type recentPro struct {
-	Path, ViewedTime string
-	IsGoRepo         bool
-	Views            int64
 }
 
 // getLangVer returns current language version and list of rest languages.

@@ -18,6 +18,7 @@ package doc
 
 import (
 	"errors"
+	"strings"
 	"time"
 
 	"github.com/Unknwon/gowalker/models"
@@ -40,6 +41,10 @@ func CheckDoc(path string, requestType int) (*Package, error) {
 	// Package documentation and crawl sign.
 	pdoc, needsCrawl := &Package{}, false
 
+	if i := strings.Index(path, "/src/pkg/"); i > -1 {
+		path = path[i+len("/src/pkg/"):]
+	}
+
 	// Get the package documentation from database.
 	pinfo, err := models.GetPkgInfo(path)
 
@@ -54,14 +59,14 @@ func CheckDoc(path string, requestType int) (*Package, error) {
 				needsCrawl = true
 			} else {
 				// Check if the documentation is too old (1 day ago).
-				needsCrawl = pinfo.Created.Add(_TIME_DAY).Local().Before(time.Now().Local())
+				needsCrawl = pinfo.Created.Add(_TIME_DAY).UTC().Before(time.Now().UTC())
 			}
 		case REFRESH_REQUEST:
 			// Check if the documentation is too frequently (within 1 hour).
-			needsCrawl = pinfo.Created.Add(_TIME_DAY).Local().Before(time.Now().Local())
+			needsCrawl = pinfo.Created.Add(_TIME_DAY).UTC().Before(time.Now().UTC())
 			if !needsCrawl {
 				return &Package{}, errors.New("doc.CheckDoc(): Package cannot be refreshed until" +
-					pdoc.Created.Add(time.Hour).Local().String())
+					pdoc.Created.Add(time.Hour).UTC().String())
 			}
 		}
 	}
@@ -99,6 +104,13 @@ func CheckDoc(path string, requestType int) (*Package, error) {
 			}
 			return nil, err
 		}
+	} else {
+		// Get package information
+		pdoc.ImportPath = pinfo.Path
+		pdoc.Synopsis = pinfo.Synopsis
+		pdoc.Created = pinfo.Created
+		pdoc.ProjectName = pinfo.ProName
+		pdoc.Views = pinfo.Views
 	}
 
 	return pdoc, nil
