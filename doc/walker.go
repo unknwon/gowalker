@@ -218,7 +218,6 @@ CutCode:
 		case len(code[i-1]) > 4 && code[i-1][:4] == "func" &&
 			code[i-1][len(code[i-1])-1] == '}': // One line functions.
 			line := code[i-1]
-			fmt.Println(line)
 			buf.WriteString("       ")
 			buf.WriteString(line[strings.Index(line, "{")+1 : len(line)-1])
 			buf.WriteByte('\n')

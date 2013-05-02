@@ -83,7 +83,7 @@ func (this *SearchController) Get() {
 
 			/* TODO */
 
-			if generatePage(this, pdoc, q, curLang.Lang) {
+			if pdoc != nil && generatePage(this, pdoc, q, curLang.Lang) {
 				// Update recent projects
 				updateRecentPros(pdoc)
 				pinfo := &models.PkgInfo{

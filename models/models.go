@@ -175,23 +175,24 @@ func DeleteProject(path string) error {
 	}
 	defer q.Db.Close()
 
+	beego.Info("ok:", path)
 	// Delete package information.
 	info := &PkgInfo{Path: path}
-	_, err = q.Delete(&info)
+	_, err = q.Delete(info)
 	if err != nil {
 		beego.Info("models.DeleteProject(): Information:", err)
 	}
 
 	// Delete package declaration
 	pdecl := &PkgDecl{Path: path}
-	_, err = q.Delete(&pdecl)
+	_, err = q.Delete(pdecl)
 	if err != nil {
 		beego.Info("models.DeleteProject(): Declaration:", err)
 	}
 
 	// Delete package documentation
 	pdoc := &PkgDoc{Path: path}
-	_, err = q.Delete(&pdoc)
+	_, err = q.Delete(pdoc)
 	if err != nil {
 		beego.Info("models.DeleteProject(): Documentation:", err)
 	}
