@@ -40,6 +40,7 @@ func main() {
 	beego.Router("/index", &controllers.IndexController{})
 	beego.Router("/about", &controllers.AboutController{})
 	beego.Router("/search", &controllers.SearchController{})
+	beego.Router("/refresh", &controllers.RefreshController{})
 
 	// For all unknown pages.
 	beego.Router("/:all", &controllers.HomeController{})

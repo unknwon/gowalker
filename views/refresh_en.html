@@ -1,0 +1,41 @@
+		<title>Go Walker - Refresh</title>
+	</head>
+		
+	<body>
+		<div class="container">
+			<div class="navbar" style="margin-top: 20px">
+				<div class="navbar-inner">
+					<a class="brand" href="/">Go Walker</a>
+					<ul class="nav">
+						<li><a href="/">Home</a></li>
+						<li><a href="/index">Index</a></li>
+						<li><a href="/about">About</a></li>
+					</ul>
+					<form class="navbar-search pull-right" action="/search">
+						<input class="search-query" type="text" placeholder="Search" autofocus="autofocus"  name="q"></input>
+					</form>
+				</div>
+			</div>
+			<h1>Refresh</h1>
+			<p>Sorry, for some reasons, you cannot refresh documentation of same package until <i>{{.LimitTime}}</i>(5 minutes).</p>
+			<p>Click <a href="/search?q={{.Path}}">Here</a> to return previous page.</p>
+			<div class="container">
+				<div class="flat-well well-small" style="background-color: #f5f5f5">
+					<a target="_blank" href="https://github.com/Unknwon"><i class="icon-user"></i> @Unknown</a>
+					<span class="muted">|</span>
+					<a href="mailto:joe2010xtmf@163.com"><i class="icon-envelope"></i> Feedback</a>
+					<span class="muted">|</span>
+					<a target="_blank" href="https://github.com/Unknwon/gowalker/issues"><i class="icon-tasks"></i> Website Issues</a>
+					<span class="muted">|</span>
+					    <div class="btn-group dropup">
+						    <a class="btn dropdown-toggle" data-toggle="dropdown">{{.CurLang}} <span class="caret"></span></a>
+						    <ul class="dropdown-menu">
+						    	{{range .RestLangs}}
+						    	<li><a href="/?lang={{.Lang}}">{{.Name}}</a></li>
+						    	{{end}}
+						    </ul>
+					    </div>
+					<span class="pull-right"><a class="btn" href="#">Back to top</a></span>
+				</div>
+			</div>
+		</div>

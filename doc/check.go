@@ -63,10 +63,9 @@ func CheckDoc(path string, requestType int) (*Package, error) {
 			}
 		case REFRESH_REQUEST:
 			// Check if the documentation is too frequently (within 1 hour).
-			needsCrawl = pinfo.Created.Add(_TIME_DAY).UTC().Before(time.Now().UTC())
+			needsCrawl = pinfo.Created.Add(5 * time.Minute).UTC().Before(time.Now().UTC())
 			if !needsCrawl {
-				return &Package{}, errors.New("doc.CheckDoc(): Package cannot be refreshed until" +
-					pdoc.Created.Add(time.Hour).UTC().String())
+				return nil, errors.New(pinfo.Created.Add(5 * time.Minute).UTC().String())
 			}
 		}
 	}

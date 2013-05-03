@@ -1,0 +1,42 @@
+		<title>Go 步行者 - 刷新</title>
+	</head>
+		
+	<body>
+		<div class="container">
+			<div class="navbar" style="margin-top: 20px">
+				<div class="navbar-inner">
+					<a class="brand" href="/?lang={{.Lang}}">Go 步行者</a>
+					<ul class="nav">
+						<li><a href="/?lang={{.Lang}}">首页</a></li>
+						<li><a href="/index?lang={{.Lang}}">索引</a></li>
+						<li><a href="/about?lang={{.Lang}}">关于</a></li>
+					</ul>
+					<form class="navbar-search pull-right" action="/search">
+						<input type="hidden" name="lang" value="{{.Lang}}" />
+						<input class="search-query" type="text" placeholder="搜索项目" autofocus="autofocus" name="q"></input>
+					</form>
+				</div>
+			</div>
+			<h1>刷新</h1>
+			<p>对不起，由于一些原因的限制，您无法在 <i>{{.LimitTime}}</i>（间隔 5 分钟）之前刷新该项目。</p>
+			<p>单击 <a href="/search?lang={{.Lang}}&q={{.Path}}">此处</a> 返回刷新前页面。</p>
+			<div class="container">
+				<div class="flat-well well-small" style="background-color: #f5f5f5">
+					<a target="_blank" href="https://github.com/Unknwon"><i class="icon-user"></i> @Unknown</a>
+					<span class="muted">|</span>
+					<a href="mailto:joe2010xtmf@163.com"><i class="icon-envelope"></i> 反馈</a>
+					<span class="muted">|</span>
+					<a target="_blank" href="https://github.com/Unknwon/gowalker/issues"><i class="icon-tasks"></i> 问题提交</a>
+					<span class="muted">|</span>
+					    <div class="btn-group dropup ">
+						    <a class="btn dropdown-toggle" data-toggle="dropdown">{{.CurLang}} <span class="caret"></span></a>
+						    <ul class="dropdown-menu">
+						    {{range .RestLangs}}
+								<li><a href="/?lang={{.Lang}}">{{.Name}}</a></li>
+						    {{end}}
+						    </ul>
+					    </div>
+					<span class="pull-right"><a class="btn" href="#">返回顶部</a></span>
+				</div>
+			</div>
+		</div>
