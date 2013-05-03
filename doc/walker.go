@@ -410,6 +410,6 @@ func (w *walker) build(srcs []*source) (*Package, error) {
 	w.pdoc.TestImports = bpkg.TestImports
 	//w.pdoc.XTestImports = bpkg.XTestImports
 
-	beego.Info("Walker.build(", pdoc.ImportPath, ")")
+	beego.Info("doc.walker.build(", pdoc.ImportPath, ")")
 	return w.pdoc, err
 }

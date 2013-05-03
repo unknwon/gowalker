@@ -148,19 +148,19 @@ func generatePage(this *SearchController, pdoc *doc.Package, q string, lang stri
 		q = q[:urlLen-1]
 	}
 
+	lastIndex := strings.LastIndex(q, "/")
 	if utils.IsGoRepoPath(pdoc.ImportPath) {
 		this.Data["IsGoRepo"] = true
-		lastIndex := strings.LastIndex(q, "/")
 		proName := q[lastIndex+1:]
 		if i := strings.Index(proName, "?"); i > -1 {
 			proName = proName[:i]
 		}
 		this.Data["ProName"] = proName
-		pkgDocPath := q[:lastIndex]
-		this.Data["ProDocPath"] = pkgDocPath
 	} else {
 		this.Data["ProName"] = pdoc.ProjectName
 	}
+	pkgDocPath := q[:lastIndex]
+	this.Data["ProDocPath"] = pkgDocPath
 
 	// Introduction
 	this.Data["ImportPath"] = pdoc.ImportPath

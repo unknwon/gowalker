@@ -175,7 +175,6 @@ func DeleteProject(path string) error {
 	}
 	defer q.Db.Close()
 
-	beego.Info("ok:", path)
 	// Delete package information.
 	info := &PkgInfo{Path: path}
 	_, err = q.Delete(info)
@@ -197,6 +196,7 @@ func DeleteProject(path string) error {
 		beego.Info("models.DeleteProject(): Documentation:", err)
 	}
 
+	beego.Info("models.DeleteProject(", path, ")")
 	return nil
 }
 

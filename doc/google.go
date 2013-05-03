@@ -18,7 +18,7 @@ import (
 	"errors"
 	"net/http"
 	"regexp"
-	_ "strconv"
+	"strconv"
 	"strings"
 
 	"github.com/Unknwon/gowalker/utils"
@@ -76,8 +76,107 @@ func getStandardDoc(client *http.Client, importPath string, savedEtag string) (p
 			ProjectName: "Go",
 		},
 	}
-
-	/* TODO:WORKING */
-
 	return w.build(files)
+}
+
+func getGoogleDoc(client *http.Client, match map[string]string, savedEtag string) (*Package, error) {
+	setupGoogleMatch(match)
+	if m := googleEtagRe.FindStringSubmatch(savedEtag); m != nil {
+		match["vcs"] = m[1]
+	} else if err := getGoogleVCS(client, match); err != nil {
+		return nil, err
+	}
+
+	// Scrape the repo browser to find the project revision and individual Go files.
+	p, err := httpGetBytes(client, expand("http://{subrepo}{dot}{repo}.googlecode.com/{vcs}{dir}/", match), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	// Check revision tag.
+	var etag string
+	if m := googleRevisionRe.FindSubmatch(p); m == nil {
+		return nil, errors.New("doc.getGoogleDoc(): Could not find revision for " + match["importPath"])
+	} else {
+		etag = expand("{vcs}-{0}", match, string(m[1]))
+		if etag == savedEtag {
+			return nil, errNotModified
+		}
+	}
+
+	// Get source file data.
+	var files []*source
+	for _, m := range googleFileRe.FindAllSubmatch(p, -1) {
+		fname := string(m[1])
+		if utils.IsDocFile(fname) {
+			files = append(files, &source{
+				name:      fname,
+				browseURL: expand("http://code.google.com/p/{repo}/source/browse{dir}/{0}{query}", match, fname),
+				rawURL:    expand("http://{subrepo}{dot}{repo}.googlecode.com/{vcs}{dir}/{0}", match, fname),
+			})
+		}
+	}
+
+	// Fetch file from VCS.
+	if err := fetchFiles(client, files, nil); err != nil {
+		return nil, err
+	}
+
+	// Start generating data.
+	w := &walker{
+		lineFmt: "#%d",
+		pdoc: &Package{
+			ImportPath:  match["importPath"],
+			ProjectName: expand("{repo}{dot}{subrepo}", match),
+		},
+	}
+	return w.build(files)
+}
+
+func setupGoogleMatch(match map[string]string) {
+	if s := match["subrepo"]; s != "" {
+		match["dot"] = "."
+		match["query"] = "?repo=" + s
+	} else {
+		match["dot"] = ""
+		match["query"] = ""
+	}
+}
+
+func getGoogleVCS(client *http.Client, match map[string]string) error {
+	// Scrape the HTML project page to find the VCS.
+	p, err := httpGetBytes(client, expand("http://code.google.com/p/{repo}/source/checkout", match), nil)
+	if err != nil {
+		return err
+	}
+	m := googleRepoRe.FindSubmatch(p)
+	if m == nil {
+		return NotFoundError{"Could not VCS on Google Code project page."}
+	}
+	match["vcs"] = string(m[1])
+	return nil
+}
+
+// expand replaces {k} in template with match[k] or subs[atoi(k)] if k is not in match.
+func expand(template string, match map[string]string, subs ...string) string {
+	var p []byte
+	var i int
+	for {
+		i = strings.Index(template, "{")
+		if i < 0 {
+			break
+		}
+		p = append(p, template[:i]...)
+		template = template[i+1:]
+		i = strings.Index(template, "}")
+		if s, ok := match[template[:i]]; ok {
+			p = append(p, s...)
+		} else {
+			j, _ := strconv.Atoi(template[:i])
+			p = append(p, subs[j]...)
+		}
+		template = template[i+1:]
+	}
+	p = append(p, template...)
+	return string(p)
 }
