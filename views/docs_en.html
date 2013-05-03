@@ -41,7 +41,7 @@
 			{{range .Types}}
 				{{$typeName := .Name}}
 				<li><a href="#{{.Name}}">type {{.Name}}</a></li>
-				{{range .Funcs}}<ul><li><a href="#{{$typeName}}_{{.Name}}">{{.Decl}}</a></li></ul>{{end}}
+				{{range .Funcs}}<ul><li><a href="#{{.Name}}">{{.Decl}}</a></li></ul>{{end}}
 				{{range .Methods}}<ul><li><a href="#{{$typeName}}_{{.Name}}">{{.Decl}}</a></li></ul>{{end}}
 			{{end}}</ul>
 			{{if .IsHasConst}}
@@ -78,11 +78,11 @@
 				<pre class="pre-x-scrollable">{{str2html .FmtDecl}}</pre>
 				<p>{{str2html .Doc}}</p>
 				{{range .Funcs}}
-					<h4 id="{{$typeName}}_{{.Name}}">func <a target="_blank" href="{{.URL}}">{{.Name}}</a> <small><a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion" href="#collapse_{{$typeName}}_{{.Name}}">View Code</a></small></h4>
+					<h4 id="{{.Name}}">func <a target="_blank" href="{{.URL}}">{{.Name}}</a> <small><a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion" href="#collapse_{{.Name}}">View Code</a></small></h4>
 					<pre>{{str2html .FmtDecl}}</pre>
 					<p>{{str2html .Doc}}</p>
 		    		<div class="accordion" id="accordion">
-		 				<div id="collapse_{{$typeName}}_{{.Name}}" class="accordion-body collapse">
+		 				<div id="collapse_{{.Name}}" class="accordion-body collapse">
 							<pre class="accordion-inner">{{str2html .FmtDecl}} {<br />{{.Code}}}</pre>
 						</div>
 	    			</div>
