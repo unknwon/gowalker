@@ -26,16 +26,22 @@ type RefreshController struct {
 // Get implemented Get method for RefreshController.
 // It serves refresh page of Go Walker.
 func (this *RefreshController) Get() {
-	// Get language version
+	// Check language version by different ways.
+	lang := checkLangVer(this.Ctx.Request, this.Input().Get("lang"))
+
+	// Get language version.
 	curLang, restLangs := getLangVer(
-		this.Ctx.Request.Header.Get("Accept-Language"), this.Input().Get("lang"))
+		this.Ctx.Request.Header.Get("Accept-Language"), lang)
+
+	// Save language information in cookies.
+	this.Ctx.SetCookie("lang", curLang.Lang+";path=/", 0)
 
 	// Get query field
 	q := this.Input().Get("q")
 
 	// Empty query string shows home page
 	if len(q) == 0 {
-		this.Redirect("/?lang="+curLang.Lang, 302)
+		this.Redirect("/", 302)
 		return
 	}
 
@@ -51,7 +57,7 @@ func (this *RefreshController) Get() {
 	_, err := doc.CheckDoc(q, doc.REFRESH_REQUEST)
 	if err == nil {
 		// Show search page
-		this.Redirect("/"+q+"?lang="+curLang.Lang, 302)
+		this.Redirect("/"+q, 302)
 		return
 	}
 

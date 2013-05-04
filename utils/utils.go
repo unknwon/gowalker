@@ -78,7 +78,7 @@ func FormatCode(w io.Writer, code string, links []*Link) {
 						// Handle string highlight.
 						break CutWords
 					}
-				case !isString && !isComment && code[pos] == '/':
+				case !isString && !isComment && code[pos] == '/' && code[pos+1] == '/':
 					isComment = true
 				case isComment:
 					if isBlockComment {
@@ -95,6 +95,7 @@ func FormatCode(w io.Writer, code string, links []*Link) {
 							break CutWords
 						}
 					}
+				case !isString && code[pos] > 47 && code[pos] < 58: // Number
 				case !isString && (code[pos] != '.' || code[pos] == '\n'):
 					break CutWords
 				}

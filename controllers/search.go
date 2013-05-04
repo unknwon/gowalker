@@ -29,16 +29,22 @@ type SearchController struct {
 // Get implemented Get method for SearchController.
 // It serves search page of Go Walker.
 func (this *SearchController) Get() {
+	// Check language version by different ways.
+	lang := checkLangVer(this.Ctx.Request, this.Input().Get("lang"))
+
 	// Get language version.
 	curLang, restLangs := getLangVer(
-		this.Ctx.Request.Header.Get("Accept-Language"), this.Input().Get("lang"))
+		this.Ctx.Request.Header.Get("Accept-Language"), lang)
+
+	// Save language information in cookies.
+	this.Ctx.SetCookie("lang", curLang.Lang+";path=/", 0)
 
 	// Get arguments.
 	q := this.Input().Get("q")
 
 	// Empty query string shows home page.
 	if len(q) == 0 {
-		this.Redirect("/?lang="+curLang.Lang, 302)
+		this.Redirect("/", 302)
 		return
 	}
 
@@ -87,7 +93,6 @@ func checkSpecialUsage(this *SearchController, q string) bool {
 	case q == "imports":
 		// Show imports package list.
 		pkgs := strings.Split(this.Input().Get("pkgs"), "|")
-		beego.Info(pkgs)
 		pinfos := make([]*models.PkgInfo, 0, 15)
 		for _, v := range pkgs {
 			if pinfo, err := models.GetPkgInfo(v); err == nil {

@@ -88,8 +88,9 @@ func getRepo(client *http.Client, importPath string, etag string) (pdoc *Package
 			pdoc, err = getDynamic(client, importPath)
 		}
 	default:
-		return nil, errors.New("doc.getRepo(): Test Error.")
+		return nil, errors.New("doc.getRepo(): No match: " + importPath)
 	}
+
 	return pdoc, err
 }
 

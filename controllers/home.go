@@ -19,6 +19,7 @@ package controllers
 import (
 	"bytes"
 	godoc "go/doc"
+	"net/http"
 	"path"
 	"strings"
 	"time"
@@ -123,6 +124,21 @@ func getLangVer(al, lang string) (*langType, []*langType) {
 	return curLang, restLangs
 }
 
+func checkLangVer(req *http.Request, lang string) string {
+	// 1. Check URL arguments.
+	if len(lang) > 0 {
+		return lang
+	}
+
+	// 2. Get language information from cookies.
+	ck, err := req.Cookie("lang")
+	if err == nil {
+		return ck.Value
+	}
+
+	return lang
+}
+
 type HomeController struct {
 	beego.Controller
 }
@@ -130,11 +146,23 @@ type HomeController struct {
 // Get implemented Get method for HomeController.
 // It serves home page of Go Walker.
 func (this *HomeController) Get() {
-	// Get language version
-	curLang, restLangs := getLangVer(
-		this.Ctx.Request.Header.Get("Accept-Language"), this.Input().Get("lang"))
+	// Print unusual User-Agent.
+	ua := this.Ctx.Request.Header.Get("User-Agent")
+	if len(ua) < 20 {
+		beego.Trace("User-Agent:", this.Ctx.Request.Header.Get("User-Agent"))
+	}
 
-	// Get query field
+	// Check language version by different ways.
+	lang := checkLangVer(this.Ctx.Request, this.Input().Get("lang"))
+
+	// Get language version.
+	curLang, restLangs := getLangVer(
+		this.Ctx.Request.Header.Get("Accept-Language"), lang)
+
+	// Save language information in cookies.
+	this.Ctx.SetCookie("lang", curLang.Lang+";path=/", 0)
+
+	// Get query field.
 	q := this.Input().Get("q")
 
 	if path, ok := utils.IsBrowseURL(q); ok {
@@ -153,6 +181,11 @@ func (this *HomeController) Get() {
 
 	// Set properties
 	this.Layout = "layout_" + curLang.Lang + ".html"
+
+	// Set language properties.
+	this.Data["Lang"] = curLang.Lang
+	this.Data["CurLang"] = curLang.Name
+	this.Data["RestLangs"] = restLangs
 
 	// Check show home page or documentation page.
 	if len(reqUrl) == 0 && len(q) == 0 {
@@ -178,7 +211,7 @@ func (this *HomeController) Get() {
 		// Check if it is a remote path that can be used for 'go get', if not means it's a keyword.
 		if !utils.IsValidRemotePath(broPath) {
 			// Show search page
-			this.Redirect("/search?lang="+curLang.Lang+"&q="+reqUrl, 302)
+			this.Redirect("/search?q="+reqUrl, 302)
 			return
 		}
 
@@ -202,19 +235,15 @@ func (this *HomeController) Get() {
 					Views:      pdoc.Views,
 				}
 				models.AddViews(pinfo)
+				return
 			}
-		} else {
-			beego.Error("HomeController.Get():", err)
-			// Show search page
-			this.Redirect("/search?lang="+curLang.Lang+"&q="+reqUrl, 302)
-			return
 		}
-	}
 
-	// Set language properties.
-	this.Data["Lang"] = curLang.Lang
-	this.Data["CurLang"] = curLang.Name
-	this.Data["RestLangs"] = restLangs
+		beego.Error("HomeController.Get():", err)
+		// Show search page
+		this.Redirect("/search?q="+reqUrl, 302)
+		return
+	}
 }
 
 // generatePage genarates documentation page for project.
