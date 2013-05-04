@@ -11,7 +11,7 @@
 						<li><a href="/index?lang={{.Lang}}">索引</a></li>
 						<li class="active"><a href="/about?lang={{.Lang}}">关于</a></li>
 					</ul>
-					<form class="navbar-search pull-right" action="/search">
+					<form class="navbar-search pull-right" action="/">
 						<input type="hidden" name="lang" value="{{.Lang}}" />
 						<input class="search-query" type="text" placeholder="搜索项目" autofocus="autofocus" name="q"></input>
 					</form>
@@ -33,24 +33,4 @@
 			<h4>反馈</h4> 
 			<p>如果您有好的建议或想法，请发送邮件到 info@gowalker.org。网站问题反馈请通过 <a target="_blank" href="https://github.com/Unknwon/gowalker/issues">Github Issue Tracker</a>。您也可以加入到 <a target="_blank" href="https://groups.google.com/d/forum/gowalker">Go Walker group</a> 来讨论相关话题。
 			<h4>书签工具</h4>
-			<p>Go 步行者书签工具通过 JavaScript 脚本来动态获取您当前浏览的项目地址，并自动跳转到本网站的相关页面。请将该链接保存至您的收藏夹来使用此功能： <a  target="_blank" href="javascript:window.location='http://gowalker.org/search?lang=zh&q='+encodeURIComponent(window.location)">Go 步行者</a></p>
-			<div class="container">
-				<div class="flat-well well-small" style="background-color: #f5f5f5">
-					<a target="_blank" href="https://github.com/Unknwon"><i class="icon-user"></i> @Unknown</a>
-					<span class="muted">|</span>
-					<a href="mailto:joe2010xtmf@163.com"><i class="icon-envelope"></i> 反馈</a>
-					<span class="muted">|</span>
-					<a target="_blank" href="https://github.com/Unknwon/gowalker/issues"><i class="icon-tasks"></i> 问题提交</a>
-					<span class="muted">|</span>
-					    <div class="btn-group dropup ">
-						    <a class="btn dropdown-toggle" data-toggle="dropdown">{{.CurLang}} <span class="caret"></span></a>
-						    <ul class="dropdown-menu">
-						    	{{range .RestLangs}}
-						    	<li><a href="/about?lang={{.Lang}}">{{.Name}}</a></li>
-						    	{{end}}
-						    </ul>
-					    </div>
-					<span class="pull-right"><a class="btn" href="#">返回顶部</a></span>
-				</div>
-			</div>
-		</div>
+			<p>Go 步行者书签工具通过 JavaScript 脚本来动态获取您当前浏览的项目地址，并自动跳转到本网站的相关页面。请将该链接保存至您的收藏夹来使用此功能：<a  target="_blank" href="javascript:window.location='http://gowalker.org/'+encodeURIComponent(window.location)+'?lang=zh'">Go 步行者</a></p>

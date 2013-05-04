@@ -11,7 +11,7 @@
 						<li><a href="/index?lang={{.Lang}}">索引</a></li>
 						<li><a href="/about?lang={{.Lang}}">关于</a></li>
 					</ul>
-					<form class="navbar-search pull-right" action="/search">
+					<form class="navbar-search pull-right" action="/">
 						<input type="hidden" name="lang" value="{{.Lang}}" />
 						<input class="search-query" type="text" placeholder="搜索项目" autofocus="autofocus" name="q"></input>
 					</form>
@@ -28,7 +28,7 @@
 			</div>
 			{{end}}
 			<div class="flat-well well-small" style="background-color: #f5f5f5">
-				<a target="_blank" href="http://{{.ProPath}}"><strong>{{.ProName}}:</strong></a> <a href="/search?q={{.ProDocPath}}">{{.ProDocPath}}</a><span class="muted">/{{.ProName}}</span>
+				<a target="_blank" href="http://{{.ProPath}}"><strong>{{.ProName}}:</strong></a> <a href="/{{.ProDocPath}}?lang={{.Lang}}">{{.ProDocPath}}</a><span class="muted">/{{.ProName}}</span>
 				<span class="pull-right"><span >您是本页面的第 <b>{{.Views}}</b> 位访问者。</span><span class="muted"> | </span><a href="#_index">索引</a><span class="muted"> | </span><a href="#_files">文件</a><span class="muted"> | </span><a href="#_subdirs">目录</a></span>
 			</div>
 			<h2>项目 {{.ProName}}</h2>
@@ -70,7 +70,7 @@
 					<p>{{str2html .Doc}}</p>
 	    			<div class="accordion" id="accordion">
 	 					<div id="collapse_{{.Name}}" class="accordion-body collapse">
-							<pre class="accordion-inner">{{str2html .FmtDecl}} {<br />{{.Code}}}</pre>
+							<pre class="accordion-inner">{{str2html .FmtDecl}} {<br />{{str2html .Code}}}</pre>
 						</div>
 	    			</div>
 				{{end}}
@@ -86,7 +86,7 @@
 					<p>{{str2html .Doc}}</p>
 		    		<div class="accordion" id="accordion">
 	 					<div id="collapse_{{.Name}}" class="accordion-body collapse">
-							<pre class="accordion-inner">{{str2html .FmtDecl}} {<br />{{.Code}}}</pre>
+							<pre class="accordion-inner">{{str2html .FmtDecl}} {<br />{{str2html .Code}}}</pre>
 						</div>
 		   			</div>
 				{{end}}
@@ -96,7 +96,7 @@
 					<p>{{str2html .Doc}}</p>
 		   			<div class="accordion" id="accordion">
 		 				<div id="collapse_{{$typeName}}_{{.Name}}" class="accordion-body collapse">
-							<pre class="accordion-inner">{{str2html .FmtDecl}} {<br />{{.Code}}}</pre>
+							<pre class="accordion-inner">{{str2html .FmtDecl}} {<br />{{str2html .Code}}}</pre>
 						</div>
 		    		</div>
 				{{end}}
@@ -109,26 +109,5 @@
 			{{end}}
 			</p>
 			<p>
-			项目 <b>{{.ProName}}</b> 共计导入 {{.ImportPkgNum}} 个外部包。Go 步行者在 <i>{{.UtcTime}}</i> 使用操作系统 GOOS={{.GOOS}} 和系统类型 GOARCH={{.GOARCH}} 生成了此页面。 <a href="/refresh?lang={{.Lang}}&q={{.ImportPath}}">刷新文档</a>.
+			项目 <b>{{.ProName}}</b> 共计导入 <a href="/search?lang={{.Lang}}&q=imports&pkgs={{.ImportPkgs}}">{{.ImportPkgNum}}</a> 个外部包。Go 步行者在 <i>{{.UtcTime}}</i> 使用操作系统 GOOS={{.GOOS}} 和系统类型 GOARCH={{.GOARCH}} 生成了此页面。 <a href="/refresh?lang={{.Lang}}&q={{.ImportPath}}">刷新文档</a>.
 			</p>
-			<div class="container">
-				<div class="flat-well well-small" style="background-color: #f5f5f5">
-					<a target="_blank" href="https://github.com/Unknwon"><i class="icon-user"></i> @Unknown</a>
-					<span class="muted">|</span>
-					<a href="mailto:joe2010xtmf@163.com"><i class="icon-envelope"></i> 反馈</a>
-					<span class="muted">|</span>
-					<a target="_blank" href="https://github.com/Unknwon/gowalker/issues"><i class="icon-tasks"></i> 问题提交</a>
-					<span class="muted">|</span>
-					<div class="btn-group dropup">
-						<a class="btn dropdown-toggle" data-toggle="dropdown">{{.CurLang}} <span class="caret"></span></a>
-						<ul class="dropdown-menu">
-						{{$keyword := .Keyword}}
-						{{range .RestLangs}}
-							<li><a href="/search?lang={{.Lang}}&q={{$keyword}}">{{.Name}}</a></li>
-						{{end}}
-						</ul>
-				    </div>
-					<span class="pull-right"><a class="btn" href="#">返回顶部</a></span>
-				</div>
-			</div>
-		</div>

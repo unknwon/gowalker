@@ -27,21 +27,23 @@ type RefreshController struct {
 // It serves refresh page of Go Walker.
 func (this *RefreshController) Get() {
 	// Get language version
-	curLang, restLangs := getLangVer(this.Input().Get("lang"))
+	curLang, restLangs := getLangVer(
+		this.Ctx.Request.Header.Get("Accept-Language"), this.Input().Get("lang"))
 
 	// Get query field
 	q := this.Input().Get("q")
 
 	// Empty query string shows home page
 	if len(q) == 0 {
-		this.Redirect("/"+curLang.Lang+"/", 302)
+		this.Redirect("/?lang="+curLang.Lang, 302)
 		return
 	}
 
 	// Set properties
-	this.Layout = "layout.html"
+	this.Layout = "layout_" + curLang.Lang + ".html"
 	this.TplNames = "refresh_" + curLang.Lang + ".html"
 
+	// Set language properties.
 	this.Data["Lang"] = curLang.Lang
 	this.Data["CurLang"] = curLang.Name
 	this.Data["RestLangs"] = restLangs
@@ -49,7 +51,7 @@ func (this *RefreshController) Get() {
 	_, err := doc.CheckDoc(q, doc.REFRESH_REQUEST)
 	if err == nil {
 		// Show search page
-		this.Redirect("/search?lang="+curLang.Lang+"&q="+q, 302)
+		this.Redirect("/"+q+"?lang="+curLang.Lang, 302)
 		return
 	}
 

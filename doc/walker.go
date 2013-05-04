@@ -213,7 +213,7 @@ CutCode:
 	for i := posPos.Line; i < l; i++ {
 		// Check end of code block.
 		switch {
-		case code[i] == "}": // Normal end.
+		case len(code[i]) > 0 && code[i][0] == '}': // Normal end.
 			break CutCode
 		case len(code[i-1]) > 4 && code[i-1][:4] == "func" &&
 			code[i-1][len(code[i-1])-1] == '}': // One line functions.

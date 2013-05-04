@@ -27,10 +27,11 @@ type IndexController struct {
 // It serves index page of Go Walker.
 func (this *IndexController) Get() {
 	// Get language version
-	curLang, restLangs := getLangVer(this.Input().Get("lang"))
+	curLang, restLangs := getLangVer(
+		this.Ctx.Request.Header.Get("Accept-Language"), this.Input().Get("lang"))
 
 	// Set properties
-	this.Layout = "layout.html"
+	this.Layout = "layout_" + curLang.Lang + ".html"
 	this.TplNames = "index_" + curLang.Lang + ".html"
 
 	// Get all packages
@@ -38,6 +39,7 @@ func (this *IndexController) Get() {
 	this.Data["AllPros"] = pkgInfos
 	this.Data["ProNum"] = len(pkgInfos)
 
+	// Set language properties.
 	this.Data["Lang"] = curLang.Lang
 	this.Data["CurLang"] = curLang.Name
 	this.Data["RestLangs"] = restLangs

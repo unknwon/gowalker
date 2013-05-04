@@ -17,23 +17,17 @@
 package main
 
 import (
-	"strings"
-
 	"github.com/Unknwon/gowalker/controllers"
 	"github.com/astaxie/beego"
 )
 
 const (
-	VERSION = "0.1.1.0502"
+	VERSION = "0.1.4.0503" // Application version.
 )
 
 func main() {
+	beego.AppName = "Go Walker"
 	beego.Info("Go Walker", VERSION)
-
-	// Load languages.
-	langs := strings.Split(beego.AppConfig.String("language"), "|")
-	names := strings.Split(beego.AppConfig.String("langNames"), "|")
-	controllers.InitLangs(langs, names)
 
 	// Register routers.
 	beego.Router("/", &controllers.HomeController{})

@@ -23,9 +23,11 @@ import (
 	"github.com/Unknwon/gowalker/utils"
 )
 
-var githubRawHeader = http.Header{"Accept": {"application/vnd.github-blob.raw"}}
-var githubPattern = regexp.MustCompile(`^github\.com/(?P<owner>[a-z0-9A-Z_.\-]+)/(?P<repo>[a-z0-9A-Z_.\-]+)(?P<dir>/[a-z0-9A-Z_.\-/]*)?$`)
-var githubCred string
+var (
+	githubRawHeader = http.Header{"Accept": {"application/vnd.github-blob.raw"}}
+	githubPattern   = regexp.MustCompile(`^github\.com/(?P<owner>[a-z0-9A-Z_.\-]+)/(?P<repo>[a-z0-9A-Z_.\-]+)(?P<dir>/[a-z0-9A-Z_.\-/]*)?$`)
+	githubCred      string
+)
 
 func SetGithubCredentials(id, secret string) {
 	githubCred = "client_id=" + id + "&client_secret=" + secret

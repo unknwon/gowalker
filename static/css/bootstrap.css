@@ -6156,4 +6156,8 @@ a.badge:focus {
 .affix {
   position: fixed;
 }
- pre .com {  color: #93a1a1;}
+pre .com {  color: #007500;}
+pre .str {  color: #796400;}
+pre .int {  color: #5A5AAD;}
+pre .ext {  color: #6F00D2;}
+pre .ret {  color: #CE0000;}

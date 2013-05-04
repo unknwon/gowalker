@@ -5,14 +5,15 @@
 		<div class="container">
 			<div class="navbar" style="margin-top: 20px">
 				<div class="navbar-inner">
-					<a class="brand" href="/">Go Walker</a>
+					<a class="brand" href="/?lang={{.Lang}}">Go Walker</a>
 					<ul class="nav">
-						<li><a href="/">Home</a></li>
-						<li><a href="/index">Index</a></li>
-						<li><a href="/about">About</a></li>
+						<li><a href="/?lang={{.Lang}}">Home</a></li>
+						<li><a href="/index?lang={{.Lang}}">Index</a></li>
+						<li><a href="/about?lang={{.Lang}}">About</a></li>
 					</ul>
-					<form class="navbar-search pull-right" action="/search">
-						<input class="search-query" type="text" placeholder="Search" autofocus="autofocus" name="q"></input>
+					<form class="navbar-search pull-right" action="/">
+						<input type="hidden" name="lang" value="{{.Lang}}" />
+						<input class="search-query" type="text" placeholder="Search" autofocus="autofocus"  name="q"></input>
 					</form>
 				</div>
 			</div>
@@ -27,7 +28,7 @@
 			</div>
 			{{end}}
 			<div class="flat-well well-small" style="background-color: #f5f5f5">
-				<a target="_blank" href="http://{{.ProPath}}"><strong>{{.ProName}}:</strong></a> <a href="/search?q={{.ProDocPath}}">{{.ProDocPath}}</a><span class="muted">/{{.ProName}}</span>
+				<a target="_blank" href="http://{{.ProPath}}"><strong>{{.ProName}}:</strong></a> <a href="/{{.ProDocPath}}?lang={{.Lang}}">{{.ProDocPath}}</a><span class="muted">/{{.ProName}}</span>
 				<span class="pull-right"><span >You are No.<b>{{.Views}}</b> visitor of this page.</span><span class="muted"> | </span><a href="#_index">Index</a><span class="muted"> | </span><a href="#_files">Files</a><span class="muted"> | </span><a href="#_subdirs">Directories</a></span>
 			</div>
 			<h2>package {{.ProName}}</h2>
@@ -68,7 +69,7 @@
 				<p>{{str2html .Doc}}</p>	
     			<div class="accordion" id="accordion">
  					<div id="collapse_{{.Name}}" class="accordion-body collapse">
-						<pre class="accordion-inner">{{str2html .FmtDecl}} {<br />{{.Code}}}</pre>
+						<pre class="accordion-inner">{{str2html .FmtDecl}} {<br />{{str2html .Code}}}</pre>
 					</div>
     			</div>
 			{{end}}
@@ -83,7 +84,7 @@
 					<p>{{str2html .Doc}}</p>
 		    		<div class="accordion" id="accordion">
 		 				<div id="collapse_{{.Name}}" class="accordion-body collapse">
-							<pre class="accordion-inner">{{str2html .FmtDecl}} {<br />{{.Code}}}</pre>
+							<pre class="accordion-inner">{{str2html .FmtDecl}} {<br />{{str2html .Code}}}</pre>
 						</div>
 	    			</div>
 				{{end}}
@@ -93,7 +94,7 @@
 					<p>{{str2html .Doc}}</p>
 		   			<div class="accordion" id="accordion">
 		 				<div id="collapse_{{$typeName}}_{{.Name}}" class="accordion-body collapse">
-							<pre class="accordion-inner">{{str2html .FmtDecl}} {<br />{{.Code}}}</pre>
+							<pre class="accordion-inner">{{str2html .FmtDecl}} {<br />{{str2html .Code}}}</pre>
 						</div>
 		   			</div>
 				{{end}}
@@ -106,26 +107,5 @@
 			{{end}}
 			</p>
 			<p>
-			Package <b>{{.ProName}}</b> imports {{.ImportPkgNum}} packages. Go Walker generated this page in <i>{{.UtcTime}}</i> with GOOS={{.GOOS}} and GOARCH={{.GOARCH}}. <a href="/refresh?q={{.ImportPath}}">Refresh</a>.
+			Package <b>{{.ProName}}</b> imports <a href="/search?lang={{.Lang}}&q=imports&pkgs={{.ImportPkgs}}">{{.ImportPkgNum}}</a> packages. Go Walker generated this page in <i>{{.UtcTime}}</i> with GOOS={{.GOOS}} and GOARCH={{.GOARCH}}. <a href="/refresh?lang={{.Lang}}&q={{.ImportPath}}">Refresh</a>.
 			</p>
-			<div class="container">
-				<div class="flat-well well-small" style="background-color: #f5f5f5">
-					<a target="_blank" href="https://github.com/Unknwon"><i class="icon-user"></i> @Unknown</a>
-					<span class="muted">|</span>
-					<a href="mailto:joe2010xtmf@163.com"><i class="icon-envelope"></i> Feedback</a>
-					<span class="muted">|</span>
-					<a target="_blank" href="https://github.com/Unknwon/gowalker/issues"><i class="icon-tasks"></i> Website Issues</a>
-					<span class="muted">|</span>
-					<div class="btn-group dropup">
-				    <a class="btn dropdown-toggle" data-toggle="dropdown">{{.CurLang}} <span class="caret"></span></a>
-				    <ul class="dropdown-menu">
-					{{$keyword := .Keyword}}
-			    	{{range .RestLangs}}
-						<li><a href="/search?lang={{.Lang}}&q={{$keyword}}">{{.Name}}</a></li>
-			    	{{end}}
-				    </ul>
-				    </div>
-					<span class="pull-right"><a class="btn" href="#">Back to top</a></span>
-				</div>
-			</div>
-		</div>

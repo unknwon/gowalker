@@ -22,6 +22,8 @@ import (
 	"regexp"
 	"sort"
 	"strings"
+
+	"github.com/astaxie/beego"
 )
 
 func importPathFromGoogleBrowse(m []string) string {
@@ -236,11 +238,11 @@ var standardPath = map[string]bool{
 }
 
 var (
-	GoRepoSet string
+	GoRepoSet string // Standard library set for type-ahead.
 )
 
 func init() {
-	// Initialize standard library typeahead
+	// Initialize standard library type-ahead.
 	goRepos := make([]string, 0, len(standardPath))
 	for p := range standardPath {
 		goRepos = append(goRepos, "&quot;"+p+"&quot;,")
@@ -250,6 +252,7 @@ func init() {
 		GoRepoSet += s
 	}
 	GoRepoSet = GoRepoSet[:len(GoRepoSet)-1]
+	beego.Debug("Initialized 'GoRepoSet'")
 }
 
 // IsGoRepoPath returns true if package is from standard library

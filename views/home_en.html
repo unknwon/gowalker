@@ -5,13 +5,14 @@
 		<div class="container">
 			<div class="navbar" style="margin-top: 20px">
 				<div class="navbar-inner">
-					<a class="brand" href="/">Go Walker</a>
+					<a class="brand" href="/?lang={{.Lang}}">Go Walker</a>
 					<ul class="nav">
-						<li class="active"><a href="/">Home</a></li>
-						<li><a href="/index">Index</a></li>
-						<li><a href="/about">About</a></li>
+						<li class="active"><a href="/?lang={{.Lang}}">Home</a></li>
+						<li><a href="/index?lang={{.Lang}}">Index</a></li>
+						<li><a href="/about?lang={{.Lang}}">About</a></li>
 					</ul>
-					<form class="navbar-search pull-right" action="/search">
+					<form class="navbar-search pull-right" action="/">
+						<input type="hidden" name="lang" value="{{.Lang}}" />
 						<input class="search-query" type="text" placeholder="Search" autofocus="autofocus"  name="q"></input>
 					</form>
 				</div>
@@ -21,8 +22,9 @@
 			</div>
     		<div class="page-header">
 				<h2 style="margin-top: 0">Search for Go projects. <small>Find a cup of source code.</small></h2>
-				<form action="/search">
+				<form action="/">
 					<div class="input-append">
+						<input type="hidden" name="lang" value="{{.Lang}}" />
 						<input autocomplete="off" class="span6" type="text" placeholder="Import path or keywords" value="{{.Keyword}}" name="q" data-source="[{{str2html .DataSrc}}]" data-items="8" data-provide="typeahead"></input>
 						<button class="btn" type="submit"><i class="icon-search"></i> Go!</button>
 					</div>
@@ -31,7 +33,7 @@
     		<div>
 				<h4>What is this?</h4>
 				<p>Go Walker generates <a target="_blank" href="http://golang.org/">Go</a> projects whole <b>source code</b> documentation on the fly from projects on Bitbucket, Github, Google Project Hosting and Launchpad. It's <b>NOT</b> just API documentation, if you want to see that, <a target="_blank" href="http://godoc.org/">GoDoc</a> is better place for you.</p>
-				<p class="text-success">Please read the  <a href="/about">About Page</a> for information about adding projects to Go Walker and more.</p>
+				<p class="text-success">Please read the  <a href="/about?lang={{.Lang}}">About Page</a> for information about adding projects to Go Walker and more.</p>
 			</div>
 			<div class="row">
 				<div class="span6">
@@ -40,16 +42,17 @@
 						<thead>
 							<tr>
 								<th>Import Path</th>
-								<th>Viewd Time</th>
+								<th>Viewd Time(UTC)</th>
 							</tr>
 						</thead>
 						<tbody>
-							{{range .RecentPros}}
+						{{$lang := .Lang}}
+						{{range .RecentPros}}
 							<tr>
-								<td><a href="/search?q={{.Path}}">{{.Path}}</a>{{if .IsGoRepo}} <span class="label label-info">Standard</span>{{end}}</td>
+								<td><a href="/{{.Path}}?lang={{$lang}}">{{.Path}}</a>{{if .IsGoRepo}} <span class="label label-info">Standard</span>{{end}}</td>
 								<td>{{.ViewedTime}}</td>
 							</tr>
-							{{end}}
+						{{end}}
 						</tbody>
 					</table>
 				</div>
@@ -58,15 +61,15 @@
 						<h4>Popular Projects</h4>
 						<ul class="unstyled">
 							{{range .PopPros}}
-							<li><a href="/search?q={{.Path}}">{{.Path}}</a> <span class="badge badge-important">{{.Views}}</span></li>
+							<li><span class="badge">{{.Views}}</span> <a href="/{{.Path}}?lang={{$lang}}">{{.Path}}</a></li>
 							{{end}}
 						</ul>
 					</div>
 					<div class="span6">
 						<h4>More Projects</h4>
 						<ul class="unstyled">
-							<li><a href="/index">Index</a></li>
-							<li><a href="/search?q=gorepo">Standard Library</a></li>
+							<li><a href="/index?lang={{.Lang}}">Index</a></li>
+							<li><a href="/search?lang={{.Lang}}&q=gorepo">Standard Library</a></li>
 							<li><a target="_blank" href="https://code.google.com/p/go-wiki/wiki/Projects">Projects @ go-wiki</a></li>
 						</ul>
 					</div>
@@ -77,32 +80,12 @@
 						</ul>
 					</div>
 					<div class="span6">
-						<h4>Develop progress: 37%</h4>
+						<h4>Develop progress: 40%</h4>
 						<div style="width:60%">
 	    					<div class="progress progress-striped active">
-	    						<div class="bar" style="width: 37%;"></div>
+	    						<div class="bar" style="width: 40%;"></div>
 	    					</div>
 	    				</div>
     				</div>
 				</div>
 			</div>
-			<div class="container">
-				<div class="flat-well well-small" style="background-color: #f5f5f5">
-					<a target="_blank" href="https://github.com/Unknwon"><i class="icon-user"></i> @Unknown</a>
-					<span class="muted">|</span>
-					<a href="mailto:joe2010xtmf@163.com"><i class="icon-envelope"></i> Feedback</a>
-					<span class="muted">|</span>
-					<a target="_blank" href="https://github.com/Unknwon/gowalker/issues"><i class="icon-tasks"></i> Website Issues</a>
-					<span class="muted">|</span>
-					    <div class="btn-group dropup">
-						    <a class="btn dropdown-toggle" data-toggle="dropdown">{{.CurLang}} <span class="caret"></span></a>
-						    <ul class="dropdown-menu">
-						    	{{range .RestLangs}}
-						    	<li><a href="/?lang={{.Lang}}">{{.Name}}</a></li>
-						    	{{end}}
-						    </ul>
-					    </div>
-					<span class="pull-right"><a class="btn" href="#">Back to top</a></span>
-				</div>
-			</div>
-		</div>

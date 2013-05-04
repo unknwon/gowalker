@@ -41,29 +41,59 @@ func IsDocFile(n string) bool {
 // The zero value of a link represents "no link".
 //
 type Link struct {
-	Path, Name, Comment string // package path, identifier name, and comments
+	Path, Name, Comment string // package path, identifier name, and comments.
 }
 
 func FormatCode(w io.Writer, code string, links []*Link) {
-	isString := false   // Indicates if right now is checking string
-	isComment := false  // Indicates if right now is checking comments
-	length := len(code) // Length of whole code
-	last := 0           // Start index of the word
-	pos := 0            // Current index
+	length := len(code) // Length of whole code.
+	if length == 0 {
+		return
+	}
+
+	isString := false       // Indicates if right now is checking string.
+	isRawString := false    // Indicates if right now is checking raw string.
+	isComment := false      // Indicates if right now is checking comments.
+	isBlockComment := false // Indicates if right now is checking block comments.
+	last := 0               // Start index of the word.
+	pos := 0                // Current index.
 
 	for {
-		// Cut words
+		// Cut words.
 	CutWords:
 		for {
 			if code[pos] < 'A' || code[pos] > 'z' || (code[pos] > 'Z' && code[pos] < 'a') {
 				switch {
-				case code[pos] == '"':
-					isString = !isString
-				case !isString && code[pos] == '/':
+				case !isComment && code[pos] == '`':
+					if !isString {
+						isString = true
+						isRawString = true
+					} else {
+						// Handle string highlight.
+						break CutWords
+					}
+				case !isComment && !isRawString && code[pos] == '"' && code[pos-1] != '\\':
+					if !isString {
+						isString = true
+					} else {
+						// Handle string highlight.
+						break CutWords
+					}
+				case !isString && !isComment && code[pos] == '/':
 					isComment = true
 				case isComment:
-					if code[pos] == '\n' {
-						break CutWords
+					if isBlockComment {
+						// End of block comments.
+						if code[pos] == '/' && code[pos-1] == '*' {
+							break CutWords
+						}
+					} else {
+						switch {
+						case code[pos] == '*' && code[pos-1] == '/':
+							// Start of block comments.
+							isBlockComment = true
+						case code[pos] == '\n':
+							break CutWords
+						}
 					}
 				case !isString && (code[pos] != '.' || code[pos] == '\n'):
 					break CutWords
@@ -77,23 +107,41 @@ func FormatCode(w io.Writer, code string, links []*Link) {
 		}
 
 		seg := code[last : pos+1]
+	CheckLink:
 		switch {
 		case isComment:
 			isComment = false
+			isBlockComment = false
 			fmt.Fprintf(w, `<span class="com">%s</span>`, seg)
-		case pos-last > 1 && !isString:
-			// Check if the last word of the paragraphy
+		case isString:
+			isString = false
+			isRawString = false
+			fmt.Fprintf(w, `<span class="str">%s</span>`, seg)
+		case pos-last > 1:
+			// Check if the last word of the paragraphy.
 			l := len(seg)
 			if pos+1 == length {
 				l++
 			}
-			// Check links
+
+			// Check keywords.
+			switch seg[:l-1] {
+			case "return":
+				fmt.Fprintf(w, `<span class="ret">%s</span>%s`, "return", seg[l-1:])
+				break CheckLink
+			}
+
+			// Check links.
 			link, ok := findType(seg[:l-1], links)
 			if ok {
 				switch {
 				case len(link.Path) == 0 && len(link.Name) > 0:
-					fmt.Fprintf(w, `<a title="%s" href="#%s">%s</a>%s`,
+					// Exported types in current package.
+					fmt.Fprintf(w, `<a class="int" title="%s" href="#%s">%s</a>%s`,
 						link.Comment, link.Name, link.Name, seg[l-1:])
+				case len(link.Path) > 0 && len(link.Name) > 0:
+					fmt.Fprintf(w, `<a class="ext" title="%s" target="_blank" href="%s">%s</a>%s`,
+						link.Comment, link.Path, link.Name, seg[l-1:])
 				}
 			} else {
 				fmt.Fprintf(w, "%s", seg)
@@ -104,7 +152,7 @@ func FormatCode(w io.Writer, code string, links []*Link) {
 
 		last = pos + 1
 		pos++
-		// End of code
+		// End of code.
 		if pos == length {
 			fmt.Fprintf(w, "%s", code[last:])
 			return
@@ -112,11 +160,27 @@ func FormatCode(w io.Writer, code string, links []*Link) {
 	}
 }
 
-func findType(name string, links []*Link) (Link, bool) {
+func findType(name string, links []*Link) (*Link, bool) {
+	// This is for functions and types from imported packages.
+	i := strings.Index(name, ".")
+	var left, right string
+	if i > -1 {
+		left = name[:i+1]
+		right = name[i+1:]
+	}
+
 	for _, l := range links {
-		if l.Name == name {
-			return *l, true
+		if i == -1 {
+			// Exported types in current package.
+			if l.Name == name {
+				return l, true
+			}
+		} else {
+			// Functions and types from imported packages.
+			if l.Name == left {
+				return &Link{Name: name, Path: "/" + l.Path + "#" + right}, true
+			}
 		}
 	}
-	return Link{}, false
+	return nil, false
 }

@@ -26,13 +26,14 @@ import (
 )
 
 const (
+	// Request type.
 	HUMAN_REQUEST = iota
 	REFRESH_REQUEST
 )
 
 const (
-	_TIME_DAY      = 24 * time.Hour
-	_FETCH_TIMEOUT = 10 * time.Second
+	_TIME_DAY      = 24 * time.Hour   // Time duration of one day.
+	_FETCH_TIMEOUT = 10 * time.Second // Fetch package timeout duration.
 )
 
 // CheckDoc checks the project documentation from the database or from the version
@@ -49,6 +50,7 @@ func CheckDoc(path string, requestType int) (*Package, error) {
 	pinfo, err := models.GetPkgInfo(path)
 
 	if err != nil {
+		// No package information in database.
 		needsCrawl = true
 	} else {
 		// Check request type.
@@ -62,9 +64,10 @@ func CheckDoc(path string, requestType int) (*Package, error) {
 				needsCrawl = pinfo.Created.Add(_TIME_DAY).UTC().Before(time.Now().UTC())
 			}
 		case REFRESH_REQUEST:
-			// Check if the documentation is too frequently (within 1 hour).
+			// Check if the documentation is too frequently (within 5 minutes).
 			needsCrawl = pinfo.Created.Add(5 * time.Minute).UTC().Before(time.Now().UTC())
 			if !needsCrawl {
+				// Return error messages as limit time information.
 				return nil, errors.New(pinfo.Created.Add(5 * time.Minute).UTC().String())
 			}
 		}
@@ -74,9 +77,6 @@ func CheckDoc(path string, requestType int) (*Package, error) {
 		// Fetch package from VCS.
 		c := make(chan crawlResult, 1)
 		go func() {
-
-			/* TODO:WORKING */
-
 			pdoc, err = crawlDoc(path, pinfo.Etag)
 			c <- crawlResult{pdoc, err}
 		}()

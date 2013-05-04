@@ -85,20 +85,18 @@ func setMg() (*qbs.Migration, error) {
 
 func init() {
 	// Initialize database.
-	beego.Info("Initialize database:", DB_NAME)
-
 	os.Mkdir("./data", os.ModePerm)
 
 	// Connect to database.
 	q, err := connDb()
 	if err != nil {
-		beego.Info("models.init():", err)
+		beego.Error("models.init():", err)
 	}
 	defer q.Db.Close()
 
 	mg, err := setMg()
 	if err != nil {
-		beego.Info("models.init():", err)
+		beego.Error("models.init():", err)
 	}
 	defer mg.Db.Close()
 
@@ -106,6 +104,8 @@ func init() {
 	mg.CreateTableIfNotExists(new(PkgInfo))
 	mg.CreateTableIfNotExists(new(PkgDecl))
 	mg.CreateTableIfNotExists(new(PkgDoc))
+
+	beego.Debug("Initialized database ->", DB_NAME)
 }
 
 // GetProInfo returns package information from database.
@@ -113,7 +113,7 @@ func GetPkgInfo(path string) (*PkgInfo, error) {
 	// Connect to database.
 	q, err := connDb()
 	if err != nil {
-		beego.Info("models.GetPkgInfo():", err)
+		beego.Error("models.GetPkgInfo():", err)
 	}
 	defer q.Db.Close()
 
@@ -128,7 +128,7 @@ func SaveProject(pinfo *PkgInfo, pdecl *PkgDecl, pdoc *PkgDoc) error {
 	// Connect to database.
 	q, err := connDb()
 	if err != nil {
-		beego.Info("models.SaveProject():", err)
+		beego.Error("models.SaveProject():", err)
 	}
 	defer q.Db.Close()
 
@@ -146,20 +146,20 @@ func SaveProject(pinfo *PkgInfo, pdecl *PkgDecl, pdoc *PkgDoc) error {
 		_, err = q.Save(info)
 	}
 	if err != nil {
-		beego.Info("models.SaveProject(): Information:", err)
+		beego.Error("models.SaveProject(): Information:", err)
 	}
 
 	// Save package declaration
 	_, err = q.Save(pdecl)
 	if err != nil {
-		beego.Info("models.SaveProject(): Declaration:", err)
+		beego.Error("models.SaveProject(): Declaration:", err)
 	}
 
 	// Save package documentation
 	if len(pdoc.Doc) > 0 {
 		_, err = q.Save(pdoc)
 		if err != nil {
-			beego.Info("models.SaveProject(): Documentation:", err)
+			beego.Error("models.SaveProject(): Documentation:", err)
 		}
 	}
 
@@ -171,7 +171,7 @@ func DeleteProject(path string) error {
 	// Connect to database.
 	q, err := connDb()
 	if err != nil {
-		beego.Info("models.SaveProject():", err)
+		beego.Error("models.SaveProject():", err)
 	}
 	defer q.Db.Close()
 
@@ -179,24 +179,24 @@ func DeleteProject(path string) error {
 	info := &PkgInfo{Path: path}
 	_, err = q.Delete(info)
 	if err != nil {
-		beego.Info("models.DeleteProject(): Information:", err)
+		beego.Error("models.DeleteProject(): Information:", err)
 	}
 
 	// Delete package declaration
 	pdecl := &PkgDecl{Path: path}
 	_, err = q.Delete(pdecl)
 	if err != nil {
-		beego.Info("models.DeleteProject(): Declaration:", err)
+		beego.Error("models.DeleteProject(): Declaration:", err)
 	}
 
 	// Delete package documentation
 	pdoc := &PkgDoc{Path: path}
 	_, err = q.Delete(pdoc)
 	if err != nil {
-		beego.Info("models.DeleteProject(): Documentation:", err)
+		beego.Error("models.DeleteProject(): Documentation:", err)
 	}
 
-	beego.Info("models.DeleteProject(", path, ")")
+	beego.Error("models.DeleteProject(", path, ")")
 	return nil
 }
 
@@ -205,7 +205,7 @@ func LoadProject(path string) (*PkgDecl, error) {
 	// Connect to database.
 	q, err := connDb()
 	if err != nil {
-		beego.Info("models.SaveProject():", err)
+		beego.Error("models.SaveProject():", err)
 	}
 	defer q.Db.Close()
 
@@ -219,7 +219,7 @@ func GetRecentPros(num int) ([]*PkgInfo, error) {
 	// Connect to database.
 	q, err := connDb()
 	if err != nil {
-		beego.Info("models.GetRecentPros():", err)
+		beego.Error("models.GetRecentPros():", err)
 	}
 	defer q.Db.Close()
 
@@ -233,7 +233,7 @@ func AddViews(pinfo *PkgInfo) error {
 	// Connect to database.
 	q, err := connDb()
 	if err != nil {
-		beego.Info("models.AddViews():", err)
+		beego.Error("models.AddViews():", err)
 	}
 	defer q.Db.Close()
 
@@ -247,7 +247,7 @@ func GetPopularPros() ([]*PkgInfo, error) {
 	// Connect to database.
 	q, err := connDb()
 	if err != nil {
-		beego.Info("models.GetPopularPros():", err)
+		beego.Error("models.GetPopularPros():", err)
 	}
 	defer q.Db.Close()
 
@@ -261,7 +261,7 @@ func GetGoRepo() ([]*PkgInfo, error) {
 	// Connect to database.
 	q, err := connDb()
 	if err != nil {
-		beego.Info("models.GetGoRepo():", err)
+		beego.Error("models.GetGoRepo():", err)
 	}
 	defer q.Db.Close()
 
@@ -276,7 +276,7 @@ func SearchDoc(key string) ([]*PkgInfo, error) {
 	// Connect to database.
 	q, err := connDb()
 	if err != nil {
-		beego.Info("models.SearchDoc():", err)
+		beego.Error("models.SearchDoc():", err)
 	}
 	defer q.Db.Close()
 
@@ -291,11 +291,11 @@ func GetAllPkgs() ([]*PkgInfo, error) {
 	// Connect to database.
 	q, err := connDb()
 	if err != nil {
-		beego.Info("models.GetAllPkgs():", err)
+		beego.Error("models.GetAllPkgs():", err)
 	}
 	defer q.Db.Close()
 
 	var pkgInfos []*PkgInfo
-	err = q.Where("views > ?", 0).OrderBy("path").FindAll(&pkgInfos)
+	err = q.Where("views > ?", 0).OrderBy("pro_name").OrderBy("views").FindAll(&pkgInfos)
 	return pkgInfos, err
 }
