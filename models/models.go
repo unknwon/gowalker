@@ -37,7 +37,7 @@ type PkgInfo struct {
 	Synopsis   string
 	Views      int64     `qbs:"index"`
 	Created    time.Time `qbs:"index"` // Time when information last updated.
-	ViewedTime string    // User viewed time.
+	ViewedTime string    // User viewed time(Unix-timestamp).
 	ProName    string    // Name of the project.
 	Etag       string    // Revision tag.
 }

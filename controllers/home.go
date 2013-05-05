@@ -21,6 +21,7 @@ import (
 	godoc "go/doc"
 	"net/http"
 	"path"
+	"strconv"
 	"strings"
 	"time"
 
@@ -535,10 +536,9 @@ func ConvertDataFormat(pdoc *doc.Package, pdecl *models.PkgDecl) error {
 func updateRecentPros(pdoc *doc.Package) {
 	index := -1
 	listLen := len(recentViewedPros)
-	t := time.Now().UTC().String()
 	curPro := &recentPro{
 		Path:       pdoc.ImportPath,
-		ViewedTime: t[:19],
+		ViewedTime: strconv.Itoa(int(time.Now().UTC().Unix())),
 		IsGoRepo:   pdoc.ProjectName == "Go",
 		Views:      pdoc.Views,
 	}
