@@ -6171,3 +6171,6 @@ pre .ret {  color: #CE0000;}
     width: 38px;
     background: url("/static/img/top.png") no-repeat scroll 0% 0% transparent;
 }
+
+.homeleft { width: 550px; }
+.homeright { width: 350px; }

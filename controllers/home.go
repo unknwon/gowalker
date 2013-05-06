@@ -267,15 +267,14 @@ func generatePage(this *HomeController, pdoc *doc.Package, q string, lang string
 
 	// Get project name.
 	lastIndex := strings.LastIndex(q, "/")
+	proName := q[lastIndex+1:]
+	if i := strings.Index(proName, "?"); i > -1 {
+		proName = proName[:i]
+	}
+	this.Data["ProName"] = proName
+
 	if utils.IsGoRepoPath(pdoc.ImportPath) {
 		this.Data["IsGoRepo"] = true
-		proName := q[lastIndex+1:]
-		if i := strings.Index(proName, "?"); i > -1 {
-			proName = proName[:i]
-		}
-		this.Data["ProName"] = proName
-	} else {
-		this.Data["ProName"] = pdoc.ProjectName
 	}
 	pkgDocPath := q[:lastIndex]
 	this.Data["ProDocPath"] = pkgDocPath // Upper level project URL.
@@ -312,7 +311,7 @@ func generatePage(this *HomeController, pdoc *doc.Package, q string, lang string
 	for _, v := range pdoc.Imports {
 		links = append(links, &utils.Link{
 			Name: path.Base(v) + ".",
-			Path: v + "?lang=" + lang,
+			Path: v,
 		})
 	}
 

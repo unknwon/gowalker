@@ -17,13 +17,19 @@
 package main
 
 import (
+	"runtime"
+
 	"github.com/Unknwon/gowalker/controllers"
 	"github.com/astaxie/beego"
 )
 
 const (
-	VERSION = "0.1.5.0504" // Application version.
+	VERSION = "0.1.5.0505" // Application version.
 )
+
+func init() {
+	runtime.GOMAXPROCS(runtime.NumCPU())
+}
 
 func main() {
 	beego.AppName = "Go Walker"

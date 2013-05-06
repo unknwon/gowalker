@@ -34,7 +34,7 @@
 				<p class="text-success">Please read the  <a href="/about">About Page</a> for information about adding projects to Go Walker and more.</p>
 			</div>
 			<div class="row">
-				<div class="span6">
+				<div class="span6 homeleft">
 					<h4>What are other people looking at.</h4>
 					<table id="rectable" class="table table-bordered table-hover">
 						<thead>
@@ -52,8 +52,20 @@
 						{{end}}
 						</tbody>
 					</table>
+					<script>
+						(function(){
+							var node = document.getElementById("rectable");
+							var child = node.getElementsByTagName("tr");
+							var d1 = new Date();
+							for(var i=1;i<child.length;i++){
+								var t = parseInt(node.rows[i].cells[1].innerHTML);
+								var d = new Date(t * 1000);
+								node.rows[i].cells[1].innerHTML = d.toLocaleString();
+							}
+						})();
+					</script>
 				</div>
-				<div class="span6">
+				<div class="span6 homeright">
 					<div class="span6">
 						<h4>Popular Projects</h4>
 						<ul class="unstyled">

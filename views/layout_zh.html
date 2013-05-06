@@ -2,7 +2,7 @@
 <html>
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-		<link rel="shortcut icon" href="/static/favicon.ico" />
+		<link rel="shortcut icon" href="/static/img/favicon.ico" />
 		<meta name="author" content="Unknown"/>
 
 		 <!-- Stylesheets -->
@@ -26,6 +26,18 @@
 						    </ul>
 					    </div>
 					<span class="pull-right"><a class="btn" href="#">返回顶部</a></span>
+					<span class="muted">|</span>
+					</script>
+					<span>
+						<script type="text/javascript">
+							var _bdhmProtocol = (("https:" == document.location.protocol) ? " https://" : " http://");
+							document.write(unescape("%3Cscript src='" + _bdhmProtocol +"hm.baidu.com/h.js%3Fd2d5278d61e466bcb3f9ea29a18d40dc' type='text/javascript'%3E%3C/script%3E"));
+						</script>
+					</span>
+					<span class="muted">|</span>
+					<span>
+						<script type="text/javascript" src="http://tajs.qq.com/stats?sId=24262957" charset="UTF-8"></script>
+					</span>
 				</div>
 			</div>
 		</div>
@@ -45,17 +57,6 @@
 				};     
 				$(window).bind("scroll", $backToTopFun);     
 				$(function() { $backToTopFun(); }); 
-			})();
-
-			(function(){
-				var node = document.getElementById("rectable");
-				var child = node.getElementsByTagName("tr");
-				var d1 = new Date();
-				for(var i=1;i<child.length;i++){
-					var t = parseInt(node.rows[i].cells[1].innerHTML);
-					var d = new Date(t * 1000);
-					node.rows[i].cells[1].innerHTML = d.toLocaleString();
-				}
 			})();
 		</script>
 		<script>

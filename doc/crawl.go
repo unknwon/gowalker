@@ -22,6 +22,7 @@ import (
 	"net/http"
 	"path"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 
@@ -98,12 +99,11 @@ func getRepo(client *http.Client, importPath string, etag string) (pdoc *Package
 func SaveProject(pdoc *Package) error {
 
 	// Save package information.
-	t := time.Now().UTC().String()
 	pinfo := &models.PkgInfo{
 		Path:       pdoc.ImportPath,
 		Synopsis:   pdoc.Synopsis,
 		Created:    time.Now().UTC(),
-		ViewedTime: t[:19],
+		ViewedTime: strconv.Itoa(int(time.Now().UTC().Unix())),
 		ProName:    pdoc.ProjectName,
 	}
 
