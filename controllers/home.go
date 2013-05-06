@@ -20,6 +20,7 @@ import (
 	"bytes"
 	"encoding/base32"
 	godoc "go/doc"
+	"html/template"
 	"net/http"
 	"path"
 	"strings"
@@ -320,7 +321,7 @@ func generatePage(this *HomeController, pdoc *doc.Package, q string, lang string
 	for _, t := range pdoc.Types {
 		links = append(links, &utils.Link{
 			Name:    t.Name,
-			Comment: t.Doc,
+			Comment: template.HTMLEscapeString(t.Doc),
 		})
 	}
 	for _, v := range pdoc.Imports {
