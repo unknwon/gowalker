@@ -37,7 +37,7 @@ type PkgInfo struct {
 	Synopsis   string
 	Views      int64     `qbs:"index"`
 	Created    time.Time `qbs:"index"` // Time when information last updated.
-	ViewedTime string    // User viewed time(Unix-timestamp).
+	ViewedTime int64     // User viewed time(Unix-timestamp).
 	ProName    string    // Name of the project.
 	Etag       string    // Revision tag.
 }
@@ -105,7 +105,7 @@ func init() {
 	mg.CreateTableIfNotExists(new(PkgDecl))
 	mg.CreateTableIfNotExists(new(PkgDoc))
 
-	beego.Debug("Initialized database ->", DB_NAME)
+	beego.Trace("Initialized database ->", DB_NAME)
 }
 
 // GetProInfo returns package information from database.
@@ -133,18 +133,21 @@ func SaveProject(pinfo *PkgInfo, pdecl *PkgDecl, pdoc *PkgDoc) error {
 	defer q.Db.Close()
 
 	// Save package information.
-	info := new(PkgInfo)
-	err = q.WhereEqual("path", pinfo.Path).Find(info)
-	if err != nil {
-		_, err = q.Save(pinfo)
-	} else {
-		t := pinfo.Created.String()
-		info.Synopsis = pinfo.Synopsis
-		info.Created = pinfo.Created
-		info.ViewedTime = t[:19]
-		info.ProName = pinfo.ProName
-		_, err = q.Save(info)
-	}
+	_, err = q.Save(pinfo)
+
+	// When 'path' as primary key, don't need to use following code.
+	/*	info := new(PkgInfo)
+		err = q.WhereEqual("path", pinfo.Path).Find(info)
+		if err != nil {
+			_, err = q.Save(pinfo)
+		} else {
+			info.Synopsis = pinfo.Synopsis
+			info.Created = pinfo.Created
+			info.ViewedTime = pinfo.ViewedTime
+			info.ProName = pinfo.ProName
+			info.Etag = pinfo.Etag
+			_, err = q.Save(info)
+		}*/
 	if err != nil {
 		beego.Error("models.SaveProject(): Information:", err)
 	}

@@ -28,7 +28,7 @@
 			{{end}}
 			<div class="flat-well well-small" style="background-color: #f5f5f5">
 				<a target="_blank" href="http://{{.ProPath}}"><strong>{{.ProName}}:</strong></a> <a href="/{{.ProDocPath}}">{{.ProDocPath}}</a><span class="muted">/{{.ProName}}</span>
-				<span class="pull-right"><span >You are No.<b>{{.Views}}</b> visitor of this page.</span><span class="muted"> | </span><a href="#_index">Index</a><span class="muted"> | </span><a href="#_files">Files</a><span class="muted"> | </span><a href="#_subdirs">Directories</a></span>
+				<span class="pull-right"><span >You are No.<b>{{.Views}}</b> visitor of this page.</span><span class="muted"> | </span><a href="#_index">Index</a><span class="muted"> | </span><a href="#_files">Files</a>{{if .IsHasSubdirs}}<span class="muted"> | </span><a href="#_subdirs">Directories</a></span>{{end}}
 			</div>
 			<h2>package {{.ProName}}</h2>
 			<p><code>import "{{.ImportPath}}"</code></p>
@@ -98,13 +98,33 @@
 		   			</div>
 				{{end}}
 			{{end}}
-			<h3 id="_files"><a target="_blank" href="{{.ProPath}}">Files</a></h3>
+			<h3 id="_files"><a target="_blank" href="http://{{.ProPath}}">Files</a></h3>
 			<p>
 			{{$proPath := .ProPath}}
 			{{range .Files}}
 				<a target="_blank" href="http://{{$proPath}}/{{.}}">{{.}}</a>
 			{{end}}
 			</p>
+			{{if .IsHasSubdirs}}
+				<h3 id="_subdirs"><a target="_blank" href="http://{{.ProPath}}">Directories</a></h3>
+				<table class="table table-hover table-striped table-condensed">
+					<thead>
+						<tr>
+							<th>Import Path</th>
+							<th>Synopsis</th>
+						</tr>
+					</thead>
+					<tbody>
+					{{$proPath := .ProPath}}
+					{{range .Subdirs}}
+						<tr>
+							<td><a href="/{{.Path}}">{{.Path}}</a></td>
+							<td>{{.Synopsis}}</td>
+						</tr>
+					{{end}}
+					</tbody>
+				</table>
+			{{end}}
 			<p>
 			Package <b>{{.ProName}}</b> imports <a href="/search?q=imports&pkgs={{.ImportPkgs}}">{{.ImportPkgNum}}</a> packages. Go Walker generated this page in <i>{{.UtcTime}}</i> with GOOS={{.GOOS}} and GOARCH={{.GOARCH}}. <a href="/refresh?q={{.ImportPath}}">Refresh</a>.
 			</p>

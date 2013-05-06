@@ -73,8 +73,9 @@ type Package struct {
 	// Time when information last updated.
 	Created time.Time `qbs:"index"`
 
-	Views      int64
-	ViewedTime string
+	Views, ViewedTime int64
+
+	Etag string // Revision tag.
 
 	// Top-level declarations.
 	Consts []*Value

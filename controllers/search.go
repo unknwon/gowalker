@@ -40,7 +40,7 @@ func (this *SearchController) Get() {
 	this.Ctx.SetCookie("lang", curLang.Lang+";path=/", 0)
 
 	// Get arguments.
-	q := this.Input().Get("q")
+	q := strings.TrimSpace(this.Input().Get("q"))
 
 	// Empty query string shows home page.
 	if len(q) == 0 {

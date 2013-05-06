@@ -18,10 +18,10 @@ package controllers
 
 import (
 	"bytes"
+	"encoding/base32"
 	godoc "go/doc"
 	"net/http"
 	"path"
-	"strconv"
 	"strings"
 	"time"
 
@@ -39,9 +39,9 @@ var (
 
 // Recent viewed project.
 type recentPro struct {
-	Path, ViewedTime string
-	IsGoRepo         bool
-	Views            int64
+	Path              string
+	IsGoRepo          bool
+	Views, ViewedTime int64
 }
 
 // Language type.
@@ -54,9 +54,9 @@ func init() {
 	num, err := beego.AppConfig.Int("recentViewedProNum")
 	if err == nil {
 		recentViewedProNum = num
-		beego.Debug("Loaded 'recentViewedProNum' -> value:", recentViewedProNum)
+		beego.Trace("Loaded 'recentViewedProNum' -> value:", recentViewedProNum)
 	} else {
-		beego.Warn("Failed to load 'recentViewedProNum' -> Use default value:", recentViewedProNum)
+		beego.Trace("Failed to load 'recentViewedProNum' -> Use default value:", recentViewedProNum)
 	}
 
 	recentViewedPros = make([]*recentPro, 0, recentViewedProNum)
@@ -71,7 +71,6 @@ func init() {
 				Views:      p.Views,
 			})
 	}
-	beego.Debug("Initialized 'recentViewedPros'")
 
 	// Initialized language type list.
 	langs := strings.Split(beego.AppConfig.String("language"), "|")
@@ -83,7 +82,6 @@ func init() {
 			Name: names[i],
 		})
 	}
-	beego.Debug("Initialized 'langTypes'")
 }
 
 // getLangVer returns current language version and list of rest languages.
@@ -164,7 +162,7 @@ func (this *HomeController) Get() {
 	this.Ctx.SetCookie("lang", curLang.Lang+";path=/", 0)
 
 	// Get query field.
-	q := this.Input().Get("q")
+	q := strings.TrimSpace(this.Input().Get("q"))
 
 	if path, ok := utils.IsBrowseURL(q); ok {
 		q = path
@@ -234,13 +232,15 @@ func (this *HomeController) Get() {
 					ProName:    pdoc.ProjectName,
 					ViewedTime: pdoc.ViewedTime,
 					Views:      pdoc.Views,
+					Etag:       pdoc.Etag,
 				}
 				models.AddViews(pinfo)
 				return
 			}
+		} else {
+			beego.Error("HomeController.Get():", err)
 		}
 
-		beego.Error("HomeController.Get():", err)
 		// Show search page
 		this.Redirect("/search?q="+reqUrl, 302)
 		return
@@ -256,15 +256,6 @@ func generatePage(this *HomeController, pdoc *doc.Package, q string, lang string
 	// Refresh (within 10 seconds).
 	this.Data["IsRefresh"] = pdoc.Created.Add(10 * time.Second).UTC().After(time.Now().UTC())
 
-	// Title.
-	this.Data["ProPath"] = q // Project VCS home page.
-	this.Data["Views"] = pdoc.Views + 1
-
-	// Remove last "/".
-	if urlLen := len(q); q[urlLen-1] == '/' {
-		q = q[:urlLen-1]
-	}
-
 	// Get project name.
 	lastIndex := strings.LastIndex(q, "/")
 	proName := q[lastIndex+1:]
@@ -272,6 +263,30 @@ func generatePage(this *HomeController, pdoc *doc.Package, q string, lang string
 		proName = proName[:i]
 	}
 	this.Data["ProName"] = proName
+
+	// Project VCS home page.
+	switch {
+	case q[:4] == "code": // code.google.com
+		if strings.Index(q, "source/") == -1 {
+			this.Data["ProPath"] = strings.Replace(q, pdoc.ProjectName, pdoc.ProjectName+"/source/browse", 1)
+		} else {
+			this.Data["ProPath"] = q
+		}
+	case q[:3] == "git": // github.com
+		if proName != pdoc.ProjectName {
+			// Not root.
+			this.Data["ProPath"] = strings.Replace(q, proName, "tree/master/"+proName, 1)
+		} else {
+			this.Data["ProPath"] = q + "/tree/master"
+		}
+	}
+
+	this.Data["Views"] = pdoc.Views + 1
+
+	// Remove last "/".
+	if urlLen := len(q); q[urlLen-1] == '/' {
+		q = q[:urlLen-1]
+	}
 
 	if utils.IsGoRepoPath(pdoc.ImportPath) {
 		this.Data["IsGoRepo"] = true
@@ -384,6 +399,19 @@ func generatePage(this *HomeController, pdoc *doc.Package, q string, lang string
 		pdoc.Vars[i] = v
 	}
 
+	// Dirs.
+	this.Data["IsHasSubdirs"] = len(pdoc.Dirs) > 0
+	pinfos := make([]*models.PkgInfo, 0, len(pdoc.Dirs))
+	for _, v := range pdoc.Dirs {
+		v = pdoc.ImportPath + "/" + v
+		if pinfo, err := models.GetPkgInfo(v); err == nil {
+			pinfos = append(pinfos, pinfo)
+		} else {
+			pinfos = append(pinfos, &models.PkgInfo{Path: v})
+		}
+	}
+	this.Data["Subdirs"] = pinfos
+
 	this.Data["Files"] = pdoc.Files
 	this.Data["ImportPkgs"] = pdecl.Imports
 	this.Data["ImportPkgNum"] = len(pdoc.Imports) - 1
@@ -450,7 +478,7 @@ func ConvertDataFormat(pdoc *doc.Package, pdecl *models.PkgDecl) error {
 			case 3: // URL
 				val.URL = s
 			case 4: // Code
-				val.Code = s
+				val.Code = *codeDecode(&s)
 			}
 		}
 		pdoc.Funcs = append(pdoc.Funcs, val)
@@ -491,7 +519,7 @@ func ConvertDataFormat(pdoc *doc.Package, pdecl *models.PkgDecl) error {
 						case 3: // URL
 							val2.URL = s2
 						case 4: // Code
-							val2.Code = s2
+							val2.Code = *codeDecode(&s2)
 						}
 					}
 					val.Funcs = append(val.Funcs, val2)
@@ -512,7 +540,7 @@ func ConvertDataFormat(pdoc *doc.Package, pdecl *models.PkgDecl) error {
 						case 3: // URL
 							val2.URL = s2
 						case 4: // Code
-							val2.Code = s2
+							val2.Code = *codeDecode(&s2)
 						}
 					}
 					val.Methods = append(val.Methods, val2)
@@ -524,12 +552,23 @@ func ConvertDataFormat(pdoc *doc.Package, pdecl *models.PkgDecl) error {
 	}
 	pdoc.Types = pdoc.Types[:len(pdoc.Types)-1]
 
-	// Files.
-	pdoc.Files = strings.Split(pdecl.Files, "|")
+	// Dirs.
+	pdoc.Dirs = strings.Split(pdecl.Dirs, "|")
+	pdoc.Dirs = pdoc.Dirs[:len(pdoc.Dirs)-1]
 
 	// Imports.
 	pdoc.Imports = strings.Split(pdecl.Imports, "|")
+
+	// Files.
+	pdoc.Files = strings.Split(pdecl.Files, "|")
 	return nil
+}
+
+func codeDecode(code *string) *string {
+	str := new(string)
+	byts, _ := base32.StdEncoding.DecodeString(*code)
+	*str = string(byts)
+	return str
 }
 
 func updateRecentPros(pdoc *doc.Package) {
@@ -537,7 +576,7 @@ func updateRecentPros(pdoc *doc.Package) {
 	listLen := len(recentViewedPros)
 	curPro := &recentPro{
 		Path:       pdoc.ImportPath,
-		ViewedTime: strconv.Itoa(int(time.Now().UTC().Unix())),
+		ViewedTime: time.Now().UTC().Unix(),
 		IsGoRepo:   pdoc.ProjectName == "Go",
 		Views:      pdoc.Views,
 	}

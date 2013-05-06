@@ -17,18 +17,46 @@
 package main
 
 import (
+	"fmt"
+	"log"
+	"os"
 	"runtime"
+	"time"
 
 	"github.com/Unknwon/gowalker/controllers"
+	"github.com/Unknwon/gowalker/utils"
 	"github.com/astaxie/beego"
 )
 
 const (
-	VERSION = "0.1.5.0505" // Application version.
+	VERSION = "0.1.6.0506" // Application version.
 )
 
 func init() {
+	// Try to have highest performance.
 	runtime.GOMAXPROCS(runtime.NumCPU())
+
+	// Set application log level.
+	beego.SetLevel(beego.LevelTrace)
+
+	// Initialize log file.
+	os.Mkdir("./log", os.ModePerm)
+	// Compute log file name as format '<year>-<month>-<day>.txt', eg.'2013-5-6.txt'.
+	logName := fmt.Sprintf("./log/%d-%d-%d.txt", time.Now().Year(), time.Now().Month(), time.Now().Day())
+	// Open or create log file.
+	var fl *os.File
+	var err error
+	if utils.IsExist(logName) {
+		fl, err = os.OpenFile(logName, os.O_RDWR|os.O_APPEND, 0644)
+	} else {
+		fl, err = os.Create(logName)
+	}
+	if err != nil {
+		beego.Trace("Failed to init log file ->", err)
+		return
+	}
+	beego.Info("Go Walker", VERSION)
+	beego.SetLogger(log.New(fl, "", log.Ldate|log.Ltime))
 }
 
 func main() {

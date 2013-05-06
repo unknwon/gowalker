@@ -62,6 +62,7 @@ func getGithubDoc(client *http.Client, match map[string]string, savedEtag string
 		}
 	}
 
+	// Check revision tag.
 	var commit string
 	match["tag"], commit, err = bestTag(tags, "master")
 	if err != nil {
@@ -97,11 +98,19 @@ func getGithubDoc(client *http.Client, match map[string]string, savedEtag string
 	if dirPrefix != "" {
 		dirPrefix = dirPrefix[1:] + "/"
 	}
+	preLen := len(dirPrefix)
 
 	// Get source file data.
-	var files []*source
+	dirs := make([]string, 0, 5)
+	files := make([]*source, 0, 5)
 	for _, node := range tree.Tree {
 		if node.Type != "blob" || !strings.HasPrefix(node.Path, dirPrefix) {
+			if len(dirPrefix) > 0 && strings.HasPrefix(node.Path, dirPrefix) {
+				p := node.Path[preLen:]
+				dirs = append(dirs, p)
+			} else if len(dirPrefix) == 0 && strings.Index(node.Path, "/") == -1 {
+				dirs = append(dirs, node.Path)
+			}
 			continue
 		}
 		inTree = true
@@ -114,7 +123,7 @@ func getGithubDoc(client *http.Client, match map[string]string, savedEtag string
 		}
 	}
 
-	if !inTree {
+	if !inTree || len(files) == 0 {
 		return nil, NotFoundError{"Directory tree does not contain Go files."}
 	}
 
@@ -123,10 +132,10 @@ func getGithubDoc(client *http.Client, match map[string]string, savedEtag string
 		return nil, err
 	}
 
-	/*	browseURL := expand("https://github.com/{owner}/{repo}", match)
-		if match["dir"] != "" {
-			browseURL = expand("https://github.com/{owner}/{repo}/tree/{tag}{dir}", match)
-		}*/
+	/*browseURL := expand("https://github.com/{owner}/{repo}", match)
+	if match["dir"] != "" {
+		browseURL = expand("https://github.com/{owner}/{repo}/tree/{tag}{dir}", match)
+	}*/
 
 	// Start generating data.
 	w := &walker{
@@ -134,6 +143,8 @@ func getGithubDoc(client *http.Client, match map[string]string, savedEtag string
 		pdoc: &Package{
 			ImportPath:  match["importPath"],
 			ProjectName: match["repo"],
+			Etag:        commit,
+			Dirs:        dirs,
 		},
 	}
 	return w.build(files)

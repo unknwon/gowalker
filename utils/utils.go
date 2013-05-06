@@ -71,14 +71,14 @@ func FormatCode(w io.Writer, code string, links []*Link) {
 						// Handle string highlight.
 						break CutWords
 					}
-				case !isComment && !isRawString && code[pos] == '"' && code[pos-1] != '\\':
+				case !isComment && !isRawString && code[pos] == '"' && (pos > 0) && code[pos-1] != '\\':
 					if !isString {
 						isString = true
 					} else {
 						// Handle string highlight.
 						break CutWords
 					}
-				case !isString && !isComment && code[pos] == '/' && code[pos+1] == '/':
+				case !isString && !isComment && code[pos] == '/' && (pos > 0) && code[pos+1] == '/':
 					isComment = true
 				case isComment:
 					if isBlockComment {

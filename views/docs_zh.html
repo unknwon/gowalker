@@ -28,7 +28,7 @@
 			{{end}}
 			<div class="flat-well well-small" style="background-color: #f5f5f5">
 				<a target="_blank" href="http://{{.ProPath}}"><strong>{{.ProName}}:</strong></a> <a href="/{{.ProDocPath}}">{{.ProDocPath}}</a><span class="muted">/{{.ProName}}</span>
-				<span class="pull-right"><span >您是本页面的第 <b>{{.Views}}</b> 位访问者。</span><span class="muted"> | </span><a href="#_index">索引</a><span class="muted"> | </span><a href="#_files">文件</a><span class="muted"> | </span><a href="#_subdirs">目录</a></span>
+				<span class="pull-right"><span >您是本页面的第 <b>{{.Views}}</b> 位访问者。</span><span class="muted"> | </span><a href="#_index">索引</a><span class="muted"> | </span><a href="#_files">文件</a>{{if .IsHasSubdirs}}<span class="muted"> | </span><a href="#_subdirs">目录</a></span>{{end}}
 			</div>
 			<h2>项目 {{.ProName}}</h2>
 			<p><code>import "{{.ImportPath}}"</code></p>
@@ -100,13 +100,33 @@
 		    		</div>
 				{{end}}
 			{{end}}
-			<h3 id="_files"><a target="_blank" href="{{.ProPath}}">Files</a></h3>
+			<h3 id="_files"><a target="_blank" href="http://{{.ProPath}}">Files</a></h3>
 			<p>
 			{{$proPath := .ProPath}}
 			{{range .Files}}
 				<a target="_blank" href="http://{{$proPath}}/{{.}}">{{.}}</a>
 			{{end}}
 			</p>
+			{{if .IsHasSubdirs}}
+				<h3 id="_subdirs"><a target="_blank" href="http://{{.ProPath}}">目录</a></h3>
+				<table class="table table-hover table-striped table-condensed">
+					<thead>
+						<tr>
+							<th>项目路径</th>
+							<th>简介</th>
+						</tr>
+					</thead>
+					<tbody>
+					{{$proPath := .ProPath}}
+					{{range .Subdirs}}
+						<tr>
+							<td><a href="/{{.Path}}">{{.Path}}</a></td>
+							<td>{{.Synopsis}}</td>
+						</tr>
+					{{end}}
+					</tbody>
+				</table>
+			{{end}}
 			<p>
 			项目 <b>{{.ProName}}</b> 共计导入 <a href="/search?q=imports&pkgs={{.ImportPkgs}}">{{.ImportPkgNum}}</a> 个外部包。Go 步行者在 <i>{{.UtcTime}}</i> 使用操作系统 GOOS={{.GOOS}} 和系统类型 GOARCH={{.GOARCH}} 生成了此页面。 <a href="/refresh?q={{.ImportPath}}">刷新文档</a>.
 			</p>

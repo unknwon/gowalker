@@ -16,13 +16,13 @@ package doc
 
 import (
 	"bytes"
+	"encoding/base32"
 	"encoding/xml"
 	"errors"
 	"io"
 	"net/http"
 	"path"
 	"regexp"
-	"strconv"
 	"strings"
 	"time"
 
@@ -37,7 +37,7 @@ type crawlResult struct {
 }
 
 // crawlDoc fetchs package from VCS.
-func crawlDoc(path string, etag string) (pdoc *Package, err error) {
+func crawlDoc(path string, etag string, views int64) (pdoc *Package, err error) {
 	// I have no idea what the fuck does this mean.
 	if i := strings.Index(path, "/libgo/go/"); i > 0 && utils.IsGoRepoPath(path[i+len("/libgo/go/"):]) {
 		// Go Frontend source tree mirror.
@@ -50,13 +50,15 @@ func crawlDoc(path string, etag string) (pdoc *Package, err error) {
 		// For timeout logic in client.go to work, we cannot leave connections idling. This is ugly.
 		httpTransport.CloseIdleConnections()
 
-		if err != errNotModified {
+		if err != errNotModified && pdocNew != nil {
 			pdoc = pdocNew
+			pdoc.Views = views
 		}
 	}
 
 	switch {
 	case err == nil:
+		pdoc.Views = views
 		if err = SaveProject(pdoc); err != nil {
 			beego.Error("doc.SaveProject(", path, "):", err)
 		}
@@ -92,6 +94,11 @@ func getRepo(client *http.Client, importPath string, etag string) (pdoc *Package
 		return nil, errors.New("doc.getRepo(): No match: " + importPath)
 	}
 
+	// Save revision tag.
+	if pdoc != nil {
+		pdoc.Etag = VER_PREFIX + pdoc.Etag
+	}
+
 	return pdoc, err
 }
 
@@ -103,8 +110,9 @@ func SaveProject(pdoc *Package) error {
 		Path:       pdoc.ImportPath,
 		Synopsis:   pdoc.Synopsis,
 		Created:    time.Now().UTC(),
-		ViewedTime: strconv.Itoa(int(time.Now().UTC().Unix())),
+		ViewedTime: time.Now().UTC().Unix(),
 		ProName:    pdoc.ProjectName,
+		Etag:       pdoc.Etag,
 	}
 
 	// Save package declaration.
@@ -155,7 +163,7 @@ func SaveProject(pdoc *Package) error {
 			buf.WriteString("&F#")
 			buf.WriteString(m.URL)
 			buf.WriteString("&F#")
-			buf.WriteString(m.Code)
+			buf.WriteString(*codeEncode(&m.Code))
 			buf.WriteString("&M#")
 		}
 		buf.WriteString("&$#")
@@ -168,7 +176,7 @@ func SaveProject(pdoc *Package) error {
 			buf.WriteString("&F#")
 			buf.WriteString(m.URL)
 			buf.WriteString("&F#")
-			buf.WriteString(m.Code)
+			buf.WriteString(*codeEncode(&m.Code))
 			buf.WriteString("&M#")
 		}
 		buf.WriteString("&$#")
@@ -183,7 +191,7 @@ func SaveProject(pdoc *Package) error {
 			buf.WriteString("&F#")
 			buf.WriteString(m.URL)
 			buf.WriteString("&F#")
-			buf.WriteString(m.Code)
+			buf.WriteString(*codeEncode(&m.Code))
 			buf.WriteString("&M#")
 		}
 		buf.WriteString("&$#")
@@ -196,7 +204,7 @@ func SaveProject(pdoc *Package) error {
 			buf.WriteString("&F#")
 			buf.WriteString(m.URL)
 			buf.WriteString("&F#")
-			buf.WriteString(m.Code)
+			buf.WriteString(*codeEncode(&m.Code))
 			buf.WriteString("&M#")
 		}
 		buf.WriteString("&##")
@@ -300,10 +308,16 @@ func addFuncs(buf *bytes.Buffer, pfuncs *string, funcs []*Func) {
 		buf.WriteString("&F#")
 		buf.WriteString(v.URL)
 		buf.WriteString("&F#")
-		buf.WriteString(v.Code)
+		buf.WriteString(*codeEncode(&v.Code))
 		buf.WriteString("&$#")
 	}
 	*pfuncs = buf.String()
+}
+
+func codeEncode(code *string) *string {
+	str := new(string)
+	*str = base32.StdEncoding.EncodeToString([]byte(*code))
+	return str
 }
 
 // service represents a source code control service.

@@ -49,7 +49,7 @@ func CheckDoc(path string, requestType int) (*Package, error) {
 	// Get the package documentation from database.
 	pinfo, err := models.GetPkgInfo(path)
 
-	if err != nil {
+	if err != nil || !strings.HasPrefix(pinfo.Etag, PACKAGE_VER) {
 		// No package information in database.
 		needsCrawl = true
 	} else {
@@ -77,7 +77,7 @@ func CheckDoc(path string, requestType int) (*Package, error) {
 		// Fetch package from VCS.
 		c := make(chan crawlResult, 1)
 		go func() {
-			pdoc, err = crawlDoc(path, pinfo.Etag)
+			pdoc, err = crawlDoc(path, pinfo.Etag, pinfo.Views)
 			c <- crawlResult{pdoc, err}
 		}()
 
@@ -93,24 +93,36 @@ func CheckDoc(path string, requestType int) (*Package, error) {
 		}
 
 		if err != nil {
-			if pdoc != nil {
+			switch {
+			case pdoc != nil:
 				beego.Error("Serving", path, "from database after error: ", err)
-				err = nil
-			} else if err == errUpdateTimeout {
+				return pdoc, nil
+			case err == errUpdateTimeout:
 				// Handle timeout on packages never seen before as not found.
 				beego.Error("Serving", path, "as not found after timeout")
-				err = errors.New("Status not found")
+				return nil, errors.New("Status not found")
+			case err == errNotModified:
+				beego.Info("Serving", path, "without modified")
+				err = nil
+				pinfo.Created = time.Now().UTC()
+				pdoc = &Package{}
+				assginPkgInfo(pdoc, pinfo)
 			}
-			return nil, err
+
 		}
 	} else {
-		// Get package information
-		pdoc.ImportPath = pinfo.Path
-		pdoc.Synopsis = pinfo.Synopsis
-		pdoc.Created = pinfo.Created
-		pdoc.ProjectName = pinfo.ProName
-		pdoc.Views = pinfo.Views
+		assginPkgInfo(pdoc, pinfo)
 	}
 
 	return pdoc, nil
+}
+
+func assginPkgInfo(pdoc *Package, pinfo *models.PkgInfo) {
+	// Assgin package information
+	pdoc.ImportPath = pinfo.Path
+	pdoc.Synopsis = pinfo.Synopsis
+	pdoc.Created = pinfo.Created
+	pdoc.ProjectName = pinfo.ProName
+	pdoc.Views = pinfo.Views
+	pdoc.Etag = pinfo.Etag
 }

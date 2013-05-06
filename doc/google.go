@@ -51,7 +51,7 @@ func getStandardDoc(client *http.Client, importPath string, savedEtag string) (p
 	}
 
 	// Get source file data.
-	var files []*source
+	files := make([]*source, 0, 5)
 	for _, m := range googleFileRe.FindAllSubmatch(p, -1) {
 		fname := strings.Split(string(m[1]), "?")[0]
 		if utils.IsDocFile(fname) {
@@ -61,6 +61,17 @@ func getStandardDoc(client *http.Client, importPath string, savedEtag string) (p
 				rawURL:    "http://go.googlecode.com/hg-history/release/src/pkg/" + importPath + "/" + fname,
 			})
 		}
+	}
+
+	if len(files) == 0 {
+		return nil, NotFoundError{"Directory tree does not contain Go files."}
+	}
+
+	dirs := make([]string, 0, 5)
+	// Get subdirectories.
+	for _, m := range googleDirRe.FindAllSubmatch(p, -1) {
+		dirName := strings.Split(string(m[1]), "?")[0]
+		dirs = append(dirs, strings.Replace(dirName, "/", "", -1))
 	}
 
 	// Fetch file from VCS.
@@ -74,6 +85,8 @@ func getStandardDoc(client *http.Client, importPath string, savedEtag string) (p
 		pdoc: &Package{
 			ImportPath:  importPath,
 			ProjectName: "Go",
+			Etag:        etag,
+			Dirs:        dirs,
 		},
 	}
 	return w.build(files)
@@ -117,6 +130,17 @@ func getGoogleDoc(client *http.Client, match map[string]string, savedEtag string
 		}
 	}
 
+	if len(files) == 0 {
+		return nil, NotFoundError{"Directory tree does not contain Go files."}
+	}
+
+	dirs := make([]string, 0, 5)
+	// Get subdirectories.
+	for _, m := range googleDirRe.FindAllSubmatch(p, -1) {
+		dirName := strings.Split(string(m[1]), "?")[0]
+		dirs = append(dirs, strings.Replace(dirName, "/", "", -1))
+	}
+
 	// Fetch file from VCS.
 	if err := fetchFiles(client, files, nil); err != nil {
 		return nil, err
@@ -128,6 +152,8 @@ func getGoogleDoc(client *http.Client, match map[string]string, savedEtag string
 		pdoc: &Package{
 			ImportPath:  match["importPath"],
 			ProjectName: expand("{repo}{dot}{subrepo}", match),
+			Etag:        etag,
+			Dirs:        dirs,
 		},
 	}
 	return w.build(files)

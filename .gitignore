@@ -6,9 +6,10 @@
 # Folders
 _obj
 _test
-docs/
+
+# Log and database folders
+log/
 data/
-github.com/
 
 # Architecture specific extensions/prefixes
 *.[568vq]
@@ -24,4 +25,4 @@ _testmain.go
 
 *.exe
 .DS_Store
-main3.go
+gowalker
