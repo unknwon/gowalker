@@ -51,6 +51,7 @@ type langType struct {
 }
 
 func init() {
+	beego.ParseConfig()
 	// Initialized recent viewed project list.
 	num, err := beego.AppConfig.Int("recentViewedProNum")
 	if err == nil {

@@ -113,6 +113,7 @@ func SaveProject(pdoc *Package) error {
 		Created:    time.Now().UTC(),
 		ViewedTime: time.Now().UTC().Unix(),
 		ProName:    pdoc.ProjectName,
+		Views:      pdoc.Views,
 		Etag:       pdoc.Etag,
 	}
 
