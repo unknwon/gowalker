@@ -343,10 +343,10 @@ func generatePage(this *HomeController, pdoc *doc.Package, q string, lang string
 		godoc.ToHTML(&buf, f.Doc, nil)
 		f.Doc = buf.String()
 		buf.Reset()
-		utils.FormatCode(&buf, f.Decl, links)
+		utils.FormatCode(&buf, &f.Decl, links)
 		f.FmtDecl = buf.String()
 		buf.Reset()
-		utils.FormatCode(&buf, f.Code, links)
+		utils.FormatCode(&buf, &f.Code, links)
 		f.Code = buf.String()
 		pdoc.Funcs[i] = f
 	}
@@ -357,10 +357,10 @@ func generatePage(this *HomeController, pdoc *doc.Package, q string, lang string
 			godoc.ToHTML(&buf, f.Doc, nil)
 			f.Doc = buf.String()
 			buf.Reset()
-			utils.FormatCode(&buf, f.Decl, links)
+			utils.FormatCode(&buf, &f.Decl, links)
 			f.FmtDecl = buf.String()
 			buf.Reset()
-			utils.FormatCode(&buf, f.Code, links)
+			utils.FormatCode(&buf, &f.Code, links)
 			f.Code = buf.String()
 			t.Funcs[j] = f
 		}
@@ -369,10 +369,10 @@ func generatePage(this *HomeController, pdoc *doc.Package, q string, lang string
 			godoc.ToHTML(&buf, m.Doc, nil)
 			m.Doc = buf.String()
 			buf.Reset()
-			utils.FormatCode(&buf, m.Decl, links)
+			utils.FormatCode(&buf, &m.Decl, links)
 			m.FmtDecl = buf.String()
 			buf.Reset()
-			utils.FormatCode(&buf, m.Code, links)
+			utils.FormatCode(&buf, &m.Code, links)
 			m.Code = buf.String()
 			t.Methods[j] = m
 		}
@@ -380,7 +380,7 @@ func generatePage(this *HomeController, pdoc *doc.Package, q string, lang string
 		godoc.ToHTML(&buf, t.Doc, nil)
 		t.Doc = buf.String()
 		buf.Reset()
-		utils.FormatCode(&buf, t.Decl, links)
+		utils.FormatCode(&buf, &t.Decl, links)
 		t.FmtDecl = buf.String()
 		pdoc.Types[i] = t
 	}
@@ -389,7 +389,7 @@ func generatePage(this *HomeController, pdoc *doc.Package, q string, lang string
 	this.Data["Consts"] = pdoc.Consts
 	for i, v := range pdoc.Consts {
 		buf.Reset()
-		utils.FormatCode(&buf, v.Decl, links)
+		utils.FormatCode(&buf, &v.Decl, links)
 		v.FmtDecl = buf.String()
 		pdoc.Consts[i] = v
 	}
@@ -398,7 +398,7 @@ func generatePage(this *HomeController, pdoc *doc.Package, q string, lang string
 	this.Data["Vars"] = pdoc.Vars
 	for i, v := range pdoc.Vars {
 		buf.Reset()
-		utils.FormatCode(&buf, v.Decl, links)
+		utils.FormatCode(&buf, &v.Decl, links)
 		v.FmtDecl = buf.String()
 		pdoc.Vars[i] = v
 	}

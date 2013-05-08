@@ -52,8 +52,8 @@ func isLetter(l uint8) bool {
 }
 
 // FormatCode highlights keywords and adds HTML links to them.
-func FormatCode(w io.Writer, code string, links []*Link) {
-	length := len(code) // Length of whole code.
+func FormatCode(w io.Writer, code *string, links []*Link) {
+	length := len(*code) // Length of whole code.
 	if length == 0 {
 		return
 	}
@@ -69,40 +69,41 @@ func FormatCode(w io.Writer, code string, links []*Link) {
 		// Cut words.
 	CutWords:
 		for {
-			if !isLetter(code[pos]) {
+			curChar := (*code)[pos] // Current check character.
+			if !isLetter(curChar) {
 				if !isComment {
 					switch {
-					case (code[pos] == '\'' || code[pos] == '"' || code[pos] == '`') && code[pos-1] != '\\': // String.
+					case (curChar == '\'' || curChar == '"' || curChar == '`') && (*code)[pos-1] != '\\': // String.
 						if !isString {
 							// Set string tag.
-							strTag = code[pos]
+							strTag = curChar
 							isString = true
 						} else {
 							// Check string tag.
-							if code[pos] == strTag {
+							if curChar == strTag {
 								// Handle string highlight.
 								break CutWords
 							}
 						}
-					case !isString && code[pos] == '/': //&& (pos > 0) && code[pos+1] == '/':
+					case !isString && curChar == '/': //&& (pos > 0) && code[pos+1] == '/':
 						isComment = true
-					case !isString && code[pos] > 47 && code[pos] < 58: // Number
-					case !isString && code[pos] == '_' && code[pos-1] != ' ': // _
-					case !isString && (code[pos] != '.' || code[pos] == '\n'):
+					case !isString && curChar > 47 && curChar < 58: // Number
+					case !isString && curChar == '_' && (*code)[pos-1] != ' ': // _
+					case !isString && (curChar != '.' || curChar == '\n'):
 						break CutWords
 					}
 				} else {
 					if isBlockComment {
 						// End of block comments.
-						if code[pos] == '/' && code[pos-1] == '*' {
+						if curChar == '/' && (*code)[pos-1] == '*' {
 							break CutWords
 						}
 					} else {
 						switch {
-						case code[pos] == '*' && code[pos-1] == '/':
+						case curChar == '*' && (*code)[pos-1] == '/':
 							// Start of block comments.
 							isBlockComment = true
-						case code[pos] == '\n':
+						case curChar == '\n':
 							break CutWords
 						}
 					}
@@ -115,7 +116,7 @@ func FormatCode(w io.Writer, code string, links []*Link) {
 			pos++
 		}
 
-		seg := code[last : pos+1]
+		seg := (*code)[last : pos+1]
 	CheckLink:
 		switch {
 		case isComment:
@@ -146,7 +147,7 @@ func FormatCode(w io.Writer, code string, links []*Link) {
 			case "true", "false", "nil":
 				fmt.Fprintf(w, `<span class="boo">%s</span>%s`, keyword, seg[l-1:])
 				break CheckLink
-			case "new", "append", "make", "panic", "recover", "len", "cap", "copy", "close", "delete":
+			case "new", "append", "make", "panic", "recover", "len", "cap", "copy", "close", "delete", "defer":
 				fmt.Fprintf(w, `<span class="bui">%s</span>%s`, keyword, seg[l-1:])
 				break CheckLink
 			}
@@ -174,7 +175,7 @@ func FormatCode(w io.Writer, code string, links []*Link) {
 		pos++
 		// End of code.
 		if pos == length {
-			fmt.Fprintf(w, "%s", code[last:])
+			fmt.Fprintf(w, "%s", (*code)[last:])
 			return
 		}
 	}
