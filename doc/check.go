@@ -95,19 +95,17 @@ func CheckDoc(path string, requestType int) (*Package, error) {
 
 		if err != nil {
 			switch {
-			case pdoc != nil:
-				beego.Error("Serving", path, "from database after error: ", err)
-				return pdoc, nil
-			case err == errUpdateTimeout:
-				// Handle timeout on packages never seen before as not found.
-				beego.Error("Serving", path, "as not found after timeout")
-				return nil, errors.New("Status not found")
-			case err == errNotModified:
+			case pdoc != nil || err == errNotModified:
 				beego.Info("Serving", path, "without modified")
 				err = nil
 				pinfo.Created = time.Now().UTC()
 				pdoc = &Package{}
 				assginPkgInfo(pdoc, pinfo)
+				return pdoc, nil
+			case err == errUpdateTimeout:
+				// Handle timeout on packages never seen before as not found.
+				beego.Error("Serving", path, "as not found after timeout")
+				return nil, errors.New("Status not found")
 			}
 		}
 

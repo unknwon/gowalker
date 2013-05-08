@@ -51,7 +51,6 @@ type langType struct {
 }
 
 func init() {
-	beego.ParseConfig()
 	// Initialized recent viewed project list.
 	num, err := beego.AppConfig.Int("recentViewedProNum")
 	if err == nil {
@@ -65,13 +64,16 @@ func init() {
 	// Get recent viewed projects from database.
 	proinfos, _ := models.GetRecentPros(recentViewedProNum)
 	for _, p := range proinfos {
-		recentViewedPros = append(recentViewedPros,
-			&recentPro{
-				Path:       p.Path,
-				ViewedTime: p.ViewedTime,
-				IsGoRepo:   p.ProName == "Go",
-				Views:      p.Views,
-			})
+		// Only projects with import path length is less than 40 letters will be showed.
+		if len(p.Path) < 40 {
+			recentViewedPros = append(recentViewedPros,
+				&recentPro{
+					Path:       p.Path,
+					ViewedTime: p.ViewedTime,
+					IsGoRepo:   p.ProName == "Go",
+					Views:      p.Views,
+				})
+		}
 	}
 
 	// Initialized language type list.
@@ -301,7 +303,7 @@ func generatePage(this *HomeController, pdoc *doc.Package, q string, lang string
 	// Load project data from database.
 	pdecl, err := models.LoadProject(pdoc.ImportPath)
 	if err != nil {
-		beego.Error("SearchController.generatePage(): models.LoadProject()", err)
+		beego.Error("HomeController.generatePage(): models.LoadProject()", err)
 		return false
 	}
 	var buf bytes.Buffer
@@ -313,7 +315,7 @@ func generatePage(this *HomeController, pdoc *doc.Package, q string, lang string
 	// Convert data format.
 	err = ConvertDataFormat(pdoc, pdecl)
 	if err != nil {
-		beego.Error("SearchController.generatePage(): ConvertDataFormat", err)
+		beego.Error("HomeController.generatePage(): ConvertDataFormat", err)
 		return false
 	}
 
@@ -574,38 +576,41 @@ func codeDecode(code *string) *string {
 }
 
 func updateRecentPros(pdoc *doc.Package) {
-	index := -1
-	listLen := len(recentViewedPros)
-	curPro := &recentPro{
-		Path:       pdoc.ImportPath,
-		ViewedTime: time.Now().UTC().Unix(),
-		IsGoRepo:   pdoc.ProjectName == "Go",
-		Views:      pdoc.Views,
-	}
-
-	pdoc.ViewedTime = curPro.ViewedTime
-
-	// Check if in the list
-	for i, s := range recentViewedPros {
-		if s.Path == curPro.Path {
-			index = i
-			break
+	// Only projects with import path length is less than 40 letters will be showed.
+	if len(pdoc.ImportPath) < 40 {
+		index := -1
+		listLen := len(recentViewedPros)
+		curPro := &recentPro{
+			Path:       pdoc.ImportPath,
+			ViewedTime: time.Now().UTC().Unix(),
+			IsGoRepo:   pdoc.ProjectName == "Go",
+			Views:      pdoc.Views,
 		}
-	}
 
-	s := make([]*recentPro, 0, recentViewedProNum)
-	s = append(s, curPro)
-	switch {
-	case index == -1 && listLen < recentViewedProNum:
-		// Not found and list is not full
-		s = append(s, recentViewedPros...)
-	case index == -1 && listLen >= recentViewedProNum:
-		// Not found but list is full
-		s = append(s, recentViewedPros[:recentViewedProNum-1]...)
-	case index > -1:
-		// Found
-		s = append(s, recentViewedPros[:index]...)
-		s = append(s, recentViewedPros[index+1:]...)
+		pdoc.ViewedTime = curPro.ViewedTime
+
+		// Check if in the list
+		for i, s := range recentViewedPros {
+			if s.Path == curPro.Path {
+				index = i
+				break
+			}
+		}
+
+		s := make([]*recentPro, 0, recentViewedProNum)
+		s = append(s, curPro)
+		switch {
+		case index == -1 && listLen < recentViewedProNum:
+			// Not found and list is not full
+			s = append(s, recentViewedPros...)
+		case index == -1 && listLen >= recentViewedProNum:
+			// Not found but list is full
+			s = append(s, recentViewedPros[:recentViewedProNum-1]...)
+		case index > -1:
+			// Found
+			s = append(s, recentViewedPros[:index]...)
+			s = append(s, recentViewedPros[index+1:]...)
+		}
+		recentViewedPros = s
 	}
-	recentViewedPros = s
 }

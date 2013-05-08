@@ -18,6 +18,7 @@ package models
 
 import (
 	"database/sql"
+	"errors"
 	"os"
 	"time"
 
@@ -208,10 +209,13 @@ func LoadProject(path string) (*PkgDecl, error) {
 	// Connect to database.
 	q, err := connDb()
 	if err != nil {
-		beego.Error("models.SaveProject():", err)
+		beego.Error("models.LoadProject():", err)
 	}
 	defer q.Db.Close()
 
+	if len(path) == 0 {
+		return nil, errors.New("models.LoadProject(): Empty path as not found.")
+	}
 	pdecl := &PkgDecl{Path: path}
 	err = q.WhereEqual("path", path).Find(pdecl)
 	return pdecl, err
