@@ -47,6 +47,11 @@ type Link struct {
 	Path, Name, Comment string // package path, identifier name, and comments.
 }
 
+func isLetter(l uint8) bool {
+	return (l >= 'A' && l <= 'Z') || (l >= 'a' && l <= 'z')
+}
+
+// FormatCode highlights keywords and adds HTML links to them.
 func FormatCode(w io.Writer, code string, links []*Link) {
 	length := len(code) // Length of whole code.
 	if length == 0 {
@@ -55,7 +60,6 @@ func FormatCode(w io.Writer, code string, links []*Link) {
 
 	strTag := uint8(0)      // Indicates what kind of string is chekcing.
 	isString := false       // Indicates if right now is checking string.
-	isRawString := false    // Indicates if right now is checking raw string.
 	isComment := false      // Indicates if right now is checking comments.
 	isBlockComment := false // Indicates if right now is checking block comments.
 	last := 0               // Start index of the word.
@@ -65,31 +69,29 @@ func FormatCode(w io.Writer, code string, links []*Link) {
 		// Cut words.
 	CutWords:
 		for {
-			if code[pos] < 'A' || code[pos] > 'z' || (code[pos] > 'Z' && code[pos] < 'a') {
-				switch {
-				case !isComment && code[pos] == '`':
-					if !isString {
-						isString = true
-						isRawString = true
-					} else {
-						// Handle string highlight.
+			if !isLetter(code[pos]) {
+				if !isComment {
+					switch {
+					case (code[pos] == '\'' || code[pos] == '"' || code[pos] == '`') && code[pos-1] != '\\': // String.
+						if !isString {
+							// Set string tag.
+							strTag = code[pos]
+							isString = true
+						} else {
+							// Check string tag.
+							if code[pos] == strTag {
+								// Handle string highlight.
+								break CutWords
+							}
+						}
+					case !isString && code[pos] == '/': //&& (pos > 0) && code[pos+1] == '/':
+						isComment = true
+					case !isString && code[pos] > 47 && code[pos] < 58: // Number
+					case !isString && code[pos] == '_' && code[pos-1] != ' ': // _
+					case !isString && (code[pos] != '.' || code[pos] == '\n'):
 						break CutWords
 					}
-				case !isComment && !isRawString && (code[pos] == '\'' || code[pos] == '"') && code[pos-1] != '\\':
-					if !isString {
-						// Set string tag.
-						strTag = code[pos]
-						isString = true
-					} else {
-						// Check string tag.
-						if code[pos] == strTag {
-							// Handle string highlight.
-							break CutWords
-						}
-					}
-				case !isString && !isComment && code[pos] == '/': //&& (pos > 0) && code[pos+1] == '/':
-					isComment = true
-				case isComment:
+				} else {
 					if isBlockComment {
 						// End of block comments.
 						if code[pos] == '/' && code[pos-1] == '*' {
@@ -104,10 +106,6 @@ func FormatCode(w io.Writer, code string, links []*Link) {
 							break CutWords
 						}
 					}
-				case !isString && code[pos] > 47 && code[pos] < 58: // Number
-				case !isString && code[pos] == '_' && code[pos-1] != ' ': // _
-				case !isString && (code[pos] != '.' || code[pos] == '\n'):
-					break CutWords
 				}
 			}
 
@@ -126,7 +124,6 @@ func FormatCode(w io.Writer, code string, links []*Link) {
 			fmt.Fprintf(w, `<span class="com">%s</span>`, seg)
 		case isString:
 			isString = false
-			isRawString = false
 			fmt.Fprintf(w, `<span class="str">%s</span>`, seg)
 		case pos-last > 1:
 			// Check if the last word of the paragraphy.
@@ -137,8 +134,17 @@ func FormatCode(w io.Writer, code string, links []*Link) {
 
 			// Check keywords.
 			switch seg[:l-1] {
-			case "return":
-				fmt.Fprintf(w, `<span class="ret">%s</span>%s`, "return", seg[l-1:])
+			case "return", "break":
+				fmt.Fprintf(w, `<span class="ret">%s</span>%s`, seg[:l-1], seg[l-1:])
+				break CheckLink
+			case "var", "func", "range", "for", "if", "else", "type", "struct":
+				fmt.Fprintf(w, `<span class="key">%s</span>%s`, seg[:l-1], seg[l-1:])
+				break CheckLink
+			case "true", "false", "nil":
+				fmt.Fprintf(w, `<span class="boo">%s</span>%s`, seg[:l-1], seg[l-1:])
+				break CheckLink
+			case "new", "append", "make", "panic", "recover", "len", "cap", "copy":
+				fmt.Fprintf(w, `<span class="bui">%s</span>%s`, seg[:l-1], seg[l-1:])
 				break CheckLink
 			}
 

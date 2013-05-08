@@ -6156,11 +6156,16 @@ a.badge:focus {
 .affix {
   position: fixed;
 }
-pre .com {  color: #007500;}
+
+/* Comment, String, Internal, External, Return/Break, Keyword, Boolean/nil, Builtin */
+pre .com {  color: #007500;} 
 pre .str {  color: #796400;}
 pre .int {  color: #5A5AAD;}
 pre .ext {  color: #6F00D2;}
 pre .ret {  color: #CE0000;}
+pre .key {  color: #F00078;}
+pre .boo {  color: #00CACA;}
+pre .bui {  color: #009393;}
 
 .backToTop {     display: none;     width: 18px;     line-height: 1.2;     padding: 5px 0;     background-color: #000;     color: #fff;     font-size: 12px;     text-align: center;     position: fixed;     _position: absolute;     right: 10px;     bottom: 100px;     _bottom: "auto";     cursor: pointer;  }
 
