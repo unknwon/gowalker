@@ -128,23 +128,26 @@ func FormatCode(w io.Writer, code string, links []*Link) {
 		case pos-last > 1:
 			// Check if the last word of the paragraphy.
 			l := len(seg)
-			if pos+1 == length {
+			keyword := seg
+			if !isLetter(seg[l-1]) {
+				keyword = seg[:l-1]
+			} else {
 				l++
 			}
 
 			// Check keywords.
-			switch seg[:l-1] {
+			switch keyword {
 			case "return", "break":
-				fmt.Fprintf(w, `<span class="ret">%s</span>%s`, seg[:l-1], seg[l-1:])
+				fmt.Fprintf(w, `<span class="ret">%s</span>%s`, keyword, seg[l-1:])
 				break CheckLink
-			case "var", "func", "range", "for", "if", "else", "type", "struct":
-				fmt.Fprintf(w, `<span class="key">%s</span>%s`, seg[:l-1], seg[l-1:])
+			case "func", "range", "for", "if", "else", "type", "struct", "select", "case", "var", "const":
+				fmt.Fprintf(w, `<span class="key">%s</span>%s`, keyword, seg[l-1:])
 				break CheckLink
 			case "true", "false", "nil":
-				fmt.Fprintf(w, `<span class="boo">%s</span>%s`, seg[:l-1], seg[l-1:])
+				fmt.Fprintf(w, `<span class="boo">%s</span>%s`, keyword, seg[l-1:])
 				break CheckLink
 			case "new", "append", "make", "panic", "recover", "len", "cap", "copy":
-				fmt.Fprintf(w, `<span class="bui">%s</span>%s`, seg[:l-1], seg[l-1:])
+				fmt.Fprintf(w, `<span class="bui">%s</span>%s`, keyword, seg[l-1:])
 				break CheckLink
 			}
 
