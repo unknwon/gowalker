@@ -53,6 +53,7 @@ func FormatCode(w io.Writer, code string, links []*Link) {
 		return
 	}
 
+	strTag := uint8(0)      // Indicates what kind of string is chekcing.
 	isString := false       // Indicates if right now is checking string.
 	isRawString := false    // Indicates if right now is checking raw string.
 	isComment := false      // Indicates if right now is checking comments.
@@ -74,14 +75,19 @@ func FormatCode(w io.Writer, code string, links []*Link) {
 						// Handle string highlight.
 						break CutWords
 					}
-				case !isComment && !isRawString && code[pos] == '"' && (pos > 0) && code[pos-1] != '\\':
+				case !isComment && !isRawString && (code[pos] == '\'' || code[pos] == '"') && code[pos-1] != '\\':
 					if !isString {
+						// Set string tag.
+						strTag = code[pos]
 						isString = true
 					} else {
-						// Handle string highlight.
-						break CutWords
+						// Check string tag.
+						if code[pos] == strTag {
+							// Handle string highlight.
+							break CutWords
+						}
 					}
-				case !isString && !isComment && code[pos] == '/' && (pos > 0) && code[pos+1] == '/':
+				case !isString && !isComment && code[pos] == '/': //&& (pos > 0) && code[pos+1] == '/':
 					isComment = true
 				case isComment:
 					if isBlockComment {
@@ -99,6 +105,7 @@ func FormatCode(w io.Writer, code string, links []*Link) {
 						}
 					}
 				case !isString && code[pos] > 47 && code[pos] < 58: // Number
+				case !isString && code[pos] == '_' && code[pos-1] != ' ': // _
 				case !isString && (code[pos] != '.' || code[pos] == '\n'):
 					break CutWords
 				}
