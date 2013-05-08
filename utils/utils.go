@@ -146,7 +146,7 @@ func FormatCode(w io.Writer, code string, links []*Link) {
 			case "true", "false", "nil":
 				fmt.Fprintf(w, `<span class="boo">%s</span>%s`, keyword, seg[l-1:])
 				break CheckLink
-			case "new", "append", "make", "panic", "recover", "len", "cap", "copy":
+			case "new", "append", "make", "panic", "recover", "len", "cap", "copy", "close", "delete":
 				fmt.Fprintf(w, `<span class="bui">%s</span>%s`, keyword, seg[l-1:])
 				break CheckLink
 			}
