@@ -23,8 +23,10 @@ import (
 	"github.com/Unknwon/gowalker/utils"
 )
 
-var bitbucketPattern = regexp.MustCompile(`^bitbucket\.org/(?P<owner>[a-z0-9A-Z_.\-]+)/(?P<repo>[a-z0-9A-Z_.\-]+)(?P<dir>/[a-z0-9A-Z_.\-/]*)?$`)
-var bitbucketEtagRe = regexp.MustCompile(`^(hg|git)-`)
+var (
+	bitbucketPattern = regexp.MustCompile(`^bitbucket\.org/(?P<owner>[a-z0-9A-Z_.\-]+)/(?P<repo>[a-z0-9A-Z_.\-]+)(?P<dir>/[a-z0-9A-Z_.\-/]*)?$`)
+	bitbucketEtagRe  = regexp.MustCompile(`^(hg|git)-`)
+)
 
 func getBitbucketDoc(client *http.Client, match map[string]string, savedEtag string) (*Package, error) {
 
@@ -59,24 +61,26 @@ func getBitbucketDoc(client *http.Client, match map[string]string, savedEtag str
 		return nil, err
 	}
 
+	// Check revision tag.
 	etag := expand("{vcs}-{commit}", match)
 	if etag == savedEtag {
 		return nil, errNotModified
 	}
 
-	var directory struct {
+	var node struct {
 		Files []struct {
 			Path string
 		}
+		Directories []string
 	}
 
-	if err := httpGetJSON(client, expand("https://api.bitbucket.org/1.0/repositories/{owner}/{repo}/src/{tag}{dir}/", match), &directory); err != nil {
+	if err := httpGetJSON(client, expand("https://api.bitbucket.org/1.0/repositories/{owner}/{repo}/src/{tag}{dir}/", match), &node); err != nil {
 		return nil, err
 	}
 
 	// Get source file data.
-	var files []*source
-	for _, f := range directory.Files {
+	files := make([]*source, 0, 5)
+	for _, f := range node.Files {
 		_, name := path.Split(f.Path)
 		if utils.IsDocFile(name) {
 			files = append(files, &source{
@@ -85,6 +89,10 @@ func getBitbucketDoc(client *http.Client, match map[string]string, savedEtag str
 				rawURL:    expand("https://api.bitbucket.org/1.0/repositories/{owner}/{repo}/raw/{tag}/{0}", match, f.Path),
 			})
 		}
+	}
+
+	if len(files) == 0 {
+		return nil, NotFoundError{"Directory tree does not contain Go files."}
 	}
 
 	// Fetch file from VCS.
@@ -98,6 +106,8 @@ func getBitbucketDoc(client *http.Client, match map[string]string, savedEtag str
 		pdoc: &Package{
 			ImportPath:  match["importPath"],
 			ProjectName: match["repo"],
+			Etag:        etag,
+			Dirs:        node.Directories,
 		},
 	}
 	return w.build(files)

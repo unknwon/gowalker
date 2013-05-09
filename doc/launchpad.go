@@ -82,7 +82,8 @@ func getLaunchpadDoc(client *http.Client, match map[string]string, savedEtag str
 	dirPrefix := expand("+branch/{repo}{dir}/", match)
 
 	// Get source file data.
-	var files []*source
+	dirs := make([]string, 0, 3)
+	files := make([]*source, 0, 5)
 	for {
 		h, err := tr.Next()
 		if err == io.EOF {
@@ -91,8 +92,14 @@ func getLaunchpadDoc(client *http.Client, match map[string]string, savedEtag str
 		if err != nil {
 			return nil, err
 		}
+
 		d, f := path.Split(h.Name)
 		if !utils.IsDocFile(f) {
+			// Check directories.
+			if len(f) == 0 && strings.HasPrefix(d, dirPrefix) && len(d) > len(dirPrefix) {
+				sub := h.Name[:len(h.Name)-1]
+				dirs = append(dirs, sub[strings.LastIndex(sub, "/")+1:])
+			}
 			continue
 		}
 		b := make([]byte, h.Size)
@@ -116,7 +123,7 @@ func getLaunchpadDoc(client *http.Client, match map[string]string, savedEtag str
 		}
 	}
 
-	if !inTree {
+	if !inTree || len(files) == 0 {
 		return nil, NotFoundError{"Directory tree does not contain Go files."}
 	}
 
@@ -135,6 +142,8 @@ func getLaunchpadDoc(client *http.Client, match map[string]string, savedEtag str
 		pdoc: &Package{
 			ImportPath:  match["importPath"],
 			ProjectName: match["repo"],
+			Etag:        etag,
+			Dirs:        dirs,
 		},
 	}
 	return w.build(files)

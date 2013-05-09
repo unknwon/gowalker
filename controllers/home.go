@@ -158,6 +158,9 @@ func (this *HomeController) Get() {
 	// Get query field.
 	q := strings.TrimSpace(this.Input().Get("q"))
 
+	// Remove last "/".
+	q = strings.TrimRight(q, "/")
+
 	if path, ok := utils.IsBrowseURL(q); ok {
 		q = path
 	}
@@ -249,11 +252,6 @@ func generatePage(this *HomeController, pdoc *doc.Package, q string, lang string
 
 	// Refresh (within 10 seconds).
 	this.Data["IsRefresh"] = pdoc.Created.Add(10 * time.Second).UTC().After(time.Now().UTC())
-
-	// Remove last "/".
-	if urlLen := len(q); q[urlLen-1] == '/' {
-		q = q[:urlLen-1]
-	}
 
 	// Get VCS name, project name, project home page, and Upper level project URL.
 	this.Data["VCS"], this.Data["ProName"], this.Data["ProPath"], this.Data["ProDocPath"] = getVCSInfo(q, pdoc)

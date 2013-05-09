@@ -102,7 +102,7 @@ func getGithubDoc(client *http.Client, match map[string]string, savedEtag string
 	preLen := len(dirPrefix)
 
 	// Get source file data.
-	dirs := make([]string, 0, 5)
+	dirs := make([]string, 0, 3)
 	files := make([]*source, 0, 5)
 	for _, node := range tree.Tree {
 		if node.Type != "blob" || !strings.HasPrefix(node.Path, dirPrefix) {

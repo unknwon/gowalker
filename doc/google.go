@@ -119,7 +119,7 @@ func getGoogleDoc(client *http.Client, match map[string]string, savedEtag string
 	}
 
 	// Get source file data.
-	var files []*source
+	files := make([]*source, 0, 5)
 	for _, m := range googleFileRe.FindAllSubmatch(p, -1) {
 		fname := string(m[1])
 		if utils.IsDocFile(fname) {
@@ -135,7 +135,7 @@ func getGoogleDoc(client *http.Client, match map[string]string, savedEtag string
 		return nil, NotFoundError{"Directory tree does not contain Go files."}
 	}
 
-	dirs := make([]string, 0, 5)
+	dirs := make([]string, 0, 3)
 	// Get subdirectories.
 	for _, m := range googleDirRe.FindAllSubmatch(p, -1) {
 		dirName := strings.Split(string(m[1]), "?")[0]
