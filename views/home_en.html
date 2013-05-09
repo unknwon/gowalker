@@ -46,7 +46,7 @@
 						<tbody>
 						{{range .RecentPros}}
 							<tr>
-								<td><a href="/{{.Path}}">{{.Path}}</a>{{if .IsGoRepo}} <span class="label label-info">Standard</span>{{end}}</td>
+								<td><a title="{{.Synopsis}}" href="/{{.Path}}">{{.Path}}</a>{{if .IsGoRepo}} <span class="label label-info">Standard</span>{{end}}</td>
 								<td>{{.ViewedTime}}</td>
 							</tr>
 						{{end}}
@@ -70,7 +70,7 @@
 						<h4>Popular Projects</h4>
 						<ul class="unstyled">
 							{{range .PopPros}}
-							<li><span class="badge">{{.Views}}</span> <a href="/{{.Path}}">{{.Path}}</a></li>
+							<li><span class="badge">{{.Views}}</span> <a title="{{.Synopsis}}" href="/{{.Path}}">{{.Path}}</a></li>
 							{{end}}
 						</ul>
 					</div>

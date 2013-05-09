@@ -22,6 +22,7 @@ import (
 	godoc "go/doc"
 	"html/template"
 	"net/http"
+	"net/url"
 	"path"
 	"strings"
 	"time"
@@ -40,7 +41,7 @@ var (
 
 // Recent viewed project.
 type recentPro struct {
-	Path              string
+	Path, Synopsis    string
 	IsGoRepo          bool
 	Views, ViewedTime int64
 }
@@ -69,6 +70,7 @@ func init() {
 			recentViewedPros = append(recentViewedPros,
 				&recentPro{
 					Path:       p.Path,
+					Synopsis:   p.Synopsis,
 					ViewedTime: p.ViewedTime,
 					IsGoRepo:   p.ProName == "Go",
 					Views:      p.Views,
@@ -88,15 +90,21 @@ func init() {
 	}
 }
 
-// getLangVer returns current language version and list of rest languages.
-func getLangVer(al, lang string) (*langType, []*langType) {
-	// Check language version.
-	/* Check flow:
-	1. Check if user assigned.
-	2. Check if browser has acceptable 'Accept-Language'.
-	3. Use default language version: for now is English.
-	*/
+func setLangVer(req *http.Request, input url.Values) (*langType, []*langType) {
+	// 1. Check URL arguments.
+	lang := input.Get("lang")
+
+	// 2. Get language information from cookies.
 	if len(lang) == 0 {
+		ck, err := req.Cookie("lang")
+		if err == nil {
+			lang = ck.Value
+		}
+	}
+
+	// 3. Get language information from 'Accept-Language'.
+	if len(lang) == 0 {
+		al := req.Header.Get("Accept-Language")
 		if len(al) > 2 {
 			al = al[:2] // Only compare first two letters.
 			for _, v := range langTypes {
@@ -108,6 +116,7 @@ func getLangVer(al, lang string) (*langType, []*langType) {
 		}
 	}
 
+	// 4. Default language is English.
 	if len(lang) == 0 {
 		lang = "en"
 	}
@@ -127,21 +136,6 @@ func getLangVer(al, lang string) (*langType, []*langType) {
 	return curLang, restLangs
 }
 
-func checkLangVer(req *http.Request, lang string) string {
-	// 1. Check URL arguments.
-	if len(lang) > 0 {
-		return lang
-	}
-
-	// 2. Get language information from cookies.
-	ck, err := req.Cookie("lang")
-	if err == nil {
-		return ck.Value
-	}
-
-	return lang
-}
-
 type HomeController struct {
 	beego.Controller
 }
@@ -155,12 +149,8 @@ func (this *HomeController) Get() {
 		beego.Trace("User-Agent:", this.Ctx.Request.Header.Get("User-Agent"))
 	}
 
-	// Check language version by different ways.
-	lang := checkLangVer(this.Ctx.Request, this.Input().Get("lang"))
-
-	// Get language version.
-	curLang, restLangs := getLangVer(
-		this.Ctx.Request.Header.Get("Accept-Language"), lang)
+	// Set language version.
+	curLang, restLangs := setLangVer(this.Ctx.Request, this.Input())
 
 	// Save language information in cookies.
 	this.Ctx.SetCookie("lang", curLang.Lang+";path=/", 0)
@@ -260,43 +250,19 @@ func generatePage(this *HomeController, pdoc *doc.Package, q string, lang string
 	// Refresh (within 10 seconds).
 	this.Data["IsRefresh"] = pdoc.Created.Add(10 * time.Second).UTC().After(time.Now().UTC())
 
-	// Get project name.
-	lastIndex := strings.LastIndex(q, "/")
-	proName := q[lastIndex+1:]
-	if i := strings.Index(proName, "?"); i > -1 {
-		proName = proName[:i]
-	}
-	this.Data["ProName"] = proName
-
-	// Project VCS home page.
-	switch {
-	case q[:4] == "code": // code.google.com
-		if strings.Index(q, "source/") == -1 {
-			this.Data["ProPath"] = strings.Replace(q, pdoc.ProjectName, pdoc.ProjectName+"/source/browse", 1)
-		} else {
-			this.Data["ProPath"] = q
-		}
-	case q[:3] == "git": // github.com
-		if proName != pdoc.ProjectName {
-			// Not root.
-			this.Data["ProPath"] = strings.Replace(q, proName, "tree/master/"+proName, 1)
-		} else {
-			this.Data["ProPath"] = q + "/tree/master"
-		}
-	}
-
-	this.Data["Views"] = pdoc.Views + 1
-
 	// Remove last "/".
 	if urlLen := len(q); q[urlLen-1] == '/' {
 		q = q[:urlLen-1]
 	}
 
+	// Get VCS name, project name, project home page, and Upper level project URL.
+	this.Data["VCS"], this.Data["ProName"], this.Data["ProPath"], this.Data["ProDocPath"] = getVCSInfo(q, pdoc)
+
 	if utils.IsGoRepoPath(pdoc.ImportPath) {
 		this.Data["IsGoRepo"] = true
 	}
-	pkgDocPath := q[:lastIndex]
-	this.Data["ProDocPath"] = pkgDocPath // Upper level project URL.
+
+	this.Data["Views"] = pdoc.Views + 1
 
 	// Introduction.
 	this.Data["ImportPath"] = pdoc.ImportPath
@@ -423,6 +389,50 @@ func generatePage(this *HomeController, pdoc *doc.Package, q string, lang string
 	this.Data["GOOS"] = pdecl.Goos
 	this.Data["GOARCH"] = pdecl.Goarch
 	return true
+}
+
+// getVCSInfo returns VCS name, project name, project home page, and Upper level project URL.
+func getVCSInfo(q string, pdoc *doc.Package) (vcs, proName, proPath, pkgDocPath string) {
+	// Get project name.
+	lastIndex := strings.LastIndex(q, "/")
+	proName = q[lastIndex+1:]
+	if i := strings.Index(proName, "?"); i > -1 {
+		proName = proName[:i]
+	}
+
+	// Project VCS home page.
+	switch {
+	case q[0] == 'c': // code.google.com
+		vcs = "Google Code"
+		if strings.Index(q, "source/") == -1 {
+			proPath = strings.Replace(q, "/"+pdoc.ProjectName, "/"+pdoc.ProjectName+"/source/browse", 1)
+		} else {
+			proPath = q
+		}
+	case q[0] == 'g': // github.com
+		vcs = "Github"
+		if proName != pdoc.ProjectName {
+			// Not root.
+			proPath = strings.Replace(q, "/"+proName, "/tree/master/"+proName, 1)
+		} else {
+			proPath = q + "/tree/master"
+		}
+	case q[0] == 'b': // bitbucket.org
+		vcs = "BitBucket"
+		if proName != pdoc.ProjectName {
+			// Not root.
+			proPath = strings.Replace(q, "/"+pdoc.ProjectName, "/"+pdoc.ProjectName+"/src/default", 1)
+		} else {
+			proPath = q + "/src/default"
+		}
+	case q[0] == 'l': // launchpad.net
+		vcs = "Launchpad"
+		proPath = "bazaar." + strings.Replace(q, "/"+pdoc.ProjectName, "/+branch/"+pdoc.ProjectName+"/view/head:/", 1)
+	}
+
+	pkgDocPath = q[:lastIndex]
+
+	return vcs, proName, proPath, pkgDocPath
 }
 
 // ConvertDataFormat converts data from database acceptable format to useable format.
@@ -582,6 +592,7 @@ func updateRecentPros(pdoc *doc.Package) {
 		listLen := len(recentViewedPros)
 		curPro := &recentPro{
 			Path:       pdoc.ImportPath,
+			Synopsis:   pdoc.Synopsis,
 			ViewedTime: time.Now().UTC().Unix(),
 			IsGoRepo:   pdoc.ProjectName == "Go",
 			Views:      pdoc.Views,

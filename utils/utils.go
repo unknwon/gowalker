@@ -85,10 +85,10 @@ func FormatCode(w io.Writer, code *string, links []*Link) {
 								break CutWords
 							}
 						}
-					case !isString && curChar == '/': //&& (pos > 0) && code[pos+1] == '/':
+					case !isString && curChar == '/' && ((*code)[pos+1] == '/' || (*code)[pos+1] == '*'):
 						isComment = true
-					case !isString && curChar > 47 && curChar < 58: // Number
-					case !isString && curChar == '_' && (*code)[pos-1] != ' ': // _
+					case !isString && curChar > 47 && curChar < 58: // Ends with number.
+					case !isString && curChar == '_' && (*code)[pos-1] != ' ': // Underline: _.
 					case !isString && (curChar != '.' || curChar == '\n'):
 						break CutWords
 					}

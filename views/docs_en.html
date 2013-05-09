@@ -27,7 +27,7 @@
 			</div>
 			{{end}}
 			<div class="flat-well well-small" style="background-color: #f5f5f5">
-				<a target="_blank" href="http://{{.ProPath}}"><strong>{{.ProName}}:</strong></a> <a href="/{{.ProDocPath}}">{{.ProDocPath}}</a><span class="muted">/{{.ProName}}</span>
+				<a title="See this project on {{.VCS}}" target="_blank" href="http://{{.ProPath}}" class="label label-info">{{.VCS}}</a> <a target="_blank" href="http://{{.ProPath}}"><strong>{{.ProName}}:</strong></a> <a href="/{{.ProDocPath}}">{{.ProDocPath}}</a><span class="muted">/{{.ProName}}</span>
 				<span class="pull-right"><span >You are No.<b>{{.Views}}</b> visitor of this page.</span><span class="muted"> | </span><a href="#_index">Index</a><span class="muted"> | </span><a href="#_files">Files</a>{{if .IsHasSubdirs}}<span class="muted"> | </span><a href="#_subdirs">Directories</a></span>{{end}}
 			</div>
 			<h2>package {{.ProName}}</h2>
@@ -126,5 +126,5 @@
 				</table>
 			{{end}}
 			<p>
-			Package <b>{{.ProName}}</b> imports <a href="/search?q=imports&pkgs={{.ImportPkgs}}">{{.ImportPkgNum}}</a> packages. Go Walker generated this page in <i>{{.UtcTime}}</i> with GOOS={{.GOOS}} and GOARCH={{.GOARCH}}. <a href="/refresh?q={{.ImportPath}}">Refresh</a>.
+			Package <b>{{.ProName}}</b> imports <a href="/search?q=imports&pkgs={{.ImportPkgs}}">{{.ImportPkgNum}}</a> packages. Go Walker generated this page in <i>{{.UtcTime}}</i> with {{.GOOS}}-{{.GOARCH}}. <a href="/refresh?q={{.ImportPath}}">Refresh</a>.
 			</p>

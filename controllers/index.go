@@ -26,12 +26,8 @@ type IndexController struct {
 // Get implemented Get method for IndexController.
 // It serves index page of Go Walker.
 func (this *IndexController) Get() {
-	// Check language version by different ways.
-	lang := checkLangVer(this.Ctx.Request, this.Input().Get("lang"))
-
-	// Get language version.
-	curLang, restLangs := getLangVer(
-		this.Ctx.Request.Header.Get("Accept-Language"), lang)
+	// Set language version.
+	curLang, restLangs := setLangVer(this.Ctx.Request, this.Input())
 
 	// Save language information in cookies.
 	this.Ctx.SetCookie("lang", curLang.Lang+";path=/", 0)

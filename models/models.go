@@ -20,6 +20,7 @@ import (
 	"database/sql"
 	"errors"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/astaxie/beego"
@@ -172,6 +173,11 @@ func SaveProject(pinfo *PkgInfo, pdecl *PkgDecl, pdoc *PkgDoc) error {
 
 // DeleteProject deletes everything about the path in database.
 func DeleteProject(path string) error {
+	// Check path length to reduce connect times. (except launchpad.net)
+	if path[0] != 'l' && len(strings.Split(path, "/")) <= 2 {
+		return errors.New("models.DeleteProject(): Short path as not needed.")
+	}
+
 	// Connect to database.
 	q, err := connDb()
 	if err != nil {
@@ -206,6 +212,11 @@ func DeleteProject(path string) error {
 
 // LoadProject gets package declaration from database.
 func LoadProject(path string) (*PkgDecl, error) {
+	// Check path length to reduce connect times.
+	if len(path) == 0 {
+		return nil, errors.New("models.LoadProject(): Empty path as not found.")
+	}
+
 	// Connect to database.
 	q, err := connDb()
 	if err != nil {
@@ -213,9 +224,6 @@ func LoadProject(path string) (*PkgDecl, error) {
 	}
 	defer q.Db.Close()
 
-	if len(path) == 0 {
-		return nil, errors.New("models.LoadProject(): Empty path as not found.")
-	}
 	pdecl := &PkgDecl{Path: path}
 	err = q.WhereEqual("path", path).Find(pdecl)
 	return pdecl, err
@@ -303,6 +311,6 @@ func GetAllPkgs() ([]*PkgInfo, error) {
 	defer q.Db.Close()
 
 	var pkgInfos []*PkgInfo
-	err = q.Where("views > ?", 0).OrderBy("pro_name").OrderBy("views").FindAll(&pkgInfos)
+	err = q.Where("views > ?", 0).OrderByDesc("pro_name").OrderBy("views").FindAll(&pkgInfos)
 	return pkgInfos, err
 }
