@@ -2,10 +2,10 @@ Go Walker
 ========
 [中文文档](README_ZH.md)
 
-Go Walker is a server that generates <a target="_blank" href="http://golang.org/">Go</a> projects <b>source code</b> documentation on the fly from projects on Bitbucket, Github, Google Project Hosting and Launchpad. It's <b>NOT</b> just API documentation, if you want to see that, <a target="_blank" href="http://godoc.org/">GoDoc</a> is better place for you.
+Go Walker is a server that generates <a target="_blank" href="http://golang.org/">Go</a> projects <b>source code</b> documentation on the fly from projects on Bitbucket, Github, Google Project Hosting and Launchpad.
 
 ##Features
-- Input the package **import path** or **keywords** in search boxes in home page to find or create documentation( **other pages' search boxes only search for existed projects, as well as search page** ).
+- Input the package **import path** or **keywords** in search boxes in home page to find or create documentation.
 - Generate Go project documentation **on the fly** : no more installation required for using.
 - **Mouse hover tip** and **jump link** for public types in current package: reduce time to find.
 - **Code view** for public functions, methods in current package in the same page: reduce rake up space and do more work at the same time.

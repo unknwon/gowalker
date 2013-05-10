@@ -17,6 +17,7 @@ package utils
 import (
 	"bytes"
 	"fmt"
+	"html/template"
 	"io"
 	"os"
 	"regexp"
@@ -73,16 +74,19 @@ func FormatCode(w io.Writer, code *string, links []*Link) {
 			if !isLetter(curChar) {
 				if !isComment {
 					switch {
-					case (curChar == '\'' || curChar == '"' || curChar == '`') && (*code)[pos-1] != '\\': // String.
+					case curChar == '\'' || curChar == '"' || curChar == '`': // String.
 						if !isString {
 							// Set string tag.
 							strTag = curChar
 							isString = true
 						} else {
-							// Check string tag.
-							if curChar == strTag {
-								// Handle string highlight.
-								break CutWords
+							// CHeck if it is end of string or escaped character.
+							if ((*code)[pos-1] == '\\' && (*code)[pos-2] == '\\') || (*code)[pos-1] != '\\' {
+								// Check string tag.
+								if curChar == strTag {
+									// Handle string highlight.
+									break CutWords
+								}
 							}
 						}
 					case !isString && curChar == '/' && ((*code)[pos+1] == '/' || (*code)[pos+1] == '*'):
@@ -125,7 +129,7 @@ func FormatCode(w io.Writer, code *string, links []*Link) {
 			fmt.Fprintf(w, `<span class="com">%s</span>`, seg)
 		case isString:
 			isString = false
-			fmt.Fprintf(w, `<span class="str">%s</span>`, seg)
+			fmt.Fprintf(w, `<span class="str">%s</span>`, template.HTMLEscapeString(seg))
 		case pos-last > 1:
 			// Check if the last word of the paragraphy.
 			l := len(seg)
@@ -141,7 +145,7 @@ func FormatCode(w io.Writer, code *string, links []*Link) {
 			case "return", "break":
 				fmt.Fprintf(w, `<span class="ret">%s</span>%s`, keyword, seg[l-1:])
 				break CheckLink
-			case "func", "range", "for", "if", "else", "type", "struct", "select", "case", "var", "const":
+			case "func", "range", "for", "if", "else", "type", "struct", "select", "case", "var", "const", "switch", "default":
 				fmt.Fprintf(w, `<span class="key">%s</span>%s`, keyword, seg[l-1:])
 				break CheckLink
 			case "true", "false", "nil":
@@ -192,7 +196,7 @@ func findType(name string, links []*Link) (*Link, bool) {
 
 	for _, l := range links {
 		if i == -1 {
-			// Exported types in current package.
+			// Exported types and functions in current package.
 			if l.Name == name {
 				return l, true
 			}

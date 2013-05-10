@@ -283,14 +283,22 @@ func generatePage(this *HomeController, pdoc *doc.Package, q string, lang string
 		return false
 	}
 
-	links := make([]*utils.Link, 0, len(pdoc.Types)+len(pdoc.Imports))
-	// Get all types and import packages
+	links := make([]*utils.Link, 0, len(pdoc.Types)+len(pdoc.Imports)+len(pdoc.Funcs))
+	// Get all types, functions and import packages
 	for _, t := range pdoc.Types {
 		links = append(links, &utils.Link{
 			Name:    t.Name,
 			Comment: template.HTMLEscapeString(t.Doc),
 		})
 	}
+
+	for _, f := range pdoc.Funcs {
+		links = append(links, &utils.Link{
+			Name:    f.Name,
+			Comment: template.HTMLEscapeString(f.Doc),
+		})
+	}
+
 	for _, v := range pdoc.Imports {
 		links = append(links, &utils.Link{
 			Name: path.Base(v) + ".",

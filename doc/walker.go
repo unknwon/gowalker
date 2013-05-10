@@ -156,10 +156,6 @@ CutCode:
 	return buf.String()
 }
 
-func writeSingleLineFunc(buf *bytes.Buffer, line string) {
-
-}
-
 func (w *walker) values(vdocs []*doc.Value) []*Value {
 	var result []*Value
 	for _, d := range vdocs {
