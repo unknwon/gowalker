@@ -64,15 +64,15 @@ func getStandardDoc(client *http.Client, importPath string, savedEtag string) (p
 		}
 	}
 
-	if len(files) == 0 {
-		return nil, NotFoundError{"Directory tree does not contain Go files."}
-	}
-
 	dirs := make([]string, 0, 5)
 	// Get subdirectories.
 	for _, m := range googleDirRe.FindAllSubmatch(p, -1) {
 		dirName := strings.Split(string(m[1]), "?")[0]
 		dirs = append(dirs, strings.Replace(dirName, "/", "", -1))
+	}
+
+	if len(files) == 0 && len(dirs) == 0 {
+		return nil, NotFoundError{"Directory tree does not contain Go files and subdirs."}
 	}
 
 	// Fetch file from VCS.

@@ -332,6 +332,6 @@ func (w *walker) build(srcs []*source) (*Package, error) {
 	w.pdoc.TestImports = bpkg.TestImports
 	//w.pdoc.XTestImports = bpkg.XTestImports
 
-	beego.Info("doc.walker.build(", pdoc.ImportPath, ")")
+	beego.Info("doc.walker.build(", pdoc.ImportPath, "), Goroutine #", runtime.NumGoroutine())
 	return w.pdoc, err
 }

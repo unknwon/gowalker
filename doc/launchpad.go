@@ -78,7 +78,6 @@ func getLaunchpadDoc(client *http.Client, match map[string]string, savedEtag str
 	tr := tar.NewReader(gzr)
 
 	var hash []byte
-	inTree := false
 	dirPrefix := expand("+branch/{repo}{dir}/", match)
 
 	// Get source file data.
@@ -114,7 +113,7 @@ func getLaunchpadDoc(client *http.Client, match map[string]string, savedEtag str
 		if !strings.HasPrefix(h.Name, dirPrefix) {
 			continue
 		}
-		inTree = true
+
 		if d == dirPrefix {
 			files = append(files, &source{
 				name:      f,
@@ -123,8 +122,8 @@ func getLaunchpadDoc(client *http.Client, match map[string]string, savedEtag str
 		}
 	}
 
-	if !inTree || len(files) == 0 {
-		return nil, NotFoundError{"Directory tree does not contain Go files."}
+	if len(files) == 0 && len(dirs) == 0 {
+		return nil, NotFoundError{"Directory tree does not contain Go files and subdirs."}
 	}
 
 	sort.Sort(byHash(hash))

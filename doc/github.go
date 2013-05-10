@@ -94,7 +94,6 @@ func getGithubDoc(client *http.Client, match map[string]string, savedEtag string
 		return nil, NotFoundError{"Github import path has incorrect case."}
 	}
 
-	inTree := false
 	dirPrefix := match["dir"]
 	if dirPrefix != "" {
 		dirPrefix = dirPrefix[1:] + "/"
@@ -114,7 +113,6 @@ func getGithubDoc(client *http.Client, match map[string]string, savedEtag string
 			}
 			continue
 		}
-		inTree = true
 		if d, f := path.Split(node.Path); d == dirPrefix && utils.IsDocFile(f) {
 			files = append(files, &source{
 				name:      f,
@@ -124,8 +122,8 @@ func getGithubDoc(client *http.Client, match map[string]string, savedEtag string
 		}
 	}
 
-	if !inTree || len(files) == 0 {
-		return nil, NotFoundError{"Directory tree does not contain Go files."}
+	if len(files) == 0 && len(dirs) == 0 {
+		return nil, NotFoundError{"Directory tree does not contain Go files and subdirs."}
 	}
 
 	// Fetch file from VCS.

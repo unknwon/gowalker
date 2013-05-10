@@ -91,8 +91,8 @@ func getBitbucketDoc(client *http.Client, match map[string]string, savedEtag str
 		}
 	}
 
-	if len(files) == 0 {
-		return nil, NotFoundError{"Directory tree does not contain Go files."}
+	if len(files) == 0 && len(node.Directories) == 0 {
+		return nil, NotFoundError{"Directory tree does not contain Go files and subdirs."}
 	}
 
 	// Fetch file from VCS.

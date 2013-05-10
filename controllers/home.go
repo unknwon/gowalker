@@ -247,6 +247,13 @@ func (this *HomeController) Get() {
 // generatePage genarates documentation page for project.
 // it returns false when its a invaild(empty) project.
 func generatePage(this *HomeController, pdoc *doc.Package, q string, lang string) bool {
+	// Load project data from database.
+	pdecl, err := models.LoadProject(pdoc.ImportPath)
+	if err != nil {
+		beego.Error("HomeController.generatePage():", err)
+		return false
+	}
+
 	// Set properties.
 	this.TplNames = "docs_" + lang + ".html"
 
@@ -264,12 +271,7 @@ func generatePage(this *HomeController, pdoc *doc.Package, q string, lang string
 
 	// Introduction.
 	this.Data["ImportPath"] = pdoc.ImportPath
-	// Load project data from database.
-	pdecl, err := models.LoadProject(pdoc.ImportPath)
-	if err != nil {
-		beego.Error("HomeController.generatePage(): models.LoadProject()", err)
-		return false
-	}
+
 	var buf bytes.Buffer
 	godoc.ToHTML(&buf, pdecl.Doc, nil)
 	pkgInfo := buf.String()
