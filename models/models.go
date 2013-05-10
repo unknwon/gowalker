@@ -181,32 +181,35 @@ func DeleteProject(path string) error {
 	// Connect to database.
 	q, err := connDb()
 	if err != nil {
-		beego.Error("models.SaveProject():", err)
+		beego.Error("models.DeleteProject():", err)
 	}
 	defer q.Db.Close()
 
+	var i1, i2, i3 int64
 	// Delete package information.
 	info := &PkgInfo{Path: path}
-	_, err = q.Delete(info)
+	i1, err = q.Delete(info)
 	if err != nil {
 		beego.Error("models.DeleteProject(): Information:", err)
 	}
 
 	// Delete package declaration
 	pdecl := &PkgDecl{Path: path}
-	_, err = q.Delete(pdecl)
+	i2, err = q.Delete(pdecl)
 	if err != nil {
 		beego.Error("models.DeleteProject(): Declaration:", err)
 	}
 
 	// Delete package documentation
 	pdoc := &PkgDoc{Path: path}
-	_, err = q.Delete(pdoc)
+	i3, err = q.Delete(pdoc)
 	if err != nil {
 		beego.Error("models.DeleteProject(): Documentation:", err)
 	}
 
-	beego.Error("models.DeleteProject(", path, ")")
+	if i1+i2+i3 > 0 {
+		beego.Info("models.DeleteProject(", path, i1, i2, i3, ")")
+	}
 	return nil
 }
 
