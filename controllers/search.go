@@ -15,7 +15,6 @@
 package controllers
 
 import (
-	"strconv"
 	"strings"
 
 	"github.com/Unknwon/gowalker/models"
@@ -90,15 +89,7 @@ func checkSpecialUsage(this *SearchController, q string) bool {
 	case q == "imports":
 		// Show imports package list.
 		pkgs := strings.Split(this.Input().Get("pkgs"), "|")
-		pinfos := make([]*models.PkgInfo, 0, len(pkgs)-1)
-		for _, v := range pkgs {
-			if pinfo, err := models.GetPkgInfo(v); err == nil {
-				pinfos = append(pinfos, pinfo)
-			} else {
-				pinfos = append(pinfos, &models.PkgInfo{Path: v})
-			}
-		}
-
+		pinfos, _ := models.GetGroupPkgInfo(pkgs)
 		if len(pinfos) > 0 {
 			this.Data["IsFindPro"] = true
 			this.Data["AllPros"] = pinfos
@@ -107,17 +98,7 @@ func checkSpecialUsage(this *SearchController, q string) bool {
 	case q == "imported":
 		// Show packages that import this project.
 		pkgs := strings.Split(this.Input().Get("pkgs"), "|")
-		pinfos := make([]*models.PkgInfo, 0, len(pkgs)-1)
-		for _, v := range pkgs {
-			if len(v) > 1 {
-				id, _ := strconv.Atoi(v[1:])
-				if pinfo, err := models.GetPkgInfoById(id); err == nil {
-					pinfos = append(pinfos, pinfo)
-				}
-
-			}
-		}
-
+		pinfos, _ := models.GetGroupPkgInfoById(pkgs)
 		if len(pinfos) > 0 {
 			this.Data["IsFindPro"] = true
 			this.Data["AllPros"] = pinfos

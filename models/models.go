@@ -134,8 +134,24 @@ func GetPkgInfo(path string) (*PkgInfo, error) {
 }
 
 // GetGroupPkgInfo returns group of package infomration in order to reduce database connect times.
-func GetGroupPkgInfo(paths []string) (*PkgInfo, error) {
-	return nil, nil
+func GetGroupPkgInfo(paths []string) ([]*PkgInfo, error) {
+	// Connect to database.
+	q := connDb()
+	defer q.Db.Close()
+
+	pinfos := make([]*PkgInfo, 0, len(paths))
+	for _, v := range paths {
+		if len(v) > 0 {
+			pinfo := new(PkgInfo)
+			err := q.WhereEqual("path", v).Find(pinfo)
+			if err == nil {
+				pinfos = append(pinfos, pinfo)
+			} else {
+				pinfos = append(pinfos, &PkgInfo{Path: v})
+			}
+		}
+	}
+	return pinfos, nil
 }
 
 // GetPkgInfoById returns package information from database by pid.
@@ -151,8 +167,26 @@ func GetPkgInfoById(pid int) (*PkgInfo, error) {
 }
 
 // GetGroupPkgInfoById returns group of package infomration by pid in order to reduce database connect times.
-func GetGroupPkgInfoById(pids []int) (*PkgInfo, error) {
-	return nil, nil
+// The formatted pid looks like '$<pid>|', so we need to cut '$' here.
+func GetGroupPkgInfoById(pids []string) ([]*PkgInfo, error) {
+	// Connect to database.
+	q := connDb()
+	defer q.Db.Close()
+
+	pinfos := make([]*PkgInfo, 0, len(pids))
+	for _, v := range pids {
+		if len(v) > 1 {
+			pid, err := strconv.Atoi(v[1:])
+			if err == nil {
+				pinfo := new(PkgInfo)
+				err = q.WhereEqual("id", pid).Find(pinfo)
+				if err == nil {
+					pinfos = append(pinfos, pinfo)
+				}
+			}
+		}
+	}
+	return pinfos, nil
 }
 
 // SaveProject save package information, declaration, documentation to database, and update import information.
