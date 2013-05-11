@@ -62,7 +62,6 @@ func crawlDoc(path string, pinfo *models.PkgInfo) (pdoc *Package, err error) {
 
 	switch {
 	case err == nil:
-		pdoc.Views = pinfo.Views
 		if err = SaveProject(pdoc, pinfo); err != nil {
 			beego.Error("doc.SaveProject(", path, "):", err)
 		}
@@ -116,7 +115,7 @@ func SaveProject(pdoc *Package, info *models.PkgInfo) error {
 		Created:     time.Now().UTC(),
 		ViewedTime:  time.Now().UTC().Unix(),
 		ProName:     pdoc.ProjectName,
-		Views:       pdoc.Views,
+		Views:       info.Views,
 		Etag:        pdoc.Etag,
 		Tags:        pdoc.Tags,
 		ImportedNum: info.ImportedNum,

@@ -19,6 +19,7 @@ package controllers
 import (
 	"bytes"
 	"encoding/base32"
+	"fmt"
 	godoc "go/doc"
 	"html/template"
 	"net/http"
@@ -219,6 +220,7 @@ func (this *HomeController) Get() {
 			/* TODO */
 
 			if pdoc != nil && generatePage(this, pdoc, broPath, curLang.Lang) {
+				fmt.Println(pdoc.Created)
 				// Update recent project list.
 				updateRecentPros(pdoc)
 				// Update project views.

@@ -51,6 +51,7 @@ func CheckDoc(path string, requestType int) (*Package, error) {
 	// Get the package documentation from database.
 	pinfo, err := models.GetPkgInfo(path)
 
+	// If PACKAGE_VER does not match, refresh anyway.
 	if err != nil || !strings.HasPrefix(pinfo.Etag, PACKAGE_VER) {
 		// No package information in database.
 		needsCrawl = true
@@ -97,7 +98,11 @@ func CheckDoc(path string, requestType int) (*Package, error) {
 		if err != nil {
 			switch {
 			case pdoc != nil || err == errNotModified:
-				beego.Info("Serving", path, "without modified")
+				if err == errNotModified {
+					beego.Info("Serving", path, "without modified")
+				} else {
+					beego.Error("Serving", path, "with error:", err)
+				}
 				err = nil
 				pinfo.Created = time.Now().UTC()
 				pdoc = &Package{}
