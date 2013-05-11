@@ -16,6 +16,7 @@
 package doc
 
 import (
+	"fmt"
 	"net/http"
 	"path"
 	"regexp"
@@ -69,7 +70,7 @@ func getGithubDoc(client *http.Client, match map[string]string, savedEtag string
 	if err != nil {
 		return nil, err
 	}
-
+	fmt.Println(commit)
 	if commit == savedEtag {
 		return nil, errNotModified
 	}

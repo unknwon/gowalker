@@ -29,7 +29,7 @@ import (
 )
 
 const (
-	VERSION = "0.2.0.0511" // Application version.
+	VERSION = "0.2.1.0511" // Application version.
 )
 
 func init() {
