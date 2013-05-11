@@ -35,6 +35,7 @@ const (
 const (
 	_TIME_DAY      = 24 * time.Hour   // Time duration of one day.
 	_FETCH_TIMEOUT = 10 * time.Second // Fetch package timeout duration.
+	_REFRESH_LIMIT = 5 * time.Minute  // Package fresh time limitation.
 )
 
 // CheckDoc checks the project documentation from the database or from the version
@@ -66,10 +67,10 @@ func CheckDoc(path string, requestType int) (*Package, error) {
 			}
 		case REFRESH_REQUEST:
 			// Check if the documentation is too frequently (within 5 minutes).
-			needsCrawl = pinfo.Created.Add(5 * time.Minute).UTC().Before(time.Now().UTC())
+			needsCrawl = pinfo.Created.Add(_REFRESH_LIMIT).UTC().Before(time.Now().UTC())
 			if !needsCrawl {
 				// Return error messages as limit time information.
-				return nil, errors.New(pinfo.Created.Add(5 * time.Minute).UTC().String())
+				return nil, errors.New(pinfo.Created.Add(_REFRESH_LIMIT).UTC().String())
 			}
 		}
 	}
@@ -124,6 +125,7 @@ func assginPkgInfo(pdoc *Package, pinfo *models.PkgInfo) {
 	pdoc.ProjectName = pinfo.ProName
 	pdoc.Views = pinfo.Views
 	pdoc.Etag = pinfo.Etag
+	pdoc.Tags = pinfo.Tags
 	pdoc.ImportedNum = pinfo.ImportedNum
 	pdoc.ImportPid = pinfo.ImportPid
 }

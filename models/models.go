@@ -44,7 +44,7 @@ type PkgInfo struct {
 	Created     time.Time `qbs:"index"` // Time when information last updated.
 	ViewedTime  int64     // User viewed time(Unix-timestamp).
 	ProName     string    // Name of the project.
-	Etag        string    // Revision tag.
+	Etag, Tags  string    // Revision tag and project tags.
 	ImportedNum int       // Number of packages that imports this project.
 	ImportPid   string    // Packages id of packages that imports this project.
 }
@@ -78,10 +78,14 @@ type PkgDoc struct {
 	Doc  string // Documentataion.
 }
 
-func connDb() (*qbs.Qbs, error) {
+func connDb() *qbs.Qbs {
+	// 'sql.Open' only returns error when unknown driver, so it's not necessary to check in other places.
 	db, err := sql.Open(_SQLITE3_DRIVER, DB_NAME)
+	if err != nil {
+		beego.Error("models.connDb():", err)
+	}
 	q := qbs.New(db, qbs.NewSqlite3())
-	return q, err
+	return q
 }
 
 func setMg() (*qbs.Migration, error) {
@@ -95,10 +99,7 @@ func init() {
 	os.Mkdir("./data", os.ModePerm)
 
 	// Connect to database.
-	q, err := connDb()
-	if err != nil {
-		beego.Error("models.init():", err)
-	}
+	q := connDb()
 	defer q.Db.Close()
 
 	mg, err := setMg()
@@ -123,45 +124,46 @@ func GetPkgInfo(path string) (*PkgInfo, error) {
 	}
 
 	// Connect to database.
-	q, err := connDb()
-	if err != nil {
-		beego.Error("models.GetPkgInfo():", err)
-	}
+	q := connDb()
 	defer q.Db.Close()
 
 	pinfo := new(PkgInfo)
-	err = q.WhereEqual("path", path).Find(pinfo)
+	err := q.WhereEqual("path", path).Find(pinfo)
 
 	return pinfo, err
 }
 
-// GetPkgInfoById returns package information from database bu pid.
+// GetGroupPkgInfo returns group of package infomration in order to reduce database connect times.
+func GetGroupPkgInfo(paths []string) (*PkgInfo, error) {
+	return nil, nil
+}
+
+// GetPkgInfoById returns package information from database by pid.
 func GetPkgInfoById(pid int) (*PkgInfo, error) {
 	// Connect to database.
-	q, err := connDb()
-	if err != nil {
-		beego.Error("models.GetPkgInfoById():", err)
-	}
+	q := connDb()
 	defer q.Db.Close()
 
 	pinfo := new(PkgInfo)
-	err = q.WhereEqual("id", pid).Find(pinfo)
+	err := q.WhereEqual("id", pid).Find(pinfo)
 
 	return pinfo, err
+}
+
+// GetGroupPkgInfoById returns group of package infomration by pid in order to reduce database connect times.
+func GetGroupPkgInfoById(pids []int) (*PkgInfo, error) {
+	return nil, nil
 }
 
 // SaveProject save package information, declaration, documentation to database, and update import information.
 func SaveProject(pinfo *PkgInfo, pdecl *PkgDecl, pdoc *PkgDoc, imports []string) error {
 	// Connect to database.
-	q, err := connDb()
-	if err != nil {
-		beego.Error("models.SaveProject():", err)
-	}
+	q := connDb()
 	defer q.Db.Close()
 
 	// Save package information.
 	info := new(PkgInfo)
-	err = q.WhereEqual("path", pinfo.Path).Find(info)
+	err := q.WhereEqual("path", pinfo.Path).Find(info)
 	if err != nil {
 		_, err = q.Save(pinfo)
 	} else {
@@ -186,11 +188,14 @@ func SaveProject(pinfo *PkgInfo, pdecl *PkgDecl, pdoc *PkgDoc, imports []string)
 		}
 	}
 
-	// Update import information.
-	for _, v := range imports {
-		if !utils.IsGoRepoPath(v) {
-			// Only count non-standard library.
-			updateImportInfo(q, v, int(pinfo.Id), true)
+	// Don't need to check standard library.
+	if !utils.IsGoRepoPath(pinfo.Path) {
+		// Update import information.
+		for _, v := range imports {
+			if !utils.IsGoRepoPath(v) {
+				// Only count non-standard library.
+				updateImportInfo(q, v, int(pinfo.Id), true)
+			}
 		}
 	}
 	return nil
@@ -231,16 +236,13 @@ func DeleteProject(path string) error {
 	}
 
 	// Connect to database.
-	q, err := connDb()
-	if err != nil {
-		beego.Error("models.DeleteProject():", err)
-	}
+	q := connDb()
 	defer q.Db.Close()
 
 	var i1, i2, i3 int64
 	// Delete package information.
 	info := new(PkgInfo)
-	err = q.WhereEqual("path", path).Find(info)
+	err := q.WhereEqual("path", path).Find(info)
 	if err == nil {
 		i1, err = q.Delete(info)
 		if err != nil {
@@ -255,7 +257,8 @@ func DeleteProject(path string) error {
 		i2, err = q.Delete(pdecl)
 		if err != nil {
 			beego.Error("models.DeleteProject(): Declaration:", err)
-		} else if info.Id > 0 {
+		} else if info.Id > 0 && !utils.IsGoRepoPath(path) {
+			// Don't need to check standard library.
 			// Update import information.
 			imports := strings.Split(pdecl.Imports, "|")
 			imports = imports[:len(imports)-1]
@@ -290,44 +293,35 @@ func LoadProject(path string) (*PkgDecl, error) {
 	}
 
 	// Connect to database.
-	q, err := connDb()
-	if err != nil {
-		beego.Error("models.LoadProject():", err)
-	}
+	q := connDb()
 	defer q.Db.Close()
 
 	pdecl := &PkgDecl{Path: path}
-	err = q.WhereEqual("path", path).Find(pdecl)
+	err := q.WhereEqual("path", path).Find(pdecl)
 	return pdecl, err
 }
 
 // GetRecentPros gets recent viewed projects from database
 func GetRecentPros(num int) ([]*PkgInfo, error) {
 	// Connect to database.
-	q, err := connDb()
-	if err != nil {
-		beego.Error("models.GetRecentPros():", err)
-	}
+	q := connDb()
 	defer q.Db.Close()
 
 	var pkgInfos []*PkgInfo
-	err = q.Limit(num).OrderByDesc("viewed_time").FindAll(&pkgInfos)
+	err := q.Limit(num).OrderByDesc("viewed_time").FindAll(&pkgInfos)
 	return pkgInfos, err
 }
 
 // AddViews add views in database by 1 each time
 func AddViews(pinfo *PkgInfo) error {
 	// Connect to database.
-	q, err := connDb()
-	if err != nil {
-		beego.Error("models.AddViews():", err)
-	}
+	q := connDb()
 	defer q.Db.Close()
 
 	pinfo.Views++
 
 	info := new(PkgInfo)
-	err = q.WhereEqual("path", pinfo.Path).Find(info)
+	err := q.WhereEqual("path", pinfo.Path).Find(info)
 	if err != nil {
 		_, err = q.Save(pinfo)
 	} else {
@@ -341,58 +335,46 @@ func AddViews(pinfo *PkgInfo) error {
 // GetPopularPros gets <num> most viewed projects from database with offset.
 func GetPopularPros(offset, num int) ([]*PkgInfo, error) {
 	// Connect to database.
-	q, err := connDb()
-	if err != nil {
-		beego.Error("models.GetPopularPros():", err)
-	}
+	q := connDb()
 	defer q.Db.Close()
 
 	var pkgInfos []*PkgInfo
-	err = q.Offset(offset).Limit(num).OrderByDesc("views").FindAll(&pkgInfos)
+	err := q.Offset(offset).Limit(num).OrderByDesc("views").FindAll(&pkgInfos)
 	return pkgInfos, err
 }
 
 // GetGoRepo returns packages in go standard library.
 func GetGoRepo() ([]*PkgInfo, error) {
 	// Connect to database.
-	q, err := connDb()
-	if err != nil {
-		beego.Error("models.GetGoRepo():", err)
-	}
+	q := connDb()
 	defer q.Db.Close()
 
 	var pkgInfos []*PkgInfo
 	condition := qbs.NewCondition("pro_name = ?", "Go")
-	err = q.Condition(condition).OrderBy("path").FindAll(&pkgInfos)
+	err := q.Condition(condition).OrderBy("path").FindAll(&pkgInfos)
 	return pkgInfos, err
 }
 
 // SearchDoc returns packages information that contain keyword
 func SearchDoc(key string) ([]*PkgInfo, error) {
 	// Connect to database.
-	q, err := connDb()
-	if err != nil {
-		beego.Error("models.SearchDoc():", err)
-	}
+	q := connDb()
 	defer q.Db.Close()
 
 	var pkgInfos []*PkgInfo
 	condition := qbs.NewCondition("path like ?", "%"+key+"%")
-	err = q.Condition(condition).OrderBy("path").FindAll(&pkgInfos)
+	err := q.Condition(condition).OrderBy("path").FindAll(&pkgInfos)
 	return pkgInfos, err
 }
 
 // GetAllPkgs returns all packages information in database
 func GetAllPkgs() ([]*PkgInfo, error) {
 	// Connect to database.
-	q, err := connDb()
-	if err != nil {
-		beego.Error("models.GetAllPkgs():", err)
-	}
+	q := connDb()
 	defer q.Db.Close()
 
 	var pkgInfos []*PkgInfo
-	err = q.OrderByDesc("pro_name").OrderBy("views").FindAll(&pkgInfos)
+	err := q.OrderByDesc("pro_name").OrderBy("views").FindAll(&pkgInfos)
 	return pkgInfos, err
 }
 
@@ -400,10 +382,7 @@ func GetAllPkgs() ([]*PkgInfo, error) {
 // One function is for reducing database connect times.
 func GetIndexPageInfo() (totalNum int64, popPkgs, importedPkgs []*PkgInfo, err error) {
 	// Connect to database.
-	q, err := connDb()
-	if err != nil {
-		beego.Error("models.GetIndexPageInfo():", err)
-	}
+	q := connDb()
 	defer q.Db.Close()
 
 	totalNum = q.Count(&PkgInfo{})
@@ -411,6 +390,6 @@ func GetIndexPageInfo() (totalNum int64, popPkgs, importedPkgs []*PkgInfo, err e
 	if err != nil {
 		beego.Error("models.GetIndexPageInfo(): popPkgs:", err)
 	}
-	err = q.Limit(20).OrderByDesc("imported_num").FindAll(&importedPkgs)
+	err = q.Limit(20).OrderByDesc("imported_num").OrderByDesc("views").FindAll(&importedPkgs)
 	return totalNum, popPkgs, importedPkgs, nil
 }

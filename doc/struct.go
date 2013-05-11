@@ -51,7 +51,7 @@ type Type struct {
 }
 
 // PACKAGE_VER is modified when previously stored packages are invalid.
-const PACKAGE_VER = "1"
+const PACKAGE_VER = "2"
 
 // Package represents full information and documentation for a package.
 type Package struct {
@@ -72,11 +72,11 @@ type Package struct {
 	GOOS, GOARCH string
 
 	// Time when information last updated.
-	Created time.Time `qbs:"index"`
+	Created time.Time
 
-	Views, ViewedTime int64
+	Views, ViewedTime int64 // User viewed time(Unix-timestamp).
 
-	Etag string // Revision tag.
+	Etag, Tags string // Revision tag and project tags.
 
 	// Top-level declarations.
 	Consts []*Value

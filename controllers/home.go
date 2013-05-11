@@ -230,6 +230,7 @@ func (this *HomeController) Get() {
 					ViewedTime:  pdoc.ViewedTime,
 					Views:       pdoc.Views,
 					Etag:        pdoc.Etag,
+					Tags:        pdoc.Tags,
 					ImportedNum: pdoc.ImportedNum,
 					ImportPid:   pdoc.ImportPid,
 				}
