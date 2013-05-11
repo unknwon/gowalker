@@ -17,21 +17,33 @@
 				</div>
 			</div>
 			<h1>Index</h1>
-			<p>The following is a list of '<a target="_blank" href="http://golang.org/cmd/go/#hdr-Download_and_install_packages_and_dependencies">go get</a>' able packages viewed previously on godoc.org. A  <a href="/search?q=gorepo">list of Go standard packages</a>  is also available.</p>
-			<table class="table table-hover table-striped table-condensed">
-				<thead>
-					<tr>
-						<th>Import Path</th>
-						<th>Synopsis</th>
-					</tr>
-				</thead>
-				<tbody>
-					{{range .AllPros}}
-					<tr>
-						<td><a href="/{{.Path}}">{{.Path}}</a></td>
-						<td>{{.Synopsis}}</td>
-					</tr>
-					{{end}}
-				</tbody>
-			</table>
-			<p>Number of projects: {{.ProNum}}.</p>
+			<p>Number of total projects: {{.ProNum}}.</p>
+			<div class="row">
+				<div class="span6 homeright">
+					<h4>Top 26-64 Popular Projects</h4>
+					<ul class="unstyled">
+						{{range .PopPros}}
+						<li><span class="badge">{{.Views}}</span> <a title="{{.Synopsis}}" href="/{{.Path}}">{{.Path}}</a></li>
+						{{end}}
+					</ul>
+				</div>
+				<div class="span6 homeleft">
+					<h4>Most Imported Projects</h4>
+					<table id="rectable" class="table table-bordered table-hover">
+						<thead>
+							<tr>
+								<th>Import Path</th>
+								<th>Imported Num</th>
+							</tr>
+						</thead>
+						<tbody>
+						{{range .ImportedPros}}
+							<tr>
+								<td><a title="{{.Synopsis}}" href="/{{.Path}}">{{.Path}}</a></td>
+								<td><a href="/search?q=imported&pkgs={{.ImportPid}}">{{.ImportedNum}} Packages</a></td>
+							</tr>
+						{{end}}
+						</tbody>
+					</table>
+				</div>
+			</div>

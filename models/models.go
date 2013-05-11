@@ -20,9 +20,11 @@ import (
 	"database/sql"
 	"errors"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
+	"github.com/Unknwon/gowalker/utils"
 	"github.com/astaxie/beego"
 	"github.com/coocood/qbs"
 	_ "github.com/mattn/go-sqlite3"
@@ -35,13 +37,16 @@ const (
 
 // PkgInfo is package information.
 type PkgInfo struct {
-	Path       string `qbs:"pk,index"` // Import path of package.
-	Synopsis   string
-	Views      int64     `qbs:"index"`
-	Created    time.Time `qbs:"index"` // Time when information last updated.
-	ViewedTime int64     // User viewed time(Unix-timestamp).
-	ProName    string    // Name of the project.
-	Etag       string    // Revision tag.
+	Id          int64
+	Path        string `qbs:"index"` // Import path of package.
+	Synopsis    string
+	Views       int64     `qbs:"index"`
+	Created     time.Time `qbs:"index"` // Time when information last updated.
+	ViewedTime  int64     // User viewed time(Unix-timestamp).
+	ProName     string    // Name of the project.
+	Etag        string    // Revision tag.
+	ImportedNum int       // Number of packages that imports this project.
+	ImportPid   string    // Packages id of packages that imports this project.
 }
 
 // PkgDecl is package declaration in database acceptable form.
@@ -112,6 +117,11 @@ func init() {
 
 // GetProInfo returns package information from database.
 func GetPkgInfo(path string) (*PkgInfo, error) {
+	// Check path length to reduce connect times.
+	if len(path) == 0 {
+		return nil, errors.New("models.GetPkgInfo(): Empty path as not found.")
+	}
+
 	// Connect to database.
 	q, err := connDb()
 	if err != nil {
@@ -125,8 +135,23 @@ func GetPkgInfo(path string) (*PkgInfo, error) {
 	return pinfo, err
 }
 
-// SaveProject save package information, declaration, documentation to database.
-func SaveProject(pinfo *PkgInfo, pdecl *PkgDecl, pdoc *PkgDoc) error {
+// GetPkgInfoById returns package information from database bu pid.
+func GetPkgInfoById(pid int) (*PkgInfo, error) {
+	// Connect to database.
+	q, err := connDb()
+	if err != nil {
+		beego.Error("models.GetPkgInfoById():", err)
+	}
+	defer q.Db.Close()
+
+	pinfo := new(PkgInfo)
+	err = q.WhereEqual("id", pid).Find(pinfo)
+
+	return pinfo, err
+}
+
+// SaveProject save package information, declaration, documentation to database, and update import information.
+func SaveProject(pinfo *PkgInfo, pdecl *PkgDecl, pdoc *PkgDoc, imports []string) error {
 	// Connect to database.
 	q, err := connDb()
 	if err != nil {
@@ -135,21 +160,14 @@ func SaveProject(pinfo *PkgInfo, pdecl *PkgDecl, pdoc *PkgDoc) error {
 	defer q.Db.Close()
 
 	// Save package information.
-	_, err = q.Save(pinfo)
-
-	// When 'path' as primary key, don't need to use following code.
-	/*	info := new(PkgInfo)
-		err = q.WhereEqual("path", pinfo.Path).Find(info)
-		if err != nil {
-			_, err = q.Save(pinfo)
-		} else {
-			info.Synopsis = pinfo.Synopsis
-			info.Created = pinfo.Created
-			info.ViewedTime = pinfo.ViewedTime
-			info.ProName = pinfo.ProName
-			info.Etag = pinfo.Etag
-			_, err = q.Save(info)
-		}*/
+	info := new(PkgInfo)
+	err = q.WhereEqual("path", pinfo.Path).Find(info)
+	if err != nil {
+		_, err = q.Save(pinfo)
+	} else {
+		pinfo.Id = info.Id
+		_, err = q.Save(pinfo)
+	}
 	if err != nil {
 		beego.Error("models.SaveProject(): Information:", err)
 	}
@@ -168,10 +186,44 @@ func SaveProject(pinfo *PkgInfo, pdecl *PkgDecl, pdoc *PkgDoc) error {
 		}
 	}
 
+	// Update import information.
+	for _, v := range imports {
+		if !utils.IsGoRepoPath(v) {
+			// Only count non-standard library.
+			updateImportInfo(q, v, int(pinfo.Id), true)
+		}
+	}
 	return nil
 }
 
-// DeleteProject deletes everything about the path in database.
+func updateImportInfo(q *qbs.Qbs, path string, pid int, add bool) {
+	// Save package information.
+	info := new(PkgInfo)
+	err := q.WhereEqual("path", path).Find(info)
+	if err == nil {
+		// Check if pid exists in this project.
+		i := strings.Index(info.ImportPid, "$"+strconv.Itoa(pid)+"|")
+		switch {
+		case i == -1 && add: // Add operation and does not contain.
+			info.ImportPid += "$" + strconv.Itoa(pid) + "|"
+			info.ImportedNum++
+			_, err = q.Save(info)
+			if err != nil {
+				beego.Error("models.updateImportInfo(): add:", path, err)
+			}
+		case i > -1 && !add: // Delete operation and contains.
+			info.ImportPid = strings.Replace(info.ImportPid, "$"+strconv.Itoa(pid)+"|", "", 1)
+			info.ImportedNum--
+			if err != nil {
+				beego.Error("models.updateImportInfo(): delete:", path, err)
+			}
+		}
+	}
+
+	// Error means this project does not exist, simply skip.
+}
+
+// DeleteProject deletes everything about the path in database, and update import information.
 func DeleteProject(path string) error {
 	// Check path length to reduce connect times. (except launchpad.net)
 	if path[0] != 'l' && len(strings.Split(path, "/")) <= 2 {
@@ -187,17 +239,33 @@ func DeleteProject(path string) error {
 
 	var i1, i2, i3 int64
 	// Delete package information.
-	info := &PkgInfo{Path: path}
-	i1, err = q.Delete(info)
-	if err != nil {
-		beego.Error("models.DeleteProject(): Information:", err)
+	info := new(PkgInfo)
+	err = q.WhereEqual("path", path).Find(info)
+	if err == nil {
+		i1, err = q.Delete(info)
+		if err != nil {
+			beego.Error("models.DeleteProject(): Information:", err)
+		}
 	}
 
 	// Delete package declaration
-	pdecl := &PkgDecl{Path: path}
-	i2, err = q.Delete(pdecl)
-	if err != nil {
-		beego.Error("models.DeleteProject(): Declaration:", err)
+	pdecl := new(PkgDecl)
+	err = q.WhereEqual("path", path).Find(pdecl)
+	if err == nil {
+		i2, err = q.Delete(pdecl)
+		if err != nil {
+			beego.Error("models.DeleteProject(): Declaration:", err)
+		} else if info.Id > 0 {
+			// Update import information.
+			imports := strings.Split(pdecl.Imports, "|")
+			imports = imports[:len(imports)-1]
+			for _, v := range imports {
+				if !utils.IsGoRepoPath(v) {
+					// Only count non-standard library.
+					updateImportInfo(q, v, int(info.Id), false)
+				}
+			}
+		}
 	}
 
 	// Delete package documentation
@@ -210,6 +278,7 @@ func DeleteProject(path string) error {
 	if i1+i2+i3 > 0 {
 		beego.Info("models.DeleteProject(", path, i1, i2, i3, ")")
 	}
+
 	return nil
 }
 
@@ -242,7 +311,7 @@ func GetRecentPros(num int) ([]*PkgInfo, error) {
 	defer q.Db.Close()
 
 	var pkgInfos []*PkgInfo
-	err = q.Where("views > ?", 0).Limit(num).OrderByDesc("viewed_time").FindAll(&pkgInfos)
+	err = q.Limit(num).OrderByDesc("viewed_time").FindAll(&pkgInfos)
 	return pkgInfos, err
 }
 
@@ -256,12 +325,21 @@ func AddViews(pinfo *PkgInfo) error {
 	defer q.Db.Close()
 
 	pinfo.Views++
+
+	info := new(PkgInfo)
+	err = q.WhereEqual("path", pinfo.Path).Find(info)
+	if err != nil {
+		_, err = q.Save(pinfo)
+	} else {
+		pinfo.Id = info.Id
+		_, err = q.Save(pinfo)
+	}
 	_, err = q.Save(pinfo)
 	return err
 }
 
-// GetPopularPros gets most viewed projects from database
-func GetPopularPros() ([]*PkgInfo, error) {
+// GetPopularPros gets <num> most viewed projects from database with offset.
+func GetPopularPros(offset, num int) ([]*PkgInfo, error) {
 	// Connect to database.
 	q, err := connDb()
 	if err != nil {
@@ -270,11 +348,11 @@ func GetPopularPros() ([]*PkgInfo, error) {
 	defer q.Db.Close()
 
 	var pkgInfos []*PkgInfo
-	err = q.Where("views > ?", 0).Limit(25).OrderByDesc("views").FindAll(&pkgInfos)
+	err = q.Offset(offset).Limit(num).OrderByDesc("views").FindAll(&pkgInfos)
 	return pkgInfos, err
 }
 
-// GetGoRepo gets go standard library
+// GetGoRepo returns packages in go standard library.
 func GetGoRepo() ([]*PkgInfo, error) {
 	// Connect to database.
 	q, err := connDb()
@@ -284,12 +362,12 @@ func GetGoRepo() ([]*PkgInfo, error) {
 	defer q.Db.Close()
 
 	var pkgInfos []*PkgInfo
-	condition := qbs.NewCondition("pro_name = ?", "Go").And("views > ?", 0)
+	condition := qbs.NewCondition("pro_name = ?", "Go")
 	err = q.Condition(condition).OrderBy("path").FindAll(&pkgInfos)
 	return pkgInfos, err
 }
 
-// SearchDoc gets packages that contain keyword
+// SearchDoc returns packages information that contain keyword
 func SearchDoc(key string) ([]*PkgInfo, error) {
 	// Connect to database.
 	q, err := connDb()
@@ -299,12 +377,12 @@ func SearchDoc(key string) ([]*PkgInfo, error) {
 	defer q.Db.Close()
 
 	var pkgInfos []*PkgInfo
-	condition := qbs.NewCondition("path like ?", "%"+key+"%").And("views > ?", 0)
+	condition := qbs.NewCondition("path like ?", "%"+key+"%")
 	err = q.Condition(condition).OrderBy("path").FindAll(&pkgInfos)
 	return pkgInfos, err
 }
 
-// GetAllPkgs gets all packages in database
+// GetAllPkgs returns all packages information in database
 func GetAllPkgs() ([]*PkgInfo, error) {
 	// Connect to database.
 	q, err := connDb()
@@ -314,6 +392,25 @@ func GetAllPkgs() ([]*PkgInfo, error) {
 	defer q.Db.Close()
 
 	var pkgInfos []*PkgInfo
-	err = q.Where("views > ?", 0).OrderByDesc("pro_name").OrderBy("views").FindAll(&pkgInfos)
+	err = q.OrderByDesc("pro_name").OrderBy("views").FindAll(&pkgInfos)
 	return pkgInfos, err
+}
+
+// GetIndexPageInfo returns all data that used for index page.
+// One function is for reducing database connect times.
+func GetIndexPageInfo() (totalNum int64, popPkgs, importedPkgs []*PkgInfo, err error) {
+	// Connect to database.
+	q, err := connDb()
+	if err != nil {
+		beego.Error("models.GetIndexPageInfo():", err)
+	}
+	defer q.Db.Close()
+
+	totalNum = q.Count(&PkgInfo{})
+	err = q.Offset(25).Limit(39).OrderByDesc("views").FindAll(&popPkgs)
+	if err != nil {
+		beego.Error("models.GetIndexPageInfo(): popPkgs:", err)
+	}
+	err = q.Limit(20).OrderByDesc("imported_num").FindAll(&importedPkgs)
+	return totalNum, popPkgs, importedPkgs, nil
 }

@@ -126,5 +126,5 @@
 				</table>
 			{{end}}
 			<p>
-			Package <b>{{.ProName}}</b> imports <a href="/search?q=imports&pkgs={{.ImportPkgs}}">{{.ImportPkgNum}} packages</a>. Go Walker generated this page in <i>{{.UtcTime}}</i> with {{.GOOS}}-{{.GOARCH}}. <a href="/refresh?q={{.ImportPath}}">Refresh</a>.
+			Package <b>{{.ProName}}</b> imports <a href="/search?q=imports&pkgs={{.ImportPkgs}}">{{.ImportPkgNum}} packages</a>{{if .IsImported}} and imported by <a href="/search?q=imported&pkgs={{.ImportPid}}">{{.ImportedNum}} packages</a>{{end}}. Go Walker generated this page in <i>{{.UtcTime}}</i> with {{.GOOS}}-{{.GOARCH}}. <a href="/refresh?q={{.ImportPath}}">Refresh</a>.
 			</p>

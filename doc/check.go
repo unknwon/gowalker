@@ -78,7 +78,7 @@ func CheckDoc(path string, requestType int) (*Package, error) {
 		// Fetch package from VCS.
 		c := make(chan crawlResult, 1)
 		go func() {
-			pdoc, err := crawlDoc(path, pinfo.Etag, pinfo.Views)
+			pdoc, err := crawlDoc(path, pinfo)
 			c <- crawlResult{pdoc, err}
 		}()
 
@@ -124,4 +124,6 @@ func assginPkgInfo(pdoc *Package, pinfo *models.PkgInfo) {
 	pdoc.ProjectName = pinfo.ProName
 	pdoc.Views = pinfo.Views
 	pdoc.Etag = pinfo.Etag
+	pdoc.ImportedNum = pinfo.ImportedNum
+	pdoc.ImportPid = pinfo.ImportPid
 }

@@ -36,10 +36,11 @@ func (this *IndexController) Get() {
 	this.Layout = "layout_" + curLang.Lang + ".html"
 	this.TplNames = "index_" + curLang.Lang + ".html"
 
-	// Get all packages
-	pkgInfos, _ := models.GetAllPkgs()
-	this.Data["AllPros"] = pkgInfos
-	this.Data["ProNum"] = len(pkgInfos)
+	// Get index page data.
+	totalNum, popPkgs, importedPkgs, _ := models.GetIndexPageInfo()
+	this.Data["ProNum"] = totalNum
+	this.Data["PopPros"] = popPkgs
+	this.Data["ImportedPros"] = importedPkgs
 
 	// Set language properties.
 	this.Data["Lang"] = curLang.Lang

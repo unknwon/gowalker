@@ -191,7 +191,7 @@ func (this *HomeController) Get() {
 		// Recent projects
 		this.Data["RecentPros"] = recentViewedPros
 		// Get popular project list from database.
-		pkgInfos, _ := models.GetPopularPros()
+		pkgInfos, _ := models.GetPopularPros(0, 25)
 		this.Data["PopPros"] = pkgInfos
 		// Set standard library keyword type-ahead.
 		this.Data["DataSrc"] = utils.GoRepoSet
@@ -223,13 +223,15 @@ func (this *HomeController) Get() {
 				updateRecentPros(pdoc)
 				// Update project views.
 				pinfo := &models.PkgInfo{
-					Path:       pdoc.ImportPath,
-					Synopsis:   pdoc.Synopsis,
-					Created:    pdoc.Created,
-					ProName:    pdoc.ProjectName,
-					ViewedTime: pdoc.ViewedTime,
-					Views:      pdoc.Views,
-					Etag:       pdoc.Etag,
+					Path:        pdoc.ImportPath,
+					Synopsis:    pdoc.Synopsis,
+					Created:     pdoc.Created,
+					ProName:     pdoc.ProjectName,
+					ViewedTime:  pdoc.ViewedTime,
+					Views:       pdoc.Views,
+					Etag:        pdoc.Etag,
+					ImportedNum: pdoc.ImportedNum,
+					ImportPid:   pdoc.ImportPid,
 				}
 				models.AddViews(pinfo)
 				return
@@ -393,6 +395,9 @@ func generatePage(this *HomeController, pdoc *doc.Package, q string, lang string
 	this.Data["Files"] = pdoc.Files
 	this.Data["ImportPkgs"] = pdecl.Imports
 	this.Data["ImportPkgNum"] = len(pdoc.Imports) - 1
+	this.Data["IsImported"] = pdoc.ImportedNum > 0
+	this.Data["ImportPid"] = pdoc.ImportPid
+	this.Data["ImportedNum"] = pdoc.ImportedNum
 	this.Data["UtcTime"] = pdoc.Created
 	this.Data["GOOS"] = pdecl.Goos
 	this.Data["GOARCH"] = pdecl.Goarch

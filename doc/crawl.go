@@ -38,7 +38,7 @@ type crawlResult struct {
 }
 
 // crawlDoc fetchs package from VCS.
-func crawlDoc(path string, etag string, views int64) (pdoc *Package, err error) {
+func crawlDoc(path string, pinfo *models.PkgInfo) (pdoc *Package, err error) {
 	// I have no idea what the fuck does this mean.
 	if i := strings.Index(path, "/libgo/go/"); i > 0 && utils.IsGoRepoPath(path[i+len("/libgo/go/"):]) {
 		// Go Frontend source tree mirror.
@@ -46,21 +46,23 @@ func crawlDoc(path string, etag string, views int64) (pdoc *Package, err error) 
 		err = errors.New("Go Frontend source tree mirror.")
 	} else {
 		var pdocNew *Package
-		pdocNew, err = getRepo(httpClient, path, etag)
+		pdocNew, err = getRepo(httpClient, path, pinfo.Etag)
 
 		// For timeout logic in client.go to work, we cannot leave connections idling. This is ugly.
 		httpTransport.CloseIdleConnections()
 
 		if err != errNotModified && pdocNew != nil {
 			pdoc = pdocNew
-			pdoc.Views = views
+			pdoc.Views = pinfo.Views
+			pdoc.ImportPid = pinfo.ImportPid
+			pdoc.ImportedNum = pinfo.ImportedNum
 		}
 	}
 
 	switch {
 	case err == nil:
-		pdoc.Views = views
-		if err = SaveProject(pdoc); err != nil {
+		pdoc.Views = pinfo.Views
+		if err = SaveProject(pdoc, pinfo); err != nil {
 			beego.Error("doc.SaveProject(", path, "):", err)
 		}
 	case isNotFound(err):
@@ -104,17 +106,19 @@ func getRepo(client *http.Client, importPath string, etag string) (pdoc *Package
 }
 
 // SaveProject saves project information to database.
-func SaveProject(pdoc *Package) error {
+func SaveProject(pdoc *Package, info *models.PkgInfo) error {
 
 	// Save package information.
 	pinfo := &models.PkgInfo{
-		Path:       pdoc.ImportPath,
-		Synopsis:   pdoc.Synopsis,
-		Created:    time.Now().UTC(),
-		ViewedTime: time.Now().UTC().Unix(),
-		ProName:    pdoc.ProjectName,
-		Views:      pdoc.Views,
-		Etag:       pdoc.Etag,
+		Path:        pdoc.ImportPath,
+		Synopsis:    pdoc.Synopsis,
+		Created:     time.Now().UTC(),
+		ViewedTime:  time.Now().UTC().Unix(),
+		ProName:     pdoc.ProjectName,
+		Views:       pdoc.Views,
+		Etag:        pdoc.Etag,
+		ImportedNum: info.ImportedNum,
+		ImportPid:   info.ImportPid,
 	}
 
 	// Save package declaration.
@@ -282,7 +286,7 @@ func SaveProject(pdoc *Package) error {
 	}
 	doc.Doc = buf.String()
 
-	err := models.SaveProject(pinfo, pdecl, doc)
+	err := models.SaveProject(pinfo, pdecl, doc, pdoc.Imports)
 	return err
 }
 

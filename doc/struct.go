@@ -97,6 +97,9 @@ type Package struct {
 	Dirs             []string // Subdirectories
 
 	Imports, TestImports []string // Imports.
+
+	ImportedNum int    // Number of packages that imports this project.
+	ImportPid   string // Packages id of packages that imports this project.
 }
 
 // source is source code file.

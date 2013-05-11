@@ -11,7 +11,7 @@ Go Walker is a server that generates <a target="_blank" href="http://golang.org/
 - **Code view** for public functions, methods in current package in the same page: reduce rake up space and do more work at the same time.
 - **Code highlight** and **jump link** for public functions, types from imported packages: reduce time to find.
 - **Type-ahead** for standard library: not a big deal.
-- **Multi-language** documentation support(**coming soon!**).
+- **Multi-language** documentation support( **coming soon!** ).
 
 ##Third-party packages
 - [Beego](https://github.com/astaxie/beego): a **lightweight** web framework for web application **quick** development.

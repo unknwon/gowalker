@@ -17,22 +17,34 @@
 				</div>
 			</div>
 			<h1>索引</h1>
-			<p>以下是可以使用命令 '<a target="_blank" href="http://golang.org/cmd/go/#hdr-Download_and_install_packages_and_dependencies">go get</a>' 进行快速安装的项目列表。你也可以到  <a href="/search?lang={{.Lang}}&q=gorepo">Go 标准库</a>  查看有关标准库的文档。<!--Please use http://api.godoc.org/packages instead of scraping this page.--></p>
-			<table class="table table-hover table-striped table-condensed">
-				<thead>
-					<tr>
-						<th>项目路径</th>
-						<th>简介</th>
-					</tr>
-				</thead>
-				<tbody>
-					{{range .AllPros}}
-					<tr>
-						<td><a href="/{{.Path}}">{{.Path}}</a></td>
-						<td>{{.Synopsis}}</td>
-					</tr>
-					{{end}}
-				</tbody>
-			</table>
 			<p>当前收录项目总数：{{.ProNum}}。</p>
+			<div class="row">
+				<div class="span6 homeright">
+					<h4>Top 26-64 热门项目</h4>
+					<ul class="unstyled">
+						{{range .PopPros}}
+						<li><span class="badge">{{.Views}}</span> <a title="{{.Synopsis}}" href="/{{.Path}}">{{.Path}}</a></li>
+						{{end}}
+					</ul>
+				</div>
+				<div class="span6 homeleft">
+					<h4>项目引用排行榜</h4>
+					<table id="rectable" class="table table-bordered table-hover">
+						<thead>
+							<tr>
+								<th>导入路径</th>
+								<th>引用信息</th>
+							</tr>
+						</thead>
+						<tbody>
+						{{range .ImportedPros}}
+							<tr>
+								<td><a title="{{.Synopsis}}" href="/{{.Path}}">{{.Path}}</a></td>
+								<td><a href="/search?q=imported&pkgs={{.ImportPid}}">{{.ImportedNum}} 个包</a></td>
+							</tr>
+						{{end}}
+						</tbody>
+					</table>
+				</div>
+			</div>
 		
