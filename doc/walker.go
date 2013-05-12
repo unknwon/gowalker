@@ -240,16 +240,18 @@ func (w *walker) build(srcs []*source) (*Package, error) {
 	for _, src := range srcs {
 		if strings.HasSuffix(src.name, ".go") {
 			w.srcs[src.name] = src
-		} else if src.name == "doc_zh.md" {
-			// Multi-language documentation.
-			w.mldocs[src.name] = src
+		} else if strings.ToLower(src.name) == "readme.md" {
+			// Readme.
+			w.pdoc.Doc = strings.Replace(string(src.data), "=", "", -1)
+			if w.pdoc.Doc[0] == '\n' {
+				w.pdoc.Doc = w.pdoc.Doc[1:]
+			}
+			w.pdoc.Doc = w.pdoc.Doc[strings.Index(w.pdoc.Doc, "\n")+1:]
+			w.pdoc.Synopsis = utils.Synopsis(w.pdoc.Doc)
+			w.pdoc.Doc = string(beego.MarkDown(w.pdoc.Doc))
+			w.pdoc.Doc = strings.Replace(w.pdoc.Doc, "h3>", "h5>", -1)
+			w.pdoc.Doc = strings.Replace(w.pdoc.Doc, "h2>", "h4>", -1)
 		}
-	}
-
-	// Check number of source files.
-	if len(w.srcs) == 0 {
-		// No source file.
-		return w.pdoc, nil
 	}
 
 	w.fset = token.NewFileSet()
@@ -313,8 +315,16 @@ func (w *walker) build(srcs []*source) (*Package, error) {
 
 	pdoc := doc.New(apkg, w.pdoc.ImportPath, mode)
 
-	w.pdoc.Doc = strings.TrimRight(pdoc.Doc, " \t\n\r")
-	w.pdoc.Synopsis = utils.Synopsis(w.pdoc.Doc)
+	if len(w.pdoc.Doc) == 0 {
+		w.pdoc.Doc = strings.TrimRight(pdoc.Doc, " \t\n\r")
+		w.pdoc.Synopsis = utils.Synopsis(w.pdoc.Doc)
+		var buf bytes.Buffer
+		doc.ToHTML(&buf, w.pdoc.Doc, nil)
+		w.pdoc.Doc = buf.String()
+	}
+
+	w.pdoc.Doc = strings.Replace(w.pdoc.Doc, "<p>", "<p><b>", 1)
+	w.pdoc.Doc = strings.Replace(w.pdoc.Doc, "</p>", "</b></p>", 1)
 
 	//w.pdoc.Examples = w.getExamples("")
 	//w.pdoc.IsCmd = bpkg.IsCommand()

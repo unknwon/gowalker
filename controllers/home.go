@@ -19,7 +19,6 @@ package controllers
 import (
 	"bytes"
 	"encoding/base32"
-	"fmt"
 	godoc "go/doc"
 	"html/template"
 	"net/http"
@@ -220,7 +219,6 @@ func (this *HomeController) Get() {
 			/* TODO */
 
 			if pdoc != nil && generatePage(this, pdoc, broPath, curLang.Lang) {
-				fmt.Println(pdoc.Created)
 				// Update recent project list.
 				updateRecentPros(pdoc)
 				// Update project views.
@@ -276,13 +274,9 @@ func generatePage(this *HomeController, pdoc *doc.Package, q string, lang string
 
 	// Introduction.
 	this.Data["ImportPath"] = pdoc.ImportPath
+	this.Data["PkgFullIntro"] = pdecl.Doc
 
 	var buf bytes.Buffer
-	godoc.ToHTML(&buf, pdecl.Doc, nil)
-	pkgInfo := buf.String()
-	pkgInfo = strings.Replace(pkgInfo, "<p>", "<p><b>", 1)
-	pkgInfo = strings.Replace(pkgInfo, "</p>", "</b></p>", 1)
-	this.Data["PkgFullIntro"] = pkgInfo
 	// Convert data format.
 	err = ConvertDataFormat(pdoc, pdecl)
 	if err != nil {

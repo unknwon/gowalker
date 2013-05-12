@@ -51,7 +51,7 @@ type Type struct {
 }
 
 // PACKAGE_VER is modified when previously stored packages are invalid.
-const PACKAGE_VER = "2"
+const PACKAGE_VER = "3"
 
 // Package represents full information and documentation for a package.
 type Package struct {
@@ -123,7 +123,6 @@ type walker struct {
 	pdoc     *Package
 	srcLines map[string][]string // Source files with line arrays.
 	srcs     map[string]*source  // Source files.
-	mldocs   map[string]*source  // Multi-language documentation.
 	fset     *token.FileSet
 	buf      []byte // scratch space for printNode method.
 }
