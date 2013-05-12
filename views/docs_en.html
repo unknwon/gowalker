@@ -30,7 +30,8 @@
 				<a title="See this project on {{.VCS}}" target="_blank" href="http://{{.ProPath}}" class="label label-info">{{.VCS}}</a> <a target="_blank" href="http://{{.ProPath}}"><strong>{{.ProName}}:</strong></a> <a href="/{{.ProDocPath}}">{{.ProDocPath}}</a><span class="muted">/{{.ProName}}</span>
 				<span class="pull-right"><span >You are No.<b>{{.Views}}</b> visitor of this page.</span><span class="muted"> | </span><a href="#_index">Index</a><span class="muted"> | </span><a href="#_files">Files</a>{{if .IsHasSubdirs}}<span class="muted"> | </span><a href="#_subdirs">Directories</a></span>{{end}}
 			</div>
-			<h2>package {{.ProName}}</h2>
+			<h2>package {{.ProName}} 
+			{{range .Tags}}<a target="_blank" href="/index#{{.}}" class="label label-inverse">{{.}}</a> {{end}}</h2>
 			<p><code>import "{{.ImportPath}}"</code></p>
 			{{str2html .PkgFullIntro}}
 			<h3 id="_index">Index</h3>

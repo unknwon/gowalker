@@ -77,8 +77,7 @@ func (this *SearchController) Get() {
 // It returns true if it is a special usage, false otherwise.
 func checkSpecialUsage(this *SearchController, q string) bool {
 	switch {
-	case q == "gorepo":
-		// Show list of standard library.
+	case q == "gorepo": // Show list of standard library.
 		pkgInfos, _ := models.GetGoRepo()
 		// Show results after searched.
 		if len(pkgInfos) > 0 {
@@ -86,8 +85,7 @@ func checkSpecialUsage(this *SearchController, q string) bool {
 			this.Data["AllPros"] = pkgInfos
 		}
 		return true
-	case q == "imports":
-		// Show imports package list.
+	case q == "imports": // Show imports package list.
 		pkgs := strings.Split(this.Input().Get("pkgs"), "|")
 		pinfos, _ := models.GetGroupPkgInfo(pkgs)
 		if len(pinfos) > 0 {
@@ -95,8 +93,7 @@ func checkSpecialUsage(this *SearchController, q string) bool {
 			this.Data["AllPros"] = pinfos
 		}
 		return true
-	case q == "imported":
-		// Show packages that import this project.
+	case q == "imported": // Show packages that import this project.
 		pkgs := strings.Split(this.Input().Get("pkgs"), "|")
 		pinfos, _ := models.GetGroupPkgInfoById(pkgs)
 		if len(pinfos) > 0 {
@@ -104,7 +101,44 @@ func checkSpecialUsage(this *SearchController, q string) bool {
 			this.Data["AllPros"] = pinfos
 		}
 		return true
+	case strings.Index(q, ":tag=") > -1: // Add tag(s) to the project.
+		// Get tag(s).
+		i := strings.Index(q, ":tag=")
+		inputs := strings.Split(q[i+5:], ":")
+		// Verify tags.
+		tags := verifyTags(inputs)
+
+		if len(tags) > 0 && models.UpdateTagInfo(q[:i], tags, true) {
+			this.Redirect("/"+q[:i], 302)
+		}
+		return true
+	case strings.Index(q, ":rtag=") > -1: // Remove tag(s) to the project.
+		// Get tag(s).
+		i := strings.Index(q, ":rtag=")
+		inputs := strings.Split(q[i+6:], ":")
+		// Verify tags.
+		tags := verifyTags(inputs)
+
+		if len(tags) > 0 && models.UpdateTagInfo(q[:i], tags, false) {
+			this.Redirect("/"+q[:i], 302)
+		}
+		return true
 	}
 
 	return false
+}
+
+func verifyTags(inputs []string) []string {
+	tags := make([]string, 0, len(inputs))
+	for _, v := range inputs {
+		if len(v) > 0 {
+			for _, t := range tagList {
+				if t == v {
+					tags = append(tags, v)
+					break
+				}
+			}
+		}
+	}
+	return tags
 }

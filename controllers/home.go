@@ -37,6 +37,8 @@ var (
 	recentViewedProNum = 20         // Maximum element number of recent viewed project list.
 	recentViewedPros   []*recentPro // Recent viewed project list.
 	langTypes          []*langType  // Languages are supported.
+
+	tagList []string // Projects tag list.
 )
 
 // Recent viewed project.
@@ -88,6 +90,9 @@ func init() {
 			Name: names[i],
 		})
 	}
+
+	// Initialize project tags.
+	tagList = strings.Split(beego.AppConfig.String("tags"), "|")
 }
 
 func setLangVer(req *http.Request, input url.Values) (*langType, []*langType) {
@@ -272,6 +277,9 @@ func generatePage(this *HomeController, pdoc *doc.Package, q string, lang string
 
 	this.Data["Views"] = pdoc.Views + 1
 
+	// Tags.
+	this.Data["Tags"] = getTags(pdoc.Tags, lang)
+
 	// Introduction.
 	this.Data["ImportPath"] = pdoc.ImportPath
 	byts, _ := base32.StdEncoding.DecodeString(pdecl.Doc)
@@ -453,6 +461,26 @@ func getVCSInfo(q string, pdoc *doc.Package) (vcs, proName, proPath, pkgDocPath 
 	pkgDocPath = q[:lastIndex]
 
 	return vcs, proName, proPath, pkgDocPath
+}
+
+func getTags(rawTag, lang string) []string {
+	// Get tag labels.
+	tagLabels := strings.Split(beego.AppConfig.String("tagsLabels"), "|")
+
+	tags := strings.Split(rawTag, "|")
+	tags = tags[:len(tags)-1] // The last element is always empty.
+	// Remove first character '$' in every tag.
+	for i := range tags {
+		tags[i] = tags[i][1:]
+		// Reassign tag label name.
+		for j, v := range tagList {
+			if tags[i] == v {
+				tags[i] = tagLabels[j]
+				break
+			}
+		}
+	}
+	return tags
 }
 
 // ConvertDataFormat converts data from database acceptable format to useable format.

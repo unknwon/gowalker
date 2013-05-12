@@ -30,7 +30,8 @@
 				<a title="到 {{.VCS}} 上查看该项目" target="_blank" href="http://{{.ProPath}}" class="label label-info">{{.VCS}}</a> <a target="_blank" href="http://{{.ProPath}}"><strong>{{.ProName}}:</strong></a> <a href="/{{.ProDocPath}}">{{.ProDocPath}}</a><span class="muted">/{{.ProName}}</span>
 				<span class="pull-right"><span >您是本页面的第 <b>{{.Views}}</b> 位访问者。</span><span class="muted"> | </span><a href="#_index">索引</a><span class="muted"> | </span><a href="#_files">文件</a>{{if .IsHasSubdirs}}<span class="muted"> | </span><a href="#_subdirs">目录</a></span>{{end}}
 			</div>
-			<h2>项目 {{.ProName}}</h2>
+			<h2>项目 {{.ProName}}
+			{{range .Tags}}<a target="_blank" href="/index#{{.}}" class="label label-inverse">{{.}}</a> {{end}}</h2>
 			<p><code>import "{{.ImportPath}}"</code></p>
 			{{str2html .PkgFullIntro}}
 			<h3 id="_index">索引</h3>

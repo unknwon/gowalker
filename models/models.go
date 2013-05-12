@@ -253,6 +253,7 @@ func updateImportInfo(q *qbs.Qbs, path string, pid int, add bool) {
 		case i > -1 && !add: // Delete operation and contains.
 			info.ImportPid = strings.Replace(info.ImportPid, "$"+strconv.Itoa(pid)+"|", "", 1)
 			info.ImportedNum--
+			_, err = q.Save(info)
 			if err != nil {
 				beego.Error("models.updateImportInfo(): delete:", path, err)
 			}
@@ -408,13 +409,13 @@ func GetAllPkgs() ([]*PkgInfo, error) {
 	defer q.Db.Close()
 
 	var pkgInfos []*PkgInfo
-	err := q.OrderByDesc("pro_name").OrderBy("views").FindAll(&pkgInfos)
+	err := q.OrderBy("pro_name").OrderByDesc("views").FindAll(&pkgInfos)
 	return pkgInfos, err
 }
 
 // GetIndexPageInfo returns all data that used for index page.
 // One function is for reducing database connect times.
-func GetIndexPageInfo() (totalNum int64, popPkgs, importedPkgs []*PkgInfo, err error) {
+func GetIndexPageInfo() (totalNum int64, popPkgs, importedPkgs, WFPros, ORMPros, DBDPros []*PkgInfo, err error) {
 	// Connect to database.
 	q := connDb()
 	defer q.Db.Close()
@@ -425,5 +426,45 @@ func GetIndexPageInfo() (totalNum int64, popPkgs, importedPkgs []*PkgInfo, err e
 		beego.Error("models.GetIndexPageInfo(): popPkgs:", err)
 	}
 	err = q.Limit(20).OrderByDesc("imported_num").OrderByDesc("views").FindAll(&importedPkgs)
-	return totalNum, popPkgs, importedPkgs, nil
+
+	condition := qbs.NewCondition("tags like ?", "%$wf|%")
+	err = q.Condition(condition).OrderByDesc("views").FindAll(&WFPros)
+	condition = qbs.NewCondition("tags like ?", "%$orm|%")
+	err = q.Condition(condition).OrderByDesc("views").FindAll(&ORMPros)
+	condition = qbs.NewCondition("tags like ?", "%$dbd|%")
+	err = q.Condition(condition).OrderByDesc("views").FindAll(&DBDPros)
+	return totalNum, popPkgs, importedPkgs, WFPros, ORMPros, DBDPros, nil
+}
+
+// UpdateTagInfo updates prohect tag information, returns false if the project does not exist.
+func UpdateTagInfo(path string, tags []string, add bool) bool {
+	// Connect to database.
+	q := connDb()
+	defer q.Db.Close()
+
+	info := new(PkgInfo)
+	err := q.WhereEqual("path", path).Find(info)
+	if err != nil {
+		return false
+	}
+
+	for _, v := range tags {
+		i := strings.Index(info.Tags, "$"+v+"|")
+		switch {
+		case i == -1 && add: // Add operation and does not contain.
+			info.Tags += "$" + v + "|"
+			_, err = q.Save(info)
+			if err != nil {
+				beego.Error("models.UpdateTagInfo(): add:", path, err)
+			}
+		case i > -1 && !add: // Delete opetation and contains.
+			info.Tags = strings.Replace(info.Tags, "$"+v+"|", "", 1)
+			_, err = q.Save(info)
+			if err != nil {
+				beego.Error("models.UpdateTagInfo(): add:", path, err)
+			}
+		}
+	}
+
+	return true
 }
