@@ -17,6 +17,7 @@ package doc
 
 import (
 	"bytes"
+	"encoding/base32"
 	"errors"
 	"fmt"
 	"go/ast"
@@ -240,14 +241,13 @@ func (w *walker) build(srcs []*source) (*Package, error) {
 	for _, src := range srcs {
 		if strings.HasSuffix(src.name, ".go") {
 			w.srcs[src.name] = src
-		} else if strings.ToLower(src.name) == "readme.md" {
+		} else if strings.HasPrefix(strings.ToLower(src.name), "readme") {
 			// Readme.
 			w.pdoc.Doc = strings.Replace(string(src.data), "=", "", -1)
 			if w.pdoc.Doc[0] == '\n' {
 				w.pdoc.Doc = w.pdoc.Doc[1:]
 			}
 			w.pdoc.Doc = w.pdoc.Doc[strings.Index(w.pdoc.Doc, "\n")+1:]
-			w.pdoc.Synopsis = utils.Synopsis(w.pdoc.Doc)
 			w.pdoc.Doc = string(beego.MarkDown(w.pdoc.Doc))
 			w.pdoc.Doc = strings.Replace(w.pdoc.Doc, "h3>", "h5>", -1)
 			w.pdoc.Doc = strings.Replace(w.pdoc.Doc, "h2>", "h4>", -1)
@@ -315,16 +315,14 @@ func (w *walker) build(srcs []*source) (*Package, error) {
 
 	pdoc := doc.New(apkg, w.pdoc.ImportPath, mode)
 
-	if len(w.pdoc.Doc) == 0 {
-		w.pdoc.Doc = strings.TrimRight(pdoc.Doc, " \t\n\r")
-		w.pdoc.Synopsis = utils.Synopsis(w.pdoc.Doc)
-		var buf bytes.Buffer
-		doc.ToHTML(&buf, w.pdoc.Doc, nil)
-		w.pdoc.Doc = buf.String()
-	}
-
+	w.pdoc.Synopsis = utils.Synopsis(pdoc.Doc)
+	pdoc.Doc = strings.TrimRight(pdoc.Doc, " \t\n\r")
+	var buf bytes.Buffer
+	doc.ToHTML(&buf, pdoc.Doc, nil)
+	w.pdoc.Doc += buf.String()
 	w.pdoc.Doc = strings.Replace(w.pdoc.Doc, "<p>", "<p><b>", 1)
 	w.pdoc.Doc = strings.Replace(w.pdoc.Doc, "</p>", "</b></p>", 1)
+	w.pdoc.Doc = base32.StdEncoding.EncodeToString([]byte(w.pdoc.Doc))
 
 	//w.pdoc.Examples = w.getExamples("")
 	//w.pdoc.IsCmd = bpkg.IsCommand()

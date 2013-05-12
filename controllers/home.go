@@ -274,7 +274,8 @@ func generatePage(this *HomeController, pdoc *doc.Package, q string, lang string
 
 	// Introduction.
 	this.Data["ImportPath"] = pdoc.ImportPath
-	this.Data["PkgFullIntro"] = pdecl.Doc
+	byts, _ := base32.StdEncoding.DecodeString(pdecl.Doc)
+	this.Data["PkgFullIntro"] = string(byts)
 
 	var buf bytes.Buffer
 	// Convert data format.
