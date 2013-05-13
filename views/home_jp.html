@@ -1,0 +1,100 @@
+		<title>Go Walker</title>
+	</head>
+
+	<body>
+		<div class="container">
+			<div class="navbar" style="margin-top: 20px">
+				<div class="navbar-inner">
+					<a class="brand" href="/">Go Walker</a>
+					<ul class="nav">
+						<li class="active"><a href="/">Home</a></li>
+						<li><a href="/index">Index</a></li>
+						<li><a href="/about">About</a></li>
+					</ul>
+					<form class="navbar-search pull-right" action="/">
+						<input class="search-query" type="text" placeholder="Search" autofocus="autofocus"  name="q"></input>
+					</form>
+				</div>
+			</div>
+			<!--div class="alert">
+				<button type="button" class="close" data-dismiss="alert">&times;</button><strong>Warning!</strong> This is the <span class="label label-important">Beta</span> version of Go Walker, errors may occur at any time.
+			</div-->
+    		<div class="page-header">
+				<h2 style="margin-top: 0">Search for Go projects. <small>Find a cup of source code.</small></h2>
+				<form action="/">
+					<div class="input-append">
+						<input autocomplete="off" class="span6" type="text" placeholder="Import path or keywords" value="{{.Keyword}}" name="q" data-source="[{{str2html .DataSrc}}]" data-items="8" data-provide="typeahead"></input>
+						<button class="btn" type="submit"><i class="icon-search"></i> Go!</button>
+					</div>
+				</form>
+    		</div>
+    		<div>
+				<h4>これはなに？</h4>
+				<p>Go Walkerは<a target="_blank" href="http://golang.org/">Go</a>のプロジェクトの<b>ソースコード</b>ドキュメントを、Bitbucket, Github, Google Project Hosting や Launchpad 上にあるプロジェクトから生成します。主な特徴は、<b>コード表示</b>、<b>ジャンプ</b>等です。</p>
+				<p class="text-success">Go Walkerのプロジェクトについては<a href="/about">About Page</a>を参照してください。</p>
+			</div>
+			<div class="row">
+				<div class="span6 homeleft">
+					<h4>他の人はこんなプロジェクトを見ています</h4>
+					<table id="rectable" class="table table-bordered table-hover">
+						<thead>
+							<tr>
+								<th>Import Path</th>
+								<th>Viewd Time(Local)</th>
+							</tr>
+						</thead>
+						<tbody>
+						{{range .RecentPros}}
+							<tr>
+								<td><a title="{{.Synopsis}}" href="/{{.Path}}">{{.Path}}</a>{{if .IsGoRepo}} <span class="label label-info">Standard</span>{{end}}</td>
+								<td>{{.ViewedTime}}</td>
+							</tr>
+						{{end}}
+						</tbody>
+					</table>
+					<script>
+						(function(){
+							var node = document.getElementById("rectable");
+							var child = node.getElementsByTagName("tr");
+							var d1 = new Date();
+							for(var i=1;i<child.length;i++){
+								var t = parseInt(node.rows[i].cells[1].innerHTML);
+								var d = new Date(t * 1000);
+								node.rows[i].cells[1].innerHTML = d.toLocaleString();
+							}
+						})();
+					</script>
+				</div>
+				<div class="span6 homeright">
+					<div class="span6">
+						<h4>人気のプロジェクト</h4>
+						<ul class="unstyled">
+							{{range .PopPros}}
+							<li><span class="badge">{{.Views}}</span> <a title="{{.Synopsis}}" href="/{{.Path}}">{{.Path}}</a></li>
+							{{end}}
+						</ul>
+					</div>
+					<div class="span6">
+						<h4>プロジェクトをもっと見る</h4>
+						<ul class="unstyled">
+							<li><a href="/index">Index</a></li>
+							<li><a href="/search?q=gorepo">Standard Library</a></li>
+							<li><a target="_blank" href="https://code.google.com/p/go-wiki/wiki/Projects">Projects @ go-wiki</a></li>
+						</ul>
+					</div>
+					<div class="span6">
+						<h4>他のAPIドキュメンテーションサイト</h4>
+						<ul class="unstyled">
+							<li><a target="_blank" href="http://godoc.org/">GoDoc</a></li>
+						</ul>
+					</div>
+					<div class="span6">
+						<h4>Develop progress: 55%</h4>
+						<div style="width:60%">
+	    					<div class="progress progress-striped active">
+	    						<div class="bar" style="width: 50%;"></div>
+	    					</div>
+	    				</div>
+    				</div>
+				</div>
+			</div>
