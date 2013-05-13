@@ -428,11 +428,11 @@ func GetIndexPageInfo() (totalNum int64, popPkgs, importedPkgs, WFPros, ORMPros,
 	err = q.Limit(20).OrderByDesc("imported_num").OrderByDesc("views").FindAll(&importedPkgs)
 
 	condition := qbs.NewCondition("tags like ?", "%$wf|%")
-	err = q.Condition(condition).OrderByDesc("views").FindAll(&WFPros)
+	err = q.Limit(10).Condition(condition).OrderByDesc("views").FindAll(&WFPros)
 	condition = qbs.NewCondition("tags like ?", "%$orm|%")
-	err = q.Condition(condition).OrderByDesc("views").FindAll(&ORMPros)
+	err = q.Limit(10).Condition(condition).OrderByDesc("views").FindAll(&ORMPros)
 	condition = qbs.NewCondition("tags like ?", "%$dbd|%")
-	err = q.Condition(condition).OrderByDesc("views").FindAll(&DBDPros)
+	err = q.Limit(10).Condition(condition).OrderByDesc("views").FindAll(&DBDPros)
 	return totalNum, popPkgs, importedPkgs, WFPros, ORMPros, DBDPros, nil
 }
 
