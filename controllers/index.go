@@ -37,7 +37,9 @@ func (this *IndexController) Get() {
 	this.TplNames = "index_" + curLang.Lang + ".html"
 
 	// Get index page data.
-	this.Data["ProNum"], this.Data["PopPros"], this.Data["ImportedPros"], this.Data["WFPros"], this.Data["ORMPros"], this.Data["DBDPros"],
+	this.Data["ProNum"], this.Data["PopPros"], this.Data["ImportedPros"],
+		this.Data["WFPros"], this.Data["ORMPros"], this.Data["DBDPros"],
+		this.Data["GUIPros"], this.Data["NETPros"],
 		_ = models.GetIndexPageInfo()
 
 	// Set language properties.

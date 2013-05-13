@@ -417,7 +417,7 @@ func GetAllPkgs() ([]*PkgInfo, error) {
 
 // GetIndexPageInfo returns all data that used for index page.
 // One function is for reducing database connect times.
-func GetIndexPageInfo() (totalNum int64, popPkgs, importedPkgs, WFPros, ORMPros, DBDPros []*PkgInfo, err error) {
+func GetIndexPageInfo() (totalNum int64, popPkgs, importedPkgs, WFPros, ORMPros, DBDPros, GUIPros, NETPros []*PkgInfo, err error) {
 	// Connect to database.
 	q := connDb()
 	defer q.Db.Close()
@@ -435,7 +435,11 @@ func GetIndexPageInfo() (totalNum int64, popPkgs, importedPkgs, WFPros, ORMPros,
 	err = q.Limit(10).Condition(condition).OrderByDesc("views").FindAll(&ORMPros)
 	condition = qbs.NewCondition("tags like ?", "%$dbd|%")
 	err = q.Limit(10).Condition(condition).OrderByDesc("views").FindAll(&DBDPros)
-	return totalNum, popPkgs, importedPkgs, WFPros, ORMPros, DBDPros, nil
+	condition = qbs.NewCondition("tags like ?", "%$gui|%")
+	err = q.Limit(10).Condition(condition).OrderByDesc("views").FindAll(&GUIPros)
+	condition = qbs.NewCondition("tags like ?", "%$net|%")
+	err = q.Limit(10).Condition(condition).OrderByDesc("views").FindAll(&NETPros)
+	return totalNum, popPkgs, importedPkgs, WFPros, ORMPros, DBDPros, GUIPros, NETPros, nil
 }
 
 // UpdateTagInfo updates prohect tag information, returns false if the project does not exist.

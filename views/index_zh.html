@@ -73,4 +73,22 @@
 					</ul>
 				</div>
 			</div>
+			<div class="row">
+				<div class="span4">
+					<h4 id="GUI">图形用户界面</h4>
+					<ul class="unstyled">
+						{{range .GUIPros}}
+						<li><span class="badge">{{.Views}}</span> <a title="{{.Synopsis}}" href="/{{.Path}}">{{.Path}}</a></li>
+						{{end}}
+					</ul>
+				</div>
+				<div class="span4">
+					<h4 id="Networking">计算机网络</h4>
+					<ul class="unstyled">
+						{{range .NETPros}}
+						<li><span class="badge">{{.Views}}</span> <a title="{{.Synopsis}}" href="/{{.Path}}">{{.Path}}</a></li>
+						{{end}}
+					</ul>
+				</div>
+			</div>
 		

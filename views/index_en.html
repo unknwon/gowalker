@@ -73,3 +73,21 @@
 					</ul>
 				</div>
 			</div>
+			<div class="row">
+				<div class="span4">
+					<h4 id="GUI">Graphic User Interface</h4>
+					<ul class="unstyled">
+						{{range .GUIPros}}
+						<li><span class="badge">{{.Views}}</span> <a title="{{.Synopsis}}" href="/{{.Path}}">{{.Path}}</a></li>
+						{{end}}
+					</ul>
+				</div>
+				<div class="span4">
+					<h4 id="Networking">Networking</h4>
+					<ul class="unstyled">
+						{{range .NETPros}}
+						<li><span class="badge">{{.Views}}</span> <a title="{{.Synopsis}}" href="/{{.Path}}">{{.Path}}</a></li>
+						{{end}}
+					</ul>
+				</div>
+			</div>
