@@ -16,6 +16,7 @@ package controllers
 
 import (
 	"github.com/Unknwon/gowalker/doc"
+	"github.com/Unknwon/gowalker/models"
 	"github.com/astaxie/beego"
 )
 
@@ -50,8 +51,21 @@ func (this *RefreshController) Get() {
 	this.Data["CurLang"] = curLang.Name
 	this.Data["RestLangs"] = restLangs
 
-	_, err := doc.CheckDoc(q, doc.REFRESH_REQUEST)
+	pdoc, err := doc.CheckDoc(q, doc.REFRESH_REQUEST)
 	if err == nil {
+		pinfo := &models.PkgInfo{
+			Path:        pdoc.ImportPath,
+			Synopsis:    pdoc.Synopsis,
+			Created:     pdoc.Created,
+			ProName:     pdoc.ProjectName,
+			ViewedTime:  pdoc.ViewedTime,
+			Views:       pdoc.Views,
+			Etag:        pdoc.Etag,
+			Tags:        pdoc.Tags,
+			ImportedNum: pdoc.ImportedNum,
+			ImportPid:   pdoc.ImportPid,
+		}
+		models.SaveProject(pinfo, nil, nil, nil)
 		// Show search page
 		this.Redirect("/"+q, 302)
 		return

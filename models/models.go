@@ -209,13 +209,15 @@ func SaveProject(pinfo *PkgInfo, pdecl *PkgDecl, pdoc *PkgDoc, imports []string)
 	}
 
 	// Save package declaration
-	_, err = q.Save(pdecl)
-	if err != nil {
-		beego.Error("models.SaveProject(): Declaration:", err)
+	if pdecl != nil {
+		_, err = q.Save(pdecl)
+		if err != nil {
+			beego.Error("models.SaveProject(): Declaration:", err)
+		}
 	}
 
 	// Save package documentation
-	if len(pdoc.Doc) > 0 {
+	if pdoc != nil && len(pdoc.Doc) > 0 {
 		_, err = q.Save(pdoc)
 		if err != nil {
 			beego.Error("models.SaveProject(): Documentation:", err)
@@ -223,7 +225,7 @@ func SaveProject(pinfo *PkgInfo, pdecl *PkgDecl, pdoc *PkgDoc, imports []string)
 	}
 
 	// Don't need to check standard library.
-	if !utils.IsGoRepoPath(pinfo.Path) {
+	if imports != nil && !utils.IsGoRepoPath(pinfo.Path) {
 		// Update import information.
 		for _, v := range imports {
 			if !utils.IsGoRepoPath(v) {
