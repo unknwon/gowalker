@@ -104,8 +104,13 @@ func checkSpecialUsage(this *SearchController, q string) bool {
 	case strings.Index(q, ":tag=") > -1: // Add tag(s) to the project.
 		// Get tag(s).
 		i := strings.Index(q, ":tag=")
-		inputs := strings.Split(q[i+5:], ":")
+		if utils.IsGoRepoPath(q[:i]) {
+			this.Redirect("/"+q[:i], 302)
+			return true
+		}
+
 		// Verify tags.
+		inputs := strings.Split(q[i+5:], ":")
 		tags := verifyTags(inputs)
 
 		if len(tags) > 0 && models.UpdateTagInfo(q[:i], tags, true) {
@@ -115,8 +120,13 @@ func checkSpecialUsage(this *SearchController, q string) bool {
 	case strings.Index(q, ":rtag=") > -1: // Remove tag(s) to the project.
 		// Get tag(s).
 		i := strings.Index(q, ":rtag=")
-		inputs := strings.Split(q[i+6:], ":")
+		if utils.IsGoRepoPath(q[:i]) {
+			this.Redirect("/"+q[:i], 302)
+			return true
+		}
+
 		// Verify tags.
+		inputs := strings.Split(q[i+6:], ":")
 		tags := verifyTags(inputs)
 
 		if len(tags) > 0 && models.UpdateTagInfo(q[:i], tags, false) {
