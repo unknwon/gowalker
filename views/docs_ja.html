@@ -7,9 +7,9 @@
 				<div class="navbar-inner">
 					<a class="brand" href="/">Go Walker</a>
 					<ul class="nav">
-						<li><a href="/">Home</a></li>
-						<li><a href="/index">Index</a></li>
-						<li><a href="/about">About</a></li>
+						<li><a href="/">ホーム</a></li>
+						<li><a href="/index">索引の</a></li>
+						<li><a href="/about">助け</a></li>
 					</ul>
 					<form class="navbar-search pull-right" action="/">
 						<input class="search-query" type="text" placeholder="Search" autofocus="autofocus"  name="q"></input>
@@ -18,23 +18,23 @@
 			</div>
 			{{if .IsRefresh}}
 			<div class="alert alert-success">
-				<button type="button" class="close" data-dismiss="alert">&times;</button><strong>  Congratulations!</strong> このプロジェクトのドキュメントは<i>{{.UtcTime}}</i>に更新されました。
+				<button type="button" class="close" data-dismiss="alert">&times;</button><strong>  Congratulations!</strong> このプロジェクトのドキュメントは <i>{{.UtcTime}}</i> に更新されました。
 			</div>
 			{{end}}
 			{{if .IsGoRepo}}
 			<div class="alert alert-info">
-				<button type="button" class="close" data-dismiss="alert">&times;</button><strong>Information!</strong> AstaXieさんは<strong>Go Standard Library</strong>の<span class="label label-info">examples</span>を提供しています。<a target="_blank" href="https://github.com/astaxie/gopkg/tree/master/{{.ImportPath}}" class="label label-success">gopkg</a>を見逃さないように！
+				<button type="button" class="close" data-dismiss="alert">&times;</button><strong>Information!</strong> AstaXieさんは <strong>Go Standard Library</strong> の <span class="label label-info">examples</span> を提供しています。<a target="_blank" href="https://github.com/astaxie/gopkg/tree/master/{{.ImportPath}}" class="label label-success">gopkg</a> を見逃さないように！
 			</div>
 			{{end}}
 			<div class="flat-well well-small" style="background-color: #f5f5f5">
 				<a title="See this project on {{.VCS}}" target="_blank" href="http://{{.ProPath}}" class="label label-info">{{.VCS}}</a> <a target="_blank" href="http://{{.ProPath}}"><strong>{{.ProName}}:</strong></a> <a href="/{{.ProDocPath}}">{{.ProDocPath}}</a><span class="muted">/{{.ProName}}</span>
-				<span class="pull-right"><span >このページは<b>{{.Views}}</b>人見ました</span><span class="muted"> | </span><a href="#_index">Index</a><span class="muted"> | </span><a href="#_files">Files</a>{{if .IsHasSubdirs}}<span class="muted"> | </span><a href="#_subdirs">Directories</a></span>{{end}}
+				<span class="pull-right"><span >このページは<b>{{.Views}}</b>人見ました</span><span class="muted"> | </span><a href="#_index">索引の</a><span class="muted"> | </span><a href="#_files">文書</a>{{if .IsHasSubdirs}}<span class="muted"> | </span><a href="#_subdirs">ディレクトリ</a></span>{{end}}
 			</div>
 			<h2>package {{.ProName}} 
 			{{range .Tags}}<a target="_blank" href="/index#{{.}}" class="label label-inverse">{{.}}</a> {{end}}</h2>
 			<p><code>import "{{.ImportPath}}"</code></p>
 			{{str2html .PkgFullIntro}}
-			<h3 id="_index">Index</h3>
+			<h3 id="_index">索引の</h3>
 			<ul class="unstyled">
 			{{if .IsHasConst}}<li><a href="#_constants">Constants</a></li>{{end}}
 			{{if .IsHasVar}}<li><a href="#_variables">Variables</a></li>{{end}}
@@ -99,7 +99,7 @@
 		   			</div>
 				{{end}}
 			{{end}}
-			<h3 id="_files"><a target="_blank" href="http://{{.ProPath}}">Files</a></h3>
+			<h3 id="_files"><a target="_blank" href="http://{{.ProPath}}">文書</a></h3>
 			<p>
 			{{$proPath := .ProPath}}
 			{{range .Files}}
@@ -107,7 +107,7 @@
 			{{end}}
 			</p>
 			{{if .IsHasSubdirs}}
-				<h3 id="_subdirs"><a target="_blank" href="http://{{.ProPath}}">Directories</a></h3>
+				<h3 id="_subdirs"><a target="_blank" href="http://{{.ProPath}}">ディレクトリ</a></h3>
 				<table class="table table-hover table-striped table-condensed">
 					<thead>
 						<tr>
@@ -127,5 +127,5 @@
 				</table>
 			{{end}}
 			<p>
-			<b>{{.ProName}}</b>パッケージは、<a href="/search?q=imports&pkgs={{.ImportPkgs}}">{{.ImportPkgNum}} パッケージ</a>をimportして{{if .IsImported}}、<a href="/search?q=imported&pkgs={{.ImportPid}}">{{.ImportedNum}} パッケージ</a>からimportされて{{end}}います。Go Walkerはこのページを<i>{{.UtcTime}}</i>に{{.GOOS}}-{{.GOARCH}}で生成しました。 <a href="/refresh?q={{.ImportPath}}">Refresh</a>.
+			<b>{{.ProName}}</b> パッケージは、<a href="/search?q=imports&pkgs={{.ImportPkgs}}">{{.ImportPkgNum}} パッケージ</a>を import して{{if .IsImported}}、<a href="/search?q=imported&pkgs={{.ImportPid}}">{{.ImportedNum}} パッケージ</a> から import されて{{end}}います。Go Walker はこのページを <i>{{.UtcTime}}</i> に{{.GOOS}}-{{.GOARCH}}で生成しました。 <a href="/refresh?q={{.ImportPath}}">Refresh</a>.
 			</p>

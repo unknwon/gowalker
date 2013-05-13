@@ -21,5 +21,8 @@ Go Walker is a server that generates <a target="_blank" href="http://golang.org/
 ##Multi-language documentation
 Coming soon!
 
+#Acknowledge
+- [atotto](https://github.com/atotto) Thanks for translating site user interface to Japanese.
+
 ##License
 [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.html), some part of code in this project is from [gopkgdoc](https://github.com/garyburd/gopkgdoc),see [File Change Log](FileChangeLog.md) for deatil.
