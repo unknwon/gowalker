@@ -14,8 +14,8 @@ Go Walker is a server that generates <a target="_blank" href="http://golang.org/
 - **Multi-language** documentation support( **coming soon!** ).
 
 ##Third-party packages
-- [Beego](https://github.com/astaxie/beego): a **lightweight** web framework for web application **quick** development.
-- [Qbs](https://github.com/coocood/qbs): **Query by Struct** is an excellent ORM, it supports MySQL, SQLite3 and PosgreSQL.
+- [Beego](https://gowalker.org/github.com/astaxie/beego): a **lightweight** web framework for web application **quick** development.
+- [Qbs](https://gowalker.org/github.com/coocood/qbs): **Query by Struct** is an excellent ORM, it supports MySQL, SQLite3 and PosgreSQL.
 - [go-sqlite3](http://gowalker.org/github.com/mattn/go-sqlite3): SQLite3 database driver for Go; it **implemented `database/sql` interface** which is a very big deal for code migration; it requires cgo.
 
 ##Multi-language documentation

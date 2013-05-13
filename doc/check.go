@@ -104,8 +104,8 @@ func CheckDoc(path string, requestType int) (*Package, error) {
 					beego.Error("Serving", path, "with error:", err)
 				}
 				err = nil
-				pinfo.Created = time.Now().UTC()
 				pdoc = &Package{}
+				pinfo.Created = time.Now().UTC()
 				assginPkgInfo(pdoc, pinfo)
 				return pdoc, nil
 			case err == errUpdateTimeout:

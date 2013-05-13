@@ -13,8 +13,8 @@ Go 步行者是一个用于在线生成并浏览 <a target="_blank" href="http:/
 - **多语言** 文档支持（ **即将上线** ）。
 
 ##第三方包
-- [Beego](https://github.com/astaxie/beego)：轻量级 Web 框架，适用于 Web 应用快速开发。
-- [Qbs](https://github.com/coocood/qbs)： **结构化查询（Query by Struct）** 是一个非常给力的 ORM，目前支持 MySQL、SQLite3 和 PosgreSQL.
+- [Beego](https://gowalker.org/github.com/astaxie/beego)：轻量级 Web 框架，适用于 Web 应用快速开发。
+- [Qbs](https://gowalker.org/github.com/coocood/qbs)： **结构化查询（Query by Struct）** 是一个非常给力的 ORM，目前支持 MySQL、SQLite3 和 PosgreSQL.
 - [go-sqlite3](http://gowalker.org/github.com/mattn/go-sqlite3)：可用于 Go 开发的 SQLite3 数据库驱动；该驱动实现了 **`database/sql`** 接口，这对于代码迁移非常有利；该驱动采用 cgo 编写。
 
 ##多语言文档

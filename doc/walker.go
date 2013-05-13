@@ -251,6 +251,8 @@ func (w *walker) build(srcs []*source) (*Package, error) {
 			w.pdoc.Doc = string(beego.MarkDown(w.pdoc.Doc))
 			w.pdoc.Doc = strings.Replace(w.pdoc.Doc, "h3>", "h5>", -1)
 			w.pdoc.Doc = strings.Replace(w.pdoc.Doc, "h2>", "h4>", -1)
+			w.pdoc.Doc = strings.Replace(w.pdoc.Doc, "<center>", "", -1)
+			w.pdoc.Doc = strings.Replace(w.pdoc.Doc, "</center>", "", -1)
 		}
 	}
 
@@ -273,8 +275,14 @@ func (w *walker) build(srcs []*source) (*Package, error) {
 
 	bpkg, err := ctxt.ImportDir(w.pdoc.ImportPath, 0)
 	// Continue if there are no Go source files; we still want the directory info.
-	if _, nogo := err.(*build.NoGoError); err != nil && !nogo {
-		return w.pdoc, errors.New("doc.walker.build(): " + err.Error())
+	_, nogo := err.(*build.NoGoError)
+	if err != nil {
+		if nogo {
+			err = nil
+			beego.Info("doc.walker.build(): No Go Source file.")
+		} else {
+			return w.pdoc, errors.New("doc.walker.build(): " + err.Error())
+		}
 	}
 
 	// Parse the Go files
