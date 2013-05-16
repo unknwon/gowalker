@@ -36,6 +36,7 @@ import (
 
 	"github.com/Unknwon/gowalker/utils"
 	"github.com/astaxie/beego"
+	"github.com/russross/blackfriday"
 )
 
 type sliceWriter struct{ p *[]byte }
@@ -248,11 +249,13 @@ func (w *walker) build(srcs []*source) (*Package, error) {
 				w.pdoc.Doc = w.pdoc.Doc[1:]
 			}
 			w.pdoc.Doc = w.pdoc.Doc[strings.Index(w.pdoc.Doc, "\n")+1:]
-			w.pdoc.Doc = string(beego.MarkDown(w.pdoc.Doc))
+			w.pdoc.Doc = string(blackfriday.MarkdownCommon([]byte(w.pdoc.Doc)))
 			w.pdoc.Doc = strings.Replace(w.pdoc.Doc, "h3>", "h5>", -1)
 			w.pdoc.Doc = strings.Replace(w.pdoc.Doc, "h2>", "h4>", -1)
+			w.pdoc.Doc = strings.Replace(w.pdoc.Doc, "h1>", "h3>", -1)
 			w.pdoc.Doc = strings.Replace(w.pdoc.Doc, "<center>", "", -1)
 			w.pdoc.Doc = strings.Replace(w.pdoc.Doc, "</center>", "", -1)
+			w.pdoc.Doc = "<div style='display:block; padding: 3px; border:1px solid #4F4F4F;'>" + w.pdoc.Doc + "</div>"
 		}
 	}
 
@@ -327,7 +330,7 @@ func (w *walker) build(srcs []*source) (*Package, error) {
 	pdoc.Doc = strings.TrimRight(pdoc.Doc, " \t\n\r")
 	var buf bytes.Buffer
 	doc.ToHTML(&buf, pdoc.Doc, nil)
-	w.pdoc.Doc += buf.String()
+	w.pdoc.Doc = w.pdoc.Doc + "<br />" + buf.String()
 	w.pdoc.Doc = strings.Replace(w.pdoc.Doc, "<p>", "<p><b>", 1)
 	w.pdoc.Doc = strings.Replace(w.pdoc.Doc, "</p>", "</b></p>", 1)
 	w.pdoc.Doc = base32.StdEncoding.EncodeToString([]byte(w.pdoc.Doc))

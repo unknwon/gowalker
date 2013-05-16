@@ -496,7 +496,7 @@ func ConvertDataFormat(pdoc *doc.Package, pdecl *models.PkgDecl) error {
 			case 1: // Doc
 				val.Doc = s
 			case 2: // Decl
-				val.Decl = s
+				val.Decl = template.HTMLEscapeString(s)
 			case 3: // URL
 				val.URL = s
 			}
