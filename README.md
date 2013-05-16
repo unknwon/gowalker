@@ -19,7 +19,7 @@ Go Walker is a server that generates <a target="_blank" href="http://golang.org/
 - [Qbs](https://gowalker.org/github.com/coocood/qbs): **Query by Struct** is an excellent ORM, it supports MySQL, SQLite3 and PosgreSQL.
 - [go-sqlite3](http://gowalker.org/github.com/mattn/go-sqlite3): SQLite3 database driver for Go; it **implemented `database/sql` interface** which is a very big deal for code migration; it requires cgo.
 
-# Acknowledge
+## Acknowledge
 
 - [atotto](https://github.com/atotto) Thanks for translating site user interface to Japanese.
 
