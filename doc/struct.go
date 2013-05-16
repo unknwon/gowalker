@@ -51,7 +51,7 @@ type Type struct {
 }
 
 // PACKAGE_VER is modified when previously stored packages are invalid.
-const PACKAGE_VER = "3"
+const PACKAGE_VER = "4"
 
 // Package represents full information and documentation for a package.
 type Package struct {
