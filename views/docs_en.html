@@ -54,8 +54,8 @@
 					function update(){
 						var form = document.getElementById("search_form")
 						var input = document.getElementById("search_export_box")
-						form.action = "#" + input.value.replace(".", "_");
-						form.submit();
+						location = "#" + input.value.replace(".", "_");
+						return false
 					}
 				</script>
 			</div>
