@@ -57,6 +57,11 @@
 				};     
 				$(window).bind("scroll", $backToTopFun);     
 				$(function() { $backToTopFun(); }); 
+
+				if (document.body.clientWidth > 1100)
+				{
+					document.getElementById("navbar").className=""
+				}
 			})();
 		</script>
 		<script>
