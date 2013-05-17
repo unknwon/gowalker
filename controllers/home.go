@@ -300,6 +300,7 @@ func generatePage(this *HomeController, pdoc *doc.Package, q string, lang string
 			Name:    t.Name,
 			Comment: template.HTMLEscapeString(t.Doc),
 		})
+		buf.WriteString("&quot;" + t.Name + "&quot;,")
 	}
 
 	for _, f := range pdoc.Funcs {
@@ -307,6 +308,7 @@ func generatePage(this *HomeController, pdoc *doc.Package, q string, lang string
 			Name:    f.Name,
 			Comment: template.HTMLEscapeString(f.Doc),
 		})
+		buf.WriteString("&quot;" + f.Name + "&quot;,")
 	}
 
 	for _, t := range pdoc.Types {
@@ -315,6 +317,11 @@ func generatePage(this *HomeController, pdoc *doc.Package, q string, lang string
 				Name:    f.Name,
 				Comment: template.HTMLEscapeString(f.Doc),
 			})
+			buf.WriteString("&quot;" + f.Name + "&quot;,")
+		}
+
+		for _, m := range t.Methods {
+			buf.WriteString("&quot;" + t.Name + "." + m.Name + "&quot;,")
 		}
 	}
 
@@ -324,6 +331,11 @@ func generatePage(this *HomeController, pdoc *doc.Package, q string, lang string
 			Path: v,
 		})
 	}
+
+	exportDataSrc := buf.String()
+	exportDataSrc = exportDataSrc[:len(exportDataSrc)-1]
+	// Set export keyword type-ahead.
+	this.Data["ExportDataSrc"] = exportDataSrc
 
 	// Index.
 	this.Data["IsHasConst"] = len(pdoc.Consts) > 0

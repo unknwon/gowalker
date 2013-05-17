@@ -26,6 +26,39 @@
 				<button type="button" class="close" data-dismiss="alert">&times;</button><strong>友情提示：</strong> Asta谢 在 github 上发起了 <strong>Go </strong> 标准库函数 <span class="label label-info">示例</span> 项目，每个函数都有相应操作示例，您绝对不容错过！点击这里访问：<a target="_blank" href="https://github.com/astaxie/gopkg/tree/master/{{.ImportPath}}" class="label label-success">gopkg</a>.
 			</div>
 			{{end}}
+			<div>
+				<ul class="nav nav-list bs-docs-sidenav affix" style="left: 170px; top: 65px;">
+					<li><a href="#"><i class="icon-chevron-right"></i>顶部</a></li>
+					<li><a href="#_index"><i class="icon-chevron-right"></i>索引</a></li>
+					<li><a href="#_files"><i class="icon-chevron-right"></i>文件</a></li>
+					{{if .IsHasSubdirs}}<li><a href="#_subdirs"><i class="icon-chevron-right"></i>目录</a></li>{{end}}
+					<li><a href="#_bottom"><i class="icon-chevron-right"></i>底部</a></li>
+					<li><a href="#search_exports" data-toggle="modal"><i class="icon-chevron-right"></i>搜索导出对象</a></li>
+				</ul>
+			</div>
+			<div id="search_exports" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+				<form id="search_form" class="modal-form">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+						<h3 id="myModalLabel" style="margin: 10px">搜索导出对象</h3>
+					</div>
+					<div class="modal-body" style="overflow-y: visible;">
+						<input id="search_export_box" autocomplete="off" class="span5" type="text" placeholder="输入类型或函数名"  data-source="[{{str2html .ExportDataSrc}}]" data-provide="typeahead"></input>
+					</div>
+					<div class="modal-footer">
+						<button class="btn" data-dismiss="modal" aria-hidden="true">关闭</button>
+						<button class="btn btn-primary" data-dismiss="modal" type="submit" onclick="update()">跳转</button>
+					</div>
+				</form>
+				<script type="text/javascript">
+					function update(){
+						var form = document.getElementById("search_form")
+						var input = document.getElementById("search_export_box")
+						form.action = "#" + input.value.replace(".", "_");
+						form.submit();
+					}
+				</script>
+			</div>
 			<div class="flat-well well-small" style="background-color: #f5f5f5">
 				<a title="到 {{.VCS}} 上查看该项目" target="_blank" href="http://{{.ProPath}}" class="label label-info">{{.VCS}}</a> <a target="_blank" href="http://{{.ProPath}}"><strong>{{.ProName}}:</strong></a> <a href="/{{.ProDocPath}}">{{.ProDocPath}}</a><span class="muted">/{{.ProName}}</span>
 				<span class="pull-right"><span >您是本页面的第 <b>{{.Views}}</b> 位访问者。</span><span class="muted"> | </span><a href="#_index">索引</a><span class="muted"> | </span><a href="#_files">文件</a>{{if .IsHasSubdirs}}<span class="muted"> | </span><a href="#_subdirs">目录</a></span>{{end}}

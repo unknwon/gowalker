@@ -26,6 +26,39 @@
 				<button type="button" class="close" data-dismiss="alert">&times;</button><strong>Information!</strong> AstaXie launched an open source program that provides <span class="label label-info">examples</span> for every function of <strong>Go Standard Library</strong>, you shouldn't miss this great project: <a target="_blank" href="https://github.com/astaxie/gopkg/tree/master/{{.ImportPath}}" class="label label-success">gopkg</a>.
 			</div>
 			{{end}}
+			<div>
+				<ul class="nav nav-list bs-docs-sidenav affix" style="left: 170px; top: 65px;">
+					<li><a href="#"><i class="icon-chevron-right"></i>Top</a></li>
+					<li><a href="#_index"><i class="icon-chevron-right"></i>Index</a></li>
+					<li><a href="#_files"><i class="icon-chevron-right"></i>Files</a></li>
+					{{if .IsHasSubdirs}}<li><a href="#_subdirs"><i class="icon-chevron-right"></i>Directories</a></li>{{end}}
+					<li><a href="#_bottom"><i class="icon-chevron-right"></i>Bottom</a></li>
+					<li><a href="#search_exports" data-toggle="modal"><i class="icon-chevron-right"></i>Search Exports</a></li>
+				</ul>
+			</div>
+			<div id="search_exports" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+				<form id="search_form" class="modal-form">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+						<h3 id="myModalLabel" style="margin: 10px">Search and Go to Exports.</h3>
+					</div>
+					<div class="modal-body" style="overflow-y: visible;">
+						<input id="search_export_box" autocomplete="off" class="span5" type="text" placeholder="type or function name"  data-source="[{{str2html .ExportDataSrc}}]" data-provide="typeahead"></input>
+					</div>
+					<div class="modal-footer">
+						<button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+						<button class="btn btn-primary" data-dismiss="modal" type="submit" onclick="update()">Go!</button>
+					</div>
+				</form>
+				<script type="text/javascript">
+					function update(){
+						var form = document.getElementById("search_form")
+						var input = document.getElementById("search_export_box")
+						form.action = "#" + input.value.replace(".", "_");
+						form.submit();
+					}
+				</script>
+			</div>
 			<div class="flat-well well-small" style="background-color: #f5f5f5">
 				<a title="See this project on {{.VCS}}" target="_blank" href="http://{{.ProPath}}" class="label label-info">{{.VCS}}</a> <a target="_blank" href="http://{{.ProPath}}"><strong>{{.ProName}}:</strong></a> <a href="/{{.ProDocPath}}">{{.ProDocPath}}</a><span class="muted">/{{.ProName}}</span>
 				<span class="pull-right"><span >You are No.<b>{{.Views}}</b> visitor of this page.</span><span class="muted"> | </span><a href="#_index">Index</a><span class="muted"> | </span><a href="#_files">Files</a>{{if .IsHasSubdirs}}<span class="muted"> | </span><a href="#_subdirs">Directories</a></span>{{end}}
