@@ -233,7 +233,7 @@ func (w *walker) types(tdocs []*doc.Type) []*Type {
 	return notes
 }*/
 
-var mdPicPattern = regexp.MustCompile(`^!\[+([a-zA-Z ]*)+\]\(+[a-zA-z]+://[^\s]*`)
+var buildPicPattern = regexp.MustCompile(`\[+!+\[+([a-zA-Z ]*)+\]+\(+[a-zA-z]+://[^\s]*`)
 
 // build generates data from source files.
 func (w *walker) build(srcs []*source) (*Package, error) {
@@ -252,6 +252,14 @@ func (w *walker) build(srcs []*source) (*Package, error) {
 				w.pdoc.Doc = w.pdoc.Doc[1:]
 			}
 			w.pdoc.Doc = w.pdoc.Doc[strings.Index(w.pdoc.Doc, "\n")+1:]
+			// Find all picture path of build system.
+			for _, m := range buildPicPattern.FindAllString(w.pdoc.Doc, -1) {
+				start := strings.Index(m, "http")
+				end := strings.Index(m, ")")
+				picPath := m[start:end]
+				w.pdoc.Doc = strings.Replace(w.pdoc.Doc, m, "![]("+picPath+")", 1)
+				fmt.Println(picPath)
+			}
 			w.pdoc.Doc = string(blackfriday.MarkdownCommon([]byte(w.pdoc.Doc)))
 			w.pdoc.Doc = strings.Replace(w.pdoc.Doc, "h3>", "h5>", -1)
 			w.pdoc.Doc = strings.Replace(w.pdoc.Doc, "h2>", "h4>", -1)
