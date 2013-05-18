@@ -333,9 +333,12 @@ func generatePage(this *HomeController, pdoc *doc.Package, q string, lang string
 	}
 
 	exportDataSrc := buf.String()
-	exportDataSrc = exportDataSrc[:len(exportDataSrc)-1]
-	// Set export keyword type-ahead.
-	this.Data["ExportDataSrc"] = exportDataSrc
+	if len(exportDataSrc) > 0 {
+		this.Data["HasExports"] = true
+		exportDataSrc = exportDataSrc[:len(exportDataSrc)-1]
+		// Set export keyword type-ahead.
+		this.Data["ExportDataSrc"] = exportDataSrc
+	}
 
 	// Index.
 	this.Data["IsHasConst"] = len(pdoc.Consts) > 0

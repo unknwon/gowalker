@@ -33,10 +33,10 @@
 					<li><a href="#_files"><i class="icon-chevron-right"></i>文件</a></li>
 					{{if .IsHasSubdirs}}<li><a href="#_subdirs"><i class="icon-chevron-right"></i>目录</a></li>{{end}}
 					<li><a href="#_bottom"><i class="icon-chevron-right"></i>底部</a></li>
-					<li><a href="#search_exports" data-toggle="modal"><i class="icon-chevron-right"></i>搜索导出对象</a></li>
+					{{if .HasExports}}<li><a href="#search_exports" data-toggle="modal"><i class="icon-chevron-right"></i>搜索导出对象</a></li>{{end}}
 				</ul>
 			</div>
-			<div id="search_exports" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+			{{if .HasExports}}<div id="search_exports" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
 				<form id="search_form" class="modal-form">
 					<div class="modal-header">
 						<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
@@ -58,7 +58,7 @@
 						return false
 					}
 				</script>
-			</div>
+			</div>{{end}}
 			<div class="flat-well well-small" style="background-color: #f5f5f5">
 				<a title="到 {{.VCS}} 上查看该项目" target="_blank" href="http://{{.ProPath}}" class="label label-info">{{.VCS}}</a> <a target="_blank" href="http://{{.ProPath}}"><strong>{{.ProName}}:</strong></a> <a href="/{{.ProDocPath}}">{{.ProDocPath}}</a><span class="muted">/{{.ProName}}</span>
 				<span class="pull-right"><span >您是本页面的第 <b>{{.Views}}</b> 位访问者。</span><span class="muted"> | </span><a href="#_index">索引</a><span class="muted"> | </span><a href="#_files">文件</a>{{if .IsHasSubdirs}}<span class="muted"> | </span><a href="#_subdirs">目录</a></span>{{end}}
