@@ -30,6 +30,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
+	"regexp"
 	"runtime"
 	"strings"
 	"time"
@@ -231,6 +232,8 @@ func (w *walker) types(tdocs []*doc.Type) []*Type {
 	}
 	return notes
 }*/
+
+var mdPicPattern = regexp.MustCompile(`^!\[+([a-zA-Z ]*)+\]\(+[a-zA-z]+://[^\s]*`)
 
 // build generates data from source files.
 func (w *walker) build(srcs []*source) (*Package, error) {
