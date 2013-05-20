@@ -580,8 +580,10 @@ var validTLD = map[string]bool{
 	".zw":                     true,
 }
 
-var validHost = regexp.MustCompile(`^[-a-z0-9]+(?:\.[-a-z0-9]+)+$`)
-var validPathElement = regexp.MustCompile(`^[-A-Za-z0-9~+][-A-Za-z0-9_.]*$`)
+var (
+	validHost        = regexp.MustCompile(`^[-a-z0-9]+(?:\.[-a-z0-9]+)+$`)
+	validPathElement = regexp.MustCompile(`^[-A-Za-z0-9~+][-A-Za-z0-9_.]*$`)
+)
 
 // IsValidRemotePath returns true if importPath is structurally valid for "go get".
 func IsValidRemotePath(importPath string) bool {

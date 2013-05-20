@@ -68,7 +68,10 @@ func getStandardDoc(client *http.Client, importPath string, savedEtag string) (p
 	// Get subdirectories.
 	for _, m := range googleDirRe.FindAllSubmatch(p, -1) {
 		dirName := strings.Split(string(m[1]), "?")[0]
-		dirs = append(dirs, strings.Replace(dirName, "/", "", -1))
+		// Make sure we get directories.
+		if strings.HasSuffix(dirName, "/") {
+			dirs = append(dirs, strings.Replace(dirName, "/", "", -1))
+		}
 	}
 
 	if len(files) == 0 && len(dirs) == 0 {
