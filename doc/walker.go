@@ -256,8 +256,10 @@ func (w *walker) build(srcs []*source) (*Package, error) {
 			for _, m := range buildPicPattern.FindAllString(w.pdoc.Doc, -1) {
 				start := strings.Index(m, "http")
 				end := strings.Index(m, ")")
-				picPath := m[start:end]
-				w.pdoc.Doc = strings.Replace(w.pdoc.Doc, m, "![]("+picPath+")", 1)
+				if start > -1 && end > -1 {
+					picPath := m[start:end]
+					w.pdoc.Doc = strings.Replace(w.pdoc.Doc, m, "![]("+picPath+")", 1)
+				}
 			}
 			w.pdoc.Doc = string(blackfriday.MarkdownCommon([]byte(w.pdoc.Doc)))
 			w.pdoc.Doc = strings.Replace(w.pdoc.Doc, "h3>", "h5>", -1)
