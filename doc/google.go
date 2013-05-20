@@ -142,7 +142,9 @@ func getGoogleDoc(client *http.Client, match map[string]string, savedEtag string
 	// Get subdirectories.
 	for _, m := range googleDirRe.FindAllSubmatch(p, -1) {
 		dirName := strings.Split(string(m[1]), "?")[0]
-		dirs = append(dirs, strings.Replace(dirName, "/", "", -1))
+		if strings.HasSuffix(dirName, "/") {
+			dirs = append(dirs, strings.Replace(dirName, "/", "", -1))
+		}
 	}
 
 	// Fetch file from VCS.
