@@ -214,25 +214,6 @@ func (w *walker) types(tdocs []*doc.Type) []*Type {
 	return result
 }
 
-/*func (w *walker) notes(gnotes map[string][]*doc.Note) map[string][]*Note {
-	if len(gnotes) == 0 {
-		return nil
-	}
-	notes := make(map[string][]*Note)
-	for tag, gvalues := range gnotes {
-		values := make([]*Note, len(gvalues))
-		for i := range gvalues {
-			values[i] = &Note{
-				URL:  w.printPos(gvalues[i].Pos),
-				UID:  gvalues[i].UID,
-				Body: strings.TrimSpace(gvalues[i].Body),
-			}
-		}
-		notes[tag] = values
-	}
-	return notes
-}*/
-
 var buildPicPattern = regexp.MustCompile(`\[+!+\[+([a-zA-Z ]*)+\]+\(+[a-zA-z]+://[^\s]*`)
 
 // build generates data from source files.
@@ -256,7 +237,7 @@ func (w *walker) build(srcs []*source) (*Package, error) {
 			for _, m := range buildPicPattern.FindAllString(w.pdoc.Doc, -1) {
 				start := strings.Index(m, "http")
 				end := strings.Index(m, ")")
-				if start > -1 && end > -1 {
+				if (start > -1) && (end > -1) && (start < end) {
 					picPath := m[start:end]
 					w.pdoc.Doc = strings.Replace(w.pdoc.Doc, m, "![]("+picPath+")", 1)
 				}
