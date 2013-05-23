@@ -79,11 +79,12 @@ type PkgDoc struct {
 }
 
 func connDb() *qbs.Qbs {
-	// 'sql.Open' only returns error when unknown driver, so it's not necessary to check in other places.
-	db, err := sql.Open(_SQLITE3_DRIVER, DB_NAME)
-	if err != nil {
-		beego.Error("models.connDb():", err)
+	db := qbs.GetFreeDB()
+	if db == nil {
+		// 'sql.Open' only returns error when unknown driver, so it's not necessary to check in other places.
+		db, _ = sql.Open(_SQLITE3_DRIVER, DB_NAME)
 	}
+
 	q := qbs.New(db, qbs.NewSqlite3())
 	return q
 }
@@ -392,7 +393,7 @@ func GetGoRepo() ([]*PkgInfo, error) {
 	return pkgInfos, err
 }
 
-// SearchDoc returns packages information that contain keyword
+// SearchDoc returns packages that import path contains keyword.
 func SearchDoc(key string) ([]*PkgInfo, error) {
 	// Connect to database.
 	q := connDb()
@@ -400,6 +401,19 @@ func SearchDoc(key string) ([]*PkgInfo, error) {
 
 	var pkgInfos []*PkgInfo
 	condition := qbs.NewCondition("path like ?", "%"+key+"%")
+	err := q.Condition(condition).OrderBy("path").FindAll(&pkgInfos)
+	return pkgInfos, err
+}
+
+// SearchRawDoc returns results for raw page,
+// which are package that import path and synopsis contains keyword.
+func SearchRawDoc(key string) ([]*PkgInfo, error) {
+	// Connect to database.
+	q := connDb()
+	defer q.Db.Close()
+
+	var pkgInfos []*PkgInfo
+	condition := qbs.NewCondition("path like ?", "%"+key+"%").Or("synopsis like ?", "%"+key+"%")
 	err := q.Condition(condition).OrderBy("path").FindAll(&pkgInfos)
 	return pkgInfos, err
 }

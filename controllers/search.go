@@ -15,6 +15,7 @@
 package controllers
 
 import (
+	"bytes"
 	"strings"
 
 	"github.com/Unknwon/gowalker/models"
@@ -64,8 +65,20 @@ func (this *SearchController) Get() {
 		q = path
 	}
 
+	// Check if print raw page.
+	if this.Input().Get("raw") == "true" {
+		pkgInfos, _ := models.SearchRawDoc(q)
+		var buf bytes.Buffer
+		for _, p := range pkgInfos {
+			buf.WriteString(p.Path + "$" + p.Synopsis + "|||")
+		}
+		this.Ctx.WriteString(buf.String())
+		return
+	}
+
 	// Returns a slice of results.
 	pkgInfos, _ := models.SearchDoc(q)
+
 	// Show results after searched.
 	if len(pkgInfos) > 0 {
 		this.Data["IsFindPro"] = true
