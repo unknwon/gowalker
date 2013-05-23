@@ -229,7 +229,7 @@ func (w *walker) build(srcs []*source) (*Package, error) {
 		} else if strings.HasPrefix(strings.ToLower(src.name), "readme") {
 			// Readme.
 			w.pdoc.Doc = strings.Replace(string(src.data), "=", "", -1)
-			if w.pdoc.Doc[0] == '\n' {
+			if len(w.pdoc.Doc) > 0 && w.pdoc.Doc[0] == '\n' {
 				w.pdoc.Doc = w.pdoc.Doc[1:]
 			}
 			w.pdoc.Doc = w.pdoc.Doc[strings.Index(w.pdoc.Doc, "\n")+1:]
