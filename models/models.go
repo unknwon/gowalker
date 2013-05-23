@@ -413,8 +413,9 @@ func SearchRawDoc(key string) ([]*PkgInfo, error) {
 	defer q.Db.Close()
 
 	var pkgInfos []*PkgInfo
-	condition := qbs.NewCondition("path like ?", "%"+key+"%").Or("synopsis like ?", "%"+key+"%")
-	err := q.Condition(condition).OrderBy("path").FindAll(&pkgInfos)
+	condition := qbs.NewCondition("pro_name != ?", "Go")
+	condition2 := qbs.NewCondition("path like ?", "%"+key+"%").Or("synopsis like ?", "%"+key+"%")
+	err := q.Condition(condition).Condition(condition2).Limit(50).OrderBy("path").FindAll(&pkgInfos)
 	return pkgInfos, err
 }
 
