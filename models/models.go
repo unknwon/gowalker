@@ -407,15 +407,21 @@ func SearchDoc(key string) ([]*PkgInfo, error) {
 
 // SearchRawDoc returns results for raw page,
 // which are package that import path and synopsis contains keyword.
-func SearchRawDoc(key string) ([]*PkgInfo, error) {
+func SearchRawDoc(key string, isMatchSub bool) ([]*PkgInfo, error) {
 	// Connect to database.
 	q := connDb()
 	defer q.Db.Close()
 
+	// Check if need to match sub-packages.
+	cond := "pro_name like ?"
+	if isMatchSub {
+		cond = strings.Replace(cond, "pro_name", "path", 1)
+	}
+
 	var pkgInfos []*PkgInfo
 	condition := qbs.NewCondition("pro_name != ?", "Go")
-	condition2 := qbs.NewCondition("path like ?", "%"+key+"%").Or("synopsis like ?", "%"+key+"%")
-	err := q.Condition(condition).Condition(condition2).Limit(50).OrderBy("path").FindAll(&pkgInfos)
+	condition2 := qbs.NewCondition(cond, "%"+key+"%").Or("synopsis like ?", "%"+key+"%")
+	err := q.Condition(condition).Condition(condition2).Limit(50).OrderByDesc("views").FindAll(&pkgInfos)
 	return pkgInfos, err
 }
 

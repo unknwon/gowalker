@@ -67,7 +67,13 @@ func (this *SearchController) Get() {
 
 	// Check if print raw page.
 	if this.Input().Get("raw") == "true" {
-		pkgInfos, _ := models.SearchRawDoc(q)
+		// Check if need to match sub-packages.
+		isMatchSub := false
+		if this.Input().Get("sub") == "true" {
+			isMatchSub = true
+		}
+
+		pkgInfos, _ := models.SearchRawDoc(q, isMatchSub)
 		var buf bytes.Buffer
 		for _, p := range pkgInfos {
 			buf.WriteString(p.Path + "$" + p.Synopsis + "|||")
