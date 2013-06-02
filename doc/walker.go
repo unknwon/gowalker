@@ -228,27 +228,33 @@ func (w *walker) build(srcs []*source) (*Package, error) {
 			w.srcs[src.name] = src
 		} else if strings.HasPrefix(strings.ToLower(src.name), "readme") {
 			// Readme.
-			w.pdoc.Doc = strings.Replace(string(src.data), "=", "", -1)
-			if len(w.pdoc.Doc) > 0 && w.pdoc.Doc[0] == '\n' {
-				w.pdoc.Doc = w.pdoc.Doc[1:]
-			}
-			w.pdoc.Doc = w.pdoc.Doc[strings.Index(w.pdoc.Doc, "\n")+1:]
-			// Find all picture path of build system.
-			for _, m := range buildPicPattern.FindAllString(w.pdoc.Doc, -1) {
-				start := strings.Index(m, "http")
-				end := strings.Index(m, ")")
-				if (start > -1) && (end > -1) && (start < end) {
-					picPath := m[start:end]
-					w.pdoc.Doc = strings.Replace(w.pdoc.Doc, m, "![]("+picPath+")", 1)
+			w.pdoc.Doc = string(src.data)
+			if len(w.pdoc.Doc) > 0 {
+				if w.pdoc.Doc[0] == '\n' {
+					w.pdoc.Doc = w.pdoc.Doc[1:]
 				}
+				// Remove title and `==========`.
+				w.pdoc.Doc = w.pdoc.Doc[strings.Index(w.pdoc.Doc, "\n")+1:]
+				if w.pdoc.Doc[0] == '=' {
+					w.pdoc.Doc = w.pdoc.Doc[strings.Index(w.pdoc.Doc, "\n")+1:]
+				}
+				// Find all picture path of build system.
+				for _, m := range buildPicPattern.FindAllString(w.pdoc.Doc, -1) {
+					start := strings.Index(m, "http")
+					end := strings.Index(m, ")")
+					if (start > -1) && (end > -1) && (start < end) {
+						picPath := m[start:end]
+						w.pdoc.Doc = strings.Replace(w.pdoc.Doc, m, "![]("+picPath+")", 1)
+					}
+				}
+				w.pdoc.Doc = string(blackfriday.MarkdownCommon([]byte(w.pdoc.Doc)))
+				w.pdoc.Doc = strings.Replace(w.pdoc.Doc, "h3>", "h5>", -1)
+				w.pdoc.Doc = strings.Replace(w.pdoc.Doc, "h2>", "h4>", -1)
+				w.pdoc.Doc = strings.Replace(w.pdoc.Doc, "h1>", "h3>", -1)
+				w.pdoc.Doc = strings.Replace(w.pdoc.Doc, "<center>", "", -1)
+				w.pdoc.Doc = strings.Replace(w.pdoc.Doc, "</center>", "", -1)
+				w.pdoc.Doc = "<div style='display:block; padding: 3px; border:1px solid #4F4F4F;'>" + w.pdoc.Doc + "</div>"
 			}
-			w.pdoc.Doc = string(blackfriday.MarkdownCommon([]byte(w.pdoc.Doc)))
-			w.pdoc.Doc = strings.Replace(w.pdoc.Doc, "h3>", "h5>", -1)
-			w.pdoc.Doc = strings.Replace(w.pdoc.Doc, "h2>", "h4>", -1)
-			w.pdoc.Doc = strings.Replace(w.pdoc.Doc, "h1>", "h3>", -1)
-			w.pdoc.Doc = strings.Replace(w.pdoc.Doc, "<center>", "", -1)
-			w.pdoc.Doc = strings.Replace(w.pdoc.Doc, "</center>", "", -1)
-			w.pdoc.Doc = "<div style='display:block; padding: 3px; border:1px solid #4F4F4F;'>" + w.pdoc.Doc + "</div>"
 		}
 	}
 
