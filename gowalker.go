@@ -13,7 +13,6 @@
 // under the License.
 
 // Go Walker is a web server for Go project source code analysis.
-
 package main
 
 import (
