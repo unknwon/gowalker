@@ -235,6 +235,10 @@ func (w *walker) build(srcs []*source) (*Package, error) {
 				}
 				// Remove title and `==========`.
 				w.pdoc.Doc = w.pdoc.Doc[strings.Index(w.pdoc.Doc, "\n")+1:]
+				if len(w.pdoc.Doc) == 0 {
+					continue
+				}
+
 				if w.pdoc.Doc[0] == '=' {
 					w.pdoc.Doc = w.pdoc.Doc[strings.Index(w.pdoc.Doc, "\n")+1:]
 				}
