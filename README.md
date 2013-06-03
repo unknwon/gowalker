@@ -26,6 +26,7 @@ Go Walker is a server that generates <a target="_blank" href="http://golang.org/
 ## Todo
 
 - Add examples of functions.
+- Add specialized markdown to HTML function for parsing readme in gowalker.
 - Add user system and compatible for using gopm in the future.
 - Add support for user submit examples.
 - Add support for multi-language documentation.
