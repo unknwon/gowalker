@@ -16,6 +16,7 @@
 package doc
 
 import (
+	"go/doc"
 	"go/token"
 	"os"
 	"time"
@@ -48,6 +49,15 @@ type Type struct {
 	IFuncs        []*Func // Internal functions that return this type.
 	Methods       []*Func // Exported methods.
 	IMethods      []*Func // Internal methods.
+}
+
+// Example represents function examples.
+type Example struct {
+	Name   string
+	Doc    string
+	Code   Code
+	Play   string
+	Output string
 }
 
 // PACKAGE_VER is modified when previously stored packages are invalid.
@@ -123,6 +133,7 @@ type walker struct {
 	pdoc     *Package
 	srcLines map[string][]string // Source files with line arrays.
 	srcs     map[string]*source  // Source files.
+	examples []*doc.Example
 	fset     *token.FileSet
 	buf      []byte // scratch space for printNode method.
 }

@@ -17,7 +17,6 @@
 package models
 
 import (
-	"database/sql"
 	"errors"
 	"os"
 	"strconv"
@@ -79,19 +78,13 @@ type PkgDoc struct {
 }
 
 func connDb() *qbs.Qbs {
-	db := qbs.GetFreeDB()
-	if db == nil {
-		// 'sql.Open' only returns error when unknown driver, so it's not necessary to check in other places.
-		db, _ = sql.Open(_SQLITE3_DRIVER, DB_NAME)
-	}
-
-	q := qbs.New(db, qbs.NewSqlite3())
+	// 'sql.Open' only returns error when unknown driver, so it's not necessary to check in other places.
+	q, _ := qbs.GetQbs()
 	return q
 }
 
 func setMg() (*qbs.Migration, error) {
-	db, err := sql.Open(_SQLITE3_DRIVER, DB_NAME)
-	mg := qbs.NewMigration(db, DB_NAME, qbs.NewSqlite3())
+	mg, err := qbs.GetMigration()
 	return mg, err
 }
 
@@ -99,15 +92,16 @@ func init() {
 	// Initialize database.
 	os.Mkdir("./data", os.ModePerm)
 
+	qbs.Register(_SQLITE3_DRIVER, DB_NAME, "", qbs.NewSqlite3())
 	// Connect to database.
 	q := connDb()
-	defer q.Db.Close()
+	defer q.Close()
 
 	mg, err := setMg()
 	if err != nil {
 		beego.Error("models.init():", err)
 	}
-	defer mg.Db.Close()
+	defer mg.Close()
 
 	// Create data tables.
 	mg.CreateTableIfNotExists(new(PkgInfo))
@@ -126,7 +120,7 @@ func GetPkgInfo(path string) (*PkgInfo, error) {
 
 	// Connect to database.
 	q := connDb()
-	defer q.Db.Close()
+	defer q.Close()
 
 	pinfo := new(PkgInfo)
 	err := q.WhereEqual("path", path).Find(pinfo)
@@ -138,7 +132,7 @@ func GetPkgInfo(path string) (*PkgInfo, error) {
 func GetGroupPkgInfo(paths []string) ([]*PkgInfo, error) {
 	// Connect to database.
 	q := connDb()
-	defer q.Db.Close()
+	defer q.Close()
 
 	pinfos := make([]*PkgInfo, 0, len(paths))
 	for _, v := range paths {
@@ -159,7 +153,7 @@ func GetGroupPkgInfo(paths []string) ([]*PkgInfo, error) {
 func GetPkgInfoById(pid int) (*PkgInfo, error) {
 	// Connect to database.
 	q := connDb()
-	defer q.Db.Close()
+	defer q.Close()
 
 	pinfo := new(PkgInfo)
 	err := q.WhereEqual("id", pid).Find(pinfo)
@@ -172,7 +166,7 @@ func GetPkgInfoById(pid int) (*PkgInfo, error) {
 func GetGroupPkgInfoById(pids []string) ([]*PkgInfo, error) {
 	// Connect to database.
 	q := connDb()
-	defer q.Db.Close()
+	defer q.Close()
 
 	pinfos := make([]*PkgInfo, 0, len(pids))
 	for _, v := range pids {
@@ -194,7 +188,7 @@ func GetGroupPkgInfoById(pids []string) ([]*PkgInfo, error) {
 func SaveProject(pinfo *PkgInfo, pdecl *PkgDecl, pdoc *PkgDoc, imports []string) error {
 	// Connect to database.
 	q := connDb()
-	defer q.Db.Close()
+	defer q.Close()
 
 	// Save package information.
 	info := new(PkgInfo)
@@ -275,7 +269,7 @@ func DeleteProject(path string) error {
 
 	// Connect to database.
 	q := connDb()
-	defer q.Db.Close()
+	defer q.Close()
 
 	var i1, i2, i3 int64
 	// Delete package information.
@@ -332,7 +326,7 @@ func LoadProject(path string) (*PkgDecl, error) {
 
 	// Connect to database.
 	q := connDb()
-	defer q.Db.Close()
+	defer q.Close()
 
 	pdecl := &PkgDecl{Path: path}
 	err := q.WhereEqual("path", path).Find(pdecl)
@@ -343,7 +337,7 @@ func LoadProject(path string) (*PkgDecl, error) {
 func GetRecentPros(num int) ([]*PkgInfo, error) {
 	// Connect to database.
 	q := connDb()
-	defer q.Db.Close()
+	defer q.Close()
 
 	var pkgInfos []*PkgInfo
 	err := q.Limit(num).OrderByDesc("viewed_time").FindAll(&pkgInfos)
@@ -354,7 +348,7 @@ func GetRecentPros(num int) ([]*PkgInfo, error) {
 func AddViews(pinfo *PkgInfo) error {
 	// Connect to database.
 	q := connDb()
-	defer q.Db.Close()
+	defer q.Close()
 
 	pinfo.Views++
 
@@ -374,7 +368,7 @@ func AddViews(pinfo *PkgInfo) error {
 func GetPopularPros(offset, num int) ([]*PkgInfo, error) {
 	// Connect to database.
 	q := connDb()
-	defer q.Db.Close()
+	defer q.Close()
 
 	var pkgInfos []*PkgInfo
 	err := q.Offset(offset).Limit(num).OrderByDesc("views").FindAll(&pkgInfos)
@@ -385,7 +379,7 @@ func GetPopularPros(offset, num int) ([]*PkgInfo, error) {
 func GetGoRepo() ([]*PkgInfo, error) {
 	// Connect to database.
 	q := connDb()
-	defer q.Db.Close()
+	defer q.Close()
 
 	var pkgInfos []*PkgInfo
 	condition := qbs.NewCondition("pro_name = ?", "Go")
@@ -397,7 +391,7 @@ func GetGoRepo() ([]*PkgInfo, error) {
 func SearchDoc(key string) ([]*PkgInfo, error) {
 	// Connect to database.
 	q := connDb()
-	defer q.Db.Close()
+	defer q.Close()
 
 	var pkgInfos []*PkgInfo
 	condition := qbs.NewCondition("path like ?", "%"+key+"%")
@@ -410,7 +404,7 @@ func SearchDoc(key string) ([]*PkgInfo, error) {
 func SearchRawDoc(key string, isMatchSub bool) (pkgInfos []*PkgInfo, err error) {
 	// Connect to database.
 	q := connDb()
-	defer q.Db.Close()
+	defer q.Close()
 
 	// Check if need to match sub-packages.
 	if isMatchSub {
@@ -429,7 +423,7 @@ func SearchRawDoc(key string, isMatchSub bool) (pkgInfos []*PkgInfo, err error) 
 func GetAllPkgs() ([]*PkgInfo, error) {
 	// Connect to database.
 	q := connDb()
-	defer q.Db.Close()
+	defer q.Close()
 
 	var pkgInfos []*PkgInfo
 	err := q.OrderBy("pro_name").OrderByDesc("views").FindAll(&pkgInfos)
@@ -441,7 +435,7 @@ func GetAllPkgs() ([]*PkgInfo, error) {
 func GetIndexPageInfo() (totalNum int64, popPkgs, importedPkgs, WFPros, ORMPros, DBDPros, GUIPros, NETPros []*PkgInfo, err error) {
 	// Connect to database.
 	q := connDb()
-	defer q.Db.Close()
+	defer q.Close()
 
 	totalNum = q.Count(&PkgInfo{})
 	err = q.Offset(25).Limit(39).OrderByDesc("views").FindAll(&popPkgs)
@@ -467,7 +461,7 @@ func GetIndexPageInfo() (totalNum int64, popPkgs, importedPkgs, WFPros, ORMPros,
 func UpdateTagInfo(path string, tags []string, add bool) bool {
 	// Connect to database.
 	q := connDb()
-	defer q.Db.Close()
+	defer q.Close()
 
 	info := new(PkgInfo)
 	err := q.WhereEqual("path", path).Find(info)

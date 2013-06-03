@@ -288,12 +288,11 @@ func (w *walker) build(srcs []*source) (*Package, error) {
 	}
 
 	// Parse the Go files
-
 	files := make(map[string]*ast.File)
 	for _, name := range append(bpkg.GoFiles, bpkg.CgoFiles...) {
 		file, err := parser.ParseFile(w.fset, name, w.srcs[name].data, parser.ParseComments)
 		if err != nil {
-			beego.Error("doc.walker.build():", err)
+			beego.Error("doc.walker.build().[parse go files]:", err)
 			continue
 		}
 		w.pdoc.Files = append(w.pdoc.Files, name)
@@ -304,17 +303,16 @@ func (w *walker) build(srcs []*source) (*Package, error) {
 	apkg, _ := ast.NewPackage(w.fset, files, simpleImporter, nil)
 
 	// Find examples in the test files.
-
-	/*for _, name := range append(bpkg.TestGoFiles, bpkg.XTestGoFiles...) {
-		file, err := parser.ParseFile(w.fset, name, w.srcs[name].data, parser.ParseComments)
-		if err != nil {
-			w.pdoc.Errors = append(w.pdoc.Errors, err.Error())
-			continue
-		}
-		w.pdoc.TestFiles = append(w.pdoc.TestFiles, &File{Name: name, URL: w.srcs[name].browseURL})
-		w.pdoc.TestSourceSize += len(w.srcs[name].data)
-		w.examples = append(w.examples, doc.Examples(file)...)
-	}*/
+	// for _, name := range append(bpkg.TestGoFiles, bpkg.XTestGoFiles...) {
+	// 	file, err := parser.ParseFile(w.fset, name, w.srcs[name].data, parser.ParseComments)
+	// 	if err != nil {
+	// 		beego.Error("doc.walker.build().[find examples]:", err)
+	// 		continue
+	// 	}
+	// 	//w.pdoc.TestFiles = append(w.pdoc.TestFiles, &File{Name: name, URL: w.srcs[name].browseURL})
+	// 	//w.pdoc.TestSourceSize += len(w.srcs[name].data)
+	// 	w.examples = append(w.examples, doc.Examples(file)...)
+	// }
 
 	//w.vetPackage(apkg)
 
