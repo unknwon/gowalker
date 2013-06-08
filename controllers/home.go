@@ -74,7 +74,7 @@ func init() {
 					Synopsis:   p.Synopsis,
 					ViewedTime: p.ViewedTime,
 					IsGoRepo: p.ProName == "Go" &&
-						strings.Index(p.Path, "code.") > -1,
+						strings.Index(p.Path, ".") == -1,
 					Views: p.Views,
 				})
 		}
@@ -272,7 +272,7 @@ func generatePage(this *HomeController, pdoc *doc.Package, q string, lang string
 	this.Data["VCS"], this.Data["ProName"], this.Data["ProPath"], this.Data["ProDocPath"] = getVCSInfo(q, pdoc)
 
 	if utils.IsGoRepoPath(pdoc.ImportPath) &&
-		strings.Index(pdoc.ImportPath, "code.") > -1 {
+		strings.Index(pdoc.ImportPath, ".") == -1 {
 		this.Data["IsGoRepo"] = true
 	}
 
@@ -659,7 +659,7 @@ func updateRecentPros(pdoc *doc.Package) {
 			Synopsis:   pdoc.Synopsis,
 			ViewedTime: time.Now().UTC().Unix(),
 			IsGoRepo: pdoc.ProjectName == "Go" &&
-				strings.Index(pdoc.ImportPath, "code.") > -1,
+				strings.Index(pdoc.ImportPath, ".") == -1,
 			Views: pdoc.Views,
 		}
 
