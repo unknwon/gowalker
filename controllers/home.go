@@ -13,7 +13,6 @@
 // under the License.
 
 // Package controllers implemented controller methods of beego.
-
 package controllers
 
 import (
@@ -74,8 +73,9 @@ func init() {
 					Path:       p.Path,
 					Synopsis:   p.Synopsis,
 					ViewedTime: p.ViewedTime,
-					IsGoRepo:   p.ProName == "Go",
-					Views:      p.Views,
+					IsGoRepo: p.ProName == "Go" &&
+						strings.Index(p.Path, "code.") > -1,
+					Views: p.Views,
 				})
 		}
 	}
@@ -658,8 +658,9 @@ func updateRecentPros(pdoc *doc.Package) {
 			Path:       pdoc.ImportPath,
 			Synopsis:   pdoc.Synopsis,
 			ViewedTime: time.Now().UTC().Unix(),
-			IsGoRepo:   pdoc.ProjectName == "Go",
-			Views:      pdoc.Views,
+			IsGoRepo: pdoc.ProjectName == "Go" &&
+				strings.Index(pdoc.ImportPath, "code.") > -1,
+			Views: pdoc.Views,
 		}
 
 		pdoc.ViewedTime = curPro.ViewedTime
