@@ -271,7 +271,8 @@ func generatePage(this *HomeController, pdoc *doc.Package, q string, lang string
 	// Get VCS name, project name, project home page, and Upper level project URL.
 	this.Data["VCS"], this.Data["ProName"], this.Data["ProPath"], this.Data["ProDocPath"] = getVCSInfo(q, pdoc)
 
-	if utils.IsGoRepoPath(pdoc.ImportPath) {
+	if utils.IsGoRepoPath(pdoc.ImportPath) &&
+		strings.Index(pdoc.ImportPath, "code.") > -1 {
 		this.Data["IsGoRepo"] = true
 	}
 
