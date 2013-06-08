@@ -394,8 +394,8 @@ func SearchDoc(key string) ([]*PkgInfo, error) {
 	defer q.Close()
 
 	var pkgInfos []*PkgInfo
-	condition := qbs.NewCondition("path like ?", "%"+key+"%")
-	err := q.Condition(condition).OrderBy("path").FindAll(&pkgInfos)
+	condition := qbs.NewCondition("path like ?", "%"+key+"%").Or("synopsis like ?", "%"+key+"%")
+	err := q.Condition(condition).Limit(200).OrderBy("path").FindAll(&pkgInfos)
 	return pkgInfos, err
 }
 
