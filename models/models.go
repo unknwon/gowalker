@@ -384,7 +384,13 @@ func GetGoRepo() ([]*PkgInfo, error) {
 	var pkgInfos []*PkgInfo
 	condition := qbs.NewCondition("pro_name = ?", "Go")
 	err := q.Condition(condition).OrderBy("path").FindAll(&pkgInfos)
-	return pkgInfos, err
+	infos := make([]*PkgInfo, 0, 30)
+	for _, v := range pkgInfos {
+		if strings.Index(v.Path, ".") == -1 {
+			infos = append(infos, v)
+		}
+	}
+	return infos, err
 }
 
 // SearchDoc returns packages that import path contains keyword.
