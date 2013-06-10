@@ -19,13 +19,13 @@ import (
 	"github.com/astaxie/beego"
 )
 
-type IndexController struct {
+type TagsController struct {
 	beego.Controller
 }
 
-// Get implemented Get method for IndexController.
-// It serves index page of Go Walker.
-func (this *IndexController) Get() {
+// Get implemented Get method for TagsController.
+// It serves about page of Go Walker.
+func (this *TagsController) Get() {
 	// Set language version.
 	curLang, restLangs := setLangVer(this.Ctx.Request, this.Input())
 
@@ -34,11 +34,12 @@ func (this *IndexController) Get() {
 
 	// Set properties
 	this.Layout = "layout_" + curLang.Lang + ".html"
-	this.TplNames = "index_" + curLang.Lang + ".html"
+	this.TplNames = "tags_" + curLang.Lang + ".html"
 
 	// Get index page data.
-	this.Data["ProNum"], this.Data["PopPros"], this.Data["ImportedPros"],
-		_ = models.GetIndexPageInfo()
+	this.Data["WFPros"], this.Data["ORMPros"], this.Data["DBDPros"],
+		this.Data["GUIPros"], this.Data["NETPros"],
+		_ = models.GetTagsPageInfo()
 
 	// Set language properties.
 	this.Data["Lang"] = curLang.Lang

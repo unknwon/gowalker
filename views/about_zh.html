@@ -3,26 +3,14 @@
 
 	<body>
 		<div class="container">
-			<div class="navbar" style="margin-top: 20px">
-				<div class="navbar-inner">
-					<a class="brand" href="/">Go 步行者</a>
-					<ul class="nav">
-						<li><a href="/">首页</a></li>
-						<li><a href="/index">索引</a></li>
-						<li class="active"><a href="/about">关于</a></li>
-					</ul>
-					<form class="navbar-search pull-right" action="/">
-						<input class="search-query" type="text" placeholder="搜索项目" autofocus="autofocus" name="q"></input>
-					</form>
-				</div>
-			</div>
+			{{template "navbar_zh"}}
 
 			<h1>关于</h1>
 			<p>Go 步行者用于为托管在版本控制系统上的 <a target="_blank" href="http://golang.org/">Go</a> 开源项目生成在线源码文档，目前支持的平台包括 <a target="_blank" href="https://bitbucket.org/">Bitbucket</a>、<a target="_blank" href="https://github.com/">Github</a>、<a target="_blank" href="https://launchpad.net/">Launchpad</a> 和 <a target="_blank" href="http://code.google.com/hosting/">Google Project Hosting</a>。</p>
 			<p>您可以在 <a target="_blank" href="https://github.com/Unknwon/gowalker">Github</a> 上浏览并下载该项目的源代码。  
 
 			<h4 id="howto">添加新的项目到 Go 步行者</h4> 
-			<p>Go 步行者是一个用于生成 Go 项目源码文档的服务器，有关文档注释规范，请参考官方给出的 <a target="_blank" href="http://golang.org/doc/articles/godoc_documenting_go_code.html">大纲</a>。Go 步行者兼容所有 <a href="http://golang.org/cmd/godoc/">godoc</a> 工具所支持的标准，同时 Go 步行者还将会显示类型在不同包之间的关联。</p>
+			<p>Go 步行者是一个用于生成 Go 项目源码文档的服务器，有关文档注释规范，请参考官方给出的 <a target="_blank" href="http://docs.studygolang.com/doc/articles/godoc_documenting_go_code.html">大纲</a>。Go 步行者兼容所有 <a href="http://docs.studygolang.com/cmd/godoc/">godoc</a> 工具所支持的标准，同时 Go 步行者还将会显示类型在不同包之间的关联。</p>
 			<p>对于一个具有良好可读性的项目而言，规范完整的文档说明是极其重要的。Go 步行者会截取每个项目的包的首行文字作为该包的纲要，并在搜索项目时展现给阅读者。</p>
 			<p>如果您打算将某个项目添加到 Go 步行者，可以通过 <a href="/">搜索</a> 该项目的导入路径来通知服务器。如果该项目的文档已经存在，则将直接呈现给您，否则会从相关的版本控制系统上即时下载并生成文档。如果您的操作是添加新的项目，则最多可能需要 5 秒的时间来完成，因为 Go 步行者会将源码和文档展示在相同页面上。</p>
 			<p>Go 步行者每天都会检查各个项目的更新情况，你也可以通过底部的刷新按钮来进行强制刷新。</p>

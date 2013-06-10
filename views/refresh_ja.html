@@ -3,19 +3,7 @@
 		
 	<body>
 		<div class="container">
-			<div class="navbar" style="margin-top: 20px">
-				<div class="navbar-inner">
-					<a class="brand" href="/">Go Walker</a>
-					<ul class="nav">
-						<li><a href="/">Home</a></li>
-						<li><a href="/index">Index</a></li>
-						<li><a href="/about">About</a></li>
-					</ul>
-					<form class="navbar-search pull-right" action="/">
-						<input class="search-query" type="text" placeholder="Search" autofocus="autofocus"  name="q"></input>
-					</form>
-				</div>
-			</div>
+			{{template "navbar_ja"}}
 			<h1>Refresh</h1>
 			<p>申し訳ありません。いくつかの理由で、<i>{{.LimitTime}}</i> まで(5分間)同じパッケージのドキュメントを更新できません。</p>
 			<p><a href="/{{.Path}}">戻る</a></p>

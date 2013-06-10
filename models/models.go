@@ -438,7 +438,7 @@ func GetAllPkgs() ([]*PkgInfo, error) {
 
 // GetIndexPageInfo returns all data that used for index page.
 // One function is for reducing database connect times.
-func GetIndexPageInfo() (totalNum int64, popPkgs, importedPkgs, WFPros, ORMPros, DBDPros, GUIPros, NETPros []*PkgInfo, err error) {
+func GetIndexPageInfo() (totalNum int64, popPkgs, importedPkgs []*PkgInfo, err error) {
 	// Connect to database.
 	q := connDb()
 	defer q.Close()
@@ -449,6 +449,15 @@ func GetIndexPageInfo() (totalNum int64, popPkgs, importedPkgs, WFPros, ORMPros,
 		beego.Error("models.GetIndexPageInfo(): popPkgs:", err)
 	}
 	err = q.Limit(20).OrderByDesc("imported_num").OrderByDesc("views").FindAll(&importedPkgs)
+	return totalNum, popPkgs, importedPkgs, nil
+}
+
+// GetTagsPageInfo returns all data that used for tags page.
+// One function is for reducing database connect times.
+func GetTagsPageInfo() (WFPros, ORMPros, DBDPros, GUIPros, NETPros []*PkgInfo, err error) {
+	// Connect to database.
+	q := connDb()
+	defer q.Close()
 
 	condition := qbs.NewCondition("tags like ?", "%$wf|%")
 	err = q.Limit(10).Condition(condition).OrderByDesc("views").FindAll(&WFPros)
@@ -460,7 +469,7 @@ func GetIndexPageInfo() (totalNum int64, popPkgs, importedPkgs, WFPros, ORMPros,
 	err = q.Limit(10).Condition(condition).OrderByDesc("views").FindAll(&GUIPros)
 	condition = qbs.NewCondition("tags like ?", "%$net|%")
 	err = q.Limit(10).Condition(condition).OrderByDesc("views").FindAll(&NETPros)
-	return totalNum, popPkgs, importedPkgs, WFPros, ORMPros, DBDPros, GUIPros, NETPros, nil
+	return WFPros, ORMPros, DBDPros, GUIPros, NETPros, nil
 }
 
 // UpdateTagInfo updates prohect tag information, returns false if the project does not exist.

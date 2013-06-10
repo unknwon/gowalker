@@ -28,7 +28,7 @@ import (
 )
 
 const (
-	VERSION = "0.2.10.0603" // Application version.
+	VERSION = "0.2.11.0610" // Application version.
 )
 
 func init() {
@@ -65,6 +65,7 @@ func main() {
 	// Register routers.
 	beego.Router("/", &controllers.HomeController{})
 	beego.Router("/index", &controllers.IndexController{})
+	beego.Router("/tags", &controllers.TagsController{})
 	beego.Router("/about", &controllers.AboutController{})
 	beego.Router("/search", &controllers.SearchController{})
 	beego.Router("/refresh", &controllers.RefreshController{})
