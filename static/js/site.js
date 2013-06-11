@@ -29,9 +29,14 @@
 		_ep.modal({ keyboard: false, show: false }); // for export modal
 
 		$('#search_form').submit(function(){
-			var input = $.trim(document.getElementById("search_export_box"))
-			if(input.length > 1){
-				location.hash = "#".concat(input.value.replace(".", "_"));
+			var input = $.trim(document.getElementById("search_export_box").value)
+			if(input.length > 0 && ){
+				_ep.modal('hide');
+	 			var anchor = "#".concat(input.replace(".", "_"));
+	 			if(location.hash == anchor){
+	 				location.hash = "";
+	 			}
+	 			location.hash = anchor;	
 			}
 			return false;
 		});
