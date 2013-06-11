@@ -42,27 +42,7 @@
 		</div>
 		<script src="http://code.jquery.com/jquery.js"></script>
 		<script type="text/javascript" src="/static/js/bootstrap.js"></script>
-		<script>
-			(function() {     
-				var $backToTopTxt = "Back to Top", $backToTopEle = $('<div class="backToTop"></div>').appendTo($("body")).attr("title", $backToTopTxt).click(function() {             
-					$("html, body").animate({ scrollTop: 0 }, 120);     
-				}), $backToTopFun = function() {         
-					var st = $(document).scrollTop(), winh = $(window).height();         
-					(st > 0)? $backToTopEle.show(): $backToTopEle.hide();        
-					//IE6下的定位         
-					if (!window.XMLHttpRequest) {             
-						$backToTopEle.css("top", st + winh - 166);         
-					}     
-				};     
-				$(window).bind("scroll", $backToTopFun);     
-				$(function() { $backToTopFun(); }); 
-
-				if (document.body.clientWidth > 1500)
-				{
-					document.getElementById("navbar").className=""
-				}
-			})();
-		</script>
+		<script type='text/javascript' src='/static/js/site.js'></script>
 		<script>
 		  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
 		  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
