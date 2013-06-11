@@ -46,10 +46,11 @@
    	  
     var isProjectPage = 0;
     var preKeyG = 0;
-    	if(  document.getElementById("navbar") == null){
+    	if(  document.getElementById("navbar") != null){
     		isProjectPage = 1;
 
     	}else{
+    		// Mute options in control panel.
     		_modal.find('tbody > tr').each(function(i,ele){
     			if(i == 2 || i ==5 || i ==6){
     				$(ele).addClass("muted");
@@ -77,6 +78,7 @@
 		    _modal.modal('hide');
 		    //site search focus
 		    $('input[name=q]').first().focus();
+		    $('input[name=q]').first().html("");
 		}else if( code == 46 && isProjectPage){ //for '.'    comma as 46   'go to export'
 				_modal.modal('hide');  
 				if(_ep) _ep.modal('show');
@@ -106,14 +108,15 @@
 	     		GkeyCb(function(){
 	     			location.hash = "#_index" ;
 	     		});
-	    }else if( code == 101 ){// for 'g then e'   e 101
-	     		if(_ep) _ep.modal('hide');
-	     		_modal.modal('hide');
-	     		GkeyCb(function(){
-	     			location.hash = "#Chunk";
-	     		});
 	    }
-		       // else if(code == ){}    // for `g then t`   
+	    // else if( code == 101 ){// for 'g then e'   e 101
+	    //  		if(_ep) _ep.modal('hide');
+	    //  		_modal.modal('hide');
+	    //  		GkeyCb(function(){
+	    //  			location.hash = "#Chunk";
+	    //  		});
+	    // }
+		// else if(code == ){}    // for `g then t`   
 	})
 	//end 
 })();

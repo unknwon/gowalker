@@ -24,7 +24,8 @@
 					{{if .HasExports}}<li><a href="#search_exports" data-toggle="modal"><i class="icon-chevron-right"></i>Search Exports</a></li>{{end}}
 				</ul>
 			</div>
-			{{if .HasExports}}<div id="search_exports" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+			{{if .HasExports}}
+			<div id="search_exports" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
 				<form id="search_form" class="modal-form">
 					<div class="modal-header">
 						<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
@@ -38,15 +39,8 @@
 						<button class="btn btn-primary" data-dismiss="modal" type="submit" onclick="update()">Go!</button>
 					</div>
 				</form>
-				<script type="text/javascript">
-					function update(){
-						var form = document.getElementById("search_form")
-						var input = document.getElementById("search_export_box")
-						location = "#" + input.value.replace(".", "_");
-						return false
-					}
-				</script>
-			</div>{{end}}
+			</div>
+			{{end}}
 			<div class="flat-well well-small" style="background-color: #f5f5f5">
 				<a title="See this project on {{.VCS}}" target="_blank" href="http://{{.ProPath}}" class="label label-info">{{.VCS}}</a> <a target="_blank" href="http://{{.ProPath}}"><strong>{{.ProName}}:</strong></a> <a href="/{{.ProDocPath}}">{{.ProDocPath}}</a><span class="muted">/{{.ProName}}</span>
 				<span class="pull-right"><span >このページは<b>{{.Views}}</b>人見ました</span><span class="muted"> | </span><a href="#_index">Index</a><span class="muted"> | </span><a href="#_files">Files</a>{{if .IsHasSubdirs}}<span class="muted"> | </span><a href="#_subdirs">Directories</a></span>{{end}}
