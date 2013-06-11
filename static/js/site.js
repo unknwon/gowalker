@@ -30,7 +30,7 @@
 
 		$('#search_form').submit(function(){
 			var input = $.trim(document.getElementById("search_export_box").value)
-			if(input.length > 0 && ){
+			if(input.length > 0 ){
 				_ep.modal('hide');
 	 			var anchor = "#".concat(input.replace(".", "_"));
 	 			if(location.hash == anchor){
