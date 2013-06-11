@@ -16,7 +16,6 @@
 		}     
 	};     
 	$(window).bind("scroll", $backToTopFun);
-
 	$backToTopFun(); 
 
 	if (document.body.clientWidth > 1500 && document.getElementById("navbar") != null )

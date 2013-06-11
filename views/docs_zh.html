@@ -32,11 +32,11 @@
 						<h3 id="myModalLabel" style="margin: 10px">搜索导出对象</h3>
 					</div>
 					<div class="modal-body" style="overflow-y: visible;">
-						<input id="search_export_box" autocomplete="off" class="span5" type="text" placeholder="输入类型或函数名"  data-source="[{{str2html .ExportDataSrc}}]" data-provide="typeahead"></input>
+						<input id="search_export_box" autofocus="autofocus" autocomplete="off" class="span5" type="text" placeholder="输入类型或函数名"  data-source="[{{str2html .ExportDataSrc}}]" data-provide="typeahead"></input>
 					</div>
 					<div class="modal-footer">
 						<button class="btn" data-dismiss="modal" aria-hidden="true">关闭</button>
-						<button class="btn btn-primary" data-dismiss="modal" type="submit" onclick="update()">跳转</button>
+						<button class="btn btn-primary" type="submit">跳转</button>
 					</div>
 				</form>
 			</div>
