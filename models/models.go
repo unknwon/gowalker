@@ -13,7 +13,6 @@
 // under the License.
 
 // Package models implemented database access funtions.
-
 package models
 
 import (

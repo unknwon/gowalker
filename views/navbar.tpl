@@ -9,7 +9,7 @@
 						<li><a href="/about">About</a></li>
 					</ul>
 					<form class="navbar-search pull-right" action="/">
-						<input class="search-query" type="text" placeholder="Search" autofocus="autofocus"  name="q"></input>
+						<input class="search-query" type="text" placeholder="Search" name="q"></input>
 					</form>
 				</div>
 			</div>
@@ -27,7 +27,7 @@
 					</ul>
 					<form class="navbar-search pull-right" action="/">
 						<!--input type="hidden" name="lang" value="{{.Lang}}" /-->
-						<input class="search-query" type="text" placeholder="搜索项目" autofocus="autofocus" name="q"></input>
+						<input class="search-query" type="text" placeholder="搜索项目" name="q"></input>
 					</form>
 				</div>
 			</div>
@@ -44,7 +44,7 @@
 						<li><a href="/about">About</a></li>
 					</ul>
 					<form class="navbar-search pull-right" action="/">
-						<input class="search-query" type="text" placeholder="Search" autofocus="autofocus"  name="q"></input>
+						<input class="search-query" type="text" placeholder="Search" name="q"></input>
 					</form>
 				</div>
 			</div>
