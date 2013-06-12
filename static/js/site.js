@@ -26,19 +26,17 @@
 	var _ep = $('#search_exports');
 	if(_ep.length != 0){
 		_ep.modal({ keyboard: false, show: false }); // for export modal
-
-		$('#search_form').submit(function(){
-			var input = $.trim(document.getElementById("search_export_box").value)
+		
+        $('#search_form').submit(function(){
+            var input = $.trim(document.getElementById("search_export_box").value)
 			if(input.length > 0 ){
 				_ep.modal('hide');
 	 			var anchor = "#".concat(input.replace(".", "_"));
-	 			if(location.hash == anchor){
-	 				location.hash = "";
-	 			}
 	 			location.hash = anchor;	
 			}
+			_ep.find('input[type=text]').val("");
 			return false;
-		});
+        });
 	}else{
 		_ep = null;
 	}
@@ -78,40 +76,45 @@
 		    if(_ep) _ep.modal('hide');
 		    _modal.modal('show');
 		}else if(code == 47){ //for '/'    forward slash code:47
-				if(_ep) _ep.modal('hide');
+			if(_ep) _ep.modal('hide');
 		    _modal.modal('hide');
 		    //site search focus
 		    $('input[name=q]').first().focus();
-		    $('input[name=q]').first().html("");
+		    return false;
 		}else if( code == 46 && isProjectPage){ //for '.'    comma as 46   'go to export'
-				_modal.modal('hide');  
-				if(_ep) _ep.modal('show');
+			_modal.modal('hide');  
+			if(_ep) {
+				_ep.modal('show');
+				_ep.on('shown',function(){
+					$(this).find('#search_export_box').focus();	
+				})
+			}
 		}else if( code == 103){// for 'g then g'   g 103
-				if(_ep) _ep.modal('hide');
-				_modal.modal('hide');
-				if(preKeyG == 0 ){
-					preKeyG  =1;
-					setTimeout(function(){ preKeyG = 0 }, 2000);
-					return false;
-		   		}
+			if(_ep) _ep.modal('hide');
+			_modal.modal('hide');
+			if(preKeyG == 0 ){
+				preKeyG  =1;
+				setTimeout(function(){ preKeyG = 0 }, 2000);
+				return false;
+	   		}
 		//                           console.log(preKeyG);
-				GkeyCb(function(){
-					$("html,body").animate({ scrollTop: 0 }, 120);
-				});
+			GkeyCb(function(){
+				$("html,body").animate({ scrollTop: 0 }, 120);
+			});
 				
 		}else if( code ==  98){//for 'g then b'    b 98
-				if(_ep) _ep.modal('hide');
-				_modal.modal('hide');
-				GkeyCb(function(){
-					$("html,body").animate({ scrollTop :$("body").height() } ,120);
-		   		});
+			if(_ep) _ep.modal('hide');
+			_modal.modal('hide');
+			GkeyCb(function(){
+				$("html,body").animate({ scrollTop :$("body").height() } ,120);
+	   		});
 
 	    }else if( code ==  105){//for 'g then i'     i  105
-	     		if(_ep) _ep.modal('hide');
-	     		_modal.modal('hide');
-	     		GkeyCb(function(){
-	     			location.hash = "#_index" ;
-	     		});
+     		if(_ep) _ep.modal('hide');
+     		_modal.modal('hide');
+     		GkeyCb(function(){
+     			location.hash = "#_index" ;
+     		});
 	    }
 	    // else if( code == 101 ){// for 'g then e'   e 101
 	    //  		if(_ep) _ep.modal('hide');
