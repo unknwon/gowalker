@@ -457,7 +457,8 @@ func getVCSInfo(q string, pdoc *doc.Package) (vcs, proName, proPath, pkgDocPath 
 		vcs = "Github"
 		if proName != pdoc.ProjectName {
 			// Not root.
-			proPath = strings.Replace(q, "/"+proName, "/tree/master/"+proName, 1)
+			proName := utils.GetProjectPath(pdoc.ImportPath)
+			proPath = strings.Replace(q, proName, proName+"/tree/master", 1)
 		} else {
 			proPath = q + "/tree/master"
 		}
