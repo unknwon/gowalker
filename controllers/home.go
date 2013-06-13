@@ -38,6 +38,7 @@ var (
 	langTypes          []*langType  // Languages are supported.
 
 	tagList []string // Projects tag list.
+	tagSet  string   // Tags data source.
 )
 
 // Recent viewed project.
@@ -93,6 +94,10 @@ func init() {
 
 	// Initialize project tags.
 	tagList = strings.Split(beego.AppConfig.String("tags"), "|")
+	for _, s := range tagList {
+		tagSet += "&quot;" + s + "&quot;,"
+	}
+	tagSet = tagSet[:len(tagSet)-1]
 }
 
 func setLangVer(req *http.Request, input url.Values) (*langType, []*langType) {
@@ -422,6 +427,9 @@ func generatePage(this *HomeController, pdoc *doc.Package, q string, lang string
 		}
 	}
 	this.Data["Subdirs"] = pinfos
+
+	// Tags.
+	this.Data["TagsDataSrc"] = tagSet
 
 	this.Data["Files"] = pdoc.Files
 	this.Data["ImportPkgs"] = pdecl.Imports

@@ -48,4 +48,12 @@
 						{{end}}
 					</ul>
 				</div>
+				<div class="span4">
+					<h4 id="Toolkit">Toolkit</h4>
+					<ul class="unstyled">
+						{{range .TOOLPros}}
+						<li><span class="badge">{{.Views}}</span> <a title="{{.Synopsis}}" href="/{{.Path}}">{{.Path}}</a></li>
+						{{end}}
+					</ul>
+				</div>
 			</div>

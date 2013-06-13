@@ -453,7 +453,7 @@ func GetIndexPageInfo() (totalNum int64, popPkgs, importedPkgs []*PkgInfo, err e
 
 // GetTagsPageInfo returns all data that used for tags page.
 // One function is for reducing database connect times.
-func GetTagsPageInfo() (WFPros, ORMPros, DBDPros, GUIPros, NETPros []*PkgInfo, err error) {
+func GetTagsPageInfo() (WFPros, ORMPros, DBDPros, GUIPros, NETPros, TOOLPros []*PkgInfo, err error) {
 	// Connect to database.
 	q := connDb()
 	defer q.Close()
@@ -468,11 +468,13 @@ func GetTagsPageInfo() (WFPros, ORMPros, DBDPros, GUIPros, NETPros []*PkgInfo, e
 	err = q.Limit(10).Condition(condition).OrderByDesc("views").FindAll(&GUIPros)
 	condition = qbs.NewCondition("tags like ?", "%$net|%")
 	err = q.Limit(10).Condition(condition).OrderByDesc("views").FindAll(&NETPros)
-	return WFPros, ORMPros, DBDPros, GUIPros, NETPros, nil
+	condition = qbs.NewCondition("tags like ?", "%$tool|%")
+	err = q.Limit(10).Condition(condition).OrderByDesc("views").FindAll(&TOOLPros)
+	return WFPros, ORMPros, DBDPros, GUIPros, NETPros, TOOLPros, nil
 }
 
 // UpdateTagInfo updates prohect tag information, returns false if the project does not exist.
-func UpdateTagInfo(path string, tags []string, add bool) bool {
+func UpdateTagInfo(path string, tag string, add bool) bool {
 	// Connect to database.
 	q := connDb()
 	defer q.Close()
@@ -483,21 +485,19 @@ func UpdateTagInfo(path string, tags []string, add bool) bool {
 		return false
 	}
 
-	for _, v := range tags {
-		i := strings.Index(info.Tags, "$"+v+"|")
-		switch {
-		case i == -1 && add: // Add operation and does not contain.
-			info.Tags += "$" + v + "|"
-			_, err = q.Save(info)
-			if err != nil {
-				beego.Error("models.UpdateTagInfo(): add:", path, err)
-			}
-		case i > -1 && !add: // Delete opetation and contains.
-			info.Tags = strings.Replace(info.Tags, "$"+v+"|", "", 1)
-			_, err = q.Save(info)
-			if err != nil {
-				beego.Error("models.UpdateTagInfo(): add:", path, err)
-			}
+	i := strings.Index(info.Tags, "$"+tag+"|")
+	switch {
+	case i == -1 && add: // Add operation and does not contain.
+		info.Tags += "$" + tag + "|"
+		_, err = q.Save(info)
+		if err != nil {
+			beego.Error("models.UpdateTagInfo(): add:", path, err)
+		}
+	case i > -1 && !add: // Delete opetation and contains.
+		info.Tags = strings.Replace(info.Tags, "$"+tag+"|", "", 1)
+		_, err = q.Save(info)
+		if err != nil {
+			beego.Error("models.UpdateTagInfo(): add:", path, err)
 		}
 	}
 

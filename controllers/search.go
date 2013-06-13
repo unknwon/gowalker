@@ -128,11 +128,7 @@ func checkSpecialUsage(this *SearchController, q string) bool {
 			return true
 		}
 
-		// Verify tags.
-		inputs := strings.Split(q[i+5:], ":")
-		tags := verifyTags(inputs)
-
-		if len(tags) > 0 && models.UpdateTagInfo(q[:i], tags, true) {
+		if isTag(q[i+5:]) && models.UpdateTagInfo(q[:i], q[i+5:], true) {
 			this.Redirect("/"+q[:i], 302)
 		}
 		return true
@@ -144,11 +140,7 @@ func checkSpecialUsage(this *SearchController, q string) bool {
 			return true
 		}
 
-		// Verify tags.
-		inputs := strings.Split(q[i+6:], ":")
-		tags := verifyTags(inputs)
-
-		if len(tags) > 0 && models.UpdateTagInfo(q[:i], tags, false) {
+		if isTag(q[i+6:]) && models.UpdateTagInfo(q[:i], q[i+6:], false) {
 			this.Redirect("/"+q[:i], 302)
 		}
 		return true
@@ -157,17 +149,13 @@ func checkSpecialUsage(this *SearchController, q string) bool {
 	return false
 }
 
-func verifyTags(inputs []string) []string {
-	tags := make([]string, 0, len(inputs))
-	for _, v := range inputs {
-		if len(v) > 0 {
-			for _, t := range tagList {
-				if t == v {
-					tags = append(tags, v)
-					break
-				}
+func isTag(input string) bool {
+	if len(input) > 0 {
+		for _, t := range tagList {
+			if t == input {
+				return true
 			}
 		}
 	}
-	return tags
+	return false
 }

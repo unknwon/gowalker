@@ -38,7 +38,7 @@ func (this *TagsController) Get() {
 
 	// Get index page data.
 	this.Data["WFPros"], this.Data["ORMPros"], this.Data["DBDPros"],
-		this.Data["GUIPros"], this.Data["NETPros"],
+		this.Data["GUIPros"], this.Data["NETPros"], this.Data["TOOLPros"],
 		_ = models.GetTagsPageInfo()
 
 	// Set language properties.
