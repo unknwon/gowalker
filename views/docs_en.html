@@ -14,14 +14,18 @@
 				<button type="button" class="close" data-dismiss="alert">&times;</button><strong>Information!</strong> AstaXie launched an open source program that provides <span class="label label-info">examples</span> for every function of <strong>Go Standard Library</strong>, you shouldn't miss this great project: <a target="_blank" href="https://github.com/astaxie/gopkg/tree/master/{{.ImportPath}}" class="label label-success">gopkg</a>.
 			</div>
 			{{end}}
-			<div id ="navbar" class="hide">
+			<div id="navbar" class="hide">
 				<ul class="nav nav-list bs-docs-sidenav affix" style="left: 170px; top: 65px;">
 					<li><a href="#"><i class="icon-chevron-right"></i>Top</a></li>
 					<li><a href="#_index"><i class="icon-chevron-right"></i>Index</a></li>
 					<li><a href="#_files"><i class="icon-chevron-right"></i>Files</a></li>
 					{{if .IsHasSubdirs}}<li><a href="#_subdirs"><i class="icon-chevron-right"></i>Directories</a></li>{{end}}
 					<li><a href="#_bottom"><i class="icon-chevron-right"></i>Bottom</a></li>
-					{{if .HasExports}}<li><a href="#search_exports" data-toggle="modal"><i class="icon-chevron-right"></i>Search Exports</a></li>{{end}}
+					{{if .HasExports}}<li><a href="#search_exports" data-toggle="modal"><i class="icon-chevron-right"></i>Search Exports</a></li>{{end}}		
+					{{if .IsGoRepo}}
+					{{else}}
+						<li><a href="#tags_modal" data-toggle="modal"><i class="icon-chevron-right"></i>Tags</a></li>
+					{{end}}
 				</ul>
 			</div>
 			{{if .HasExports}}

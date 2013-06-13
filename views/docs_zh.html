@@ -21,7 +21,11 @@
 					<li><a href="#_files"><i class="icon-chevron-right"></i>文件</a></li>
 					{{if .IsHasSubdirs}}<li><a href="#_subdirs"><i class="icon-chevron-right"></i>目录</a></li>{{end}}
 					<li><a href="#_bottom"><i class="icon-chevron-right"></i>底部</a></li>
-					{{if .HasExports}}<li><a href="#search_exports" data-toggle="modal"><i class="icon-chevron-right"></i>搜索导出对象</a></li>{{end}}
+					{{if .HasExports}}<li><a href="#search_exports" data-toggle="modal"><i class="icon-chevron-right"></i>搜索导出对象</a></li>{{end}}		
+					{{if .IsGoRepo}}
+					{{else}}
+						<li><a href="#tags_modal" data-toggle="modal"><i class="icon-chevron-right"></i>项目标签</a></li>
+					{{end}}
 				</ul>
 			</div>
 			{{if .HasExports}}
