@@ -401,6 +401,8 @@ func generatePage(this *HomeController, pdoc *doc.Package, q string, lang string
 	this.Data["Consts"] = pdoc.Consts
 	for i, v := range pdoc.Consts {
 		buf.Reset()
+		v.Decl = template.HTMLEscapeString(v.Decl)
+		v.Decl = strings.Replace(v.Decl, "&#34;", "\"", -1)
 		utils.FormatCode(&buf, &v.Decl, links)
 		v.FmtDecl = buf.String()
 		pdoc.Consts[i] = v
@@ -521,7 +523,7 @@ func ConvertDataFormat(pdoc *doc.Package, pdecl *models.PkgDecl) error {
 			case 1: // Doc
 				val.Doc = s
 			case 2: // Decl
-				val.Decl = template.HTMLEscapeString(s)
+				val.Decl = s
 			case 3: // URL
 				val.URL = s
 			}

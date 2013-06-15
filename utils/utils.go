@@ -168,6 +168,8 @@ func FormatCode(w io.Writer, code *string, links []*Link) {
 					fmt.Fprintf(w, `<a class="ext" title="%s" target="_blank" href="%s">%s</a>%s`,
 						link.Comment, link.Path, link.Name, seg[l-1:])
 				}
+			} else if seg[len(seg)-1] != '\n' {
+				fmt.Fprintf(w, "<span id=\"%s\">%s</span>", seg, seg)
 			} else {
 				fmt.Fprintf(w, "%s", seg)
 			}
