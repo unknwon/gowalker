@@ -183,6 +183,8 @@ func (this *HomeController) Get() {
 
 	if len(reqUrl) == 0 && len(q) > 0 {
 		reqUrl = q
+		this.Redirect("/"+reqUrl, 302)
+		return
 	}
 
 	// Set properties
