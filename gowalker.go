@@ -12,7 +12,7 @@
 // License for the specific language governing permissions and limitations
 // under the License.
 
-// Go Walker is a web server for Go project source code analysis.
+// Go Walker is a web server that generates Go projects API documentation with source code on the fly.
 package main
 
 import (
@@ -22,13 +22,18 @@ import (
 	"runtime"
 	"time"
 
-	"github.com/Unknwon/gowalker/controllers"
 	"github.com/Unknwon/gowalker/utils"
 	"github.com/astaxie/beego"
 )
 
 const (
-	VERSION = "0.3.2.0616" // Application version.
+	VERSION = "0.3.3.0619" // Application version.
+)
+
+var (
+	logTicker   *time.Ticker
+	logFileName string
+	logFile     *os.File
 )
 
 func init() {
@@ -36,41 +41,56 @@ func init() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
 
 	// Set application log level.
-	beego.SetLevel(beego.LevelTrace)
+	beego.SetLevel(beego.LevelInfo)
 
-	// Initialize log file.
+	// ----- Initialize log file -----
 	os.Mkdir("./log", os.ModePerm)
-	// Compute log file name as format '<year>-<month>-<day>.txt', eg.'2013-5-6.txt'.
-	logName := fmt.Sprintf("./log/%d-%d-%d.txt", time.Now().Year(), time.Now().Month(), time.Now().Day())
-	// Open or create log file.
-	var fl *os.File
-	var err error
-	if utils.IsExist(logName) {
-		fl, err = os.OpenFile(logName, os.O_RDWR|os.O_APPEND, 0644)
-	} else {
-		fl, err = os.Create(logName)
+
+	// Start log ticker.
+	logTicker = time.NewTicker(time.Minute)
+	go logTickerCheck(logTicker.C)
+
+	beego.Info("Go Walker", VERSION)
+	setLogger()
+}
+
+// logTickerCheck checks for log files.
+// Because we need to record log in different files for different time period.
+func logTickerCheck(logChan <-chan time.Time) {
+	for {
+		t := <-logChan
+		setLogger()
 	}
-	if err != nil {
-		beego.Trace("Failed to init log file ->", err)
+}
+
+// setLogger sets corresponding log file for beego.Logger.
+func setLogger() {
+	// Compute log file name as format '<year>-<month>-<day>.txt', eg.'2013-06-19.txt'.
+	logName := fmt.Sprintf("./log/%04d-%02d-%02d.txt",
+		time.Now().Year(), time.Now().Month(), time.Now().Day())
+	// Check if need to create new log file.
+	if logName == logFileName {
 		return
 	}
-	beego.Info("Go Walker", VERSION)
-	beego.SetLogger(log.New(fl, "", log.Ldate|log.Ltime))
+
+	logFileName = logName
+	// Open or create log file.
+	var err error
+	if utils.IsExist(logName) {
+		logFile, err = os.OpenFile(logName, os.O_RDWR|os.O_APPEND, 0644)
+	} else {
+		logFile, err = os.Create(logName)
+	}
+	if err != nil {
+		beego.Critical("Failed to init log file ->", err)
+		return
+	}
+
+	beego.SetLogger(log.New(logFile, "", log.Ldate|log.Ltime))
 }
 
 func main() {
 	beego.AppName = "Go Walker"
 	beego.Info("Go Walker", VERSION)
-
-	// Register routers.
-	beego.Router("/", &controllers.HomeController{})
-	beego.Router("/index", &controllers.IndexController{})
-	beego.Router("/tags", &controllers.TagsController{})
-	beego.Router("/about", &controllers.AboutController{})
-	beego.Router("/search", &controllers.SearchController{})
-	beego.Router("/refresh", &controllers.RefreshController{})
-
-	// For all unknown pages.
-	beego.Router("/:all", &controllers.HomeController{})
 	beego.Run()
 }
