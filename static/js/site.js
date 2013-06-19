@@ -18,8 +18,8 @@
         var footer = document.getElementById("footer");
         var homeleft = document.getElementById("homeleft");
         var homeright = document.getElementById("homeright");
-        if (document.body.clientWidth > 1200) {
-            var delta = document.body.clientWidth - 1200;
+        var delta = document.body.clientWidth - 1200;
+        if (delta > 0) {
             navbar.style.paddingLeft = delta / 2 + 20 + "px";
             navbar.style.paddingRight = delta / 2 + 70 + "px";
             searchBox.style.width = "";
@@ -29,7 +29,7 @@
                 homeBody.style.marginLeft = "-50px";
             }
 
-            homeleft.className = "span6 homeleft";
+            homeleft.style.width = "700px";
             homeright.className = "span6 homeright";
             footer.style.marginLeft = "0px";
             footer.className = "span6";
@@ -44,6 +44,7 @@
             }
 
             homeleft.className = "span6";
+            homeleft.style.width = "600px";
             homeright.className = "span6";
             footer.style.marginLeft = "20px";
             footer.className = "span6";
