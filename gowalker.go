@@ -22,6 +22,7 @@ import (
 	"runtime"
 	"time"
 
+	"github.com/Unknwon/gowalker/routers"
 	"github.com/Unknwon/gowalker/utils"
 	"github.com/astaxie/beego"
 )
@@ -41,7 +42,9 @@ func init() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
 
 	// Set application log level.
-	beego.SetLevel(beego.LevelInfo)
+	if beego.AppConfig.String("runmode") == "pro" {
+		beego.SetLevel(beego.LevelInfo)
+	}
 
 	// ----- Initialize log file -----
 	os.Mkdir("./log", os.ModePerm)
@@ -58,7 +61,7 @@ func init() {
 // Because we need to record log in different files for different time period.
 func logTickerCheck(logChan <-chan time.Time) {
 	for {
-		t := <-logChan
+		<-logChan
 		setLogger()
 	}
 }
@@ -92,5 +95,9 @@ func setLogger() {
 func main() {
 	beego.AppName = "Go Walker"
 	beego.Info("Go Walker", VERSION)
+
+	// Register routers.
+	beego.Router("/", &routers.HomeRouter{})
+
 	beego.Run()
 }

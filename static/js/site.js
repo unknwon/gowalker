@@ -1,188 +1,234 @@
 /**
- *	@create 2013/06/11
- *  @version 0.1 
+ *  @create 2013/06/11
+ *  @version 0.2
+ *  @author: chenwenli <kapa2robert@gmail.com>, Unknown <joe2010xtmf@163.com>
  */
 
-//add by chenwenli <kapa2robert@gmail.com>
-(function() {     
-	var $backToTopTxt = "Back to Top",$backToTopEle = $('<div class="backToTop"></div>').appendTo($("body")).attr("title", $backToTopTxt).click(function() {             
-		$("html, body").animate({ scrollTop: 0 }, 120);     
-	}), $backToTopFun = function() {         
-		var st = $(document).scrollTop(), winh = $(window).height();         
-		(st > 0)? $backToTopEle.show(): $backToTopEle.hide();        
-		//IE6下的定位         
-		if (!window.XMLHttpRequest) {             
-			$backToTopEle.css("top", st + winh - 166);         
-		}     
-	};     
-	$(window).bind("scroll", $backToTopFun);
-	$backToTopFun(); 
+(function () {
+    // Fit navbar padding.
+    Responsive();
+    $(window).resize(function () {
+        Responsive();
+    });
 
-	if (document.body.clientWidth > 1500 && document.getElementById("navbar") != null )
-	{
-		document.getElementById("navbar").className=""
-	}  
+    function Responsive() {
+        var navbar = document.getElementById("navbar");
+        var searchBox = document.getElementById("navbar_search_box");
+        var homeBody = document.getElementById("home_content");
+        var footer = document.getElementById("footer");
+        var homeleft = document.getElementById("homeleft");
+        var homeright = document.getElementById("homeright");
+        if (document.body.clientWidth > 1200) {
+            var delta = document.body.clientWidth - 1200;
+            navbar.style.paddingLeft = delta / 2 + 20 + "px";
+            navbar.style.paddingRight = delta / 2 + 70 + "px";
+            searchBox.style.width = "";
 
-	var _ep = $('#search_exports');
-	if(_ep.length != 0){
-		_ep.modal({ keyboard: false, show: false }); // for export modal
-		
-        $('#search_form').submit(function(){
-            var input = $.trim(document.getElementById("search_export_box").value)
-			if(input.length > 0 ){
-				_ep.modal('hide');
-	 			var anchor = "#".concat(input.replace(".", "_"));
-	 			location.hash = anchor;	
-			}
-			_ep.find('input[type=text]').val("");
-			return false;
-        });
-	}else{
-		_ep = null;
-	}
-	
-	// For tags modal.
-	var _tf = $('#tags_modal');
-	if(_tf.length != 0){
-		_tf.modal({ keyboard: false, show: false }); // For tags modal.
+            // Home page.
+            if (homeBody != null) {
+                homeBody.style.marginLeft = "-50px";
+            }
 
-        $('#tags_form').submit(function(){
-			var _tf = $('#tags_modal');
-			_tf.modal('hide');
-			_tf.find('input[type=text]').val("");
-			return false;
-        });
-	}else{
-		_tf = null;
-	}
+            homeleft.className = "span6 homeleft";
+            homeright.className = "span6 homeright";
+            footer.style.marginLeft = "0px";
+            footer.className = "span6";
+        } else {
+            navbar.style.paddingLeft = "30px";
+            navbar.style.paddingRight = "10px";
+            searchBox.style.width = "150px";
 
-	//for global modal 
-   	var _modal = $("#_keyshortcut");
-    _modal.modal({ keyboard: true, show: false });
-   	  
-    var isProjectPage = 0;
-    var preKeyG = 0;
-    	if(  document.getElementById("navbar") != null){
-    		isProjectPage = 1;
+            // Home page.
+            if (homeBody != null) {
+                homeBody.style.marginLeft = "0px";
+            }
 
-    	}else{
-    		// Mute options in control panel.
-    		_modal.find('tbody > tr').each(function(i,ele){
-    			if(i == 2 || i ==5 || i ==6){
-    				$(ele).addClass("muted");
-    			}
-    		})
-    	}
-
-    function  GkeyCb(callback){
-    	if(preKeyG ==1 ){
-       	  	callback();
-       	}
-       	preKeyG = 0;
+            homeleft.className = "span6";
+            homeright.className = "span6";
+            footer.style.marginLeft = "20px";
+            footer.className = "span6";
+        }
     }
 
-	$(document).keypress(function(event){
-		if($('input:focus').length != 0){
-			return true;
-		}
-		var code = event.keyCode ? event.keyCode : event.charCode;
-		if(code == 63 ){// for '?'  equal as  63
-		    if(_ep) _ep.modal('hide');
-		    if(_tf) _tf.modal('hide');
-		    _modal.modal('show');
-		}else if(code == 47){ //for '/'    forward slash code:47
-			if(_ep) _ep.modal('hide');
-		    if(_tf) _tf.modal('hide');
-		    _modal.modal('hide');
-		    //site search focus
-		    $('input[name=q]').first().focus();
-		    return false;
-		}else if( code == 46 && isProjectPage){ //for '.'    comma as 46   'go to export'
-		    if(_tf) _tf.modal('hide');
-			_modal.modal('hide');  
-			if(_ep) {
-				_ep.modal('show');
-				_ep.on('shown',function(){
-					$(this).find('#search_export_box').focus();	
-				})
-			}
-		}else if( code == 103){// for 'g then g'   g 103
-			if(_ep) _ep.modal('hide');
-		    if(_tf) _tf.modal('hide');
-			_modal.modal('hide');
-			if(preKeyG == 0 ){
-				preKeyG  =1;
-				setTimeout(function(){ preKeyG = 0 }, 2000);
-				return false;
-	   		}
-		//                           console.log(preKeyG);
-			GkeyCb(function(){
-				$("html,body").animate({ scrollTop: 0 }, 120);
-			});
-				
-		}else if( code ==  98){//for 'g then b'    b 98
-			if(_ep) _ep.modal('hide');
-		    if(_tf) _tf.modal('hide');
-			_modal.modal('hide');
-			GkeyCb(function(){
-				$("html,body").animate({ scrollTop :$("body").height() } ,120);
-	   		});
+    var $backToTopTxt = "Back to Top", $backToTopEle = $('<div class="backToTop"></div>').appendTo($("body")).attr("title", $backToTopTxt).click(function () {
+        $("html, body").animate({ scrollTop: 0 }, 120);
+    }), $backToTopFun = function () {
+        var st = $(document).scrollTop(), winh = $(window).height();
+        (st > 0) ? $backToTopEle.show() : $backToTopEle.hide();
+        //IE6下的定位
+        if (!window.XMLHttpRequest) {
+            $backToTopEle.css("top", st + winh - 166);
+        }
+    };
+    $(window).bind("scroll", $backToTopFun);
+    $backToTopFun();
 
-	    }else if( code ==  105){//for 'g then i'     i  105
-     		if(_ep) _ep.modal('hide');
-		    if(_tf) _tf.modal('hide');
-     		_modal.modal('hide');
-     		GkeyCb(function(){
-     			location.hash = "#_index" ;
-     		});
-	    }else if(code == 116){ // for `g then t`	t 	116
-     		if(_ep) _ep.modal('hide');
-			_modal.modal('hide');  
-			if(_tf) {
-				_tf.modal('show');
-				_tf.on('shown',function(){
-					$(this).find('#tags_box').focus();	
-				})
-			}
-	    }   
-	    // else if( code == 101 ){// for 'g then e'   e 101
-	    //  		if(_ep) _ep.modal('hide');
-	    //  		_modal.modal('hide');
-	    //  		GkeyCb(function(){
-	    //  			location.hash = "#Chunk";
-	    //  		});
-	    // } 
-	})
-	//end 
+    if (document.body.clientWidth > 1500 && document.getElementById("navbar") != null) {
+        document.getElementById("navbar").className = ""
+    }
+
+    var _ep = $('#search_exports');
+    if (_ep.length != 0) {
+        _ep.modal({ keyboard: false, show: false }); // for export modal
+
+        $('#search_form').submit(function () {
+            var input = $.trim(document.getElementById("search_export_box").value)
+            if (input.length > 0) {
+                _ep.modal('hide');
+                var anchor = "#".concat(input.replace(".", "_"));
+                location.hash = anchor;
+            }
+            _ep.find('input[type=text]').val("");
+            return false;
+        });
+    } else {
+        _ep = null;
+    }
+
+    // For tags modal.
+    var _tf = $('#tags_modal');
+    if (_tf.length != 0) {
+        _tf.modal({ keyboard: false, show: false }); // For tags modal.
+
+        $('#tags_form').submit(function () {
+            var _tf = $('#tags_modal');
+            _tf.modal('hide');
+            _tf.find('input[type=text]').val("");
+            return false;
+        });
+    } else {
+        _tf = null;
+    }
+
+    //for global modal
+    var _modal = $("#_keyshortcut");
+    _modal.modal({ keyboard: true, show: false });
+
+    var isProjectPage = 0;
+    var preKeyG = 0;
+    if (document.getElementById("navbar") != null) {
+        isProjectPage = 1;
+
+    } else {
+        // Mute options in control panel.
+        _modal.find('tbody > tr').each(function (i, ele) {
+            if (i == 2 || i == 5 || i == 6) {
+                $(ele).addClass("muted");
+            }
+        })
+    }
+
+    function GkeyCb(callback) {
+        if (preKeyG == 1) {
+            callback();
+        }
+        preKeyG = 0;
+    }
+
+    $(document).keypress(function (event) {
+        if ($('input:focus').length != 0) {
+            return true;
+        }
+        var code = event.keyCode ? event.keyCode : event.charCode;
+        if (code == 63) {// for '?'  equal as  63
+            if (_ep) _ep.modal('hide');
+            if (_tf) _tf.modal('hide');
+            _modal.modal('show');
+        } else if (code == 47) { //for '/'    forward slash code:47
+            if (_ep) _ep.modal('hide');
+            if (_tf) _tf.modal('hide');
+            _modal.modal('hide');
+            //site search focus
+            $('input[name=q]').first().focus();
+            return false;
+        } else if (code == 46 && isProjectPage) { //for '.'    comma as 46   'go to export'
+            if (_tf) _tf.modal('hide');
+            _modal.modal('hide');
+            if (_ep) {
+                _ep.modal('show');
+                _ep.on('shown', function () {
+                    $(this).find('#search_export_box').focus();
+                })
+            }
+        } else if (code == 103) {// for 'g then g'   g 103
+            if (_ep) _ep.modal('hide');
+            if (_tf) _tf.modal('hide');
+            _modal.modal('hide');
+            if (preKeyG == 0) {
+                preKeyG = 1;
+                setTimeout(function () {
+                    preKeyG = 0
+                }, 2000);
+                return false;
+            }
+            //                           console.log(preKeyG);
+            GkeyCb(function () {
+                $("html,body").animate({ scrollTop: 0 }, 120);
+            });
+
+        } else if (code == 98) {//for 'g then b'    b 98
+            if (_ep) _ep.modal('hide');
+            if (_tf) _tf.modal('hide');
+            _modal.modal('hide');
+            GkeyCb(function () {
+                $("html,body").animate({ scrollTop: $("body").height() }, 120);
+            });
+
+        } else if (code == 105) {//for 'g then i'     i  105
+            if (_ep) _ep.modal('hide');
+            if (_tf) _tf.modal('hide');
+            _modal.modal('hide');
+            GkeyCb(function () {
+                location.hash = "#_index";
+            });
+        } else if (code == 116) { // for `g then t`	t 	116
+            if (_ep) _ep.modal('hide');
+            _modal.modal('hide');
+            if (_tf) {
+                _tf.modal('show');
+                _tf.on('shown', function () {
+                    $(this).find('#tags_box').focus();
+                })
+            }
+        }
+        // else if( code == 101 ){// for 'g then e'   e 101
+        //  		if(_ep) _ep.modal('hide');
+        //  		_modal.modal('hide');
+        //  		GkeyCb(function(){
+        //  			location.hash = "#Chunk";
+        //  		});
+        // }
+    })
+    //end
 })();
 
 // Add tag.
-function AddTagSubmit(obj){
+function AddTagSubmit(obj) {
     var input = $.trim(document.getElementById("tags_box").value);
-	if(input.length > 0 ){
-		var anchor;
-		if(window.location.href.indexOf("?") > -1){
-			anchor = window.location.href.replace("?", ":tag=" + input + "?");
-		} else {
-			anchor = window.location.href + ":tag=" + input;
-		}
-		window.location.href = anchor;	
-		return false;
-	}
+    if (input.length > 0) {
+        var anchor;
+        if (window.location.href.indexOf("?") > -1) {
+            anchor = window.location.href.replace("?", ":tag=" + input + "?");
+        } else {
+            anchor = window.location.href + ":tag=" + input;
+        }
+        window.location.href = anchor;
+        return false;
+    }
 }
 
 // Remove tag.
-function RemoveTagSubmit(obj){
+function RemoveTagSubmit(obj) {
     var input = $.trim(document.getElementById("tags_box").value);
-	if(input.length > 0 ){
-		var anchor;
-		if(window.location.href.indexOf("?") > -1){
-			anchor = window.location.href.replace("?", ":rtag=" + input + "?");
-		} else {
-			anchor = window.location.href + ":rtag=" + input;
-		}
-		window.location.href = anchor;	
-		return false;
-	}
+    if (input.length > 0) {
+        var anchor;
+        if (window.location.href.indexOf("?") > -1) {
+            anchor = window.location.href.replace("?", ":rtag=" + input + "?");
+        } else {
+            anchor = window.location.href + ":rtag=" + input;
+        }
+        window.location.href = anchor;
+        return false;
+    }
 }
 //end
