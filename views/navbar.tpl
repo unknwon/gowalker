@@ -1,5 +1,5 @@
 {{define "navbar_en"}}
-		<div class="navbar navbar-fixed-top" >
+		<div id="fixed_top" class="navbar navbar-fixed-top" >
 			<div class="navbar-inner">
 				<div id="navbar">
 					<a class="brand" href="/">Go Walker</a>

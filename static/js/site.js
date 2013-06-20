@@ -12,17 +12,21 @@
     });
 
     function Responsive() {
+        var fixedTop = document.getElementById("fixed_top");
         var navbar = document.getElementById("navbar");
         var searchForm = document.getElementById("top_search_form");
         var searchBox = document.getElementById("navbar_search_box");
+        var body = document.getElementById("body");
         var homeBody = document.getElementById("home_content");
         var footer = document.getElementById("footer");
         var delta = document.body.clientWidth - 1100;
 
         if (delta > 0) {
+            fixedTop.className = "navbar navbar-fixed-top";
             navbar.style.paddingLeft = delta / 2 + 40 + "px";
             navbar.style.paddingRight = delta / 2 + 70 + "px";
             searchBox.style.width = "";
+            body.style.paddingTop = "60px";
 
             // Home page.
             if (homeBody != null) {
@@ -31,6 +35,7 @@
 
             footer.style.marginLeft = "0px";
         } else {
+            fixedTop.className = "navbar";
             navbar.style.paddingLeft = "30px";
             navbar.style.paddingRight = "10px";
 
@@ -40,6 +45,7 @@
                 searchForm.className = "navbar-search pull-right";
                 searchBox.style.width = "150px";
             }
+            body.style.paddingTop = "0px";
 
             // Home page.
             if (homeBody != null) {
