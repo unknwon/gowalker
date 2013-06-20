@@ -1,38 +1,14 @@
-<!DOCTYPE html>
-<html>
-	<head>
-		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-		<link rel="shortcut icon" href="/static/img/favicon.ico" />
-		<meta name="author" content="Unknown"/>
-		 <!-- Stylesheets -->
-		<link href="/static/css/bootstrap.min.css" rel="stylesheet" />
-		<link href="/static/css/todc-bootstrap.css" rel="stylesheet" />
+{{template "header_en"}}
 		<title>Go Walker</title>
 	</head>
 
-	<body style="padding-top: 60px;">
-		<div class="navbar navbar-fixed-top" >
-			<div class="navbar-inner">
-				<div id="navbar">
-					<a class="brand" href="/">Go Walker</a>
-					<ul class="nav">
-						<li {{if .IsHome}}class="active"{{end}}><a href="/">Home</a></li>
-						<li {{if .IsIndex}}class="active"{{end}}><a href="/index">Index</a></li>
-						<li {{if .IsTags}}class="active"{{end}}><a href="/tags">Tags</a></li>
-						<li {{if .IsExamples}}class="active"{{end}}><a href="/examples">Examples</a></li>
-						<li {{if .IsAbout}}class="active"{{end}}><a href="/about">About</a></li>
-					</ul>
-					<form class="navbar-search pull-right" action="/">
-						<input id="navbar_search_box" class="search-query" type="text" placeholder="Search" name="q"></input>
-					</form>
-				</div>
-			</div>
-		</div>
-		<!--div class="alert">
-			<button type="button" class="close" data-dismiss="alert">&times;</button><strong>Warning!</strong> This is the <span class="label label-important">Beta</span> version of Go Walker, errors may occur at any time.
-		</div-->
-		<div class="container" style="width: 1100px;">
-			<div id="home_content" class="row" style="margin-left: -50px;">
+	<body style="padding-top: 60px; font-family: Microsoft Yahei; font-size: 13px;">
+		{{template "navbar_en" .}}
+		<div class="container" style="width: 1000px;">
+			<!-- <div class="alert">
+				<button type="button" class="close" data-dismiss="alert">&times;</button><strong>Warning!</strong> This is the <span class="label label-important">Beta</span> version of Go Walker, errors may occur at any time.
+			</div> -->
+			<div id="home_content" class="row">
 	    		<div class="page-header" style="margin-left: 20px;">
 					<h2 style="margin-top: 0">Search for Go projects. <small>Find a cup of source code.</small></h2>
 					<form action="/">
@@ -42,28 +18,69 @@
 						</div>
 					</form>
 	    		</div>
-	    		<div id="homeleft" class="span6">
+	    		<div id="homeleft" class="span6 homeleft">
 					<div>
 						<h4>What is this?</h4>
 						<p>Go Walker is a web server that generates <a target="_blank" href="http://golang.org/">Go</a> projects API documentation with source code on the fly from projects on <b><a target="_blank" href="https://bitbucket.org/">Bitbucket</a></b>, <b><a target="_blank" href="https://github.com/">Github</a></b>, <b><a target="_blank" href="http://code.google.com/">Google Code</a></b>, <b><a target="_blank" href="https://launchpad.net/">Launchpad</a></b>, <b><a target="_blank" href="http://git.oschina.net/">Git @ OSC</a></b> and <b><a target="_blank" href="https://code.csdn.net/">CSDN Code</a></b>.</p>
-						<p>Main features including <b>Code View</b>, <b>Link Jump</b>, etc.</p>
+						<p>Awesome features including 
+						<button class="btn feature" title="" data-content="View function or method code with nice highlight in the same page, reduce rake up space and do more work at the same time." data-placement="bottom" data-toggle="popover" data-original-title="Code View">Code View</button>
+						<button class="btn feature" title="" data-content="Quick jump to functions, methods and types from imported packages, reduce time to find." data-placement="top" data-toggle="popover" data-original-title="Link Jump">Link Jump</button>
+						and <a href="/about">More</a>.</p>
 						<p class="text-success">Please read the  <a href="/about">About Page</a> for information about adding projects to Go Walker and more.</p>
 					</div>
 		    		<div>
-						<h4>What are other people looking at.</h4>
+						<h4>What other people are looking at.</h4>
+						<table id="rectable" class="table table-bordered table-hover">
+							<thead>
+								<tr>
+									<th>Import Path</th>
+									<th>Viewd Time(Local)</th>
+								</tr>
+							</thead>
+							<tbody>
+							{{range .RecentPros}}
+								<tr>
+									<td><a title="{{.Synopsis}}" href="/{{.Path}}">{{.Path}}</a>{{if .IsGoRepo}} <span class="label label-info">Standard</span>{{end}}</td>
+									<td>{{.ViewedTime}}</td>
+								</tr>
+							{{end}}
+							</tbody>
+						</table>
+						<script>
+							(function(){
+								var node = document.getElementById("rectable");
+								var child = node.getElementsByTagName("tr");
+								var d1 = new Date();
+								for(var i=1;i<child.length;i++){
+									var t = parseInt(node.rows[i].cells[1].innerHTML);
+									var d = new Date(t * 1000);
+									node.rows[i].cells[1].innerHTML = d.toLocaleString();
+								}
+							})();
+						</script>
 		    		</div>
 				</div>
 	    		<div id="homeright" class="span6 homeright">
 	    			<div>
 	    				<h4>Announcement <small><a href="/announcements">More.</a></small></h4>
-	    				<p>Test announcement.</p>
+	    				<p>New version of Go Walker has been released, features including add examples for projects by <a target="_blank" href="https://gist.github.com/">Gist</a>, view project documentation by Tags.</p>
 	    				<button class="btn btn-primary">Learn more</button>
 	    			</div>
 	    			<div>
-	    				<h4>Popular Examples</h4>
+						<h4>Popular Projects</h4>
+						<ul class="unstyled">
+							{{range .PopPros}}
+							<li><span class="badge">{{.Views}}</span> <a title="{{.Synopsis}}" href="/{{.Path}}">{{.Path}}</a></li>
+							{{end}}
+						</ul>
 	    			</div>
 	    			<div>
-						<h4>Popular Projects</h4>
+	    				<h4>Popular Examples</h4>
+						<ul class="unstyled">
+							{{range .PopExams}}
+							<li><span class="badge">{{.Views}}</span> <a href="/{{.Path}}">{{.Path}}</a></li>
+							{{end}}
+						</ul>
 	    			</div>
 	    			<div>
 						<h4>More Projects</h4>
@@ -76,30 +93,7 @@
 	    		</div>
     		</div>
 		</div>
-		<footer>
-			<div class="container" style="padding-top: 10px; width: 1150px;">
-				<div id="footer" class="span6" style="width: 405px;">
-					<p><strong>Copyright © 2013 Go Walker</strong></p>
-					<p>Website built by <a target="_blank" href="https://github.com/Unknwon"><i class="icon-user"></i> @Unknown</a>. Powered by <a target="_blank" href="https://github.com/astaxie/beego"><i class="icon-bold"></i>eego</a>, <a target="_blank" href="https://github.com/coocood/qbs">Qbs</a>, <a target="_blank" href="https://github.com/mattn/go-sqlite3">go-sqlite3</a>.</p>
-					<p>Based on <a href="http://twitter.github.io/bootstrap/">Bootstrap</a>. Icons from <a href="http://glyphicons.com/">Glyphicons</a>.</p>
-					<p>Send us <a href="mailto:joe2010xtmf#163.com"><i class="icon-envelope"></i> Feedback</a> or submit <a target="_blank" href="https://github.com/Unknwon/gowalker/issues"><i class="icon-tasks"></i> Website Issues</a>.</p>
-					<p><strong>Language:</strong></p>
-				</div>
-				<div class="span6" style="margin-top: 25px;">
-					<div style="text-align: center;">
-						<img src="/static/img/qiniu.png">
-					</div>
-					<div style="text-align: center;margin-top: 15px;">
-						<img src="/static/img/Golang.png">
-						<img src="/static/img/bee.gif" style="width: 58px;">
-						<img src="/static/img/linode.png">
-					</div>
-				</div>
-			</div>
-		</footer>
-		<script type="text/javascript" src="/static/js/jquery.js"></script>
-		<script type="text/javascript" src="/static/js/bootstrap.min.js"></script>
-		<script type='text/javascript' src='/static/js/site.js'></script>
+		{{template "footer_en" .}}
 	</body>
 </html>
 

@@ -13,14 +13,14 @@
 
     function Responsive() {
         var navbar = document.getElementById("navbar");
+        var searchForm = document.getElementById("top_search_form");
         var searchBox = document.getElementById("navbar_search_box");
         var homeBody = document.getElementById("home_content");
         var footer = document.getElementById("footer");
-        var homeleft = document.getElementById("homeleft");
-        var homeright = document.getElementById("homeright");
-        var delta = document.body.clientWidth - 1200;
+        var delta = document.body.clientWidth - 1100;
+
         if (delta > 0) {
-            navbar.style.paddingLeft = delta / 2 + 20 + "px";
+            navbar.style.paddingLeft = delta / 2 + 40 + "px";
             navbar.style.paddingRight = delta / 2 + 70 + "px";
             searchBox.style.width = "";
 
@@ -29,25 +29,24 @@
                 homeBody.style.marginLeft = "-50px";
             }
 
-            homeleft.style.width = "700px";
-            homeright.className = "span6 homeright";
             footer.style.marginLeft = "0px";
-            footer.className = "span6";
         } else {
             navbar.style.paddingLeft = "30px";
             navbar.style.paddingRight = "10px";
-            searchBox.style.width = "150px";
+
+            if (document.body.clientWidth < 700) {
+                searchForm.className = "navbar-search pull-right hide";
+            } else {
+                searchForm.className = "navbar-search pull-right";
+                searchBox.style.width = "150px";
+            }
 
             // Home page.
             if (homeBody != null) {
                 homeBody.style.marginLeft = "0px";
             }
 
-            homeleft.className = "span6";
-            homeleft.style.width = "600px";
-            homeright.className = "span6";
             footer.style.marginLeft = "20px";
-            footer.className = "span6";
         }
     }
 
@@ -64,8 +63,8 @@
     $(window).bind("scroll", $backToTopFun);
     $backToTopFun();
 
-    if (document.body.clientWidth > 1500 && document.getElementById("navbar") != null) {
-        document.getElementById("navbar").className = ""
+    if (document.body.clientWidth > 1200 && document.getElementById("sidebar") != null) {
+        document.getElementById("sidebar").className = ""
     }
 
     var _ep = $('#search_exports');
@@ -101,19 +100,18 @@
         _tf = null;
     }
 
-    //for global modal
+    // For global modal.
     var _modal = $("#_keyshortcut");
     _modal.modal({ keyboard: true, show: false });
-
     var isProjectPage = 0;
     var preKeyG = 0;
-    if (document.getElementById("navbar") != null) {
+    if (document.getElementById("sidebar") != null) {
         isProjectPage = 1;
 
     } else {
         // Mute options in control panel.
         _modal.find('tbody > tr').each(function (i, ele) {
-            if (i == 2 || i == 5 || i == 6) {
+            if (i == 2 || i == 5 || i == 6 || i == 7) {
                 $(ele).addClass("muted");
             }
         })
@@ -191,14 +189,13 @@
                     $(this).find('#tags_box').focus();
                 })
             }
+        } else if (code == 101) {// for 'g then e'   e 101
+            if (_ep) _ep.modal('hide');
+            _modal.modal('hide');
+            GkeyCb(function () {
+                location.hash = "#Chunk";
+            });
         }
-        // else if( code == 101 ){// for 'g then e'   e 101
-        //  		if(_ep) _ep.modal('hide');
-        //  		_modal.modal('hide');
-        //  		GkeyCb(function(){
-        //  			location.hash = "#Chunk";
-        //  		});
-        // }
     })
     //end
 })();
