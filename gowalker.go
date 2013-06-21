@@ -99,5 +99,7 @@ func main() {
 	// Register routers.
 	beego.Router("/", &routers.HomeRouter{})
 
+	// For all unknown pages.
+	beego.Router("/:all", &routers.HomeRouter{})
 	beego.Run()
 }

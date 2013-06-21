@@ -6,7 +6,7 @@
 					<ul class="nav">
 						<li {{if .IsHome}}class="active"{{end}}><a href="/">Home</a></li>
 						<li {{if .IsIndex}}class="active"{{end}}><a href="/index">Index</a></li>
-						<li {{if .IsTags}}class="active"{{end}}><a href="/tags">Tags</a></li>
+						<li {{if .IsLabels}}class="active"{{end}}><a href="/labels">Labels</a></li>
 						<li {{if .IsExamples}}class="active"{{end}}><a href="/examples">Examples</a></li>
 						<li {{if .IsAbout}}class="active"{{end}}><a href="/about">About</a></li>
 					</ul>

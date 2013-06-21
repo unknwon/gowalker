@@ -13,7 +13,7 @@
 			      <tr><td align="right"><b>g</b> then <b>g</b></td><td> : Go to top of page</td></tr>
 			      <tr><td align="right"><b>g</b> then <b>b</b></td><td> : Go to bottom of page</td></tr>
 			      <tr><td align="right"><b>g</b> then <b>i</b></td><td> : Go to index</td></tr>
-			      <tr><td align="right"><b>g</b> then <b>t</b></td><td> : Add or remove tags</td></tr>
+			      <tr><td align="right"><b>g</b> then <b>l</b></td><td> : Add or remove labels</td></tr>
 			      <tr><td align="right"><b>g</b> then <b>e</b></td><td> : Go to examples</td></tr>
 		          </tbody>
 		      </table>

@@ -15,8 +15,10 @@
 package routers
 
 import (
+	"fmt"
 	"strings"
 
+	"github.com/Unknwon/gowalker/doc"
 	"github.com/Unknwon/gowalker/models"
 	"github.com/Unknwon/gowalker/utils"
 	"github.com/astaxie/beego"
@@ -123,5 +125,35 @@ func (this *HomeRouter) Get() {
 		this.Data["PopPros"], this.Data["PopExams"] = models.GetPopulars(20, 12)
 		// Set standard library keyword type-ahead.
 		this.Data["DataSrc"] = utils.GoRepoSet
+	} else {
+		// Documentation page.
+		broPath := reqUrl // Browse path.
+
+		// Check if it is standard library.
+		if utils.IsGoRepoPath(broPath) {
+			broPath = "code.google.com/p/go/source/browse/src/pkg/" + broPath
+		}
+
+		// Check if it is a remote path that can be used for 'gopm get', if not means it's a keyword.
+		if !utils.IsValidRemotePath(broPath) {
+			// Show search page
+			this.Redirect("/search?q="+reqUrl, 302)
+			return
+		}
+
+		// Check documentation of this import path, and update automatically as needed.
+		pdoc, err := doc.CheckDoc(reqUrl, doc.HUMAN_REQUEST)
+		if err == nil {
+			// Generate documentation page.
+			fmt.Println("Generate documentation page.")
+			_ = pdoc
+			return
+		} else {
+			beego.Error("HomeRouter.Get ->", err)
+		}
+
+		// Show search page
+		this.Redirect("/search?q="+reqUrl, 302)
+		return
 	}
 }

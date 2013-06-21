@@ -21,18 +21,16 @@ Go Walker is a web server that generates <a target="_blank" href="http://golang.
 - [Qbs](http://gowalker.org/github.com/coocood/qbs): **Query by Struct** is an excellent ORM, it supports MySQL, SQLite3 and PosgreSQL.
 - [go-sqlite3](http://gowalker.org/github.com/mattn/go-sqlite3): SQLite3 database driver for Go; it **implemented `database/sql` interface** which is a very big deal for code migration; it requires cgo.
 
-## Acknowledge
+## Credits
 
 - [chenwenli](http://www.lavachen.cn) Thanks for adding feature of [Control Panel](http://gowalker.org/about#control_panel).
 - [atotto](https://github.com/atotto) Thanks for translating site user interface to Japanese.
+- Source files that contain code that is from [gddo](https://github.com/garyburd/gddo) is honored in specific.
 
 ## Todo
 
 - Add specialized markdown to HTML function for parsing readme in gowalker.
-- Add user system and compatible for using gopm in the future.
-- Add support for user submit examples.
-- Add support for multi-language documentation.
 
 ## License
 
-[Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.html), some part of code in this project is from [gopkgdoc](https://github.com/garyburd/gopkgdoc),see [File Change Log](FileChangeLog.md) for deatil.
+[Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.html).

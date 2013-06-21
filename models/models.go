@@ -35,26 +35,26 @@ const (
 
 // PkgInfo is package information.
 type PkgInfo struct {
-	Id          int64
-	Path        string `qbs:"index"` // Import path of package.
-	Synopsis    string
-	Views       int64     `qbs:"index"`
-	Created     time.Time `qbs:"index"` // Time when information last updated.
-	ViewedTime  int64     // User viewed time(Unix-timestamp).
-	ProName     string    // Name of the project.
-	Etag, Tags  string    // Revision tag and project tags.
-	ImportedNum int       // Number of packages that imports this project.
-	ImportPid   string    // Packages id of packages that imports this project.
+	Id            int64
+	Path          string `qbs:"index"` // Import path of package.
+	Branchs, Tags string // All branches and tags of project.
+	IsCmd         bool
+	Synopsis      string
+	Views         int64     `qbs:"index"`
+	Updated       time.Time `qbs:"index"` // Time when information last updated.
+	ViewedTime    int64     // User viewed time(Unix-timestamp).
+	ProName       string    // Name of the project.
+	Etag, Labels  string    // Revision tag and project labels.
+	ImportedNum   int       // Number of packages that imports this project.
+	ImportPid     string    // Packages id of packages that imports this project.
 }
 
 // PkgDecl is package declaration in database acceptable form.
 type PkgDecl struct {
-	Path      string `qbs:"pk,index"` // Import path of package.
-	Doc       string // Package documentation.
-	Truncated bool   // True if package documentation is incomplete.
-
-	// Environment.
-	Goos, Goarch string
+	Id          int64
+	Path        string `qbs:"index"` // Import path of package.
+	Branch, Tag string // Project branch and tag.
+	Doc         string // Package documentation.
 
 	// Top-level declarations.
 	Consts, Funcs, Types, Vars string
@@ -62,6 +62,7 @@ type PkgDecl struct {
 	// Internal declarations.
 	Iconsts, Ifuncs, Itypes, Ivars string
 
+	Examples         string // Function or method example.
 	Notes            string // Source code notes.
 	Files, TestFiles string // Source files.
 	Dirs             string // Subdirectories
@@ -116,44 +117,6 @@ func init() {
 	mg.CreateTableIfNotExists(new(PkgExam))
 
 	beego.Trace("Initialized database ->", DB_NAME)
-}
-
-// GetProInfo returns package information from database.
-func GetPkgInfo(path string) (*PkgInfo, error) {
-	// Check path length to reduce connect times.
-	if len(path) == 0 {
-		return nil, errors.New("models.GetPkgInfo(): Empty path as not found.")
-	}
-
-	// Connect to database.
-	q := connDb()
-	defer q.Close()
-
-	pinfo := new(PkgInfo)
-	err := q.WhereEqual("path", path).Find(pinfo)
-
-	return pinfo, err
-}
-
-// GetGroupPkgInfo returns group of package infomration in order to reduce database connect times.
-func GetGroupPkgInfo(paths []string) ([]*PkgInfo, error) {
-	// Connect to database.
-	q := connDb()
-	defer q.Close()
-
-	pinfos := make([]*PkgInfo, 0, len(paths))
-	for _, v := range paths {
-		if len(v) > 0 {
-			pinfo := new(PkgInfo)
-			err := q.WhereEqual("path", v).Find(pinfo)
-			if err == nil {
-				pinfos = append(pinfos, pinfo)
-			} else {
-				pinfos = append(pinfos, &PkgInfo{Path: v})
-			}
-		}
-	}
-	return pinfos, nil
 }
 
 // GetPkgInfoById returns package information from database by pid.
@@ -265,63 +228,6 @@ func updateImportInfo(q *qbs.Qbs, path string, pid int, add bool) {
 	}
 
 	// Error means this project does not exist, simply skip.
-}
-
-// DeleteProject deletes everything about the path in database, and update import information.
-func DeleteProject(path string) error {
-	// Check path length to reduce connect times. (except launchpad.net)
-	if path[0] != 'l' && len(strings.Split(path, "/")) <= 2 {
-		return errors.New("models.DeleteProject(): Short path as not needed.")
-	}
-
-	// Connect to database.
-	q := connDb()
-	defer q.Close()
-
-	var i1, i2, i3 int64
-	// Delete package information.
-	info := new(PkgInfo)
-	err := q.WhereEqual("path", path).Find(info)
-	if err == nil {
-		i1, err = q.Delete(info)
-		if err != nil {
-			beego.Error("models.DeleteProject(): Information:", err)
-		}
-	}
-
-	// Delete package declaration
-	pdecl := new(PkgDecl)
-	err = q.WhereEqual("path", path).Find(pdecl)
-	if err == nil {
-		i2, err = q.Delete(pdecl)
-		if err != nil {
-			beego.Error("models.DeleteProject(): Declaration:", err)
-		} else if info.Id > 0 && !utils.IsGoRepoPath(path) {
-			// Don't need to check standard library.
-			// Update import information.
-			imports := strings.Split(pdecl.Imports, "|")
-			imports = imports[:len(imports)-1]
-			for _, v := range imports {
-				if !utils.IsGoRepoPath(v) {
-					// Only count non-standard library.
-					updateImportInfo(q, v, int(info.Id), false)
-				}
-			}
-		}
-	}
-
-	// Delete package documentation
-	pdoc := &PkgDoc{Path: path}
-	i3, err = q.Delete(pdoc)
-	if err != nil {
-		beego.Error("models.DeleteProject(): Documentation:", err)
-	}
-
-	if i1+i2+i3 > 0 {
-		beego.Info("models.DeleteProject(", path, i1, i2, i3, ")")
-	}
-
-	return nil
 }
 
 // LoadProject gets package declaration from database.

@@ -61,12 +61,22 @@ var browsePatterns = []struct {
 		func(m []string) string { return m[1] + m[2] },
 	},
 	{
+		// Git @ OSC source browser.
+		regexp.MustCompile(`^https?://(git\.oschina\.net/[^/]+/[^/]+)(?:/tree/[^/]+(/.*))?$`),
+		func(m []string) string { return m[1] + m[2] },
+	},
+	{
+		// CSDN Code source browser.
+		regexp.MustCompile(`^https?://(code\.csdn\.net/[^/]+/[^/]+)(?:/tree/[^/]+(/.*))?$`),
+		func(m []string) string { return m[1] + m[2] },
+	},
+	{
 		// Bitbucket source borwser.
 		regexp.MustCompile(`^https?://(bitbucket\.org/[^/]+/[^/]+)(?:/src/[^/]+(/[^?]+)?)?`),
 		func(m []string) string { return m[1] + m[2] },
 	},
 	{
-		// Google Project Hosting source browser.
+		// Google Code source browser.
 		regexp.MustCompile(`^http:/+code\.google\.com/p/([^/]+)/source/browse(/[^?#]*)?(\?[^#]*)?(#.*)?$`),
 		importPathFromGoogleBrowse,
 	},
@@ -586,7 +596,6 @@ var (
 
 // IsValidRemotePath returns true if importPath is structurally valid for "go get".
 func IsValidRemotePath(importPath string) bool {
-
 	parts := strings.Split(importPath, "/")
 
 	if len(parts) <= 1 {
