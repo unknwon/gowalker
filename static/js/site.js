@@ -91,13 +91,13 @@
         _ep = null;
     }
 
-    // For tags modal.
-    var _tf = $('#tags_modal');
+    // For label modal.
+    var _tf = $('#label_modal');
     if (_tf.length != 0) {
         _tf.modal({ keyboard: false, show: false }); // For tags modal.
 
-        $('#tags_form').submit(function () {
-            var _tf = $('#tags_modal');
+        $('#label_form').submit(function () {
+            var _tf = $('#label_modal');
             _tf.modal('hide');
             _tf.find('input[type=text]').val("");
             return false;
@@ -192,7 +192,7 @@
             if (_tf) {
                 _tf.modal('show');
                 _tf.on('shown', function () {
-                    $(this).find('#tags_box').focus();
+                    $(this).find('#label_box').focus();
                 })
             }
         } else if (code == 101) {// for 'g then e'   e 101
@@ -207,14 +207,14 @@
 })();
 
 // Add tag.
-function AddTagSubmit(obj) {
-    var input = $.trim(document.getElementById("tags_box").value);
+function AddLabelSubmit(obj) {
+    var input = $.trim(document.getElementById("label_box").value);
     if (input.length > 0) {
         var anchor;
         if (window.location.href.indexOf("?") > -1) {
-            anchor = window.location.href.replace("?", ":tag=" + input + "?");
+            anchor = window.location.href.replace("?", ":l=" + input + "?");
         } else {
-            anchor = window.location.href + ":tag=" + input;
+            anchor = window.location.href + ":l=" + input;
         }
         window.location.href = anchor;
         return false;
@@ -222,14 +222,14 @@ function AddTagSubmit(obj) {
 }
 
 // Remove tag.
-function RemoveTagSubmit(obj) {
-    var input = $.trim(document.getElementById("tags_box").value);
+function RemoveLabelSubmit(obj) {
+    var input = $.trim(document.getElementById("label_box").value);
     if (input.length > 0) {
         var anchor;
         if (window.location.href.indexOf("?") > -1) {
-            anchor = window.location.href.replace("?", ":rtag=" + input + "?");
+            anchor = window.location.href.replace("?", ":rl=" + input + "?");
         } else {
-            anchor = window.location.href + ":rtag=" + input;
+            anchor = window.location.href + ":rl=" + input;
         }
         window.location.href = anchor;
         return false;

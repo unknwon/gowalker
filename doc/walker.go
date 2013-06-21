@@ -212,7 +212,7 @@ var buildPicPattern = regexp.MustCompile(`\[+!+\[+([a-zA-Z ]*)+\]+\(+[a-zA-z]+:/
 // build generates data from source files.
 func (w *walker) build(srcs []*source) (*Package, error) {
 	// Set created time.
-	w.pdoc.Updated = time.Now().UTC()
+	w.pdoc.Created = time.Now().UTC()
 
 	// Add source files to walker, I skipped references here.
 	w.srcs = make(map[string]*source)
@@ -278,7 +278,7 @@ func (w *walker) build(srcs []*source) (*Package, error) {
 	if err != nil {
 		if nogo {
 			err = nil
-			beego.Info("doc.walker.build(): No Go Source file.")
+			beego.Info("doc.walker.build -> No Go Source file")
 		} else {
 			return w.pdoc, errors.New("doc.walker.build -> " + err.Error())
 		}

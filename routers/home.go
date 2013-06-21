@@ -15,8 +15,13 @@
 package routers
 
 import (
-	"fmt"
+	"bytes"
+	"encoding/base32"
+	godoc "go/doc"
+	"html/template"
+	"path"
 	"strings"
+	"time"
 
 	"github.com/Unknwon/gowalker/doc"
 	"github.com/Unknwon/gowalker/models"
@@ -35,8 +40,8 @@ var (
 	recentViewedProNum = 20         // Maximum element number of recent viewed project list.
 	recentViewedPros   []*recentPro // Recent viewed project list.
 
-	tagList []string // Projects tag list.
-	tagSet  string   // Tags data source.
+	labelList []string // Projects label list.
+	labelSet  string   // Label data source.
 )
 
 func init() {
@@ -67,11 +72,11 @@ func init() {
 	}
 
 	// Initialize project tags.
-	tagList = strings.Split(beego.AppConfig.String("tags"), "|")
-	for _, s := range tagList {
-		tagSet += "&quot;" + s + "&quot;,"
+	labelList = strings.Split(beego.AppConfig.String("labels"), "|")
+	for _, s := range labelList {
+		labelSet += "&quot;" + s + "&quot;,"
 	}
-	tagSet = tagSet[:len(tagSet)-1]
+	labelSet = labelSet[:len(labelSet)-1]
 }
 
 // HomeRouter serves home and documentation pages.
@@ -127,6 +132,7 @@ func (this *HomeRouter) Get() {
 		this.Data["DataSrc"] = utils.GoRepoSet
 	} else {
 		// Documentation page.
+		this.TplNames = "docs_" + curLang.Lang + ".html"
 		broPath := reqUrl // Browse path.
 
 		// Check if it is standard library.
@@ -151,9 +157,25 @@ func (this *HomeRouter) Get() {
 		pdoc, err := doc.CheckDoc(reqUrl, tag, doc.HUMAN_REQUEST)
 		if err == nil {
 			// Generate documentation page.
-			fmt.Println("Generate documentation page.")
-			_ = pdoc
-			return
+			if pdoc != nil && generatePage(this, pdoc, broPath, curLang.Lang) {
+				// Update recent project list.
+				updateRecentPros(pdoc)
+				// Update project views.
+				pinfo := &models.PkgInfo{
+					Path:        pdoc.ImportPath,
+					Synopsis:    pdoc.Synopsis,
+					Created:     pdoc.Created,
+					ProName:     pdoc.ProjectName,
+					ViewedTime:  pdoc.ViewedTime,
+					Views:       pdoc.Views,
+					Etag:        pdoc.Etag,
+					Tags:        strings.Join(pdoc.Tags, "|||"),
+					ImportedNum: pdoc.ImportedNum,
+					ImportPid:   pdoc.ImportPid,
+				}
+				models.AddViews(pinfo)
+				return
+			}
 		} else {
 			beego.Error("HomeRouter.Get ->", err)
 		}
@@ -161,5 +183,447 @@ func (this *HomeRouter) Get() {
 		// Show search page
 		this.Redirect("/search?q="+reqUrl, 302)
 		return
+	}
+}
+
+// generatePage genarates documentation page for project.
+// it returns false when its a invaild(empty) project.
+func generatePage(this *HomeRouter, pdoc *doc.Package, q string, lang string) bool {
+	// Load project data from database.
+	pdecl, err := models.LoadProject(pdoc.ImportPath)
+	if err != nil {
+		beego.Error("HomeController.generatePage ->", err)
+		return false
+	}
+
+	// Set properties.
+	this.TplNames = "docs_" + lang + ".html"
+
+	// Refresh (within 10 seconds).
+	this.Data["IsRefresh"] = pdoc.Created.Add(10 * time.Second).UTC().After(time.Now().UTC())
+
+	// Get VCS name, project name, project home page, and Upper level project URL.
+	this.Data["VCS"], this.Data["ProName"], this.Data["ProPath"], this.Data["ProDocPath"] = getVCSInfo(q, pdoc)
+
+	if utils.IsGoRepoPath(pdoc.ImportPath) &&
+		strings.Index(pdoc.ImportPath, ".") == -1 {
+		this.Data["IsGoRepo"] = true
+	}
+
+	this.Data["Views"] = pdoc.Views + 1
+
+	// Labels.
+	this.Data["Labels"] = getLabels(pdoc.Labels)
+
+	// Introduction.
+	this.Data["ImportPath"] = pdoc.ImportPath
+	byts, _ := base32.StdEncoding.DecodeString(pdecl.Doc)
+	this.Data["PkgFullIntro"] = string(byts)
+
+	var buf bytes.Buffer
+	// Convert data format.
+	err = ConvertDataFormat(pdoc, pdecl)
+	if err != nil {
+		beego.Error("HomeController.generatePage -> ConvertDataFormat:", err)
+		return false
+	}
+
+	links := make([]*utils.Link, 0, len(pdoc.Types)+len(pdoc.Imports)+len(pdoc.Funcs)+10)
+	// Get all types, functions and import packages
+	for _, t := range pdoc.Types {
+		links = append(links, &utils.Link{
+			Name:    t.Name,
+			Comment: template.HTMLEscapeString(t.Doc),
+		})
+		buf.WriteString("&quot;" + t.Name + "&quot;,")
+	}
+
+	for _, f := range pdoc.Funcs {
+		links = append(links, &utils.Link{
+			Name:    f.Name,
+			Comment: template.HTMLEscapeString(f.Doc),
+		})
+		buf.WriteString("&quot;" + f.Name + "&quot;,")
+	}
+
+	for _, t := range pdoc.Types {
+		for _, f := range t.Funcs {
+			links = append(links, &utils.Link{
+				Name:    f.Name,
+				Comment: template.HTMLEscapeString(f.Doc),
+			})
+			buf.WriteString("&quot;" + f.Name + "&quot;,")
+		}
+
+		for _, m := range t.Methods {
+			buf.WriteString("&quot;" + t.Name + "." + m.Name + "&quot;,")
+		}
+	}
+
+	for _, v := range pdoc.Imports {
+		links = append(links, &utils.Link{
+			Name: path.Base(v) + ".",
+			Path: v,
+		})
+	}
+
+	exportDataSrc := buf.String()
+	if len(exportDataSrc) > 0 {
+		this.Data["HasExports"] = true
+		exportDataSrc = exportDataSrc[:len(exportDataSrc)-1]
+		// Set export keyword type-ahead.
+		this.Data["ExportDataSrc"] = exportDataSrc
+	}
+
+	// Index.
+	this.Data["IsHasConst"] = len(pdoc.Consts) > 0
+	this.Data["IsHasVar"] = len(pdoc.Vars) > 0
+	this.Data["Funcs"] = pdoc.Funcs
+	for i, f := range pdoc.Funcs {
+		buf.Reset()
+		godoc.ToHTML(&buf, f.Doc, nil)
+		f.Doc = buf.String()
+		buf.Reset()
+		utils.FormatCode(&buf, &f.Decl, links)
+		f.FmtDecl = buf.String()
+		buf.Reset()
+		utils.FormatCode(&buf, &f.Code, links)
+		f.Code = buf.String()
+		pdoc.Funcs[i] = f
+	}
+	this.Data["Types"] = pdoc.Types
+	for i, t := range pdoc.Types {
+		for j, f := range t.Funcs {
+			buf.Reset()
+			godoc.ToHTML(&buf, f.Doc, nil)
+			f.Doc = buf.String()
+			buf.Reset()
+			utils.FormatCode(&buf, &f.Decl, links)
+			f.FmtDecl = buf.String()
+			buf.Reset()
+			utils.FormatCode(&buf, &f.Code, links)
+			f.Code = buf.String()
+			t.Funcs[j] = f
+		}
+		for j, m := range t.Methods {
+			buf.Reset()
+			godoc.ToHTML(&buf, m.Doc, nil)
+			m.Doc = buf.String()
+			buf.Reset()
+			utils.FormatCode(&buf, &m.Decl, links)
+			m.FmtDecl = buf.String()
+			buf.Reset()
+			utils.FormatCode(&buf, &m.Code, links)
+			m.Code = buf.String()
+			t.Methods[j] = m
+		}
+		buf.Reset()
+		godoc.ToHTML(&buf, t.Doc, nil)
+		t.Doc = buf.String()
+		buf.Reset()
+		utils.FormatCode(&buf, &t.Decl, links)
+		t.FmtDecl = buf.String()
+		pdoc.Types[i] = t
+	}
+
+	// Constants.
+	this.Data["Consts"] = pdoc.Consts
+	for i, v := range pdoc.Consts {
+		buf.Reset()
+		v.Decl = template.HTMLEscapeString(v.Decl)
+		v.Decl = strings.Replace(v.Decl, "&#34;", "\"", -1)
+		utils.FormatCode(&buf, &v.Decl, links)
+		v.FmtDecl = buf.String()
+		pdoc.Consts[i] = v
+	}
+
+	// Variables.
+	this.Data["Vars"] = pdoc.Vars
+	for i, v := range pdoc.Vars {
+		buf.Reset()
+		utils.FormatCode(&buf, &v.Decl, links)
+		v.FmtDecl = buf.String()
+		pdoc.Vars[i] = v
+	}
+
+	// Dirs.
+	this.Data["IsHasSubdirs"] = len(pdoc.Dirs) > 0
+	pinfos := make([]*models.PkgInfo, 0, len(pdoc.Dirs))
+	for _, v := range pdoc.Dirs {
+		v = pdoc.ImportPath + "/" + v
+		if pinfo, err := models.GetPkgInfo(v); err == nil {
+			pinfos = append(pinfos, pinfo)
+		} else {
+			pinfos = append(pinfos, &models.PkgInfo{Path: v})
+		}
+	}
+	this.Data["Subdirs"] = pinfos
+
+	// Labels.
+	this.Data["LabelDataSrc"] = labelSet
+
+	this.Data["Files"] = pdoc.Files
+	this.Data["ImportPkgs"] = pdecl.Imports
+	this.Data["ImportPkgNum"] = len(pdoc.Imports) - 1
+	this.Data["IsImported"] = pdoc.ImportedNum > 0
+	this.Data["ImportPid"] = pdoc.ImportPid
+	this.Data["ImportedNum"] = pdoc.ImportedNum
+	this.Data["UtcTime"] = pdoc.Created
+	return true
+}
+
+// getVCSInfo returns VCS name, project name, project home page, and Upper level project URL.
+func getVCSInfo(q string, pdoc *doc.Package) (vcs, proName, proPath, pkgDocPath string) {
+	// Get project name.
+	lastIndex := strings.LastIndex(q, "/")
+	proName = q[lastIndex+1:]
+	if i := strings.Index(proName, "?"); i > -1 {
+		proName = proName[:i]
+	}
+
+	// Project VCS home page.
+	switch {
+	case q[0] == 'c': // code.google.com
+		vcs = "Google Code"
+		if strings.Index(q, "source/") == -1 {
+			proPath = strings.Replace(q, "/"+pdoc.ProjectName, "/"+pdoc.ProjectName+"/source/browse", 1)
+		} else {
+			proPath = q
+		}
+	case q[0] == 'g': // github.com
+		vcs = "Github"
+		if proName != pdoc.ProjectName {
+			// Not root.
+			proName := utils.GetProjectPath(pdoc.ImportPath)
+			proPath = strings.Replace(q, proName, proName+"/tree/master", 1)
+		} else {
+			proPath = q + "/tree/master"
+		}
+	case q[0] == 'b': // bitbucket.org
+		vcs = "BitBucket"
+		if proName != pdoc.ProjectName {
+			// Not root.
+			proPath = strings.Replace(q, "/"+pdoc.ProjectName, "/"+pdoc.ProjectName+"/src/default", 1)
+		} else {
+			proPath = q + "/src/default"
+		}
+	case q[0] == 'l': // launchpad.net
+		vcs = "Launchpad"
+		proPath = "bazaar." + strings.Replace(q, "/"+pdoc.ProjectName, "/+branch/"+pdoc.ProjectName+"/view/head:/", 1)
+	}
+
+	pkgDocPath = q[:lastIndex]
+
+	return vcs, proName, proPath, pkgDocPath
+}
+
+func getLabels(rawLabel string) []string {
+	// Get labels.
+	labels := strings.Split(beego.AppConfig.String("labels"), "|")
+
+	rawLabels := strings.Split(rawLabel, "|")
+	rawLabels = rawLabels[:len(rawLabels)-1] // The last element is always empty.
+	// Remove first character '$' in every label.
+	for i := range rawLabels {
+		rawLabels[i] = rawLabels[i][1:]
+		// Reassign label name.
+		for j, v := range labelList {
+			if rawLabels[i] == v {
+				rawLabels[i] = labels[j]
+				break
+			}
+		}
+	}
+	return rawLabels
+}
+
+// ConvertDataFormat converts data from database acceptable format to useable format.
+func ConvertDataFormat(pdoc *doc.Package, pdecl *models.PkgDecl) error {
+	// Consts
+	pdoc.Consts = make([]*doc.Value, 0, 5)
+	for _, v := range strings.Split(pdecl.Consts, "&$#") {
+		val := new(doc.Value)
+		for j, s := range strings.Split(v, "&V#") {
+			switch j {
+			case 0: // Name
+				val.Name = s
+			case 1: // Doc
+				val.Doc = s
+			case 2: // Decl
+				val.Decl = s
+			case 3: // URL
+				val.URL = s
+			}
+		}
+		pdoc.Consts = append(pdoc.Consts, val)
+	}
+	pdoc.Consts = pdoc.Consts[:len(pdoc.Consts)-1]
+
+	// Variables
+	pdoc.Vars = make([]*doc.Value, 0, 5)
+	for _, v := range strings.Split(pdecl.Vars, "&$#") {
+		val := new(doc.Value)
+		for j, s := range strings.Split(v, "&V#") {
+			switch j {
+			case 0: // Name
+				val.Name = s
+			case 1: // Doc
+				val.Doc = s
+			case 2: // Decl
+				val.Decl = s
+			case 3: // URL
+				val.URL = s
+			}
+		}
+		pdoc.Vars = append(pdoc.Vars, val)
+	}
+	pdoc.Vars = pdoc.Vars[:len(pdoc.Vars)-1]
+
+	// Functions
+	pdoc.Funcs = make([]*doc.Func, 0, 10)
+	for _, v := range strings.Split(pdecl.Funcs, "&$#") {
+		val := new(doc.Func)
+		for j, s := range strings.Split(v, "&F#") {
+			switch j {
+			case 0: // Name
+				val.Name = s
+			case 1: // Doc
+				val.Doc = s
+			case 2: // Decl
+				val.Decl = s
+			case 3: // URL
+				val.URL = s
+			case 4: // Code
+				val.Code = *codeDecode(&s)
+			}
+		}
+		pdoc.Funcs = append(pdoc.Funcs, val)
+	}
+	pdoc.Funcs = pdoc.Funcs[:len(pdoc.Funcs)-1]
+
+	// Types
+	pdoc.Types = make([]*doc.Type, 0, 10)
+	for _, v := range strings.Split(pdecl.Types, "&##") {
+		val := new(doc.Type)
+		for j, s := range strings.Split(v, "&$#") {
+			switch j {
+			case 0: // Type
+				for y, s2 := range strings.Split(s, "&T#") {
+					switch y {
+					case 0: // Name
+						val.Name = s2
+					case 1: // Doc
+						val.Doc = s2
+					case 2: // Decl
+						val.Decl = s2
+					case 3: // URL
+						val.URL = s2
+					}
+				}
+			case 1: // Functions
+				val.Funcs = make([]*doc.Func, 0, 2)
+				for _, v2 := range strings.Split(s, "&M#") {
+					val2 := new(doc.Func)
+					for y, s2 := range strings.Split(v2, "&F#") {
+						switch y {
+						case 0: // Name
+							val2.Name = s2
+						case 1: // Doc
+							val2.Doc = s2
+						case 2: // Decl
+							val2.Decl = s2
+						case 3: // URL
+							val2.URL = s2
+						case 4: // Code
+							val2.Code = *codeDecode(&s2)
+						}
+					}
+					val.Funcs = append(val.Funcs, val2)
+				}
+				val.Funcs = val.Funcs[:len(val.Funcs)-1]
+			case 3: // Methods.
+				val.Methods = make([]*doc.Func, 0, 5)
+				for _, v2 := range strings.Split(s, "&M#") {
+					val2 := new(doc.Func)
+					for y, s2 := range strings.Split(v2, "&F#") {
+						switch y {
+						case 0: // Name
+							val2.Name = s2
+						case 1: // Doc
+							val2.Doc = s2
+						case 2: // Decl
+							val2.Decl = s2
+						case 3: // URL
+							val2.URL = s2
+						case 4: // Code
+							val2.Code = *codeDecode(&s2)
+						}
+					}
+					val.Methods = append(val.Methods, val2)
+				}
+				val.Methods = val.Methods[:len(val.Methods)-1]
+			}
+		}
+		pdoc.Types = append(pdoc.Types, val)
+	}
+	pdoc.Types = pdoc.Types[:len(pdoc.Types)-1]
+
+	// Dirs.
+	pdoc.Dirs = strings.Split(pdecl.Dirs, "|")
+	pdoc.Dirs = pdoc.Dirs[:len(pdoc.Dirs)-1]
+
+	// Imports.
+	pdoc.Imports = strings.Split(pdecl.Imports, "|")
+
+	// Files.
+	pdoc.Files = strings.Split(pdecl.Files, "|")
+	return nil
+}
+
+func codeDecode(code *string) *string {
+	str := new(string)
+	byts, _ := base32.StdEncoding.DecodeString(*code)
+	*str = string(byts)
+	return str
+}
+
+func updateRecentPros(pdoc *doc.Package) {
+	// Only projects with import path length is less than 40 letters will be showed.
+	if len(pdoc.ImportPath) < 40 {
+		index := -1
+		listLen := len(recentViewedPros)
+		curPro := &recentPro{
+			Path:       pdoc.ImportPath,
+			Synopsis:   pdoc.Synopsis,
+			ViewedTime: time.Now().UTC().Unix(),
+			IsGoRepo: pdoc.ProjectName == "Go" &&
+				strings.Index(pdoc.ImportPath, ".") == -1,
+		}
+
+		pdoc.ViewedTime = curPro.ViewedTime
+
+		// Check if in the list
+		for i, s := range recentViewedPros {
+			if s.Path == curPro.Path {
+				index = i
+				break
+			}
+		}
+
+		s := make([]*recentPro, 0, recentViewedProNum)
+		s = append(s, curPro)
+		switch {
+		case index == -1 && listLen < recentViewedProNum:
+			// Not found and list is not full
+			s = append(s, recentViewedPros...)
+		case index == -1 && listLen >= recentViewedProNum:
+			// Not found but list is full
+			s = append(s, recentViewedPros[:recentViewedProNum-1]...)
+		case index > -1:
+			// Found
+			s = append(s, recentViewedPros[:index]...)
+			s = append(s, recentViewedPros[index+1:]...)
+		}
+		recentViewedPros = s
 	}
 }

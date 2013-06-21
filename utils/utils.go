@@ -38,7 +38,7 @@ func IsDocFile(n string) bool {
 	if strings.HasSuffix(n, ".go") && n[0] != '_' && n[0] != '.' {
 		return true
 	}
-	return readmePat.MatchString(n)
+	return strings.HasPrefix(strings.ToLower(n), "readme")
 }
 
 // A link describes the (HTML) link information for an identifier.

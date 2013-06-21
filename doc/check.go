@@ -50,7 +50,7 @@ func CheckDoc(path, tag string, requestType int) (*Package, error) {
 
 	// Get the package documentation from database.
 	pinfo, err := models.GetPkgInfo(path)
-
+	beego.Info("checkdoc:", pinfo.Created)
 	// If PACKAGE_VER does not match, refresh anyway.
 	if err != nil || !strings.HasPrefix(pinfo.Etag, PACKAGE_VER) {
 		// No package information in database.
@@ -64,14 +64,14 @@ func CheckDoc(path, tag string, requestType int) (*Package, error) {
 				needsCrawl = true
 			} else {
 				// Check if the documentation is too old (1 day ago).
-				needsCrawl = pinfo.Updated.Add(_TIME_DAY).UTC().Before(time.Now().UTC())
+				needsCrawl = pinfo.Created.Add(_TIME_DAY).UTC().Before(time.Now().UTC())
 			}
 		case REFRESH_REQUEST:
 			// Check if the documentation is too frequently (within 5 minutes).
-			needsCrawl = pinfo.Updated.Add(_REFRESH_LIMIT).UTC().Before(time.Now().UTC())
+			needsCrawl = pinfo.Created.Add(_REFRESH_LIMIT).UTC().Before(time.Now().UTC())
 			if !needsCrawl {
 				// Return error messages as limit time information.
-				return nil, errors.New(pinfo.Updated.Add(_REFRESH_LIMIT).UTC().String())
+				return nil, errors.New(pinfo.Created.Add(_REFRESH_LIMIT).UTC().String())
 			}
 		}
 	}
@@ -99,7 +99,7 @@ func CheckDoc(path, tag string, requestType int) (*Package, error) {
 			case err == errNotModified:
 				beego.Info("Serving", path, "without modified")
 				pdoc = &Package{}
-				pinfo.Updated = time.Now().UTC()
+				pinfo.Created = time.Now().UTC()
 				assginPkgInfo(pdoc, pinfo)
 				return pdoc, nil
 			case pdoc != nil:
@@ -125,7 +125,7 @@ func assginPkgInfo(pdoc *Package, pinfo *models.PkgInfo) {
 	pdoc.IsCmd = pinfo.IsCmd
 	pdoc.Synopsis = pinfo.Synopsis
 	pdoc.Views = pinfo.Views
-	pdoc.Updated = pinfo.Updated
+	pdoc.Created = pinfo.Created
 	pdoc.ProjectName = pinfo.ProName
 	pdoc.Etag = pinfo.Etag
 	pdoc.Labels = pinfo.Labels

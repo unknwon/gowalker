@@ -82,7 +82,7 @@ type Package struct {
 	ProjectName string
 
 	// Time when information last updated.
-	Updated time.Time
+	Created time.Time
 
 	Views, ViewedTime int64 // User viewed time(Unix-timestamp).
 

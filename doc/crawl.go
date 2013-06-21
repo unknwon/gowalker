@@ -112,7 +112,7 @@ func SaveProject(pdoc *Package, info *models.PkgInfo) error {
 		IsCmd:       pdoc.IsCmd,
 		Synopsis:    pdoc.Synopsis,
 		Views:       info.Views,
-		Updated:     time.Now().UTC(),
+		Created:     time.Now().UTC(),
 		ViewedTime:  time.Now().UTC().Unix(),
 		ProName:     pdoc.ProjectName,
 		Etag:        pdoc.Etag,

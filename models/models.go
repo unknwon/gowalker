@@ -40,7 +40,7 @@ type PkgInfo struct {
 	IsCmd        bool
 	Synopsis     string
 	Views        int64     `qbs:"index"`
-	Updated      time.Time `qbs:"index"` // Time when information last updated.
+	Created      time.Time `qbs:"index"` // Time when information last updated.
 	ViewedTime   int64     // User viewed time(Unix-timestamp).
 	ProName      string    // Name of the project.
 	Etag, Labels string    // Revision tag and project labels.
@@ -96,8 +96,7 @@ func setMg() (*qbs.Migration, error) {
 
 func init() {
 	// Initialize database.
-	os.RemoveAll("data/")
-	os.Mkdir("data", os.ModePerm)
+	os.Mkdir("data/", os.ModePerm)
 
 	qbs.Register(_SQLITE3_DRIVER, DB_NAME, "", qbs.NewSqlite3())
 	// Connect to database.
@@ -106,7 +105,7 @@ func init() {
 
 	mg, err := setMg()
 	if err != nil {
-		beego.Error("models.init():", err)
+		beego.Error("models.init ->", err)
 	}
 	defer mg.Close()
 
