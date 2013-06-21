@@ -39,12 +39,12 @@ type crawlResult struct {
 }
 
 // crawlDoc fetchs package from VCS.
-func crawlDoc(path string, pinfo *models.PkgInfo) (pdoc *Package, err error) {
+func crawlDoc(path, tag string, pinfo *models.PkgInfo) (pdoc *Package, err error) {
 	var pdocNew *Package
 
 	/* TODO */
 
-	pdocNew, err = getRepo(httpClient, path, pinfo.Etag)
+	pdocNew, err = getRepo(httpClient, path, tag, pinfo.Etag)
 
 	// For timeout logic in client.go to work, we cannot leave connections idling. This is ugly.
 	httpTransport.CloseIdleConnections()
@@ -59,9 +59,6 @@ func crawlDoc(path string, pinfo *models.PkgInfo) (pdoc *Package, err error) {
 
 	switch {
 	case err == nil:
-
-		/* TODO */
-
 		if err = SaveProject(pdoc, pinfo); err != nil {
 			beego.Error("doc.SaveProject(", path, ") ->", err)
 		}
@@ -75,7 +72,7 @@ func crawlDoc(path string, pinfo *models.PkgInfo) (pdoc *Package, err error) {
 }
 
 // getRepo downloads package data.
-func getRepo(client *http.Client, importPath string, etag string) (pdoc *Package, err error) {
+func getRepo(client *http.Client, importPath, tag, etag string) (pdoc *Package, err error) {
 	const VER_PREFIX = PACKAGE_VER + "-"
 
 	// Check version prefix.
@@ -87,11 +84,7 @@ func getRepo(client *http.Client, importPath string, etag string) (pdoc *Package
 
 	switch {
 	case utils.IsGoRepoPath(importPath):
-
-		/* TODO */
-
-		pdoc = &Package{}
-		// pdoc, err = getStandardDoc(client, importPath, etag)
+		pdoc, err = getStandardDoc(client, importPath, tag, etag)
 	case utils.IsValidRemotePath(importPath):
 		pdoc, err = getStatic(client, importPath, etag)
 		if err == errNoMatch {
@@ -115,13 +108,15 @@ func SaveProject(pdoc *Package, info *models.PkgInfo) error {
 	// Save package information.
 	pinfo := &models.PkgInfo{
 		Path:        pdoc.ImportPath,
+		Tags:        strings.Join(pdoc.Tags, "|||"),
+		IsCmd:       pdoc.IsCmd,
 		Synopsis:    pdoc.Synopsis,
+		Views:       info.Views,
 		Updated:     time.Now().UTC(),
 		ViewedTime:  time.Now().UTC().Unix(),
 		ProName:     pdoc.ProjectName,
-		Views:       info.Views,
 		Etag:        pdoc.Etag,
-		Tags:        pdoc.Tags,
+		Labels:      pdoc.Labels,
 		ImportedNum: info.ImportedNum,
 		ImportPid:   info.ImportPid,
 	}
@@ -129,6 +124,7 @@ func SaveProject(pdoc *Package, info *models.PkgInfo) error {
 	// Save package declaration.
 	pdecl := &models.PkgDecl{
 		Path: pdoc.ImportPath,
+		Tag:  pdoc.Tag,
 		Doc:  pdoc.Doc,
 	}
 	var buf bytes.Buffer

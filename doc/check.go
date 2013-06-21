@@ -18,7 +18,6 @@ package doc
 
 import (
 	"errors"
-	"fmt"
 	"strings"
 	"time"
 
@@ -40,7 +39,7 @@ const (
 
 // CheckDoc checks the project documentation from the database or from the version
 // control system as needed.
-func CheckDoc(path string, requestType int) (*Package, error) {
+func CheckDoc(path, tag string, requestType int) (*Package, error) {
 	// Package documentation and crawl sign.
 	pdoc, needsCrawl := &Package{}, false
 
@@ -81,7 +80,7 @@ func CheckDoc(path string, requestType int) (*Package, error) {
 		// Fetch package from VCS.
 		c := make(chan crawlResult, 1)
 		go func() {
-			pdoc, err = crawlDoc(path, pinfo)
+			pdoc, err = crawlDoc(path, tag, pinfo)
 			c <- crawlResult{pdoc, err}
 		}()
 
@@ -116,14 +115,13 @@ func CheckDoc(path string, requestType int) (*Package, error) {
 		assginPkgInfo(pdoc, pinfo)
 	}
 
-	return nil, errors.New(fmt.Sprint("doc.CheckDoc ->", err))
+	return pdoc, err
 }
 
 func assginPkgInfo(pdoc *Package, pinfo *models.PkgInfo) {
 	// Assgin package information
 	pdoc.ImportPath = pinfo.Path
-	pdoc.Branchs = pinfo.Branchs
-	pdoc.Tags = pinfo.Tags
+	pdoc.Tags = strings.Split(pinfo.Tags, "|||")
 	pdoc.IsCmd = pinfo.IsCmd
 	pdoc.Synopsis = pinfo.Synopsis
 	pdoc.Views = pinfo.Views

@@ -67,9 +67,9 @@ type Package struct {
 	// Package import path.
 	ImportPath string
 
-	// Project branch(s) and tag(s).
-	Branchs, Tags string // All branches and tags of project.
-	Branch, Tag   string
+	// Tags of project.
+	Tag  string
+	Tags []string
 
 	// Synopsis and full documentation for package.
 	Synopsis string

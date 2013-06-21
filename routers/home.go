@@ -141,8 +141,14 @@ func (this *HomeRouter) Get() {
 			return
 		}
 
+		// Get tag field.
+		tag := strings.TrimSpace(this.Input().Get("tag"))
+		if tag == "master" {
+			tag = ""
+		}
+
 		// Check documentation of this import path, and update automatically as needed.
-		pdoc, err := doc.CheckDoc(reqUrl, doc.HUMAN_REQUEST)
+		pdoc, err := doc.CheckDoc(reqUrl, tag, doc.HUMAN_REQUEST)
 		if err == nil {
 			// Generate documentation page.
 			fmt.Println("Generate documentation page.")

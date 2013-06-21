@@ -22,39 +22,38 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Unknwon/gowalker/utils"
 	"github.com/astaxie/beego"
 	"github.com/coocood/qbs"
 	_ "github.com/mattn/go-sqlite3"
 )
 
 const (
-	DB_NAME         = "./data/gowalker.db"
+	DB_NAME         = "data/gowalker.db"
 	_SQLITE3_DRIVER = "sqlite3"
 )
 
 // PkgInfo is package information.
 type PkgInfo struct {
-	Id            int64
-	Path          string `qbs:"index"` // Import path of package.
-	Branchs, Tags string // All branches and tags of project.
-	IsCmd         bool
-	Synopsis      string
-	Views         int64     `qbs:"index"`
-	Updated       time.Time `qbs:"index"` // Time when information last updated.
-	ViewedTime    int64     // User viewed time(Unix-timestamp).
-	ProName       string    // Name of the project.
-	Etag, Labels  string    // Revision tag and project labels.
-	ImportedNum   int       // Number of packages that imports this project.
-	ImportPid     string    // Packages id of packages that imports this project.
+	Id           int64
+	Path         string `qbs:"index"` // Import path of package.
+	Tags         string // All tags of project.
+	IsCmd        bool
+	Synopsis     string
+	Views        int64     `qbs:"index"`
+	Updated      time.Time `qbs:"index"` // Time when information last updated.
+	ViewedTime   int64     // User viewed time(Unix-timestamp).
+	ProName      string    // Name of the project.
+	Etag, Labels string    // Revision tag and project labels.
+	ImportedNum  int       // Number of packages that imports this project.
+	ImportPid    string    // Packages id of packages that imports this project.
 }
 
 // PkgDecl is package declaration in database acceptable form.
 type PkgDecl struct {
-	Id          int64
-	Path        string `qbs:"index"` // Import path of package.
-	Branch, Tag string // Project branch and tag.
-	Doc         string // Package documentation.
+	Id   int64
+	Path string `qbs:"index"` // Import path of package.
+	Tag  string // Project tag.
+	Doc  string // Package documentation.
 
 	// Top-level declarations.
 	Consts, Funcs, Types, Vars string
@@ -97,7 +96,8 @@ func setMg() (*qbs.Migration, error) {
 
 func init() {
 	// Initialize database.
-	os.Mkdir("./data", os.ModePerm)
+	os.RemoveAll("data/")
+	os.Mkdir("data", os.ModePerm)
 
 	qbs.Register(_SQLITE3_DRIVER, DB_NAME, "", qbs.NewSqlite3())
 	// Connect to database.
@@ -152,82 +152,6 @@ func GetGroupPkgInfoById(pids []string) ([]*PkgInfo, error) {
 		}
 	}
 	return pinfos, nil
-}
-
-// SaveProject save package information, declaration, documentation to database, and update import information.
-func SaveProject(pinfo *PkgInfo, pdecl *PkgDecl, pdoc *PkgDoc, imports []string) error {
-	// Connect to database.
-	q := connDb()
-	defer q.Close()
-
-	// Save package information.
-	info := new(PkgInfo)
-	err := q.WhereEqual("path", pinfo.Path).Find(info)
-	if err != nil {
-		_, err = q.Save(pinfo)
-	} else {
-		pinfo.Id = info.Id
-		_, err = q.Save(pinfo)
-	}
-	if err != nil {
-		beego.Error("models.SaveProject(): Information:", err)
-	}
-
-	// Save package declaration
-	if pdecl != nil {
-		_, err = q.Save(pdecl)
-		if err != nil {
-			beego.Error("models.SaveProject(): Declaration:", err)
-		}
-	}
-
-	// Save package documentation
-	if pdoc != nil && len(pdoc.Doc) > 0 {
-		_, err = q.Save(pdoc)
-		if err != nil {
-			beego.Error("models.SaveProject(): Documentation:", err)
-		}
-	}
-
-	// Don't need to check standard library.
-	if imports != nil && !utils.IsGoRepoPath(pinfo.Path) {
-		// Update import information.
-		for _, v := range imports {
-			if !utils.IsGoRepoPath(v) {
-				// Only count non-standard library.
-				updateImportInfo(q, v, int(pinfo.Id), true)
-			}
-		}
-	}
-	return nil
-}
-
-func updateImportInfo(q *qbs.Qbs, path string, pid int, add bool) {
-	// Save package information.
-	info := new(PkgInfo)
-	err := q.WhereEqual("path", path).Find(info)
-	if err == nil {
-		// Check if pid exists in this project.
-		i := strings.Index(info.ImportPid, "$"+strconv.Itoa(pid)+"|")
-		switch {
-		case i == -1 && add: // Add operation and does not contain.
-			info.ImportPid += "$" + strconv.Itoa(pid) + "|"
-			info.ImportedNum++
-			_, err = q.Save(info)
-			if err != nil {
-				beego.Error("models.updateImportInfo(): add:", path, err)
-			}
-		case i > -1 && !add: // Delete operation and contains.
-			info.ImportPid = strings.Replace(info.ImportPid, "$"+strconv.Itoa(pid)+"|", "", 1)
-			info.ImportedNum--
-			_, err = q.Save(info)
-			if err != nil {
-				beego.Error("models.updateImportInfo(): delete:", path, err)
-			}
-		}
-	}
-
-	// Error means this project does not exist, simply skip.
 }
 
 // LoadProject gets package declaration from database.
