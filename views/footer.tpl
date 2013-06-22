@@ -26,7 +26,7 @@
 		<footer id="_bottom">
 			<div class="container" style="padding-top: 10px; padding-bottom: 10px; width: 1050px;">
 				<div id="footer" class="span6" style="width: 440px;">
-					<script type="text/javascript" src="/static/js/jquery.js"></script>
+					<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
 					<script type="text/javascript" src="/static/js/bootstrap.min.js"></script>
 					<script type='text/javascript' src='/static/js/site.js'></script>
 					<p><strong>Copyright © 2013 Go Walker</strong></p>
@@ -42,45 +42,7 @@
 					    {{end}}
 					    </ul>
 				    </div>
-					<!-- <span class="muted">|</span>
-					<span>
-						<script type="text/javascript">
-							var _bdhmProtocol = (("https:" == document.location.protocol) ? " https://" : " http://");
-							document.write(unescape("%3Cscript src='" + _bdhmProtocol +"hm.baidu.com/h.js%3Fd2d5278d61e466bcb3f9ea29a18d40dc' type='text/javascript'%3E%3C/script%3E"));
-						</script>
-					</span>
-					<span class="muted">|</span>
-					<span>
-						<script type="text/javascript" src="http://tajs.qq.com/stats?sId=24262957" charset="UTF-8"></script>
-					</span> -->
-				</div>
-				{{if .IsHome}}
-				<div class="span6" style="margin-top: 25px;">
-					<div style="text-align: center;">
-						<img src="/static/img/qiniu.png">
-					</div>
-					<div style="text-align: center;margin-top: 15px;">
-						<img src="/static/img/Golang.png">
-						<img src="/static/img/bee.gif" style="width: 58px;">
-						<img src="/static/img/linode.png">
-					</div>
-				</div>
-				<script >
-					// Call popover for features.
-				    $(function () {
-				        $('.feature').popover()
-				    })
-				</script>
-				{{end}}
-				<script>
-				  // (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-				  // (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-				  // m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-				  // })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
-
-				  // ga('create', 'UA-40109089-2', 'gowalker.org');
-				  // ga('send', 'pageview');
-				</script>
+				   {{template "static_file" .}}
 			</div>
 		</footer>
 {{end}}
@@ -113,7 +75,7 @@
 		<footer id="_bottom">
 			<div class="container" style="padding-top: 10px; padding-bottom: 10px; width: 1050px;">
 				<div id="footer" class="span6" style="width: 440px;">
-					<script type="text/javascript" src="/static/js/jquery.js"></script>
+					<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
 					<script type="text/javascript" src="/static/js/bootstrap.min.js"></script>
 					<script type='text/javascript' src='/static/js/site.js'></script>
 					<p><strong>版权所有 © 2013 Go 步行者</strong></p>
@@ -129,6 +91,12 @@
 					    {{end}}
 					    </ul>
 				    </div>
+				   {{template "static_file" .}}
+			</div>
+		</footer>
+{{end}}
+
+{{define "static_file"}}
 					<!-- <span class="muted">|</span>
 					<span>
 						<script type="text/javascript">
@@ -168,6 +136,4 @@
 				  // ga('create', 'UA-40109089-2', 'gowalker.org');
 				  // ga('send', 'pageview');
 				</script>
-			</div>
-		</footer>
 {{end}}

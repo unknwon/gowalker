@@ -71,12 +71,26 @@ func getStandardDoc(client *http.Client, importPath, tag, savedEtag string) (pdo
 		dirName := strings.Split(string(m[1]), "?")[0]
 		// Make sure we get directories.
 		if strings.HasSuffix(dirName, "/") &&
-			checkGoogleGoFile(client, importPath+"/"+dirName, tag) {
+			utils.FilterFileName(dirName) {
 			dirs = append(dirs, strings.Replace(dirName, "/", "", -1))
 		}
 	}
 
-	if len(files) == 0 && len(dirs) == 0 {
+	srcDirs := make([]string, 0, len(dirs))
+	c := make([]chan bool, len(dirs))
+	// Filter direcotires.
+	for i, d := range dirs {
+		go func() {
+			c[i] <- checkGoogleGoFile(client, importPath+"/"+d, tag)
+		}()
+	}
+	for i, d := range dirs {
+		if ok := <-c[i]; ok {
+			srcDirs = append(srcDirs, d)
+		}
+	}
+
+	if len(files) == 0 && len(srcDirs) == 0 {
 		return nil, NotFoundError{"Directory tree does not contain Go files and subdirs."}
 	}
 
@@ -97,7 +111,7 @@ func getStandardDoc(client *http.Client, importPath, tag, savedEtag string) (pdo
 			Tags:        tags,
 			Tag:         tag,
 			Etag:        etag,
-			Dirs:        dirs,
+			Dirs:        srcDirs,
 		},
 	}
 	return w.build(files)

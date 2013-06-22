@@ -645,3 +645,16 @@ func joinPath(importPath string, num int) string {
 	}
 	return importPath
 }
+
+var filterFileNames = []string{
+	"test", "example", "static", "docs"}
+
+// FilterFileName guess the file or directory is or contains Go source files.
+func FilterFileName(name string) bool {
+	for _, v := range filterFileNames {
+		if strings.Contains(name, v) {
+			return false
+		}
+	}
+	return true
+}
