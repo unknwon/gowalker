@@ -22,9 +22,9 @@
 					{{if .IsHasConst}}<li><a href="#_constants"><i class="icon-chevron-right"></i>Constants</a></li>{{end}}
 					{{if .IsHasVar}}<li><a href="#_variables"><i class="icon-chevron-right"></i>Variables</a></li>{{end}}
 					<li><a href="#_files"><i class="icon-chevron-right"></i>Files</a></li>
-					{{if .IsHasSubdirs}}{{end}}<li><a href="#_subdirs"><i class="icon-chevron-right"></i>Directories</a></li>
+					{{if .IsHasSubdirs}}<li><a href="#_subdirs"><i class="icon-chevron-right"></i>Directories</a></li>{{end}}
 					<li><a href="#_bottom"><i class="icon-chevron-right"></i>Bottom</a></li>
-					{{if .HasExports}}{{end}}<li><a href="#search_exports" data-toggle="modal"><i class="icon-chevron-right"></i>Search Exports</a></li>
+					{{if .HasExports}}<li><a href="#search_exports" data-toggle="modal"><i class="icon-chevron-right"></i>Search Exports</a></li>{{end}}
 					{{if .IsGoRepo}}
 					{{else}}
 						<li><a href="#label_modal" data-toggle="modal"><i class="icon-chevron-right"></i>Labels</a></li>
