@@ -5,8 +5,9 @@ Go 步行者是一个用于在线生成并浏览 <a target="_blank" href="http:/
 
 ![](https://github.com/Unknwon/gowalker/blob/master/docs/images/whatisthis_ZH.png?raw=true)
 
-## 主要功能
+## 主要特性
 
+- 在超过 7000 个海量项目中 **搜索** 并 **查看** 文档。
 - 通过在首页的搜索框中输入外部包的 **导入路径** 或 **关键字** 进行搜索或在线生成文档。
 - **在线生成** Go 项目文档：不需要附加安装任何组件即可开始使用。
 - 当前包中公开函数和类型的 **鼠标悬浮提示** 和 **跳转链接**：减少寻找的时间。

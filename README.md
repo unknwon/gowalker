@@ -8,6 +8,7 @@ Go Walker is a web server that generates <a target="_blank" href="http://golang.
 
 ## Features
 
+- **Search** and **view** huge amounts documentation of projects: over 7000 projects involved.
 - Input the package **import path** or **keywords** in search boxes in home page to find or create documentation.
 - Generate Go project documentation **on the fly** : no more installation required for using.
 - **Mouse hover tip** and **jump link** for public functions and types in current package: reduce time to find.
