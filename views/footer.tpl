@@ -25,14 +25,14 @@
 		</div>
 		<footer id="_bottom">
 			<div class="container" style="padding-top: 10px; padding-bottom: 10px; width: 1050px;">
-				<div id="footer" class="span6" style="width: 440px; margin-left: 20px;">
+				<div id="footer" class="span6" style="width: {{if .IsHome}}440{{else}}600{{end}}px;">
 					<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
 					<script type="text/javascript" src="/static/js/bootstrap.min.js"></script>
 					<script type='text/javascript' src='/static/js/site.js'></script>
 					<p><strong>Copyright © 2013 Go Walker</strong></p>
 					<p>Website built by <a target="_blank" href="https://github.com/Unknwon"><i class="icon-user"></i> @Unknown</a>. Powered by <a target="_blank" href="https://github.com/astaxie/beego"><i class="icon-bold"></i>eego</a>, <a target="_blank" href="https://github.com/coocood/qbs">Qbs</a>, <a target="_blank" href="https://github.com/mattn/go-sqlite3">go-sqlite3</a>.</p>
-					<p>Based on <a target="_blank" href="http://twitter.github.io/bootstrap/">Bootstrap</a>. Icons from <a target="_blank" href="http://glyphicons.com/">Glyphicons</a>.</p>
-					<p>Send us <a href="mailto:joe2010xtmf#163.com"><i class="icon-envelope"></i> Feedback</a> or submit <a target="_blank" href="https://github.com/Unknwon/gowalker/issues"><i class="icon-tasks"></i> Website Issues</a>.</p><strong>Language:</strong>
+					{{if .IsHome}}<p>Based on <a target="_blank" href="http://twitter.github.io/bootstrap/">Bootstrap</a>. Icons from <a target="_blank" href="http://glyphicons.com/">Glyphicons</a>.</p>{{end}}
+					{{if .IsHome}}<p>{{end}}Send us <a href="mailto:joe2010xtmf#163.com"><i class="icon-envelope"></i> Feedback</a> or submit <a target="_blank" href="https://github.com/Unknwon/gowalker/issues"><i class="icon-tasks"></i> Website Issues</a>. {{if .IsHome}}</p>{{end}}<strong>Language:</strong>
 				    <div class="btn-group dropup">
 					    <button class="btn dropdown-toggle" data-toggle="dropdown">{{.CurLang}} <span class="caret"></span></button>
 					    <ul class="dropdown-menu">
@@ -74,14 +74,14 @@
 		</div>
 		<footer id="_bottom">
 			<div class="container" style="padding-top: 10px; padding-bottom: 10px; width: 1050px;">
-				<div id="footer" class="span6" style="width: 440px;">
+				<div id="footer" class="span6" style="width: {{if .IsHome}}440{{else}}600{{end}}px;">
 					<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
 					<script type="text/javascript" src="/static/js/bootstrap.min.js"></script>
 					<script type='text/javascript' src='/static/js/site.js'></script>
 					<p><strong>版权所有 © 2013 Go 步行者</strong></p>
 					<p>网站建设者 <a target="_blank" href="https://github.com/Unknwon"><i class="icon-user"></i> @Unknown</a>. 项目基于 <a target="_blank" href="https://github.com/astaxie/beego"><i class="icon-bold"></i>eego</a>，<a target="_blank" href="https://github.com/coocood/qbs">Qbs</a> 和 <a target="_blank" href="https://github.com/mattn/go-sqlite3">go-sqlite3</a> 构建。</p>
-					<p>界面基于 <a target="_blank" href="http://twitter.github.io/bootstrap/">Bootstrap</a>. 图标来自 <a target="_blank" href="http://glyphicons.com/">Glyphicons</a>.</p>
-					<p>发送 <a href="mailto:joe2010xtmf#163.com"><i class="icon-envelope"></i> 反馈</a> 或者提交 <a target="_blank" href="https://github.com/Unknwon/gowalker/issues"><i class="icon-tasks"></i> 网站问题</a>.</p><strong>语言选项：</strong>
+					{{if .IsHome}}<p>界面基于 <a target="_blank" href="http://twitter.github.io/bootstrap/">Bootstrap</a>. 图标来自 <a target="_blank" href="http://glyphicons.com/">Glyphicons</a>.</p>{{end}}
+					{{if .IsHome}}<p>{{end}}发送 <a href="mailto:joe2010xtmf#163.com"><i class="icon-envelope"></i> 反馈</a> 或者提交 <a target="_blank" href="https://github.com/Unknwon/gowalker/issues"><i class="icon-tasks"></i> 网站问题</a>. {{if .IsHome}}</p>{{end}}<strong>语言选项：</strong>
 				    <div class="btn-group dropup">
 					    <button class="btn dropdown-toggle" data-toggle="dropdown">{{.CurLang}} <span class="caret"></span></button>
 					    <ul class="dropdown-menu">

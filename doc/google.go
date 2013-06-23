@@ -76,21 +76,7 @@ func getStandardDoc(client *http.Client, importPath, tag, savedEtag string) (pdo
 		}
 	}
 
-	srcDirs := make([]string, 0, len(dirs))
-	c := make([]chan bool, len(dirs))
-	// Filter direcotires.
-	for i, d := range dirs {
-		go func() {
-			c[i] <- checkGoogleGoFile(client, importPath+"/"+d, tag)
-		}()
-	}
-	for i, d := range dirs {
-		if ok := <-c[i]; ok {
-			srcDirs = append(srcDirs, d)
-		}
-	}
-
-	if len(files) == 0 && len(srcDirs) == 0 {
+	if len(files) == 0 && len(dirs) == 0 {
 		return nil, NotFoundError{"Directory tree does not contain Go files and subdirs."}
 	}
 
@@ -111,7 +97,7 @@ func getStandardDoc(client *http.Client, importPath, tag, savedEtag string) (pdo
 			Tags:        tags,
 			Tag:         tag,
 			Etag:        etag,
-			Dirs:        srcDirs,
+			Dirs:        dirs,
 		},
 	}
 	return w.build(files)
@@ -136,14 +122,6 @@ func getGoogleTags(client *http.Client, importPath string) []string {
 		}
 	}
 	return tags
-}
-
-func checkGoogleGoFile(client *http.Client, path, tag string) bool {
-	p, err := httpGetBytes(client, "http://go.googlecode.com/hg/src/pkg/"+path+"/?r="+tag, nil)
-	if err != nil {
-		return false
-	}
-	return len(googleFileRe.FindAllSubmatch(p, -1)) > 0
 }
 
 func getGoogleDoc(client *http.Client, match map[string]string, savedEtag string) (*Package, error) {
