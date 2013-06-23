@@ -16,6 +16,7 @@ Go 步行者是一个用于在线生成并浏览 <a target="_blank" href="http:/
 - 标准库导入路径 **输入提示**。
 - 键盘快捷键 **控制面板**：与 godoc.org 兼容。
 - 使用 **标签** 标记项目：分类显示。
+- [完整文档](https://github.com/Unknwon/gowalker/blob/master/docs/Features_ZH.md).
 
 
 ## 第三方包

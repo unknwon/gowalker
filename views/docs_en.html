@@ -124,30 +124,14 @@
 							<pre class="accordion-inner">{{str2html .FmtDecl}} {<br />{{str2html .Code}}}</pre>
 						</div>
 	    			</div>
-	    			{{if .IsHasExam}}
-	    			{{with .Exam}}
-	    			<div class="accordion">
-	    				<div class="accordion-group">
-	    					<div class="accordion-heading">
-	    						<a class="accordion-toggle collapsed" data-toggle="collapse" href="#_ex_{{.Name}}">Example</a>
-	    					</div>
-	    					<div id="_ex_{{.Name}}" class="accordion-body collapse">
-		    					<div class="accordion-inner">
-		    					<p>Code:
-		    					</p><pre class="pre-x-scrollable">{{.Code}}</pre>
-		    					<p>Output:</p><pre class="pre-x-scrollable">{{.Output}}</pre>
-		    					</div>
-	    					</div>
-	    				</div>
-	    			</div>
-	    			{{end}}
-	    			{{end}}
+	    			{{template "example_en" .}}
 				{{end}}
 				{{range .Types}}
 					{{$typeName := .Name}}
 					<h3 id="{{.Name}}">type <a target="_blank" href="{{.URL}}">{{.Name}}</a></h3>
 					<pre class="pre-x-scrollable">{{str2html .FmtDecl}}</pre>
 					<p>{{str2html .Doc}}</p>
+	    			{{template "example_en" .}}
 					{{range .Funcs}}
 						<h4 id="{{.Name}}">func <a target="_blank" href="{{.URL}}">{{.Name}}</a> <small><a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion" href="#collapse_{{.Name}}">View Code</a></small></h4>
 						<pre>{{str2html .FmtDecl}}</pre>
@@ -157,6 +141,7 @@
 								<pre class="accordion-inner">{{str2html .FmtDecl}} {<br />{{str2html .Code}}}</pre>
 							</div>
 		    			</div>
+	    				{{template "example_en" .}}
 					{{end}}
 					{{range .Methods}}
 						<h4 id="{{$typeName}}_{{.Name}}">func <a target="_blank" href="{{.URL}}">{{.Name}}</a> <small><a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion" href="#collapse_{{$typeName}}_{{.Name}}">View Code</a></small></h4>
@@ -167,6 +152,7 @@
 								<pre class="accordion-inner">{{str2html .FmtDecl}} {<br />{{str2html .Code}}}</pre>
 							</div>
 			   			</div>
+	    				{{template "example_en" .}}
 					{{end}}
 				{{end}}
 				<h3 id="_files"><a target="_blank" href="http://{{.ProPath}}">Files</a></h3>
@@ -204,3 +190,24 @@
 		{{template "footer_en" .}}
 	</body>
 </html>
+
+{{define "example_en"}}
+	    			{{if .IsHasExam}}
+	    			{{with .Exam}}
+	    			<div class="accordion">
+	    				<div class="accordion-group">
+	    					<div class="accordion-heading">
+	    						<a class="accordion-toggle collapsed" data-toggle="collapse" href="#_ex_{{.Name}}">Example</a>
+	    					</div>
+	    					<div id="_ex_{{.Name}}" class="accordion-body collapse">
+		    					<div class="accordion-inner">
+		    					<p>Code:
+		    					</p><pre class="pre-x-scrollable">{{.Code}}</pre>
+		    					{{if .IsHasOutput}}<p>Output:</p><pre class="pre-x-scrollable">{{.Output}}</pre>{{end}}
+		    					</div>
+	    					</div>
+	    				</div>
+	    			</div>
+	    			{{end}}
+	    			{{end}}
+{{end}}

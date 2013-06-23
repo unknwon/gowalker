@@ -328,15 +328,23 @@ func generatePage(this *HomeRouter, pdoc *doc.Package, q, tag, lang string) bool
 	this.Data["Types"] = pdoc.Types
 	for i, t := range pdoc.Types {
 		for j, f := range t.Funcs {
-			buf.Reset()
-			godoc.ToHTML(&buf, f.Doc, nil)
-			f.Doc = buf.String()
+			if len(f.Doc) > 0 {
+				buf.Reset()
+				godoc.ToHTML(&buf, f.Doc, nil)
+				f.Doc = buf.String()
+				comNum++
+			}
 			buf.Reset()
 			utils.FormatCode(&buf, &f.Decl, links)
 			f.FmtDecl = buf.String()
 			buf.Reset()
 			utils.FormatCode(&buf, &f.Code, links)
 			f.Code = buf.String()
+			if i := getExample(pdoc, f.Name); i > -1 {
+				f.IsHasExam = true
+				f.Exam = pdoc.Examples[i]
+			}
+			totalNum++
 			t.Funcs[j] = f
 		}
 		for j, m := range t.Methods {
@@ -359,12 +367,20 @@ func generatePage(this *HomeRouter, pdoc *doc.Package, q, tag, lang string) bool
 			totalNum++
 			t.Methods[j] = m
 		}
-		buf.Reset()
-		godoc.ToHTML(&buf, t.Doc, nil)
-		t.Doc = buf.String()
+		if len(t.Doc) > 0 {
+			buf.Reset()
+			godoc.ToHTML(&buf, t.Doc, nil)
+			t.Doc = buf.String()
+			comNum++
+		}
 		buf.Reset()
 		utils.FormatCode(&buf, &t.Decl, links)
 		t.FmtDecl = buf.String()
+		if i := getExample(pdoc, t.Name); i > -1 {
+			t.IsHasExam = true
+			t.Exam = pdoc.Examples[i]
+		}
+		totalNum++
 		pdoc.Types[i] = t
 	}
 
@@ -645,6 +661,9 @@ func ConvertDataFormat(pdoc *doc.Package, pdecl *models.PkgDecl) error {
 				val.Code = *codeDecode(&s)
 			case 3: // Output
 				val.Output = s
+				if len(s) > 0 {
+					val.IsHasOutput = true
+				}
 			}
 		}
 		pdoc.Examples = append(pdoc.Examples, val)

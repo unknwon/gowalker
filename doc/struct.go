@@ -51,6 +51,8 @@ type Type struct {
 	IFuncs        []*Func // Internal functions that return this type.
 	Methods       []*Func // Exported methods.
 	IMethods      []*Func // Internal methods.
+	IsHasExam     bool
+	Exam          *Example
 }
 
 // Example represents function examples.
@@ -59,7 +61,8 @@ type Example struct {
 	Doc  string
 	Code string
 	//Play   string
-	Output string
+	Output      string
+	IsHasOutput bool
 }
 
 // PACKAGE_VER is modified when previously stored packages are invalid.
