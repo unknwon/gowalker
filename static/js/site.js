@@ -18,7 +18,6 @@
         var searchBox = document.getElementById("navbar_search_box");
         var body = document.getElementById("body");
         var homeBody = document.getElementById("home_content");
-        var footer = document.getElementById("footer");
         var delta = document.body.clientWidth - 1100;
 
         if (delta > 0) {
@@ -30,10 +29,8 @@
 
             // Home page.
             if (homeBody != null) {
-                homeBody.style.marginLeft = "-50px";
+                homeBody.style.marginLeft = "-20px";
             }
-
-            footer.style.marginLeft = "0px";
         } else {
             fixedTop.className = "navbar";
             navbar.style.paddingLeft = "30px";
@@ -51,8 +48,6 @@
             if (homeBody != null) {
                 homeBody.style.marginLeft = "0px";
             }
-
-            footer.style.marginLeft = "20px";
         }
     }
 
@@ -69,8 +64,8 @@
     $(window).bind("scroll", $backToTopFun);
     $backToTopFun();
 
-    if (document.body.clientWidth > 1200 && document.getElementById("sidebar") != null) {
-        document.getElementById("sidebar").className = ""
+    if (document.body.clientWidth > 1500 && document.getElementById("sidebar") != null) {
+        document.getElementById("sidebar").className = "span3"
     }
 
     var _ep = $('#search_exports');

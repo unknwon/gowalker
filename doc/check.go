@@ -50,7 +50,6 @@ func CheckDoc(path, tag string, requestType int) (*Package, error) {
 
 	// Get the package documentation from database.
 	pinfo, err := models.GetPkgInfo(path)
-	beego.Info("checkdoc:", pinfo.Created)
 	// If PACKAGE_VER does not match, refresh anyway.
 	if err != nil || !strings.HasPrefix(pinfo.Etag, PACKAGE_VER) {
 		// No package information in database.
@@ -97,18 +96,18 @@ func CheckDoc(path, tag string, requestType int) (*Package, error) {
 		if err != nil {
 			switch {
 			case err == errNotModified:
-				beego.Info("Serving", path, "without modified")
+				beego.Info("Serving(", path, ")without modified")
 				pdoc = &Package{}
 				pinfo.Created = time.Now().UTC()
 				assginPkgInfo(pdoc, pinfo)
 				return pdoc, nil
-			case pdoc != nil:
-				beego.Error("Serving", path, "with error:", err)
+			case len(pdoc.ImportPath) > 0:
+				beego.Error("Serving(", path, ")with error:", err)
 				return pdoc, nil
 			case err == errUpdateTimeout:
 				// Handle timeout on packages never seen before as not found.
-				beego.Error("Serving", path, "as not found after timeout")
-				return nil, errors.New("doc.CheckDoc -> Status not found")
+				beego.Error("Serving(", path, ")as not found after timeout")
+				return nil, errors.New("doc.CheckDoc -> " + err.Error())
 			}
 		}
 	} else {

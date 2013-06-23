@@ -1,0 +1,40 @@
+{{template "header_en"}}
+		<title>Go Walker - Search</title>
+	</head>
+		
+	<body id="body" style="padding-top: 60px; font-family: Microsoft Yahei; font-size: 13px;">
+		{{template "navbar_en" .}}
+		<div class="container" style="width: 1000px;">
+			<div class="row" style="margin-left: 20px;">
+				<h1>Search</h1>
+				<form action="/">
+					<div class="input-append">
+						<input autocomplete="off" class="span6" type="text" placeholder="Type import path to add or keywords to search" value="{{.Keyword}}" name="q" data-source="[{{str2html .DataSrc}}]" data-items="8" data-provide="typeahead"></input>
+						<button class="btn" type="submit">Go!</button>
+					</div>
+				</form>
+				{{if .IsFindPro}}
+				<table class="table table-condensed">
+					<thead>
+						<tr>
+							<th>Import Path</th>
+							<th>Synopsis</th>
+						</tr>
+					</thead>
+					<tbody>
+						{{range .AllPros}}
+						<tr>
+							<td><a href="/{{.Path}}">{{.Path}}</a></td>
+							<td>{{.Synopsis}}</td>
+						</tr>
+						{{end}}
+					</tbody>
+				</table>
+				{{else}}
+				<p>No projects found. </p>
+				{{end}}
+			</div>
+		</div>
+		{{template "footer_en" .}}
+	</body>
+</html>

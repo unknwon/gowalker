@@ -59,8 +59,8 @@ func getStandardDoc(client *http.Client, importPath, tag, savedEtag string) (pdo
 		if utils.IsDocFile(fname) {
 			files = append(files, &source{
 				name:      fname,
-				browseURL: "http://code.google.com/p/go/source/browse/src/pkg/" + importPath + "/" + fname + "?name=release",
-				rawURL:    "http://go.googlecode.com/hg-history/release/src/pkg/" + importPath + "/" + fname,
+				browseURL: "http://code.google.com/p/go/source/browse/src/pkg/" + importPath + "/" + fname + "?r=" + tag,
+				rawURL:    "http://go.googlecode.com/hg/src/pkg/" + importPath + "/" + fname + "?r=" + tag,
 			})
 		}
 	}

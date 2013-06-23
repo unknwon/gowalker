@@ -18,7 +18,6 @@ package models
 import (
 	"errors"
 	"os"
-	"strconv"
 	"strings"
 	"time"
 
@@ -118,41 +117,6 @@ func init() {
 	beego.Trace("Initialized database ->", DB_NAME)
 }
 
-// GetPkgInfoById returns package information from database by pid.
-func GetPkgInfoById(pid int) (*PkgInfo, error) {
-	// Connect to database.
-	q := connDb()
-	defer q.Close()
-
-	pinfo := new(PkgInfo)
-	err := q.WhereEqual("id", pid).Find(pinfo)
-
-	return pinfo, err
-}
-
-// GetGroupPkgInfoById returns group of package infomration by pid in order to reduce database connect times.
-// The formatted pid looks like '$<pid>|', so we need to cut '$' here.
-func GetGroupPkgInfoById(pids []string) ([]*PkgInfo, error) {
-	// Connect to database.
-	q := connDb()
-	defer q.Close()
-
-	pinfos := make([]*PkgInfo, 0, len(pids))
-	for _, v := range pids {
-		if len(v) > 1 {
-			pid, err := strconv.Atoi(v[1:])
-			if err == nil {
-				pinfo := new(PkgInfo)
-				err = q.WhereEqual("id", pid).Find(pinfo)
-				if err == nil {
-					pinfos = append(pinfos, pinfo)
-				}
-			}
-		}
-	}
-	return pinfos, nil
-}
-
 // LoadProject gets package declaration from database.
 func LoadProject(path string) (*PkgDecl, error) {
 	// Check path length to reduce connect times.
@@ -215,7 +179,7 @@ func SearchDoc(key string) ([]*PkgInfo, error) {
 
 	var pkgInfos []*PkgInfo
 	condition := qbs.NewCondition("path like ?", "%"+key+"%").Or("synopsis like ?", "%"+key+"%")
-	err := q.Condition(condition).Limit(200).OrderBy("path").FindAll(&pkgInfos)
+	err := q.Condition(condition).Limit(200).OrderBy("pro_name").FindAll(&pkgInfos)
 	return pkgInfos, err
 }
 
@@ -288,8 +252,8 @@ func GetTagsPageInfo() (WFPros, ORMPros, DBDPros, GUIPros, NETPros, TOOLPros []*
 	return WFPros, ORMPros, DBDPros, GUIPros, NETPros, TOOLPros, nil
 }
 
-// UpdateTagInfo updates prohect tag information, returns false if the project does not exist.
-func UpdateTagInfo(path string, tag string, add bool) bool {
+// UpdateLabelInfo updates prohect tag information, returns false if the project does not exist.
+func UpdateLabelInfo(path string, tag string, add bool) bool {
 	// Connect to database.
 	q := connDb()
 	defer q.Close()
@@ -306,13 +270,13 @@ func UpdateTagInfo(path string, tag string, add bool) bool {
 		info.Tags += "$" + tag + "|"
 		_, err = q.Save(info)
 		if err != nil {
-			beego.Error("models.UpdateTagInfo(): add:", path, err)
+			beego.Error("models.UpdateLabelInfo -> add:", path, err)
 		}
 	case i > -1 && !add: // Delete opetation and contains.
 		info.Tags = strings.Replace(info.Tags, "$"+tag+"|", "", 1)
 		_, err = q.Save(info)
 		if err != nil {
-			beego.Error("models.UpdateTagInfo(): add:", path, err)
+			beego.Error("models.UpdateLabelInfo -> delete:", path, err)
 		}
 	}
 

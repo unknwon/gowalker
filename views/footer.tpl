@@ -25,7 +25,7 @@
 		</div>
 		<footer id="_bottom">
 			<div class="container" style="padding-top: 10px; padding-bottom: 10px; width: 1050px;">
-				<div id="footer" class="span6" style="width: 440px;">
+				<div id="footer" class="span6" style="width: 440px; margin-left: 20px;">
 					<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
 					<script type="text/javascript" src="/static/js/bootstrap.min.js"></script>
 					<script type='text/javascript' src='/static/js/site.js'></script>

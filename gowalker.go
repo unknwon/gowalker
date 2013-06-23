@@ -28,7 +28,7 @@ import (
 )
 
 const (
-	VERSION = "0.4.0.0623" // Application version.
+	VERSION = "0.4.1.0623" // Application version.
 )
 
 var (
@@ -98,6 +98,7 @@ func main() {
 
 	// Register routers.
 	beego.Router("/", &routers.HomeRouter{})
+	beego.Router("/search", &routers.SearchRouter{})
 
 	// For all unknown pages.
 	beego.Router("/:all", &routers.HomeRouter{})
