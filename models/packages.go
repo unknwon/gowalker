@@ -17,10 +17,12 @@ package models
 import (
 	"errors"
 	"strconv"
+
+	"github.com/coocood/qbs"
 )
 
 // GetProInfo returns package information from database.
-func GetPkgInfo(path string) (*PkgInfo, error) {
+func GetPkgInfo(path, tag string) (*PkgInfo, error) {
 	// Check path length to reduce connect times.
 	if len(path) == 0 {
 		return nil, errors.New("models.GetPkgInfo -> Empty path as not found.")
@@ -32,7 +34,13 @@ func GetPkgInfo(path string) (*PkgInfo, error) {
 
 	pinfo := new(PkgInfo)
 	err := q.WhereEqual("path", path).Find(pinfo)
+	if err != nil {
+		return pinfo, err
+	}
 
+	pdecl := new(PkgDecl)
+	cond := qbs.NewCondition("path = ?", path).And("tag = ?", tag)
+	err = q.Condition(cond).Find(pdecl)
 	return pinfo, err
 }
 

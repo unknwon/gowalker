@@ -28,7 +28,7 @@ import (
 )
 
 const (
-	VERSION = "0.4.1.0623" // Application version.
+	VERSION = "0.4.4.0623" // Application version.
 )
 
 var (

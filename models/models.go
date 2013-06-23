@@ -16,7 +16,6 @@
 package models
 
 import (
-	"errors"
 	"os"
 	"strings"
 	"time"
@@ -68,6 +67,10 @@ type PkgDecl struct {
 	Imports, TestImports string // Imports.
 }
 
+func (*PkgDecl) Indexes(indexes *qbs.Indexes) {
+	indexes.AddUnique("path", "tag")
+}
+
 // PkgDoc is package documentation for multi-language usage.
 type PkgDoc struct {
 	Path string `qbs:"pk,index"` // Import path of package.
@@ -115,22 +118,6 @@ func init() {
 	mg.CreateTableIfNotExists(new(PkgExam))
 
 	beego.Trace("Initialized database ->", DB_NAME)
-}
-
-// LoadProject gets package declaration from database.
-func LoadProject(path string) (*PkgDecl, error) {
-	// Check path length to reduce connect times.
-	if len(path) == 0 {
-		return nil, errors.New("models.LoadProject(): Empty path as not found.")
-	}
-
-	// Connect to database.
-	q := connDb()
-	defer q.Close()
-
-	pdecl := &PkgDecl{Path: path}
-	err := q.WhereEqual("path", path).Find(pdecl)
-	return pdecl, err
 }
 
 // AddViews add views in database by 1 each time

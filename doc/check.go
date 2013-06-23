@@ -49,7 +49,7 @@ func CheckDoc(path, tag string, requestType int) (*Package, error) {
 	}
 
 	// Get the package documentation from database.
-	pinfo, err := models.GetPkgInfo(path)
+	pinfo, err := models.GetPkgInfo(path, tag)
 	// If PACKAGE_VER does not match, refresh anyway.
 	if err != nil || !strings.HasPrefix(pinfo.Etag, PACKAGE_VER) {
 		// No package information in database.

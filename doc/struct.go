@@ -16,6 +16,7 @@
 package doc
 
 import (
+	"go/doc"
 	"go/token"
 	"os"
 	"time"
@@ -36,6 +37,8 @@ type Func struct {
 	Decl, FmtDecl string // Normal and formatted form of declaration.
 	URL           string // VCS URL.
 	Code          string // Source code.
+	IsHasExam     bool
+	Exam          *Example
 }
 
 // Type represents structs and interfaces
@@ -52,10 +55,10 @@ type Type struct {
 
 // Example represents function examples.
 type Example struct {
-	Name   string
-	Doc    string
-	Code   Code
-	Play   string
+	Name string
+	Doc  string
+	Code string
+	//Play   string
 	Output string
 }
 
@@ -130,6 +133,7 @@ func (s *source) Sys() interface{}   { return nil }
 type walker struct {
 	lineFmt  string
 	pdoc     *Package
+	examples []*doc.Example      // Function or method example.
 	srcLines map[string][]string // Source files with line arrays.
 	srcs     map[string]*source  // Source files.
 	fset     *token.FileSet

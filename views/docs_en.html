@@ -22,6 +22,7 @@
 					{{if .IsHasConst}}<li><a href="#_constants"><i class="icon-chevron-right"></i>Constants</a></li>{{end}}
 					{{if .IsHasVar}}<li><a href="#_variables"><i class="icon-chevron-right"></i>Variables</a></li>{{end}}
 					<li><a href="#_files"><i class="icon-chevron-right"></i>Files</a></li>
+					{{if .IsHasExams}}<li><a href="#_exams"><i class="icon-chevron-right"></i>Examples</a></li>{{end}}
 					{{if .IsHasSubdirs}}<li><a href="#_subdirs"><i class="icon-chevron-right"></i>Directories</a></li>{{end}}
 					<li><a href="#_bottom"><i class="icon-chevron-right"></i>Bottom</a></li>
 					{{if .HasExports}}<li><a href="#search_exports" data-toggle="modal"><i class="icon-chevron-right"></i>Search Exports</a></li>{{end}}
@@ -56,20 +57,46 @@
 				</div>
 				<h2>{{if .IsCmd}}Command{{else}}Package{{end}} {{.ProName}} 
 				{{range .Labels}}<a target="_blank" href="/labels#{{.}}" class="label label-inverse">{{.}}</a> {{end}}</h2>
-				<p><code>import "{{.ImportPath}}"</code></p>
-				{{str2html .PkgFullIntro}}
-				<h3 id="_index">Index</h3>
-				<ul class="unstyled">
-					{{if .IsHasConst}}<li><a href="#_constants">Constants</a></li>{{end}}
-					{{if .IsHasVar}}<li><a href="#_variables">Variables</a></li>{{end}}
-					{{range .Funcs}}<li><a href="#{{.Name}}">{{.Decl}}</a></li>{{end}}
-					{{range .Types}}
-						{{$typeName := .Name}}
-						<li><a href="#{{.Name}}">type {{.Name}}</a></li>
-						{{range .Funcs}}<ul><li><a href="#{{.Name}}">{{.Decl}}</a></li></ul>{{end}}
-						{{range .Methods}}<ul><li><a href="#{{$typeName}}_{{.Name}}">{{.Decl}}</a></li></ul>{{end}}
+				{{if .IsCmd}}{{else}}
+				<div>
+					<code>import "{{.ImportPath}}"</code>
+					{{if .IsHasTags}}
+					<strong>Documentation Tag: </strong>
+					<div class="btn-group">
+					    <button class="btn dropdown-toggle" data-toggle="dropdown">{{.CurTag}} <span class="caret"></span></button>
+					    <ul class="dropdown-menu">
+						{{$proPath := .ProPath}}
+					    {{range .Tags}}
+					    	<li><a href="/{{$proPath}}?tag={{.}}">{{.}}</a></li>
+					    {{end}}
+					    </ul>
+				    </div>
 					{{end}}
-				</ul>
+			    </div>
+			    {{end}}
+				{{str2html .PkgFullIntro}}
+				{{if .IsCmd}}
+				{{else}}
+					<h3 id="_index">Index 
+					<span class="label label-{{.DocCPLabel}}">Documentation complete {{.DocCP}}</span></h3>
+					<ul class="unstyled">
+						{{if .IsHasConst}}<li><a href="#_constants">Constants</a></li>{{end}}
+						{{if .IsHasVar}}<li><a href="#_variables">Variables</a></li>{{end}}
+						{{range .Funcs}}<li><a href="#{{.Name}}">{{.Decl}}</a></li>{{end}}
+						{{range .Types}}
+							{{$typeName := .Name}}
+							<li><a href="#{{.Name}}">type {{.Name}}</a></li>
+							{{range .Funcs}}<ul><li><a href="#{{.Name}}">{{.Decl}}</a></li></ul>{{end}}
+							{{range .Methods}}<ul><li><a href="#{{$typeName}}_{{.Name}}">{{.Decl}}</a></li></ul>{{end}}
+						{{end}}
+					</ul>
+					{{if .IsHasExams}}
+					<h3 id="_exams">Examples</h3>
+					<ul class="unstyled">
+						{{range .Exams}}<li><a href="#{{.Name}}">{{.Name}}</a></li>{{end}}
+					</ul>
+					{{end}}
+				{{end}}
 				{{if .IsHasConst}}
 					<h3 id="_constants">Constants</h3>
 					{{with .Consts}}
@@ -89,14 +116,32 @@
 					{{end}}
 				{{end}}
 				{{range .Funcs}}
-					<h3 id="{{.Name}}">func <a target="_blank" href="{{.URL}}">{{.Name}}</a> <small><a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion" href="#collapse_{{.Name}}">View Code</a></small></h3>
+					<h3 id="{{.Name}}">func <a target="_blank" href="{{.URL}}">{{.Name}}</a> <small><a class="accordion-toggle" data-toggle="collapse" href="#collapse_{{.Name}}">View Code</a></small></h3>
 					<pre>{{str2html .FmtDecl}}</pre>
 					<p>{{str2html .Doc}}</p>	
-	    			<div class="accordion" id="accordion">
+	    			<div class="accordion">
 	 					<div id="collapse_{{.Name}}" class="accordion-body collapse">
 							<pre class="accordion-inner">{{str2html .FmtDecl}} {<br />{{str2html .Code}}}</pre>
 						</div>
 	    			</div>
+	    			{{if .IsHasExam}}
+	    			{{with .Exam}}
+	    			<div class="accordion">
+	    				<div class="accordion-group">
+	    					<div class="accordion-heading">
+	    						<a class="accordion-toggle collapsed" data-toggle="collapse" href="#_ex_{{.Name}}">Example</a>
+	    					</div>
+	    					<div id="_ex_{{.Name}}" class="accordion-body collapse">
+		    					<div class="accordion-inner">
+		    					<p>Code:
+		    					</p><pre class="pre-x-scrollable">{{.Code}}</pre>
+		    					<p>Output:</p><pre class="pre-x-scrollable">{{.Output}}</pre>
+		    					</div>
+	    					</div>
+	    				</div>
+	    			</div>
+	    			{{end}}
+	    			{{end}}
 				{{end}}
 				{{range .Types}}
 					{{$typeName := .Name}}

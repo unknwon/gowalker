@@ -215,6 +215,22 @@ func SaveProject(pdoc *Package, info *models.PkgInfo) error {
 	}
 	pdecl.Types = buf.String()
 
+	// Examples.
+	buf.Reset()
+	for _, e := range pdoc.Examples {
+		buf.WriteString(e.Name)
+		buf.WriteString("&E#")
+		buf.WriteString(e.Doc)
+		buf.WriteString("&E#")
+		buf.WriteString(*codeEncode(&e.Code))
+		buf.WriteString("&E#")
+		// buf.WriteString(e.Play)
+		// buf.WriteString("&E#")
+		buf.WriteString(e.Output)
+		buf.WriteString("&$#")
+	}
+	pdecl.Examples = buf.String()
+
 	// Notes.
 	buf.Reset()
 	for _, s := range pdoc.Notes {

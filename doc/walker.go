@@ -23,6 +23,7 @@ import (
 	"go/ast"
 	"go/build"
 	"go/doc"
+	//"go/format"
 	"go/parser"
 	"go/printer"
 	"go/token"
@@ -207,6 +208,58 @@ func (w *walker) types(tdocs []*doc.Type) []*Type {
 	return result
 }
 
+var exampleOutputRx = regexp.MustCompile(`(?i)//[[:space:]]*output:`)
+
+func (w *walker) getExamples(name string) []*Example {
+	var docs []*Example
+	for _, e := range w.examples {
+		if !strings.HasPrefix(e.Name, name) {
+			continue
+		}
+		n := strings.Title(e.Name[len(name):])
+
+		output := e.Output
+		code := w.printNode(&printer.CommentedNode{
+			Node:     e.Code,
+			Comments: e.Comments,
+		})
+
+		// additional formatting if this is a function body
+		if i := len(code); i >= 2 && code[0] == '{' && code[i-1] == '}' {
+			// remove surrounding braces
+			code = code[1 : i-1]
+			// unindent
+			code = strings.Replace(code, "\n    ", "\n", -1)
+			// remove output comment
+			if j := exampleOutputRx.FindStringIndex(code); j != nil {
+				code = strings.TrimSpace(code[:j[0]])
+			}
+		} else {
+			// drop output, as the output comment will appear in the code
+			output = ""
+		}
+
+		// play := ""
+		// if e.Play != nil {
+		// 	w.buf = w.buf[:0]
+		// 	if err := format.Node(sliceWriter{&w.buf}, w.fset, e.Play); err != nil {
+		// 		play = err.Error()
+		// 	} else {
+		// 		play = string(w.buf)
+		// 	}
+		// }
+
+		docs = append(docs, &Example{
+			Name:   n,
+			Doc:    e.Doc,
+			Code:   code,
+			Output: output,
+		})
+		//Play:   play
+	}
+	return docs
+}
+
 var buildPicPattern = regexp.MustCompile(`\[+!+\[+([a-zA-Z ]*)+\]+\(+[a-zA-z]+://[^\s]*`)
 
 // build generates data from source files.
@@ -300,16 +353,16 @@ func (w *walker) build(srcs []*source) (*Package, error) {
 	apkg, _ := ast.NewPackage(w.fset, files, simpleImporter, nil)
 
 	// Find examples in the test files.
-	// for _, name := range append(bpkg.TestGoFiles, bpkg.XTestGoFiles...) {
-	// 	file, err := parser.ParseFile(w.fset, name, w.srcs[name].data, parser.ParseComments)
-	// 	if err != nil {
-	// 		beego.Error("doc.walker.build().[find examples]:", err)
-	// 		continue
-	// 	}
-	// 	//w.pdoc.TestFiles = append(w.pdoc.TestFiles, &File{Name: name, URL: w.srcs[name].browseURL})
-	// 	//w.pdoc.TestSourceSize += len(w.srcs[name].data)
-	// 	w.examples = append(w.examples, doc.Examples(file)...)
-	// }
+	for _, name := range append(bpkg.TestGoFiles, bpkg.XTestGoFiles...) {
+		file, err := parser.ParseFile(w.fset, name, w.srcs[name].data, parser.ParseComments)
+		if err != nil {
+			beego.Error("doc.walker.build -> find examples:", err)
+			continue
+		}
+		//w.pdoc.TestFiles = append(w.pdoc.TestFiles, &File{Name: name, URL: w.srcs[name].browseURL})
+		//w.pdoc.TestSourceSize += len(w.srcs[name].data)
+		w.examples = append(w.examples, doc.Examples(file)...)
+	}
 
 	//w.vetPackage(apkg)
 
@@ -329,7 +382,7 @@ func (w *walker) build(srcs []*source) (*Package, error) {
 	w.pdoc.Doc = strings.Replace(w.pdoc.Doc, "</p>", "</b></p>", 1)
 	w.pdoc.Doc = base32.StdEncoding.EncodeToString([]byte(w.pdoc.Doc))
 
-	//w.pdoc.Examples = w.getExamples("")
+	w.pdoc.Examples = w.getExamples("")
 	w.pdoc.IsCmd = bpkg.IsCommand()
 	w.srcLines = make(map[string][]string)
 	w.pdoc.Consts = w.values(pdoc.Consts)

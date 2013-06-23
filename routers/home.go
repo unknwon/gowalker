@@ -17,6 +17,7 @@ package routers
 import (
 	"bytes"
 	"encoding/base32"
+	"fmt"
 	godoc "go/doc"
 	"html/template"
 	"path"
@@ -157,7 +158,7 @@ func (this *HomeRouter) Get() {
 		pdoc, err := doc.CheckDoc(reqUrl, tag, doc.HUMAN_REQUEST)
 		if err == nil {
 			// Generate documentation page.
-			if pdoc != nil && generatePage(this, pdoc, broPath, curLang.Lang) {
+			if pdoc != nil && generatePage(this, pdoc, broPath, tag, curLang.Lang) {
 				// Update recent project list.
 				updateRecentPros(pdoc)
 				// Update project views.
@@ -188,9 +189,9 @@ func (this *HomeRouter) Get() {
 
 // generatePage genarates documentation page for project.
 // it returns false when its a invaild(empty) project.
-func generatePage(this *HomeRouter, pdoc *doc.Package, q string, lang string) bool {
+func generatePage(this *HomeRouter, pdoc *doc.Package, q, tag, lang string) bool {
 	// Load project data from database.
-	pdecl, err := models.LoadProject(pdoc.ImportPath)
+	pdecl, err := models.LoadProject(pdoc.ImportPath, tag)
 	if err != nil {
 		beego.Error("HomeController.generatePage ->", err)
 		return false
@@ -275,56 +276,12 @@ func generatePage(this *HomeRouter, pdoc *doc.Package, q string, lang string) bo
 		this.Data["ExportDataSrc"] = exportDataSrc
 	}
 
+	// Commented and total objects number.
+	var comNum, totalNum int
+
 	// Index.
 	this.Data["IsHasConst"] = len(pdoc.Consts) > 0
 	this.Data["IsHasVar"] = len(pdoc.Vars) > 0
-	this.Data["Funcs"] = pdoc.Funcs
-	for i, f := range pdoc.Funcs {
-		buf.Reset()
-		godoc.ToHTML(&buf, f.Doc, nil)
-		f.Doc = buf.String()
-		buf.Reset()
-		utils.FormatCode(&buf, &f.Decl, links)
-		f.FmtDecl = buf.String()
-		buf.Reset()
-		utils.FormatCode(&buf, &f.Code, links)
-		f.Code = buf.String()
-		pdoc.Funcs[i] = f
-	}
-	this.Data["Types"] = pdoc.Types
-	for i, t := range pdoc.Types {
-		for j, f := range t.Funcs {
-			buf.Reset()
-			godoc.ToHTML(&buf, f.Doc, nil)
-			f.Doc = buf.String()
-			buf.Reset()
-			utils.FormatCode(&buf, &f.Decl, links)
-			f.FmtDecl = buf.String()
-			buf.Reset()
-			utils.FormatCode(&buf, &f.Code, links)
-			f.Code = buf.String()
-			t.Funcs[j] = f
-		}
-		for j, m := range t.Methods {
-			buf.Reset()
-			godoc.ToHTML(&buf, m.Doc, nil)
-			m.Doc = buf.String()
-			buf.Reset()
-			utils.FormatCode(&buf, &m.Decl, links)
-			m.FmtDecl = buf.String()
-			buf.Reset()
-			utils.FormatCode(&buf, &m.Code, links)
-			m.Code = buf.String()
-			t.Methods[j] = m
-		}
-		buf.Reset()
-		godoc.ToHTML(&buf, t.Doc, nil)
-		t.Doc = buf.String()
-		buf.Reset()
-		utils.FormatCode(&buf, &t.Decl, links)
-		t.FmtDecl = buf.String()
-		pdoc.Types[i] = t
-	}
 
 	// Constants.
 	this.Data["Consts"] = pdoc.Consts
@@ -346,12 +303,84 @@ func generatePage(this *HomeRouter, pdoc *doc.Package, q string, lang string) bo
 		pdoc.Vars[i] = v
 	}
 
+	this.Data["Funcs"] = pdoc.Funcs
+	for i, f := range pdoc.Funcs {
+		if len(f.Doc) > 0 {
+			buf.Reset()
+			godoc.ToHTML(&buf, f.Doc, nil)
+			f.Doc = buf.String()
+			comNum++
+		}
+		buf.Reset()
+		utils.FormatCode(&buf, &f.Decl, links)
+		f.FmtDecl = buf.String()
+		buf.Reset()
+		utils.FormatCode(&buf, &f.Code, links)
+		f.Code = buf.String()
+		if i := getExample(pdoc, f.Name); i > -1 {
+			f.IsHasExam = true
+			f.Exam = pdoc.Examples[i]
+		}
+		totalNum++
+		pdoc.Funcs[i] = f
+	}
+
+	this.Data["Types"] = pdoc.Types
+	for i, t := range pdoc.Types {
+		for j, f := range t.Funcs {
+			buf.Reset()
+			godoc.ToHTML(&buf, f.Doc, nil)
+			f.Doc = buf.String()
+			buf.Reset()
+			utils.FormatCode(&buf, &f.Decl, links)
+			f.FmtDecl = buf.String()
+			buf.Reset()
+			utils.FormatCode(&buf, &f.Code, links)
+			f.Code = buf.String()
+			t.Funcs[j] = f
+		}
+		for j, m := range t.Methods {
+			if len(m.Doc) > 0 {
+				buf.Reset()
+				godoc.ToHTML(&buf, m.Doc, nil)
+				m.Doc = buf.String()
+				comNum++
+			}
+			buf.Reset()
+			utils.FormatCode(&buf, &m.Decl, links)
+			m.FmtDecl = buf.String()
+			buf.Reset()
+			utils.FormatCode(&buf, &m.Code, links)
+			m.Code = buf.String()
+			if i := getExample(pdoc, m.Name); i > -1 {
+				m.IsHasExam = true
+				m.Exam = pdoc.Examples[i]
+			}
+			totalNum++
+			t.Methods[j] = m
+		}
+		buf.Reset()
+		godoc.ToHTML(&buf, t.Doc, nil)
+		t.Doc = buf.String()
+		buf.Reset()
+		utils.FormatCode(&buf, &t.Decl, links)
+		t.FmtDecl = buf.String()
+		pdoc.Types[i] = t
+	}
+
+	// Calculate documentation complete %.
+	this.Data["DocCPLabel"], this.Data["DocCP"] = calDocCP(comNum, totalNum)
+
+	// Examples.
+	this.Data["IsHasExams"] = len(pdoc.Examples) > 0
+	this.Data["Exams"] = pdoc.Examples
+
 	// Dirs.
 	this.Data["IsHasSubdirs"] = len(pdoc.Dirs) > 0
 	pinfos := make([]*models.PkgInfo, 0, len(pdoc.Dirs))
 	for _, v := range pdoc.Dirs {
 		v = pdoc.ImportPath + "/" + v
-		if pinfo, err := models.GetPkgInfo(v); err == nil {
+		if pinfo, err := models.GetPkgInfo(v, tag); err == nil {
 			pinfos = append(pinfos, pinfo)
 		} else {
 			pinfos = append(pinfos, &models.PkgInfo{Path: v})
@@ -362,6 +391,14 @@ func generatePage(this *HomeRouter, pdoc *doc.Package, q string, lang string) bo
 	// Labels.
 	this.Data["LabelDataSrc"] = labelSet
 
+	// Tags.
+	this.Data["IsHasTags"] = len(pdoc.Tags) > 0
+	if len(tag) == 0 {
+		tag = "master"
+	}
+	this.Data["CurTag"] = tag
+	this.Data["Tags"] = pdoc.Tags
+
 	this.Data["Files"] = pdoc.Files
 	this.Data["ImportPkgs"] = pdecl.Imports
 	this.Data["ImportPkgNum"] = len(pdoc.Imports) - 1
@@ -370,6 +407,32 @@ func generatePage(this *HomeRouter, pdoc *doc.Package, q string, lang string) bo
 	this.Data["ImportedNum"] = pdoc.ImportedNum
 	this.Data["UtcTime"] = pdoc.Created
 	return true
+}
+
+// calDocCP returns label style name and percentage string according to commented and total pbjects number.
+func calDocCP(comNum, totalNum int) (label, perStr string) {
+	per := comNum * 100 / totalNum
+	perStr = strings.Replace(
+		fmt.Sprintf("%dPER(%d/%d)", per, comNum, totalNum), "PER", "%", 1)
+	switch {
+	case per > 80:
+		label = "success"
+	case per > 50:
+		label = "warning"
+	default:
+		label = "important"
+	}
+	return label, perStr
+}
+
+// getExample returns index of function example if it exists.
+func getExample(pdoc *doc.Package, name string) int {
+	for i, v := range pdoc.Examples {
+		if name == v.Name {
+			return i
+		}
+	}
+	return -1
 }
 
 // getVCSInfo returns VCS name, project name, project home page, and Upper level project URL.
@@ -567,6 +630,26 @@ func ConvertDataFormat(pdoc *doc.Package, pdecl *models.PkgDecl) error {
 		pdoc.Types = append(pdoc.Types, val)
 	}
 	pdoc.Types = pdoc.Types[:len(pdoc.Types)-1]
+
+	// Examples.
+	pdoc.Examples = make([]*doc.Example, 0, 5)
+	for _, v := range strings.Split(pdecl.Examples, "&$#") {
+		val := new(doc.Example)
+		for j, s := range strings.Split(v, "&E#") {
+			switch j {
+			case 0: // Name
+				val.Name = s
+			case 1: // Doc
+				val.Doc = s
+			case 2: // Code
+				val.Code = *codeDecode(&s)
+			case 3: // Output
+				val.Output = s
+			}
+		}
+		pdoc.Examples = append(pdoc.Examples, val)
+	}
+	pdoc.Examples = pdoc.Examples[:len(pdoc.Examples)-1]
 
 	// Dirs.
 	pdoc.Dirs = strings.Split(pdecl.Dirs, "|")
