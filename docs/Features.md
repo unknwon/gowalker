@@ -19,3 +19,23 @@ Find keyword in import path or synopsis.
 Find and view your favorite project documentation.
 
 ![](images/viewdoc.png?raw=true)
+
+View documentation by project tags and documentation complete percentage.
+
+![](images/doctag.png?raw=true)
+
+Mouse hover title for object introduction.
+
+![](images/title.png?raw=true)
+
+Code quick view.
+
+![](images/codeview.png?raw=true)
+
+Code highlight and link jump.
+
+![](images/linkjump.png?raw=true)
+
+Get examples from test files.
+
+![](images/example.png?raw=true)

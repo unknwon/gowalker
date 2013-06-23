@@ -32,7 +32,7 @@
 					</div>
 					<div class="modal-footer">
 						<button type='button' class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
-						<button type='button' class="btn" onclick="AddLabelSubmit(this)">Add</input>
+						<button type='button' class="btn" onclick="AddLabelSubmit(this)">Add</button>
 						<button type='button' class="btn btn-primary" onclick="RemoveLabelSubmit(this)">Remove</button>
 					</div>
 				</form>

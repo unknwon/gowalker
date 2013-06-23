@@ -48,6 +48,9 @@ func CheckDoc(path, tag string, requestType int) (*Package, error) {
 		path = path[i+len("/src/pkg/"):]
 	}
 
+	// For code.google.com.
+	path = strings.Replace(path, "source/browse/", "", 1)
+
 	// Get the package documentation from database.
 	pinfo, err := models.GetPkgInfo(path, tag)
 	// If PACKAGE_VER does not match, refresh anyway.
@@ -101,7 +104,7 @@ func CheckDoc(path, tag string, requestType int) (*Package, error) {
 				pinfo.Created = time.Now().UTC()
 				assginPkgInfo(pdoc, pinfo)
 				return pdoc, nil
-			case len(pdoc.ImportPath) > 0:
+			case pdoc != nil && len(pdoc.ImportPath) > 0:
 				beego.Error("Serving(", path, ")with error:", err)
 				return pdoc, nil
 			case err == errUpdateTimeout:

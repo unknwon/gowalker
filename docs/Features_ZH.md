@@ -16,6 +16,26 @@
 ![](images/findresult_ZH.png?raw=true)
 
 ##浏览文档
-Find and view your favorite project documentation.
+查找并浏览您喜爱项目的文档。
 
-![](images/viewdoc.png?raw=true)
+![](images/viewdoc_ZH.png?raw=true)
+
+根据项目 Tags 查看不同版本的文档以及文档完成率。
+
+![](images/doctag_ZH.png?raw=true)
+
+鼠标悬浮显示对象信息。
+
+![](images/title_ZH.png?raw=true)
+
+代码快速浏览。
+
+![](images/codeview_ZH.png?raw=true)
+
+代码高亮与链接跳转。
+
+![](images/linkjump_ZH.png?raw=true)
+
+展示单元测试中的示例函数。
+
+![](images/example_ZH.png?raw=true)

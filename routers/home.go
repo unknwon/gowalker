@@ -102,6 +102,7 @@ func (this *HomeRouter) Get() {
 
 	// Remove last "/".
 	q = strings.TrimRight(q, "/")
+
 	if path, ok := utils.IsBrowseURL(q); ok {
 		q = path
 	}
@@ -110,6 +111,9 @@ func (this *HomeRouter) Get() {
 	reqUrl := this.Ctx.Request.RequestURI[1:]
 	if i := strings.Index(reqUrl, "?"); i > -1 {
 		reqUrl = reqUrl[:i]
+		if path, ok := utils.IsBrowseURL(reqUrl); ok {
+			reqUrl = path
+		}
 	}
 
 	// Redirect to query string.
@@ -462,12 +466,14 @@ func getVCSInfo(q string, pdoc *doc.Package) (vcs, proName, proPath, pkgDocPath 
 
 	// Project VCS home page.
 	switch {
-	case q[0] == 'c': // code.google.com
+	case strings.HasPrefix(q, "code.google.com"): // code.google.com
 		vcs = "Google Code"
 		if strings.Index(q, "source/") == -1 {
 			proPath = strings.Replace(q, "/"+pdoc.ProjectName, "/"+pdoc.ProjectName+"/source/browse", 1)
 		} else {
 			proPath = q
+			q = strings.Replace(q, "source/browse/", "", 1)
+			lastIndex = strings.LastIndex(q, "/")
 		}
 	case q[0] == 'g': // github.com
 		vcs = "Github"
@@ -492,7 +498,6 @@ func getVCSInfo(q string, pdoc *doc.Package) (vcs, proName, proPath, pkgDocPath 
 	}
 
 	pkgDocPath = q[:lastIndex]
-
 	return vcs, proName, proPath, pkgDocPath
 }
 
@@ -690,6 +695,8 @@ func codeDecode(code *string) *string {
 }
 
 func updateRecentPros(pdoc *doc.Package) {
+	pdoc.ViewedTime = time.Now().UTC().Unix()
+
 	// Only projects with import path length is less than 40 letters will be showed.
 	if len(pdoc.ImportPath) < 40 {
 		index := -1
@@ -697,12 +704,10 @@ func updateRecentPros(pdoc *doc.Package) {
 		curPro := &recentPro{
 			Path:       pdoc.ImportPath,
 			Synopsis:   pdoc.Synopsis,
-			ViewedTime: time.Now().UTC().Unix(),
+			ViewedTime: pdoc.ViewedTime,
 			IsGoRepo: pdoc.ProjectName == "Go" &&
 				strings.Index(pdoc.ImportPath, ".") == -1,
 		}
-
-		pdoc.ViewedTime = curPro.ViewedTime
 
 		// Check if in the list
 		for i, s := range recentViewedPros {

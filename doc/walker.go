@@ -216,7 +216,12 @@ func (w *walker) getExamples(name string) []*Example {
 		if !strings.HasPrefix(e.Name, name) {
 			continue
 		}
-		n := strings.Title(e.Name[len(name):])
+
+		n := e.Name[len(name):]
+		if i := strings.Index(n, "_"); i > -1 {
+			n = n[:i]
+		}
+		n = strings.Title(n)
 
 		output := e.Output
 		code := w.printNode(&printer.CommentedNode{

@@ -109,22 +109,24 @@ func getGoogleTags(client *http.Client, importPath string) []string {
 		return nil
 	}
 
-	page := string(p)
-	start := strings.Index(page, "<strong>Tag:</strong>")
-	m := googleTagRe.FindAllStringSubmatch(page[start:], -1)
-
 	tags := make([]string, 1, 6)
 	tags[0] = "master"
-	for i, v := range m {
-		tags = append(tags, v[1])
-		if i == 4 {
-			break
+
+	page := string(p)
+	start := strings.Index(page, "<strong>Tag:</strong>")
+	if start > -1 {
+		m := googleTagRe.FindAllStringSubmatch(page[start:], -1)
+		for i, v := range m {
+			tags = append(tags, v[1])
+			if i == 4 {
+				break
+			}
 		}
 	}
 	return tags
 }
 
-func getGoogleDoc(client *http.Client, match map[string]string, savedEtag string) (*Package, error) {
+func getGoogleDoc(client *http.Client, match map[string]string, tag, savedEtag string) (*Package, error) {
 	setupGoogleMatch(match)
 	if m := googleEtagRe.FindStringSubmatch(savedEtag); m != nil {
 		match["vcs"] = m[1]
@@ -132,16 +134,17 @@ func getGoogleDoc(client *http.Client, match map[string]string, savedEtag string
 		return nil, err
 	}
 
+	match["tag"] = tag
 	// Scrape the repo browser to find the project revision and individual Go files.
-	p, err := httpGetBytes(client, expand("http://{subrepo}{dot}{repo}.googlecode.com/{vcs}{dir}/", match), nil)
+	p, err := httpGetBytes(client, expand("http://{subrepo}{dot}{repo}.googlecode.com/{vcs}{dir}/?r={tag}", match), nil)
 	if err != nil {
-		return nil, err
+		return nil, errors.New("doc.getGoogleDoc(" + match["importPath"] + ") -> " + err.Error())
 	}
 
 	// Check revision tag.
 	var etag string
 	if m := googleRevisionRe.FindSubmatch(p); m == nil {
-		return nil, errors.New("doc.getGoogleDoc(): Could not find revision for " + match["importPath"])
+		return nil, errors.New("doc.getGoogleDoc(" + match["importPath"] + ") -> Could not find revision")
 	} else {
 		etag = expand("{vcs}-{0}", match, string(m[1]))
 		if etag == savedEtag {
@@ -156,23 +159,25 @@ func getGoogleDoc(client *http.Client, match map[string]string, savedEtag string
 		if utils.IsDocFile(fname) {
 			files = append(files, &source{
 				name:      fname,
-				browseURL: expand("http://code.google.com/p/{repo}/source/browse{dir}/{0}{query}", match, fname),
-				rawURL:    expand("http://{subrepo}{dot}{repo}.googlecode.com/{vcs}{dir}/{0}", match, fname),
+				browseURL: expand("http://code.google.com/p/{repo}/source/browse{dir}/{0}{query}?r={tag}", match, fname),
+				rawURL:    expand("http://{subrepo}{dot}{repo}.googlecode.com/{vcs}{dir}/{0}?r={tag}", match, fname),
 			})
 		}
 	}
 
-	if len(files) == 0 {
-		return nil, NotFoundError{"Directory tree does not contain Go files."}
-	}
-
-	dirs := make([]string, 0, 3)
+	dirs := make([]string, 0, 5)
 	// Get subdirectories.
 	for _, m := range googleDirRe.FindAllSubmatch(p, -1) {
 		dirName := strings.Split(string(m[1]), "?")[0]
-		if strings.HasSuffix(dirName, "/") {
+		// Make sure we get directories.
+		if strings.HasSuffix(dirName, "/") &&
+			utils.FilterFileName(dirName) {
 			dirs = append(dirs, strings.Replace(dirName, "/", "", -1))
 		}
+	}
+
+	if len(files) == 0 && len(dirs) == 0 {
+		return nil, NotFoundError{"Directory tree does not contain Go files and subdirs."}
 	}
 
 	// Fetch file from VCS.
@@ -180,12 +185,17 @@ func getGoogleDoc(client *http.Client, match map[string]string, savedEtag string
 		return nil, err
 	}
 
+	// Get all tags.
+	tags := getGoogleTags(client, match["importPath"])
+
 	// Start generating data.
 	w := &walker{
 		lineFmt: "#%d",
 		pdoc: &Package{
 			ImportPath:  match["importPath"],
 			ProjectName: expand("{repo}{dot}{subrepo}", match),
+			Tags:        tags,
+			Tag:         tag,
 			Etag:        etag,
 			Dirs:        dirs,
 		},

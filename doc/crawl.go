@@ -41,9 +41,6 @@ type crawlResult struct {
 // crawlDoc fetchs package from VCS.
 func crawlDoc(path, tag string, pinfo *models.PkgInfo) (pdoc *Package, err error) {
 	var pdocNew *Package
-
-	/* TODO */
-
 	pdocNew, err = getRepo(httpClient, path, tag, pinfo.Etag)
 
 	// For timeout logic in client.go to work, we cannot leave connections idling. This is ugly.
@@ -86,9 +83,9 @@ func getRepo(client *http.Client, importPath, tag, etag string) (pdoc *Package, 
 	case utils.IsGoRepoPath(importPath):
 		pdoc, err = getStandardDoc(client, importPath, tag, etag)
 	case utils.IsValidRemotePath(importPath):
-		pdoc, err = getStatic(client, importPath, etag)
+		pdoc, err = getStatic(client, importPath, tag, etag)
 		if err == errNoMatch {
-			pdoc, err = getDynamic(client, importPath, etag)
+			pdoc, err = getDynamic(client, importPath, tag, etag)
 		}
 	default:
 		return nil, errors.New("doc.getRepo -> No match(" + importPath + ")")
@@ -331,22 +328,22 @@ func codeEncode(code *string) *string {
 type service struct {
 	pattern *regexp.Regexp
 	prefix  string
-	get     func(*http.Client, map[string]string, string) (*Package, error)
+	get     func(*http.Client, map[string]string, string, string) (*Package, error)
 }
 
 // services is the list of source code control services handled by gopkgdoc.
 var services = []*service{
-/*	{githubPattern, "github.com/", getGithubDoc},
 	{googlePattern, "code.google.com/", getGoogleDoc},
-	{bitbucketPattern, "bitbucket.org/", getBitbucketDoc},
-	{launchpadPattern, "launchpad.net/", getLaunchpadDoc},
-	{oscPattern, "git.oschina.net/", getOSCDoc},
-	{csdnPattern, "code.csdn.net/", getCSDNDoc},*/
+	/*	{githubPattern, "github.com/", getGithubDoc},
+		{bitbucketPattern, "bitbucket.org/", getBitbucketDoc},
+		{launchpadPattern, "launchpad.net/", getLaunchpadDoc},
+		{oscPattern, "git.oschina.net/", getOSCDoc},
+		{csdnPattern, "code.csdn.net/", getCSDNDoc},*/
 }
 
 // getStatic gets a document from a statically known service. getStatic
 // returns errNoMatch if the import path is not recognized.
-func getStatic(client *http.Client, importPath string, etag string) (pdoc *Package, err error) {
+func getStatic(client *http.Client, importPath, tag, etag string) (pdoc *Package, err error) {
 	for _, s := range services {
 		if s.get == nil || !strings.HasPrefix(importPath, s.prefix) {
 			continue
@@ -364,12 +361,12 @@ func getStatic(client *http.Client, importPath string, etag string) (pdoc *Packa
 				match[n] = m[i]
 			}
 		}
-		return s.get(client, match, etag)
+		return s.get(client, match, tag, etag)
 	}
 	return nil, errNoMatch
 }
 
-func getDynamic(client *http.Client, importPath string, etag string) (pdoc *Package, err error) {
+func getDynamic(client *http.Client, importPath, tag, etag string) (pdoc *Package, err error) {
 	match, err := fetchMeta(client, importPath)
 	if err != nil {
 		return nil, err
@@ -385,7 +382,7 @@ func getDynamic(client *http.Client, importPath string, etag string) (pdoc *Pack
 		}
 	}
 
-	pdoc, err = getStatic(client, expand("{repo}{dir}", match), etag)
+	pdoc, err = getStatic(client, expand("{repo}{dir}", match), tag, etag)
 	if err == errNoMatch {
 		//pdoc, err = getVCSDoc(client, match, etag)
 	}
