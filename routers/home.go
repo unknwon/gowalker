@@ -223,7 +223,10 @@ func generatePage(this *HomeRouter, pdoc *doc.Package, q, tag, lang string) bool
 
 	// Introduction.
 	this.Data["ImportPath"] = pdoc.ImportPath
-	byts, _ := base32.StdEncoding.DecodeString(pdecl.Doc)
+	byts, _ := base32.StdEncoding.DecodeString(
+		models.LoadPkgDoc(pdoc.ImportPath, lang, "rm"))
+	this.Data["PkgDoc"] = string(byts)
+	byts, _ = base32.StdEncoding.DecodeString(pdecl.Doc)
 	this.Data["PkgFullIntro"] = string(byts)
 
 	var buf bytes.Buffer

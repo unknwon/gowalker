@@ -29,7 +29,7 @@ import (
 )
 
 const (
-	VERSION = "0.4.6.0624" // Application version.
+	VERSION = "0.4.7.0625" // Application version.
 )
 
 var (

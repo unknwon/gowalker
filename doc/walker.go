@@ -36,9 +36,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/Unknwon/gowalker/models"
 	"github.com/Unknwon/gowalker/utils"
 	"github.com/astaxie/beego"
-	"github.com/russross/blackfriday"
 )
 
 func (w *walker) readDir(dir string) ([]os.FileInfo, error) {
@@ -265,8 +265,6 @@ func (w *walker) getExamples(name string) []*Example {
 	return docs
 }
 
-var buildPicPattern = regexp.MustCompile(`\[+!+\[+([a-zA-Z ]*)+\]+\(+[a-zA-z]+://[^\s]*`)
-
 // build generates data from source files.
 func (w *walker) build(srcs []*source) (*Package, error) {
 	// Set created time.
@@ -275,41 +273,15 @@ func (w *walker) build(srcs []*source) (*Package, error) {
 	// Add source files to walker, I skipped references here.
 	w.srcs = make(map[string]*source)
 	for _, src := range srcs {
-		if strings.HasSuffix(src.name, ".go") {
+		switch {
+		case strings.HasSuffix(src.name, ".go"):
 			w.srcs[src.name] = src
-		} else if strings.HasPrefix(strings.ToLower(src.name), "readme") {
-			// Readme.
-			w.pdoc.Doc = string(src.data)
-			if len(w.pdoc.Doc) > 0 {
-				if w.pdoc.Doc[0] == '\n' {
-					w.pdoc.Doc = w.pdoc.Doc[1:]
-				}
-				// Remove title and `==========`.
-				w.pdoc.Doc = w.pdoc.Doc[strings.Index(w.pdoc.Doc, "\n")+1:]
-				if len(w.pdoc.Doc) == 0 {
-					continue
-				}
-
-				if w.pdoc.Doc[0] == '=' {
-					w.pdoc.Doc = w.pdoc.Doc[strings.Index(w.pdoc.Doc, "\n")+1:]
-				}
-				// Find all picture path of build system.
-				for _, m := range buildPicPattern.FindAllString(w.pdoc.Doc, -1) {
-					start := strings.Index(m, "http")
-					end := strings.Index(m, ")")
-					if (start > -1) && (end > -1) && (start < end) {
-						picPath := m[start:end]
-						w.pdoc.Doc = strings.Replace(w.pdoc.Doc, m, "![]("+picPath+")", 1)
-					}
-				}
-				w.pdoc.Doc = string(blackfriday.MarkdownCommon([]byte(w.pdoc.Doc)))
-				w.pdoc.Doc = strings.Replace(w.pdoc.Doc, "h3>", "h5>", -1)
-				w.pdoc.Doc = strings.Replace(w.pdoc.Doc, "h2>", "h4>", -1)
-				w.pdoc.Doc = strings.Replace(w.pdoc.Doc, "h1>", "h3>", -1)
-				w.pdoc.Doc = strings.Replace(w.pdoc.Doc, "<center>", "", -1)
-				w.pdoc.Doc = strings.Replace(w.pdoc.Doc, "</center>", "", -1)
-				w.pdoc.Doc = "<div style='display:block; padding: 3px; border:1px solid #4F4F4F;'>" + w.pdoc.Doc + "</div>"
-			}
+		case len(w.pdoc.Tag) > 0:
+			continue // Only save latest readme.
+		case strings.HasPrefix(strings.ToLower(src.name), "readme_zh"):
+			models.SavePkgDoc(w.pdoc.ImportPath, "zh", src.data)
+		case strings.HasPrefix(strings.ToLower(src.name), "readme"):
+			models.SavePkgDoc(w.pdoc.ImportPath, "en", src.data)
 		}
 	}
 

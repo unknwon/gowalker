@@ -16,13 +16,16 @@
 package models
 
 import (
+	"encoding/base32"
 	"os"
+	"regexp"
 	"strings"
 	"time"
 
 	"github.com/astaxie/beego"
 	"github.com/coocood/qbs"
 	_ "github.com/mattn/go-sqlite3"
+	"github.com/russross/blackfriday"
 )
 
 const (
@@ -73,9 +76,15 @@ func (*PkgDecl) Indexes(indexes *qbs.Indexes) {
 
 // PkgDoc is package documentation for multi-language usage.
 type PkgDoc struct {
-	Path string `qbs:"pk,index"` // Import path of package.
+	Id   int64
+	Path string `qbs:"index"` // Import path of package.
 	Lang string // Documentation language.
+	Type string
 	Doc  string // Documentataion.
+}
+
+func (*PkgDoc) Indexes(indexes *qbs.Indexes) {
+	indexes.AddUnique("path", "lang", "Type")
 }
 
 // PkgExam represents a package example.
@@ -268,4 +277,81 @@ func UpdateLabelInfo(path string, tag string, add bool) bool {
 	}
 
 	return true
+}
+
+var buildPicPattern = regexp.MustCompile(`\[+!+\[+([a-zA-Z ]*)+\]+\(+[a-zA-z]+://[^\s]*`)
+
+// SavePkgDoc saves readered readme.md file data.
+func SavePkgDoc(path, lang string, docBys []byte) {
+	// Connect to database.
+	q := connDb()
+	defer q.Close()
+
+	// Reader readme.
+	doc := string(docBys)
+	if len(doc) == 0 {
+		return
+	}
+
+	if doc[0] == '\n' {
+		doc = doc[1:]
+	}
+	// Remove title and `==========`.
+	doc = doc[strings.Index(doc, "\n")+1:]
+	if len(doc) == 0 {
+		return
+	}
+
+	if doc[0] == '=' {
+		doc = doc[strings.Index(doc, "\n")+1:]
+	}
+	// Find all picture path of build system. HAVE BUG!!!
+	for _, m := range buildPicPattern.FindAllString(doc, -1) {
+		start := strings.Index(m, "http")
+		end := strings.Index(m, ")")
+		if (start > -1) && (end > -1) && (start < end) {
+			picPath := m[start:end]
+			doc = strings.Replace(doc, m, "![]("+picPath+")", 1)
+		}
+	}
+	doc = string(blackfriday.MarkdownCommon([]byte(doc)))
+	doc = strings.Replace(doc, "h3>", "h5>", -1)
+	doc = strings.Replace(doc, "h2>", "h4>", -1)
+	doc = strings.Replace(doc, "h1>", "h3>", -1)
+	doc = strings.Replace(doc, "<center>", "", -1)
+	doc = strings.Replace(doc, "</center>", "", -1)
+	doc = "<div style='display:block; padding: 3px; border:1px solid #4F4F4F;'>" + doc + "</div>"
+
+	pdoc := new(PkgDoc)
+	cond := qbs.NewCondition("path = ?", path).And("lang = ?", lang).And("type = ?", "rm")
+	q.Condition(cond).Find(pdoc)
+	pdoc.Path = path
+	pdoc.Lang = lang
+	pdoc.Type = "rm"
+	pdoc.Doc = base32.StdEncoding.EncodeToString([]byte(doc))
+	_, err := q.Save(pdoc)
+	if err != nil {
+		beego.Error("models.SavePkgDoc -> readme:", err)
+	}
+}
+
+// LoadPkgDoc loads project introduction documentation.
+func LoadPkgDoc(path, lang, docType string) (doc string) {
+	// Connect to database.
+	q := connDb()
+	defer q.Close()
+
+	pdoc := new(PkgDoc)
+	cond := qbs.NewCondition("path = ?", path).And("lang = ?", lang).And("type = ?", docType)
+	err := q.Condition(cond).Find(pdoc)
+	if err == nil {
+		return pdoc.Doc
+	}
+
+	cond = qbs.NewCondition("path = ?", path).And("lang = ?", "en").And("type = ?", docType)
+	err = q.Condition(cond).Find(pdoc)
+	if err == nil {
+		return pdoc.Doc
+	}
+	return doc
 }
