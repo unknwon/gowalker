@@ -22,13 +22,14 @@ import (
 	"runtime"
 	"time"
 
+	"github.com/Unknwon/gowalker/doc"
 	"github.com/Unknwon/gowalker/routers"
 	"github.com/Unknwon/gowalker/utils"
 	"github.com/astaxie/beego"
 )
 
 const (
-	VERSION = "0.4.5.0624" // Application version.
+	VERSION = "0.4.6.0624" // Application version.
 )
 
 var (
@@ -88,6 +89,8 @@ func setLogger() {
 		beego.Critical("Failed to init log file ->", err)
 		return
 	}
+
+	doc.SetGithubCredentials(beego.AppConfig.String("client_id"), beego.AppConfig.String("client_secret"))
 
 	beego.SetLogger(log.New(logFile, "", log.Ldate|log.Ltime))
 }

@@ -173,6 +173,7 @@ func (this *HomeRouter) Get() {
 					ProName:     pdoc.ProjectName,
 					ViewedTime:  pdoc.ViewedTime,
 					Views:       pdoc.Views,
+					IsCmd:       pdoc.IsCmd,
 					Etag:        pdoc.Etag,
 					Tags:        strings.Join(pdoc.Tags, "|||"),
 					ImportedNum: pdoc.ImportedNum,
@@ -388,12 +389,16 @@ func generatePage(this *HomeRouter, pdoc *doc.Package, q, tag, lang string) bool
 		pdoc.Types[i] = t
 	}
 
-	// Calculate documentation complete %.
-	this.Data["DocCPLabel"], this.Data["DocCP"] = calDocCP(comNum, totalNum)
+	if !pdoc.IsCmd {
+		// Calculate documentation complete %.
+		this.Data["DocCPLabel"], this.Data["DocCP"] = calDocCP(comNum, totalNum)
 
-	// Examples.
-	this.Data["IsHasExams"] = len(pdoc.Examples) > 0
-	this.Data["Exams"] = pdoc.Examples
+		// Examples.
+		this.Data["IsHasExams"] = len(pdoc.Examples) > 0
+		this.Data["Exams"] = pdoc.Examples
+	} else {
+		this.Data["IsCmd"] = true
+	}
 
 	// Dirs.
 	this.Data["IsHasSubdirs"] = len(pdoc.Dirs) > 0

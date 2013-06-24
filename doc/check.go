@@ -69,6 +69,10 @@ func CheckDoc(path, tag string, requestType int) (*Package, error) {
 				needsCrawl = pinfo.Created.Add(_TIME_DAY).UTC().Before(time.Now().UTC())
 			}
 		case REFRESH_REQUEST:
+			if len(tag) > 0 {
+				break // Things of Tag will not be changed.
+			}
+
 			// Check if the documentation is too frequently (within 5 minutes).
 			needsCrawl = pinfo.Created.Add(_REFRESH_LIMIT).UTC().Before(time.Now().UTC())
 			if !needsCrawl {

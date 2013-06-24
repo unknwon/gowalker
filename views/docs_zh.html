@@ -18,7 +18,7 @@
 			<div id="sidebar" class="span3 hide" style="margin-left: -220px; margin-top: 20px;">
 				<ul class="nav nav-tabs nav-stacked affix bs-docs-sidenav">
 					<li><a href="#"><i class="icon-chevron-right"></i>顶部</a></li>
-					<li><a href="#_index"><i class="icon-chevron-right"></i>索引</a></li>
+					{{if .IsCmd}}{{else}}<li><a href="#_index"><i class="icon-chevron-right"></i>索引</a></li>{{end}}
 					{{if .IsHasConst}}<li><a href="#_constants"><i class="icon-chevron-right"></i>常量</a></li>{{end}}
 					{{if .IsHasVar}}<li><a href="#_variables"><i class="icon-chevron-right"></i>变量</a></li>{{end}}
 					<li><a href="#_files"><i class="icon-chevron-right"></i>文件</a></li>
