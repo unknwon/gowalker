@@ -14,6 +14,8 @@
 			<div class="alert alert-info">
 				<button type="button" class="close" data-dismiss="alert">&times;</button><strong>友情提示：</strong> Asta谢 在 github 上发起了 <strong>Go </strong> 标准库函数 <span class="label label-info">示例</span> 项目，每个函数都有相应操作示例，您绝对不容错过！点击这里访问：<a target="_blank" href="https://github.com/astaxie/gopkg/tree/master/{{.ImportPath}}" class="label label-success">gopkg</a>.
 			</div>
+			{{else}}
+				{{template "labelmodal_zh" .}}
 			{{end}}
 			<div id="sidebar" class="span3 hide" style="margin-left: -220px; margin-top: 20px;">
 				<ul class="nav nav-tabs nav-stacked affix bs-docs-sidenav">
@@ -29,7 +31,6 @@
 					{{if .IsGoRepo}}
 					{{else}}
 						<li><a href="#label_modal" data-toggle="modal"><i class="icon-chevron-right"></i>项目标签</a></li>
-						{{template "labelmodal_en" .}}
 					{{end}}
 				</ul>
 			</div>

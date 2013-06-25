@@ -439,6 +439,9 @@ func generatePage(this *HomeRouter, pdoc *doc.Package, q, tag, lang string) bool
 
 // calDocCP returns label style name and percentage string according to commented and total pbjects number.
 func calDocCP(comNum, totalNum int) (label, perStr string) {
+	if totalNum == 0 {
+		totalNum = 1
+	}
 	per := comNum * 100 / totalNum
 	perStr = strings.Replace(
 		fmt.Sprintf("%dPER(%d/%d)", per, comNum, totalNum), "PER", "%", 1)

@@ -14,6 +14,8 @@
 			<div class="alert alert-info">
 				<button type="button" class="close" data-dismiss="alert">&times;</button><strong>Information!</strong> AstaXie launched an open source program that provides <span class="label label-info">examples</span> for every function of <strong>Go Standard Library</strong>, you shouldn't miss this great project: <a target="_blank" href="https://github.com/astaxie/gopkg/tree/master/{{.ImportPath}}" class="label label-success">gopkg</a>.
 			</div>
+			{{else}}
+				{{template "labelmodal_en" .}}
 			{{end}}
 			<div id="sidebar" class="span3 hide" style="margin-left: -220px; margin-top: 20px;">
 				<ul class="nav nav-tabs nav-stacked affix bs-docs-sidenav">
@@ -29,7 +31,6 @@
 					{{if .IsGoRepo}}
 					{{else}}
 						<li><a href="#label_modal" data-toggle="modal"><i class="icon-chevron-right"></i>Labels</a></li>
-						{{template "labelmodal_en" .}}
 					{{end}}
 				</ul>
 			</div>

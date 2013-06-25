@@ -248,8 +248,8 @@ func GetTagsPageInfo() (WFPros, ORMPros, DBDPros, GUIPros, NETPros, TOOLPros []*
 	return WFPros, ORMPros, DBDPros, GUIPros, NETPros, TOOLPros, nil
 }
 
-// UpdateLabelInfo updates prohect tag information, returns false if the project does not exist.
-func UpdateLabelInfo(path string, tag string, add bool) bool {
+// UpdateLabelInfo updates project label information, returns false if the project does not exist.
+func UpdateLabelInfo(path string, label string, add bool) bool {
 	// Connect to database.
 	q := connDb()
 	defer q.Close()
@@ -260,16 +260,16 @@ func UpdateLabelInfo(path string, tag string, add bool) bool {
 		return false
 	}
 
-	i := strings.Index(info.Tags, "$"+tag+"|")
+	i := strings.Index(info.Labels, "$"+label+"|")
 	switch {
 	case i == -1 && add: // Add operation and does not contain.
-		info.Tags += "$" + tag + "|"
+		info.Labels += "$" + label + "|"
 		_, err = q.Save(info)
 		if err != nil {
 			beego.Error("models.UpdateLabelInfo -> add:", path, err)
 		}
 	case i > -1 && !add: // Delete opetation and contains.
-		info.Tags = strings.Replace(info.Tags, "$"+tag+"|", "", 1)
+		info.Labels = strings.Replace(info.Labels, "$"+label+"|", "", 1)
 		_, err = q.Save(info)
 		if err != nil {
 			beego.Error("models.UpdateLabelInfo -> delete:", path, err)

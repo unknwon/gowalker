@@ -120,7 +120,7 @@ func checkSpecialUsage(this *SearchRouter, q string) bool {
 			return true
 		}
 
-		if isLabel(q[i+5:]) && models.UpdateLabelInfo(q[:i], q[i+5:], true) {
+		if isLabel(q[i+3:]) && models.UpdateLabelInfo(q[:i], q[i+3:], true) {
 			this.Redirect("/"+q[:i], 302)
 		}
 		return true
@@ -132,7 +132,7 @@ func checkSpecialUsage(this *SearchRouter, q string) bool {
 			return true
 		}
 
-		if isLabel(q[i+6:]) && models.UpdateLabelInfo(q[:i], q[i+6:], false) {
+		if isLabel(q[i+4:]) && models.UpdateLabelInfo(q[:i], q[i+4:], false) {
 			this.Redirect("/"+q[:i], 302)
 		}
 		return true
