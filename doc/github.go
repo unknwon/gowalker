@@ -94,7 +94,7 @@ func getGithubDoc(client *http.Client, match map[string]string, tag, savedEtag s
 
 	err = httpGetJSON(client, expand("https://api.github.com/repos/{owner}/{repo}/git/trees/{tag}?recursive=1&{cred}", match), &tree)
 	if err != nil {
-		return nil, err
+		return nil, errors.New("doc.getGithubDoc(" + match["importPath"] + ") -> get tress: " + err.Error())
 	}
 
 	// Because Github API URLs are case-insensitive, we need to check that the

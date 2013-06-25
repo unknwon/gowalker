@@ -154,7 +154,7 @@ func (this *HomeRouter) Get() {
 
 		// Get tag field.
 		tag := strings.TrimSpace(this.Input().Get("tag"))
-		if tag == "master" {
+		if tag == "master" || tag == "default" {
 			tag = ""
 		}
 

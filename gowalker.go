@@ -16,26 +16,16 @@
 package main
 
 import (
-	"fmt"
-	"log"
 	"os"
 	"runtime"
-	"time"
 
 	"github.com/Unknwon/gowalker/doc"
 	"github.com/Unknwon/gowalker/routers"
-	"github.com/Unknwon/gowalker/utils"
 	"github.com/astaxie/beego"
 )
 
 const (
-	VERSION = "0.4.7.0625" // Application version.
-)
-
-var (
-	logTicker   *time.Ticker
-	logFileName string
-	logFile     *os.File
+	VERSION = "0.4.8.0625" // Application version.
 )
 
 func init() {
@@ -49,50 +39,15 @@ func init() {
 
 	// ----- Initialize log file -----
 	os.Mkdir("./log", os.ModePerm)
-
-	// Start log ticker.
-	logTicker = time.NewTicker(time.Minute)
-	go logTickerCheck(logTicker.C)
-
-	beego.Info("Go Walker", VERSION)
-	setLogger()
-}
-
-// logTickerCheck checks for log files.
-// Because we need to record log in different files for different time period.
-func logTickerCheck(logChan <-chan time.Time) {
-	for {
-		<-logChan
-		setLogger()
-	}
-}
-
-// setLogger sets corresponding log file for beego.Logger.
-func setLogger() {
-	// Compute log file name as format '<year>-<month>-<day>.txt', eg.'2013-06-19.txt'.
-	logName := fmt.Sprintf("./log/%04d-%02d-%02d.txt",
-		time.Now().Year(), time.Now().Month(), time.Now().Day())
-	// Check if need to create new log file.
-	if logName == logFileName {
-		return
-	}
-
-	logFileName = logName
-	// Open or create log file.
-	var err error
-	if utils.IsExist(logName) {
-		logFile, err = os.OpenFile(logName, os.O_RDWR|os.O_APPEND, 0644)
-	} else {
-		logFile, err = os.Create(logName)
-	}
+	filew := beego.NewFileWriter("log/log.log", true)
+	err := filew.StartLogger()
 	if err != nil {
-		beego.Critical("Failed to init log file ->", err)
-		return
+		beego.Critical("NewFileWriter ->", err)
 	}
 
 	doc.SetGithubCredentials(beego.AppConfig.String("client_id"), beego.AppConfig.String("client_secret"))
 
-	beego.SetLogger(log.New(logFile, "", log.Ldate|log.Ltime))
+	beego.Info("Go Walker", VERSION)
 }
 
 func main() {

@@ -335,7 +335,8 @@ type service struct {
 var services = []*service{
 	{googlePattern, "code.google.com/", getGoogleDoc},
 	{githubPattern, "github.com/", getGithubDoc},
-	/*	{bitbucketPattern, "bitbucket.org/", getBitbucketDoc},
+	{bitbucketPattern, "bitbucket.org/", getBitbucketDoc},
+	/*
 		{launchpadPattern, "launchpad.net/", getLaunchpadDoc},
 		{oscPattern, "git.oschina.net/", getOSCDoc},
 		{csdnPattern, "code.csdn.net/", getCSDNDoc},*/
