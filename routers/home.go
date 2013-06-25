@@ -209,7 +209,8 @@ func generatePage(this *HomeRouter, pdoc *doc.Package, q, tag, lang string) bool
 	this.Data["IsRefresh"] = pdoc.Created.Add(10 * time.Second).UTC().After(time.Now().UTC())
 
 	// Get VCS name, project name, project home page, and Upper level project URL.
-	this.Data["VCS"], this.Data["ProName"], this.Data["ProPath"], this.Data["ProDocPath"] = getVCSInfo(q, pdoc)
+	this.Data["VCS"], this.Data["ProName"], this.Data["ProPath"], this.Data["ProDocPath"] =
+		getVCSInfo(q, tag, pdoc)
 
 	if utils.IsGoRepoPath(pdoc.ImportPath) &&
 		strings.Index(pdoc.ImportPath, ".") == -1 {
@@ -467,7 +468,7 @@ func getExample(pdoc *doc.Package, name string) int {
 }
 
 // getVCSInfo returns VCS name, project name, project home page, and Upper level project URL.
-func getVCSInfo(q string, pdoc *doc.Package) (vcs, proName, proPath, pkgDocPath string) {
+func getVCSInfo(q, tag string, pdoc *doc.Package) (vcs, proName, proPath, pkgDocPath string) {
 	// Get project name.
 	lastIndex := strings.LastIndex(q, "/")
 	proName = q[lastIndex+1:]
@@ -477,6 +478,18 @@ func getVCSInfo(q string, pdoc *doc.Package) (vcs, proName, proPath, pkgDocPath 
 
 	// Project VCS home page.
 	switch {
+	case strings.HasPrefix(q, "github.com"): // github.com
+		vcs = "Github"
+		if len(tag) == 0 {
+			tag = "master" // Set tag.
+		}
+		if proName != pdoc.ProjectName {
+			// Not root.
+			proName := utils.GetProjectPath(pdoc.ImportPath)
+			proPath = strings.Replace(q, proName, proName+"/tree/"+tag, 1)
+		} else {
+			proPath = q + "/tree/" + tag
+		}
 	case strings.HasPrefix(q, "code.google.com"): // code.google.com
 		vcs = "Google Code"
 		if strings.Index(q, "source/") == -1 {
@@ -486,26 +499,33 @@ func getVCSInfo(q string, pdoc *doc.Package) (vcs, proName, proPath, pkgDocPath 
 			q = strings.Replace(q, "source/browse/", "", 1)
 			lastIndex = strings.LastIndex(q, "/")
 		}
-	case q[0] == 'g': // github.com
-		vcs = "Github"
-		if proName != pdoc.ProjectName {
-			// Not root.
-			proName := utils.GetProjectPath(pdoc.ImportPath)
-			proPath = strings.Replace(q, proName, proName+"/tree/master", 1)
-		} else {
-			proPath = q + "/tree/master"
-		}
+		proPath += "?r=" + tag // Set tag.
 	case q[0] == 'b': // bitbucket.org
 		vcs = "BitBucket"
+		if len(tag) == 0 {
+			tag = "default" // Set tag.
+		}
 		if proName != pdoc.ProjectName {
 			// Not root.
-			proPath = strings.Replace(q, "/"+pdoc.ProjectName, "/"+pdoc.ProjectName+"/src/default", 1)
+			proPath = strings.Replace(q, "/"+pdoc.ProjectName, "/"+pdoc.ProjectName+"/src/"+tag, 1)
 		} else {
-			proPath = q + "/src/default"
+			proPath = q + "/src/" + tag
 		}
 	case q[0] == 'l': // launchpad.net
 		vcs = "Launchpad"
 		proPath = "bazaar." + strings.Replace(q, "/"+pdoc.ProjectName, "/+branch/"+pdoc.ProjectName+"/view/head:/", 1)
+	case strings.HasPrefix(q, "git.oschina.net"): // git.oschina.net
+		vcs = "Git @ OSC"
+		if len(tag) == 0 {
+			tag = "master" // Set tag.
+		}
+		if proName != pdoc.ProjectName {
+			// Not root.
+			proName := utils.GetProjectPath(pdoc.ImportPath)
+			proPath = strings.Replace(q, proName, proName+"/tree/"+tag, 1)
+		} else {
+			proPath = q + "/tree/" + tag
+		}
 	}
 
 	pkgDocPath = q[:lastIndex]

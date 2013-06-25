@@ -337,8 +337,8 @@ var services = []*service{
 	{githubPattern, "github.com/", getGithubDoc},
 	{bitbucketPattern, "bitbucket.org/", getBitbucketDoc},
 	{launchpadPattern, "launchpad.net/", getLaunchpadDoc},
+	{oscPattern, "git.oschina.net/", getOSCDoc},
 	/*
-		{oscPattern, "git.oschina.net/", getOSCDoc},
 		{csdnPattern, "code.csdn.net/", getCSDNDoc},*/
 }
 

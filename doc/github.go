@@ -82,7 +82,7 @@ func getGithubDoc(client *http.Client, match map[string]string, tag, savedEtag s
 		match["tag"] = tag
 	}
 
-	// Get files and directories.
+	// Get files and subdirectories.
 	var tree struct {
 		Tree []struct {
 			Url  string

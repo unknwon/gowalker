@@ -217,7 +217,7 @@ func getGoogleVCS(client *http.Client, match map[string]string) error {
 	// Scrape the HTML project page to find the VCS.
 	p, err := httpGetBytes(client, expand("http://code.google.com/p/{repo}/source/checkout", match), nil)
 	if err != nil {
-		return err
+		return errors.New("doc.getGoogleVCS(" + match["importPath"] + ") -> " + err.Error())
 	}
 	m := googleRepoRe.FindSubmatch(p)
 	if m == nil {
