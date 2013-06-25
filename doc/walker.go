@@ -273,14 +273,15 @@ func (w *walker) build(srcs []*source) (*Package, error) {
 	// Add source files to walker, I skipped references here.
 	w.srcs = make(map[string]*source)
 	for _, src := range srcs {
+		srcName := strings.ToLower(src.name) // For readme comparation.
 		switch {
 		case strings.HasSuffix(src.name, ".go"):
 			w.srcs[src.name] = src
 		case len(w.pdoc.Tag) > 0:
 			continue // Only save latest readme.
-		case strings.HasPrefix(strings.ToLower(src.name), "readme_zh"):
+		case strings.HasPrefix(srcName, "readme_zh") || strings.HasPrefix(srcName, "readme_cn"):
 			models.SavePkgDoc(w.pdoc.ImportPath, "zh", src.data)
-		case strings.HasPrefix(strings.ToLower(src.name), "readme"):
+		case strings.HasPrefix(srcName, "readme"):
 			models.SavePkgDoc(w.pdoc.ImportPath, "en", src.data)
 		}
 	}

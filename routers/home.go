@@ -399,6 +399,14 @@ func generatePage(this *HomeRouter, pdoc *doc.Package, q, tag, lang string) bool
 		// Examples.
 		this.Data["IsHasExams"] = len(pdoc.Examples) > 0
 		this.Data["Exams"] = pdoc.Examples
+
+		// Tags.
+		this.Data["IsHasTags"] = len(pdoc.Tags) > 1
+		if len(tag) == 0 {
+			tag = "master"
+		}
+		this.Data["CurTag"] = tag
+		this.Data["Tags"] = pdoc.Tags
 	} else {
 		this.Data["IsCmd"] = true
 	}
@@ -418,14 +426,6 @@ func generatePage(this *HomeRouter, pdoc *doc.Package, q, tag, lang string) bool
 
 	// Labels.
 	this.Data["LabelDataSrc"] = labelSet
-
-	// Tags.
-	this.Data["IsHasTags"] = len(pdoc.Tags) > 0
-	if len(tag) == 0 {
-		tag = "master"
-	}
-	this.Data["CurTag"] = tag
-	this.Data["Tags"] = pdoc.Tags
 
 	this.Data["Files"] = pdoc.Files
 	this.Data["ImportPkgs"] = pdecl.Imports

@@ -132,7 +132,7 @@ func getBitbucketDoc(client *http.Client, match map[string]string, tag, savedEta
 			Tags:        tags,
 			Tag:         tag,
 			Etag:        etag,
-			Dirs:        node.Directories,
+			Dirs:        dirs,
 		},
 	}
 	return w.build(files)
