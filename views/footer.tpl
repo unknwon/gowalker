@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 		<div id='_keyshortcut' class="modal hide fade" tabindex="-1" role="dialog" aria-hidden="false">
 		  <div class="modal-header">
-		      <h3>Keyboard Shortcuts</h3>
+		      <h3>Control panel</h3>
 		  </div>
 		  <div class="modal-body">
 		      <table>

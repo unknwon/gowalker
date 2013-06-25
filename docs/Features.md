@@ -39,3 +39,15 @@ Code highlight and link jump.
 Get examples from test files.
 
 ![](images/example.png?raw=true)
+
+##Control panel
+
+Press "?" in any page to call control panel.
+
+![](images/controlpanel.png?raw=true)
+
+##Label project
+
+Press "g" then "t" to label your project.
+
+![](images/label.png?raw=true)

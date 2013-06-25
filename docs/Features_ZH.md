@@ -39,3 +39,15 @@
 展示单元测试中的示例函数。
 
 ![](images/example_ZH.png?raw=true)
+
+##控制面板
+
+按下英文半角问号 “?” 后可呼出控制面板。
+
+![](images/controlpanel_ZH.png?raw=true)
+
+##标记项目
+
+按下 “g” 后再按 “t” 来标记您的项目。
+
+![](images/label_ZH.png?raw=true)

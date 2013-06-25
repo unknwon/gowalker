@@ -15,9 +15,7 @@ Go Walker is a web server that generates <a target="_blank" href="http://golang.
 - **Code view** for functions and methods code in current package in the same page with nice highlight: reduce rake up space and do more work at the same time.
 - **Mouse hover tip** and **jump link** for functions, methods and types in current package: reduce time to find.
 - **Code highlight** and **jump link** for functions, methods and types from imported packages: reduce time to find.
-
-
-- **Control panel** for keyboard shortcuts: compatible with godoc.org.
+- **Control panel** for keyboard shortcuts and more function: compatible with godoc.org.
 - Use **Tag** to label your project: list by categories.
 - [Full documentation](https://github.com/Unknwon/gowalker/blob/master/docs/Features.md).
 
