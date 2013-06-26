@@ -25,7 +25,7 @@ import (
 )
 
 const (
-	VERSION = "0.5.0.0626" // Application version.
+	VERSION = "0.5.1.0626" // Application version.
 )
 
 func init() {
@@ -37,6 +37,8 @@ func init() {
 		beego.SetLevel(beego.LevelInfo)
 	}
 
+	beego.Info("Go Walker", VERSION)
+
 	// ----- Initialize log file -----
 	os.Mkdir("./log", os.ModePerm)
 	filew := beego.NewFileWriter("log/log.log", true)
@@ -46,8 +48,6 @@ func init() {
 	}
 
 	doc.SetGithubCredentials(beego.AppConfig.String("client_id"), beego.AppConfig.String("client_secret"))
-
-	beego.Info("Go Walker", VERSION)
 }
 
 func main() {

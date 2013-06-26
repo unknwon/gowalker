@@ -526,6 +526,18 @@ func getVCSInfo(q, tag string, pdoc *doc.Package) (vcs, proName, proPath, pkgDoc
 		} else {
 			proPath = q + "/tree/" + tag
 		}
+	case strings.HasPrefix(q, "code.csdn.net"): // code.csdn.net
+		vcs = "CSDN Code"
+		if len(tag) == 0 {
+			tag = "master" // Set tag.
+		}
+		if proName != pdoc.ProjectName {
+			// Not root.
+			proName := utils.GetProjectPath(pdoc.ImportPath)
+			proPath = strings.Replace(q, proName, proName+"/tree/"+tag, 1)
+		} else {
+			proPath = q + "/tree/" + tag
+		}
 	}
 
 	pkgDocPath = q[:lastIndex]

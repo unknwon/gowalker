@@ -1,7 +1,7 @@
 Go 步行者
 ========
 
-Go 步行者是一个用于在线生成并浏览 <a target="_blank" href="http://docs.studygolang.com/">Go</a> 项目 API 文档及源码 的 Web 服务器，目前支持包括 <b><a target="_blank" href="https://bitbucket.org/">Bitbucket</a></b>，<b><a target="_blank" href="https://github.com/">Github</a></b>，<b><a target="_blank" href="http://code.google.com/">Google Code</a></b>，<b><a target="_blank" href="https://launchpad.net/">Launchpad</a></b>，<b><a target="_blank" href="http://git.oschina.net/">Git @ OSC</a></b> 和 <b><a target="_blank" href="https://code.csdn.net/">CSDN Code</a></b> 六大版本控制平台。
+Go 步行者是一个用于在线生成并浏览 <a target="_blank" href="http://docs.studygolang.com/">Go</a> 项目 API 文档及源码 的 Web 服务器，目前支持包括 <b><a target="_blank" href="https://bitbucket.org/">Bitbucket</a></b>，<b><a target="_blank" href="https://github.com/">Github</a></b>，<b><a target="_blank" href="http://code.google.com/">Google Code</a></b>，<b><a target="_blank" href="https://launchpad.net/">Launchpad</a></b> 和 <b><a target="_blank" href="http://git.oschina.net/">Git @ OSC</a></b> 五大版本控制平台。
 
 ![](https://github.com/Unknwon/gowalker/blob/master/docs/images/whatisthis_ZH.png?raw=true)
 

@@ -338,8 +338,7 @@ var services = []*service{
 	{bitbucketPattern, "bitbucket.org/", getBitbucketDoc},
 	{launchpadPattern, "launchpad.net/", getLaunchpadDoc},
 	{oscPattern, "git.oschina.net/", getOSCDoc},
-	/*
-		{csdnPattern, "code.csdn.net/", getCSDNDoc},*/
+	//{csdnPattern, "code.csdn.net/", getCSDNDoc},
 }
 
 // getStatic gets a document from a statically known service. getStatic

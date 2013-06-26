@@ -26,7 +26,7 @@ import (
 	"time"
 )
 
-var userAgent = "go application"
+var userAgent = "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/29.0.1541.0 Safari/537.36"
 
 var (
 	dialTimeout  = flag.Duration("dial_timeout", 10*time.Second, "Timeout for dialing an HTTP connection.")
