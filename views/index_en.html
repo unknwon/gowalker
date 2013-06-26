@@ -1,0 +1,42 @@
+{{template "header_en"}}
+		<title>Go Walker - Index</title>
+	</head>
+
+	<body id="body" style="padding-top: 60px; font-family: Microsoft Yahei; font-size: 13px;">
+		{{template "navbar_en" .}}
+		<div class="container" style="width: 1000px;">
+			<h1>Index</h1>
+			<p>Number of total projects: {{.ProNum}}.</p>
+			<div class="row">
+				<div class="span6 homeright">
+					<h4>Top 26-64 Popular Projects</h4>
+					<ul class="unstyled">
+						{{range .PopPros}}
+						<li><span class="badge">{{.Views}}</span> <a title="{{.Synopsis}}" href="/{{.Path}}">{{.Path}}</a></li>
+						{{end}}
+					</ul>
+				</div>
+				<div class="span6 homeleft">
+					<h4>Most Imported Projects</h4>
+					<table id="rectable" class="table table-bordered table-hover">
+						<thead>
+							<tr>
+								<th>Import Path</th>
+								<th>Imported Num</th>
+							</tr>
+						</thead>
+						<tbody>
+						{{range .ImportedPros}}
+							<tr>
+								<td><a title="{{.Synopsis}}" href="/{{.Path}}">{{.Path}}</a></td>
+								<td><a href="/search?q=imported&pkgs={{.ImportPid}}">{{.ImportedNum}} Packages</a></td>
+							</tr>
+						{{end}}
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+		{{template "footer_en" .}}
+	</body>
+</html>

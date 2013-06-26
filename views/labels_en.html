@@ -1,0 +1,64 @@
+{{template "header_en"}}
+		<title>Go Walker - Labels</title>
+	</head>
+
+	<body id="body" style="padding-top: 60px; font-family: Microsoft Yahei; font-size: 13px;">
+		{{template "navbar_en" .}}
+		<div class="container" style="width: 1000px;">
+			<h1>Labels</h1>
+			<div class="row">
+				<div class="span4">
+					<h4 id="Web Frame.">Web Framework</h4>
+					<ul class="unstyled">
+						{{range .WFPros}}
+						<li><span class="badge">{{.Views}}</span> <a title="{{.Synopsis}}" href="/{{.Path}}">{{.Path}}</a></li>
+						{{end}}
+					</ul>
+				</div>
+				<div class="span4">
+					<h4 id="ORM">Object Relation Mapping</h4>
+					<ul class="unstyled">
+						{{range .ORMPros}}
+						<li><span class="badge">{{.Views}}</span> <a title="{{.Synopsis}}" href="/{{.Path}}">{{.Path}}</a></li>
+						{{end}}
+					</ul>
+				</div>
+				<div class="span4">
+					<h4 id="DB Driver">Database Driver</h4>
+					<ul class="unstyled">
+						{{range .DBDPros}}
+						<li><span class="badge">{{.Views}}</span> <a title="{{.Synopsis}}" href="/{{.Path}}">{{.Path}}</a></li>
+						{{end}}
+					</ul>
+				</div>
+			</div>
+			<div class="row">
+				<div class="span4">
+					<h4 id="GUI">Graphic User Interface</h4>
+					<ul class="unstyled">
+						{{range .GUIPros}}
+						<li><span class="badge">{{.Views}}</span> <a title="{{.Synopsis}}" href="/{{.Path}}">{{.Path}}</a></li>
+						{{end}}
+					</ul>
+				</div>
+				<div class="span4">
+					<h4 id="Networking">Networking</h4>
+					<ul class="unstyled">
+						{{range .NETPros}}
+						<li><span class="badge">{{.Views}}</span> <a title="{{.Synopsis}}" href="/{{.Path}}">{{.Path}}</a></li>
+						{{end}}
+					</ul>
+				</div>
+				<div class="span4">
+					<h4 id="Toolkit">Toolkit</h4>
+					<ul class="unstyled">
+						{{range .TOOLPros}}
+						<li><span class="badge">{{.Views}}</span> <a title="{{.Synopsis}}" href="/{{.Path}}">{{.Path}}</a></li>
+						{{end}}
+					</ul>
+				</div>
+			</div>
+		</div>
+		{{template "footer_en" .}}
+	</body>
+</html>

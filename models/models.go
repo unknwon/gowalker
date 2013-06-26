@@ -92,6 +92,7 @@ type PkgExam struct {
 	Id    int64
 	Path  string `qbs:"index"` // Import path of package.
 	Views int64  `qbs:"index"`
+	Gid   int64  // Gist id.
 }
 
 func connDb() *qbs.Qbs {
@@ -226,24 +227,24 @@ func GetIndexPageInfo() (totalNum int64, popPkgs, importedPkgs []*PkgInfo, err e
 	return totalNum, popPkgs, importedPkgs, nil
 }
 
-// GetTagsPageInfo returns all data that used for tags page.
+// GetLabelsPageInfo returns all data that used for labels page.
 // One function is for reducing database connect times.
-func GetTagsPageInfo() (WFPros, ORMPros, DBDPros, GUIPros, NETPros, TOOLPros []*PkgInfo, err error) {
+func GetLabelsPageInfo() (WFPros, ORMPros, DBDPros, GUIPros, NETPros, TOOLPros []*PkgInfo, err error) {
 	// Connect to database.
 	q := connDb()
 	defer q.Close()
 
-	condition := qbs.NewCondition("tags like ?", "%$wf|%")
+	condition := qbs.NewCondition("labels like ?", "%$wf|%")
 	err = q.Limit(10).Condition(condition).OrderByDesc("views").FindAll(&WFPros)
-	condition = qbs.NewCondition("tags like ?", "%$orm|%")
+	condition = qbs.NewCondition("labels like ?", "%$orm|%")
 	err = q.Limit(10).Condition(condition).OrderByDesc("views").FindAll(&ORMPros)
-	condition = qbs.NewCondition("tags like ?", "%$dbd|%")
+	condition = qbs.NewCondition("labels like ?", "%$dbd|%")
 	err = q.Limit(10).Condition(condition).OrderByDesc("views").FindAll(&DBDPros)
-	condition = qbs.NewCondition("tags like ?", "%$gui|%")
+	condition = qbs.NewCondition("labels like ?", "%$gui|%")
 	err = q.Limit(10).Condition(condition).OrderByDesc("views").FindAll(&GUIPros)
-	condition = qbs.NewCondition("tags like ?", "%$net|%")
+	condition = qbs.NewCondition("labels like ?", "%$net|%")
 	err = q.Limit(10).Condition(condition).OrderByDesc("views").FindAll(&NETPros)
-	condition = qbs.NewCondition("tags like ?", "%$tool|%")
+	condition = qbs.NewCondition("labels like ?", "%$tool|%")
 	err = q.Limit(10).Condition(condition).OrderByDesc("views").FindAll(&TOOLPros)
 	return WFPros, ORMPros, DBDPros, GUIPros, NETPros, TOOLPros, nil
 }

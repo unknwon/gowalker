@@ -1,0 +1,39 @@
+{{template "header_en"}}
+		<title>Go 步行者 - 关于</title>
+	</head>
+
+	<body id="body" style="padding-top: 60px; font-family: Microsoft Yahei; font-size: 13px;">
+		{{template "navbar_zh" .}}
+		<div class="container" style="width: 1000px;">
+			<h1>关于</h1>
+			<p>Go 步行者用于为托管在版本控制系统上的 <a target="_blank" href="http://golang.org/">Go</a> 开源项目生成在线 API 文档，目前支持的平台包括 <b><a target="_blank" href="https://bitbucket.org/">Bitbucket</a></b>，<b><a target="_blank" href="https://github.com/">Github</a></b>，<b><a target="_blank" href="http://code.google.com/">Google Code</a></b>，<b><a target="_blank" href="https://launchpad.net/">Launchpad</a></b> 和 <b><a target="_blank" href="http://git.oschina.net/">Git @ OSC</a></b>。</p>
+			<p>您可以在 <a target="_blank" href="https://github.com/Unknwon/gowalker">Github</a>（稳定版）或 <a target="_blank" href="https://code.csdn.net/u011039013/gowalker">CSDN Code</a>（测试版）上浏览并下载该项目的源代码。   
+
+			<h4 id="howto">添加新的项目到 Go 步行者</h4> 
+			<p>Go 步行者是一个用于生成 Go 项目 API 文档的服务器，有关文档注释规范，请参考官方给出的 <a target="_blank" href="http://docs.studygolang.com/doc/articles/godoc_documenting_go_code.html">大纲</a>。Go 步行者兼容所有 <a href="http://docs.studygolang.com/cmd/godoc/">godoc</a> 工具所支持的标准，同时 Go 步行者还将会显示类型在不同包之间的关联。</p>
+			<p>对于一个具有良好可读性的项目而言，规范完整的文档说明是极其重要的。Go 步行者会截取每个项目的包的首行文字作为该包的纲要，并在搜索项目时展现给阅读者。</p>
+			<p>如果您打算将某个项目添加到 Go 步行者，可以通过 <a href="/">搜索</a> 该项目的导入路径来通知服务器。如果该项目的文档已经存在，则将直接呈现给您，否则会从相关的版本控制系统上即时下载并生成文档。如果您的操作是添加新的项目，则最多可能需要 5 秒的时间来完成，因为 Go 步行者会将源码和文档展示在相同页面上。</p>
+			<p>Go 步行者每天都会检查各个项目的更新情况，你也可以通过底部的刷新按钮来进行强制刷新。</p>
+
+			<h4 id="remove">从 Go 步行者中删除项目</h4>
+			<p>Go 步行者将会在每日检查更新时自动删除更新失败的项目，您也可以在删除托管在版本控制系统上的项目后，通过强制刷新的方式来完成删除操作。</p>
+			<p>如果您只是单纯的想要禁止他人通过本服务器产生您的项目源码文档，请通过 Oepn Issue 的方式提出。</p>
+
+			<h4 id="control_panel">控制面板</h4>
+			<p>Go 步行者提供控制面板以方便页面上的操作，在文档页面按下问号 "?" 即可打开控制面板。感谢 <a target="_blank" href="http://www.lavachen.cn">chenwenli</a> 提供的帮助！</p>
+
+			<h4>为您的项目增加或移除标签</h4> 
+			<p>正如我们在 <a href="/labels">标签</a> 页面向您展示不同分类的项目那样，您可以通过为您的项目添加标签来进行归类展示，只需要在您项目导入路径后加上标签搜索或在文档页面按下 <code>g + t</code>。例如，Qbs 是一个 ORM，因此可以通过搜索以下内容来对它进行标记：<a target="_blank" href="/github.com/coocood/qbs:l=orm" class="label label-inverse">github.com/coocood/qbs:l=orm</a>，您也可以通过访问页面 <a target="_blank" href="/github.com/coocood/qbs:l=orm">gowalker.org/github.com/coocood/qbs:l=orm</a> 来完成标记操作。如果您想要删除某个标记，则使用 <span class="label label-inverse">:rl=</span>。
+
+			<h4>协助站点翻译</h4> 
+			<p>Go 步行者支持多语言的网站用户界面。您可以通过翻译 "views" 目录下的文件来帮助站点支持您所使用的语言。</p>
+ 
+			<h4>反馈</h4> 
+			<p>如果您有好的建议或想法，请发送邮件到 joe2010xtmf#163.com。网站问题反馈请通过 <a target="_blank" href="https://github.com/Unknwon/gowalker/issues">Github Issue Tracker</a>。您也可以加入到 <a target="_blank" href="https://groups.google.com/d/forum/gowalker">Go Walker group</a> 来讨论相关话题。</p>
+
+			<h4>书签工具</h4>
+			<p>Go 步行者书签工具通过 JavaScript 脚本来动态获取您当前在代码托管平台上浏览的项目地址，并自动跳转到本网站的相关页面。请将该链接保存至您的收藏夹来使用此功能：<a  target="_blank" href="javascript:window.location='http://gowalker.org/'+encodeURIComponent(window.location)">Go 步行者 - 书签</a>.</p>
+		</div>
+		{{template "footer_zh" .}}
+	</body>
+</html>

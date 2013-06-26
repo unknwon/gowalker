@@ -1,0 +1,42 @@
+{{template "header_en"}}
+		<title>Go 步行者 - 索引</title>
+	</head>
+
+	<body id="body" style="padding-top: 60px; font-family: Microsoft Yahei; font-size: 13px;">
+		{{template "navbar_zh" .}}
+		<div class="container" style="width: 1000px;">
+			<h1>索引</h1>
+			<p>当前收录项目总数：{{.ProNum}}.</p>
+			<div class="row">
+				<div class="span6 homeright">
+					<h4>Top 26-64 热门项目</h4>
+					<ul class="unstyled">
+						{{range .PopPros}}
+						<li><span class="badge">{{.Views}}</span> <a title="{{.Synopsis}}" href="/{{.Path}}">{{.Path}}</a></li>
+						{{end}}
+					</ul>
+				</div>
+				<div class="span6 homeleft">
+					<h4>项目引用排行榜</h4>
+					<table id="rectable" class="table table-bordered table-hover">
+						<thead>
+							<tr>
+								<th>导入路径</th>
+								<th>引用信息</th>
+							</tr>
+						</thead>
+						<tbody>
+						{{range .ImportedPros}}
+							<tr>
+								<td><a title="{{.Synopsis}}" href="/{{.Path}}">{{.Path}}</a></td>
+								<td><a href="/search?q=imported&pkgs={{.ImportPid}}">{{.ImportedNum}} 个包</a></td>
+							</tr>
+						{{end}}
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+		{{template "footer_zh" .}}
+	</body>
+</html>
