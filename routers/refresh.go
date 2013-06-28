@@ -55,6 +55,7 @@ func (this *RefreshRouter) Get() {
 			Views:       pdoc.Views,
 			IsCmd:       pdoc.IsCmd,
 			Etag:        pdoc.Etag,
+			Labels:      pdoc.Labels,
 			Tags:        strings.Join(pdoc.Tags, "|||"),
 			ImportedNum: pdoc.ImportedNum,
 			ImportPid:   pdoc.ImportPid,

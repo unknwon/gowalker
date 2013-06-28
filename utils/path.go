@@ -643,7 +643,7 @@ func joinPath(importPath string, num int) string {
 }
 
 var filterFileNames = []string{
-	"test", "static", "docs", "views"}
+	"test", "static", "docs", "views", "js", "assets"}
 
 // FilterFileName guess the file or directory is or contains Go source files.
 func FilterFileName(name string) bool {

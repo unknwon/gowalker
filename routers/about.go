@@ -25,6 +25,7 @@ type AboutRouter struct {
 
 // Get implemented Get method for AboutRouter.
 func (this *AboutRouter) Get() {
+	this.Data["IsAbout"] = true
 	// Set language version.
 	curLang := setLangVer(this.Ctx, this.Input(), this.Data)
 

@@ -175,6 +175,7 @@ func (this *HomeRouter) Get() {
 					Views:       pdoc.Views,
 					IsCmd:       pdoc.IsCmd,
 					Etag:        pdoc.Etag,
+					Labels:      pdoc.Labels,
 					Tags:        strings.Join(pdoc.Tags, "|||"),
 					ImportedNum: pdoc.ImportedNum,
 					ImportPid:   pdoc.ImportPid,
@@ -546,7 +547,7 @@ func getVCSInfo(q, tag string, pdoc *doc.Package) (vcs, proName, proPath, pkgDoc
 
 func getLabels(rawLabel string) []string {
 	// Get labels.
-	labels := strings.Split(beego.AppConfig.String("labels"), "|")
+	labels := strings.Split(beego.AppConfig.String("label_names"), "|")
 
 	rawLabels := strings.Split(rawLabel, "|")
 	rawLabels = rawLabels[:len(rawLabels)-1] // The last element is always empty.

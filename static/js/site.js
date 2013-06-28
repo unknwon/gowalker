@@ -21,11 +21,16 @@
         var delta = document.body.clientWidth - 1100;
 
         if (delta > 0) {
+            if (document.getElementById("sidebar") == null) {
             fixedTop.className = "navbar navbar-fixed-top";
+            body.style.paddingTop = "60px";
+        }else{
+            fixedTop.className = "navbar";
+            body.style.paddingTop = "0px";
+        }
             navbar.style.paddingLeft = delta / 2 + 40 + "px";
             navbar.style.paddingRight = delta / 2 + 70 + "px";
             searchBox.style.width = "";
-            body.style.paddingTop = "60px";
 
             // Home page.
             if (homeBody != null) {

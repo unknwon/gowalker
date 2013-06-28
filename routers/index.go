@@ -26,6 +26,7 @@ type IndexRouter struct {
 
 // Get implemented Get method for IndexRouter.
 func (this *IndexRouter) Get() {
+	this.Data["IsIndex"] = true
 	// Set language version.
 	curLang := setLangVer(this.Ctx, this.Input(), this.Data)
 
