@@ -18,6 +18,7 @@ import (
 	"archive/zip"
 	"bytes"
 	"errors"
+	"fmt"
 	"net/http"
 	"regexp"
 	"strings"
@@ -57,7 +58,7 @@ func getOSCDoc(client *http.Client, match map[string]string, tag, savedEtag stri
 	files := make([]*source, 0, 5)
 	for _, f := range r.File {
 		fileName := f.FileInfo().Name()
-		if len(fileName) < dirLen {
+		if len(fileName) <= dirLen {
 			continue
 		}
 
@@ -85,8 +86,10 @@ func getOSCDoc(client *http.Client, match map[string]string, tag, savedEtag stri
 		}
 
 		// Directory.
-		if strings.HasSuffix(fileName, "/") && utils.FilterFileName(fileName[dirLen+1:]) {
-			dirs = append(dirs, fileName[dirLen+1:])
+		if strings.HasSuffix(fileName, "/") && strings.LastIndex(fileName, "/") != dirLen &&
+			utils.FilterFileName(fileName[dirLen+1:]) {
+			fmt.Println(fileName)
+			dirs = append(dirs, strings.TrimSuffix(fileName[dirLen+1:], "/"))
 		}
 	}
 
