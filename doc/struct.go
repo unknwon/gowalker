@@ -63,6 +63,7 @@ type Example struct {
 	//Play   string
 	Output      string
 	IsHasOutput bool
+	IsUsed      bool // Indicates if it's used by any kind object.
 }
 
 // PACKAGE_VER is modified when previously stored packages are invalid.

@@ -18,7 +18,6 @@ import (
 	"archive/zip"
 	"bytes"
 	"errors"
-	"fmt"
 	"net/http"
 	"regexp"
 	"strings"
@@ -88,7 +87,6 @@ func getOSCDoc(client *http.Client, match map[string]string, tag, savedEtag stri
 		// Directory.
 		if strings.HasSuffix(fileName, "/") && strings.LastIndex(fileName, "/") != dirLen &&
 			utils.FilterFileName(fileName[dirLen+1:]) {
-			fmt.Println(fileName)
 			dirs = append(dirs, strings.TrimSuffix(fileName[dirLen+1:], "/"))
 		}
 	}

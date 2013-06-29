@@ -16,6 +16,7 @@ Go 步行者是一个用于在线生成并浏览 <a target="_blank" href="http:/
 - 对于外部包的函数、方法和类型拥有 **代码高亮** 和 **跳转链接** 的便捷功能。
 - 键盘快捷键呼出 **控制面板** 以及实现更多功能：与 godoc.org 兼容。
 - 使用 **标签** 标记项目：更好地分类显示。
+- **多语言** 支持：[关于](http://gowalker.org/about)
 - [完整文档](https://github.com/Unknwon/gowalker/blob/master/docs/Features_ZH.md).
 
 ## 第三方包

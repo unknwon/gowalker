@@ -23,7 +23,6 @@ import (
 	"go/ast"
 	"go/build"
 	"go/doc"
-	//"go/format"
 	"go/parser"
 	"go/printer"
 	"go/token"
@@ -217,12 +216,6 @@ func (w *walker) getExamples(name string) []*Example {
 			continue
 		}
 
-		n := e.Name[len(name):]
-		if i := strings.Index(n, "_"); i > -1 {
-			n = n[:i]
-		}
-		n = strings.Title(n)
-
 		output := e.Output
 		code := w.printNode(&printer.CommentedNode{
 			Node:     e.Code,
@@ -253,9 +246,9 @@ func (w *walker) getExamples(name string) []*Example {
 		// 		play = string(w.buf)
 		// 	}
 		// }
-
+		fmt.Println(e.Name)
 		docs = append(docs, &Example{
-			Name:   n,
+			Name:   e.Name,
 			Doc:    e.Doc,
 			Code:   code,
 			Output: output,
