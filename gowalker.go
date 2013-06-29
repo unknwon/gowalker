@@ -59,6 +59,7 @@ func main() {
 	beego.Router("/search", &routers.SearchRouter{})
 	beego.Router("/index", &routers.IndexRouter{})
 	beego.Router("/labels", &routers.LabelsRouter{})
+	beego.Router("/examples", &routers.ExamplesRouter{})
 	beego.Router("/refresh", &routers.RefreshRouter{})
 	beego.Router("/about", &routers.AboutRouter{})
 

@@ -62,10 +62,10 @@ type PkgDecl struct {
 	// Internal declarations.
 	Iconsts, Ifuncs, Itypes, Ivars string
 
-	Examples         string // Function or method example.
+	Examples         string // Examples.
 	Notes            string // Source code notes.
 	Files, TestFiles string // Source files.
-	Dirs             string // Subdirectories
+	Dirs             string // Subdirectories.
 
 	Imports, TestImports string // Imports.
 }
@@ -89,10 +89,10 @@ func (*PkgDoc) Indexes(indexes *qbs.Indexes) {
 
 // PkgExam represents a package example.
 type PkgExam struct {
-	Id    int64
-	Path  string `qbs:"index"` // Import path of package.
-	Views int64  `qbs:"index"`
-	Gid   int64  // Gist id.
+	Id       int64
+	Path     string `qbs:"index"` // Import path of package.
+	Gist     string // Gist path.
+	Examples string // Examples.
 }
 
 func connDb() *qbs.Qbs {
@@ -209,6 +209,16 @@ func GetAllPkgs() ([]*PkgInfo, error) {
 	var pkgInfos []*PkgInfo
 	err := q.OrderBy("pro_name").OrderByDesc("views").FindAll(&pkgInfos)
 	return pkgInfos, err
+}
+
+func GetAllExams() ([]*PkgExam, error) {
+	// Connect to database.
+	q := connDb()
+	defer q.Close()
+
+	var pkgExams []*PkgExam
+	err := q.OrderBy("path").FindAll(&pkgExams)
+	return pkgExams, err
 }
 
 // GetIndexPageInfo returns all data that used for index page.
