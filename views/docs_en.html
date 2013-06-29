@@ -95,7 +95,7 @@
 					{{if .IsHasExams}}
 					<h3 id="_exams">Examples</h3>
 					<ul class="unstyled">
-						{{range .Exams}}<li><a href="#{{.Name}}">{{.Name}}</a></li>{{end}}
+						{{range .Exams}}<li><a href="#_ex_btn_{{.Name}}">{{.Name}}</a></li>{{end}}
 					</ul>
 					{{end}}
 				{{end}}
@@ -195,11 +195,11 @@
 
 {{define "example_en"}}
 	    			{{if .IsHasExam}}
-	    			{{with .Exam}}
+	    			{{range .Exams}}
 	    			<div class="accordion">
 	    				<div class="accordion-group">
 	    					<div class="accordion-heading">
-	    						<a class="accordion-toggle collapsed" data-toggle="collapse" href="#_ex_{{.Name}}">Example</a>
+	    						<a id="_ex_btn_{{.Name}}" class="accordion-toggle collapsed" data-toggle="collapse" href="#_ex_{{.Name}}">Example({{.Name}})</a>
 	    					</div>
 	    					<div id="_ex_{{.Name}}" class="accordion-body collapse">
 		    					<div class="accordion-inner">

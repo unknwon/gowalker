@@ -38,7 +38,7 @@ type Func struct {
 	URL           string // VCS URL.
 	Code          string // Source code.
 	IsHasExam     bool
-	Exam          *Example
+	Exams         []*Example
 }
 
 // Type represents structs and interfaces
@@ -52,7 +52,7 @@ type Type struct {
 	Methods       []*Func // Exported methods.
 	IMethods      []*Func // Internal methods.
 	IsHasExam     bool
-	Exam          *Example
+	Exams         []*Example
 }
 
 // Example represents function examples.
@@ -67,7 +67,7 @@ type Example struct {
 }
 
 // PACKAGE_VER is modified when previously stored packages are invalid.
-const PACKAGE_VER = "6"
+const PACKAGE_VER = "7"
 
 // Package represents full information and documentation for a package.
 type Package struct {

@@ -212,9 +212,9 @@ var exampleOutputRx = regexp.MustCompile(`(?i)//[[:space:]]*output:`)
 func (w *walker) getExamples(name string) []*Example {
 	var docs []*Example
 	for _, e := range w.examples {
-		if !strings.HasPrefix(e.Name, name) {
-			continue
-		}
+		// if !strings.HasPrefix(e.Name, name) {
+		// 	continue
+		// }
 
 		output := e.Output
 		code := w.printNode(&printer.CommentedNode{
@@ -246,7 +246,7 @@ func (w *walker) getExamples(name string) []*Example {
 		// 		play = string(w.buf)
 		// 	}
 		// }
-		fmt.Println(e.Name)
+
 		docs = append(docs, &Example{
 			Name:   e.Name,
 			Doc:    e.Doc,

@@ -327,9 +327,9 @@ func generatePage(this *HomeRouter, pdoc *doc.Package, q, tag, lang string) bool
 		buf.Reset()
 		utils.FormatCode(&buf, &f.Code, links)
 		f.Code = buf.String()
-		if i := getExample(pdoc, f.Name); i > -1 {
+		if exs := getExamples(pdoc, f.Name); len(exs) > 0 {
 			f.IsHasExam = true
-			f.Exam = pdoc.Examples[i]
+			f.Exams = exs
 		}
 		totalNum++
 		pdoc.Funcs[i] = f
@@ -350,9 +350,9 @@ func generatePage(this *HomeRouter, pdoc *doc.Package, q, tag, lang string) bool
 			buf.Reset()
 			utils.FormatCode(&buf, &f.Code, links)
 			f.Code = buf.String()
-			if i := getExample(pdoc, f.Name); i > -1 {
+			if exs := getExamples(pdoc, f.Name); len(exs) > 0 {
 				f.IsHasExam = true
-				f.Exam = pdoc.Examples[i]
+				f.Exams = exs
 			}
 			totalNum++
 			t.Funcs[j] = f
@@ -370,9 +370,9 @@ func generatePage(this *HomeRouter, pdoc *doc.Package, q, tag, lang string) bool
 			buf.Reset()
 			utils.FormatCode(&buf, &m.Code, links)
 			m.Code = buf.String()
-			if i := getExample(pdoc, m.Name); i > -1 {
+			if exs := getExamples(pdoc, m.Name); len(exs) > 0 {
 				m.IsHasExam = true
-				m.Exam = pdoc.Examples[i]
+				m.Exams = exs
 			}
 			totalNum++
 			t.Methods[j] = m
@@ -386,9 +386,9 @@ func generatePage(this *HomeRouter, pdoc *doc.Package, q, tag, lang string) bool
 		buf.Reset()
 		utils.FormatCode(&buf, &t.Decl, links)
 		t.FmtDecl = buf.String()
-		if i := getExample(pdoc, t.Name); i > -1 {
+		if exs := getExamples(pdoc, t.Name); len(exs) > 0 {
 			t.IsHasExam = true
-			t.Exam = pdoc.Examples[i]
+			t.Exams = exs
 		}
 		totalNum++
 		pdoc.Types[i] = t
@@ -458,14 +458,29 @@ func calDocCP(comNum, totalNum int) (label, perStr string) {
 	return label, perStr
 }
 
-// getExample returns index of function example if it exists.
-func getExample(pdoc *doc.Package, name string) int {
-	for i, v := range pdoc.Examples {
-		if name == v.Name {
-			return i
+// getExamples returns index of function example if it exists.
+func getExamples(pdoc *doc.Package, name string) (exams []*doc.Example) {
+	for _, v := range pdoc.Examples {
+		// Already used or doesn't match.
+		if v.IsUsed && !strings.HasPrefix(v.Name, name) {
+			continue
 		}
+
+		// Check if it has right prefix.
+		index := strings.Index(v.Name, "_")
+		// Not found "_", name length shoule be equal.
+		if index == -1 && (len(v.Name) != len(name)) {
+			continue
+		}
+
+		// Found "_", prefix length shoule be equal.
+		if index > -1 && (len(v.Name[:index]) != len(name)) {
+			continue
+		}
+
+		exams = append(exams, v)
 	}
-	return -1
+	return exams
 }
 
 // getVCSInfo returns VCS name, project name, project home page, and Upper level project URL.
