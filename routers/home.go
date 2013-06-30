@@ -160,7 +160,7 @@ func (this *HomeRouter) Get() {
 
 		// Check documentation of this import path, and update automatically as needed.
 		pdoc, err := doc.CheckDoc(reqUrl, tag, doc.HUMAN_REQUEST)
-		if err == nil {
+		if err == nil || pdoc == nil {
 			pdoc.UserExamples = getUserExamples(pdoc.ImportPath)
 			// Generate documentation page.
 			if generatePage(this, pdoc, broPath, tag, curLang.Lang) {
