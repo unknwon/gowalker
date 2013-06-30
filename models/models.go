@@ -211,6 +211,17 @@ func GetAllPkgs() ([]*PkgInfo, error) {
 	return pkgInfos, err
 }
 
+// GetPkgExams returns user examples from database.
+func GetPkgExams(path string) ([]*PkgExam, error) {
+	// Connect to database.
+	q := connDb()
+	defer q.Close()
+
+	var pkgExams []*PkgExam
+	err := q.WhereEqual("path", path).FindAll(&pkgExams)
+	return pkgExams, err
+}
+
 func GetAllExams() ([]*PkgExam, error) {
 	// Connect to database.
 	q := connDb()
@@ -291,6 +302,25 @@ func UpdateLabelInfo(path string, label string, add bool) bool {
 }
 
 var buildPicPattern = regexp.MustCompile(`\[+!+\[+([a-zA-Z ]*)+\]+\(+[a-zA-z]+://[^\s]*`)
+
+// SavePkgExam saves user examples to database.
+func SavePkgExam(gist *PkgExam) {
+	// Connect to database.
+	q := connDb()
+	defer q.Close()
+
+	pexam := new(PkgExam)
+	cond := qbs.NewCondition("path = ?", gist.Path).And("gist = ?", gist.Gist)
+	err := q.Condition(cond).Find(pexam)
+	if err != nil {
+		gist.Id = pexam.Id
+	}
+
+	_, err = q.Save(gist)
+	if err != nil {
+		beego.Error("models.SavePkgExam -> ", gist.Path, err)
+	}
+}
 
 // SavePkgDoc saves readered readme.md file data.
 func SavePkgDoc(path, lang string, docBys []byte) {

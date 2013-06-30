@@ -164,7 +164,7 @@ func SaveProject(pdoc *Package, info *models.PkgInfo) error {
 			buf.WriteString("&F#")
 			buf.WriteString(m.URL)
 			buf.WriteString("&F#")
-			buf.WriteString(*codeEncode(&m.Code))
+			buf.WriteString(*CodeEncode(&m.Code))
 			buf.WriteString("&M#")
 		}
 		buf.WriteString("&$#")
@@ -177,7 +177,7 @@ func SaveProject(pdoc *Package, info *models.PkgInfo) error {
 			buf.WriteString("&F#")
 			buf.WriteString(m.URL)
 			buf.WriteString("&F#")
-			buf.WriteString(*codeEncode(&m.Code))
+			buf.WriteString(*CodeEncode(&m.Code))
 			buf.WriteString("&M#")
 		}
 		buf.WriteString("&$#")
@@ -192,7 +192,7 @@ func SaveProject(pdoc *Package, info *models.PkgInfo) error {
 			buf.WriteString("&F#")
 			buf.WriteString(m.URL)
 			buf.WriteString("&F#")
-			buf.WriteString(*codeEncode(&m.Code))
+			buf.WriteString(*CodeEncode(&m.Code))
 			buf.WriteString("&M#")
 		}
 		buf.WriteString("&$#")
@@ -205,7 +205,7 @@ func SaveProject(pdoc *Package, info *models.PkgInfo) error {
 			buf.WriteString("&F#")
 			buf.WriteString(m.URL)
 			buf.WriteString("&F#")
-			buf.WriteString(*codeEncode(&m.Code))
+			buf.WriteString(*CodeEncode(&m.Code))
 			buf.WriteString("&M#")
 		}
 		buf.WriteString("&##")
@@ -219,7 +219,7 @@ func SaveProject(pdoc *Package, info *models.PkgInfo) error {
 		buf.WriteString("&E#")
 		buf.WriteString(e.Doc)
 		buf.WriteString("&E#")
-		buf.WriteString(*codeEncode(&e.Code))
+		buf.WriteString(*CodeEncode(&e.Code))
 		buf.WriteString("&E#")
 		// buf.WriteString(e.Play)
 		// buf.WriteString("&E#")
@@ -312,13 +312,13 @@ func addFuncs(buf *bytes.Buffer, pfuncs *string, funcs []*Func) {
 		buf.WriteString("&F#")
 		buf.WriteString(v.URL)
 		buf.WriteString("&F#")
-		buf.WriteString(*codeEncode(&v.Code))
+		buf.WriteString(*CodeEncode(&v.Code))
 		buf.WriteString("&$#")
 	}
 	*pfuncs = buf.String()
 }
 
-func codeEncode(code *string) *string {
+func CodeEncode(code *string) *string {
 	str := new(string)
 	*str = base32.StdEncoding.EncodeToString([]byte(*code))
 	return str

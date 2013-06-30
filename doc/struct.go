@@ -66,6 +66,13 @@ type Example struct {
 	IsUsed      bool // Indicates if it's used by any kind object.
 }
 
+// Gist represents a Gist.
+type Gist struct {
+	ImportPath string     // Import path of package.
+	Gist       string     // Gist path.
+	Examples   []*Example // Examples.
+}
+
 // PACKAGE_VER is modified when previously stored packages are invalid.
 const PACKAGE_VER = "7"
 
@@ -107,10 +114,10 @@ type Package struct {
 	Itypes  []*Type
 	Ivars   []*Value
 
-	Examples         []*Example // Function or method example.
-	Notes            []string   // Source code notes.
-	Files, TestFiles []string   // Source files.
-	Dirs             []string   // Subdirectories
+	Examples, UserExamples []*Example // Function or method example.
+	Notes                  []string   // Source code notes.
+	Files, TestFiles       []string   // Source files.
+	Dirs                   []string   // Subdirectories
 
 	Imports, TestImports []string // Imports.
 

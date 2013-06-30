@@ -161,8 +161,10 @@ func (this *HomeRouter) Get() {
 		// Check documentation of this import path, and update automatically as needed.
 		pdoc, err := doc.CheckDoc(reqUrl, tag, doc.HUMAN_REQUEST)
 		if err == nil {
+			pdoc.UserExamples = getUserExamples(pdoc.ImportPath)
+			fmt.Println(pdoc.UserExamples)
 			// Generate documentation page.
-			if pdoc != nil && generatePage(this, pdoc, broPath, tag, curLang.Lang) {
+			if generatePage(this, pdoc, broPath, tag, curLang.Lang) {
 				// Update recent project list.
 				updateRecentPros(pdoc)
 				// Update project views.
@@ -191,6 +193,22 @@ func (this *HomeRouter) Get() {
 		this.Redirect("/search?q="+reqUrl, 302)
 		return
 	}
+}
+
+func getUserExamples(path string) []*doc.Example {
+	gists, _ := models.GetPkgExams(path)
+	// Doesn't have Gists.
+	if len(gists) == 0 {
+		return nil
+	}
+
+	pexams := make([]*doc.Example, 0, 5)
+	for _, g := range gists {
+		exams := convertDataFormatExample(g.Examples, "_"+g.Gist)
+		pexams = append(pexams, exams...)
+	}
+	fmt.Println(pexams)
+	return pexams
 }
 
 // generatePage genarates documentation page for project.
@@ -327,7 +345,7 @@ func generatePage(this *HomeRouter, pdoc *doc.Package, q, tag, lang string) bool
 		buf.Reset()
 		utils.FormatCode(&buf, &f.Code, links)
 		f.Code = buf.String()
-		if exs := getExamples(pdoc, f.Name); len(exs) > 0 {
+		if exs := getExamples(pdoc, "", f.Name); len(exs) > 0 {
 			f.IsHasExam = true
 			f.Exams = exs
 		}
@@ -350,7 +368,7 @@ func generatePage(this *HomeRouter, pdoc *doc.Package, q, tag, lang string) bool
 			buf.Reset()
 			utils.FormatCode(&buf, &f.Code, links)
 			f.Code = buf.String()
-			if exs := getExamples(pdoc, f.Name); len(exs) > 0 {
+			if exs := getExamples(pdoc, "", f.Name); len(exs) > 0 {
 				f.IsHasExam = true
 				f.Exams = exs
 			}
@@ -370,7 +388,7 @@ func generatePage(this *HomeRouter, pdoc *doc.Package, q, tag, lang string) bool
 			buf.Reset()
 			utils.FormatCode(&buf, &m.Code, links)
 			m.Code = buf.String()
-			if exs := getExamples(pdoc, m.Name); len(exs) > 0 {
+			if exs := getExamples(pdoc, t.Name, m.Name); len(exs) > 0 {
 				m.IsHasExam = true
 				m.Exams = exs
 			}
@@ -386,7 +404,7 @@ func generatePage(this *HomeRouter, pdoc *doc.Package, q, tag, lang string) bool
 		buf.Reset()
 		utils.FormatCode(&buf, &t.Decl, links)
 		t.FmtDecl = buf.String()
-		if exs := getExamples(pdoc, t.Name); len(exs) > 0 {
+		if exs := getExamples(pdoc, "", t.Name); len(exs) > 0 {
 			t.IsHasExam = true
 			t.Exams = exs
 		}
@@ -459,10 +477,10 @@ func calDocCP(comNum, totalNum int) (label, perStr string) {
 }
 
 // getExamples returns index of function example if it exists.
-func getExamples(pdoc *doc.Package, name string) (exams []*doc.Example) {
-	for _, v := range pdoc.Examples {
+func getExamples(pdoc *doc.Package, typeName, name string) (exams []*doc.Example) {
+	for i, v := range pdoc.Examples {
 		// Already used or doesn't match.
-		if v.IsUsed && !strings.HasPrefix(v.Name, name) {
+		if v.IsUsed || !strings.HasPrefix(v.Name, name) {
 			continue
 		}
 
@@ -478,6 +496,22 @@ func getExamples(pdoc *doc.Package, name string) (exams []*doc.Example) {
 			continue
 		}
 
+		pdoc.Examples[i].IsUsed = true
+		exams = append(exams, v)
+	}
+
+	matchName := name
+	if len(typeName) > 0 {
+		matchName = typeName + "_" + name
+	}
+	for i, v := range pdoc.UserExamples {
+		// Already used or doesn't match.
+		if v.IsUsed || !strings.HasPrefix(v.Name, matchName) {
+			continue
+		}
+		fmt.Println(v.Name)
+
+		pdoc.UserExamples[i].IsUsed = true
 		exams = append(exams, v)
 	}
 	return exams
@@ -712,27 +746,7 @@ func ConvertDataFormat(pdoc *doc.Package, pdecl *models.PkgDecl) error {
 	pdoc.Types = pdoc.Types[:len(pdoc.Types)-1]
 
 	// Examples.
-	pdoc.Examples = make([]*doc.Example, 0, 5)
-	for _, v := range strings.Split(pdecl.Examples, "&$#") {
-		val := new(doc.Example)
-		for j, s := range strings.Split(v, "&E#") {
-			switch j {
-			case 0: // Name
-				val.Name = s
-			case 1: // Doc
-				val.Doc = s
-			case 2: // Code
-				val.Code = *codeDecode(&s)
-			case 3: // Output
-				val.Output = s
-				if len(s) > 0 {
-					val.IsHasOutput = true
-				}
-			}
-		}
-		pdoc.Examples = append(pdoc.Examples, val)
-	}
-	pdoc.Examples = pdoc.Examples[:len(pdoc.Examples)-1]
+	pdoc.Examples = convertDataFormatExample(pdecl.Examples, "")
 
 	// Dirs.
 	pdoc.Dirs = strings.Split(pdecl.Dirs, "|")
@@ -744,6 +758,31 @@ func ConvertDataFormat(pdoc *doc.Package, pdecl *models.PkgDecl) error {
 	// Files.
 	pdoc.Files = strings.Split(pdecl.Files, "|")
 	return nil
+}
+
+func convertDataFormatExample(examStr, suffix string) []*doc.Example {
+	exams := make([]*doc.Example, 0, 5)
+	for _, v := range strings.Split(examStr, "&$#") {
+		val := new(doc.Example)
+		for j, s := range strings.Split(v, "&E#") {
+			switch j {
+			case 0: // Name
+				val.Name = s + suffix
+			case 1: // Doc
+				val.Doc = s
+			case 2: // Code
+				val.Code = *codeDecode(&s)
+			case 3: // Output
+				val.Output = s
+				if len(s) > 0 {
+					val.IsHasOutput = true
+				}
+			}
+		}
+		exams = append(exams, val)
+	}
+	exams = exams[:len(exams)-1]
+	return exams
 }
 
 func codeDecode(code *string) *string {

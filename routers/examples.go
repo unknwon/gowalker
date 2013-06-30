@@ -15,12 +15,14 @@
 package routers
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"strings"
 
+	"github.com/Unknwon/gowalker/doc"
 	"github.com/Unknwon/gowalker/models"
 	"github.com/astaxie/beego"
 )
@@ -53,9 +55,11 @@ func (this *ExamplesRouter) Get() {
 
 	this.Data["ImportPath"] = q
 	// Get Gist.
+	gist = strings.TrimPrefix(gist, "http://")
 	if !strings.HasPrefix(gist, "https://") {
 		gist = "https://" + gist
 	}
+	gist += "/raw"
 
 	req, err := http.NewRequest("GET", gist, nil)
 	if err != nil {
@@ -82,13 +86,121 @@ func (this *ExamplesRouter) Get() {
 	}
 
 	// Parse examples.
-	err = parseExamples(html, q)
+	g, err := parseExamples(html, gist, q)
 	if err != nil {
 		this.Data["ErrMsg"] = err.Error()
 		return
 	}
+
+	if len(g.Examples) == 0 {
+		this.Data["ErrMsg"] = "No example has beed found."
+		return
+	}
+
+	saveExamples(g)
+	this.Redirect("/"+q, 302)
 }
 
-func parseExamples(html []byte, path string) error {
-	return errors.New("Unrecognized Gist.")
+func saveExamples(gist *doc.Gist) {
+	var buf bytes.Buffer
+	// Examples.
+	for _, e := range gist.Examples {
+		buf.WriteString(e.Name)
+		buf.WriteString("&E#")
+		buf.WriteString(e.Doc)
+		buf.WriteString("&E#")
+		buf.WriteString(*doc.CodeEncode(&e.Code))
+		buf.WriteString("&E#")
+		// buf.WriteString(e.Play)
+		// buf.WriteString("&E#")
+		buf.WriteString(e.Output)
+		buf.WriteString("&$#")
+	}
+
+	pkgExam := &models.PkgExam{
+		Path:     gist.ImportPath,
+		Gist:     gist.Gist,
+		Examples: buf.String(),
+	}
+
+	models.SavePkgExam(pkgExam)
+}
+
+func parseExamples(html []byte, gist, path string) (*doc.Gist, error) {
+	gist = strings.TrimPrefix(gist, "https://")
+	gist = strings.TrimSuffix(gist, "/raw")
+	g := &doc.Gist{Gist: gist}
+	exam := &doc.Example{}
+
+	var status int
+	// Status.
+	const (
+		EMPTY = iota
+		NAME
+		CODE
+		OUTPUT
+	)
+
+	for i, v := range strings.Split(string(html), "\n") {
+		// Check status.
+		switch {
+		case len(v) == 0: // Empty line.
+			status = EMPTY
+		case len(v) >= 2 && v[:2] == "//": // Comment.
+			if len(exam.Name) > 0 {
+				status = CODE
+				break
+			}
+
+			status = EMPTY
+		case len(v) >= 3 && v[0] == '[' && v[len(v)-1] == ']': // Name
+			if len(g.ImportPath) == 0 {
+				return nil, errors.New(fmt.Sprintf("Line %d: Expect import path, but found example name[ %s ]", i+1, v))
+			}
+
+			// Add example to slice.
+			if len(exam.Name) > 0 && len(exam.Code) > 0 {
+				g.Examples = append(g.Examples, exam)
+				exam = &doc.Example{}
+			}
+			status = NAME
+		case len(g.ImportPath) == 0 && strings.HasPrefix(v, "import_path"):
+			index := strings.Index(v, "=")
+			g.ImportPath = strings.TrimSpace(v[index+1:])
+
+			if g.ImportPath != path {
+				return nil, errors.New(fmt.Sprintf("Line %d: Expect import path[ %s ], but found[ %s ]", i+1, path, g.ImportPath))
+			}
+		case len(v) >= 7 && strings.Contains(strings.ToLower(v), "output:"):
+			if len(exam.Name) == 0 {
+				return nil, errors.New(fmt.Sprintf("Line %d: Expect example name, but found output[ %s ]", i+1, v))
+			}
+			status = OUTPUT
+		default:
+			if status != OUTPUT {
+				status = CODE
+			}
+		}
+
+		// Get content.
+		switch status {
+		case EMPTY:
+		case NAME:
+			exam.Name = v[1 : len(v)-1]
+		case CODE:
+			exam.Code += v + "\n"
+		case OUTPUT:
+			if !strings.Contains(strings.ToLower(v), "output:") {
+				exam.Output += v + "\n"
+			}
+		}
+	}
+
+	// Add example to slice.
+	if len(exam.Name) > 0 && len(exam.Code) > 0 {
+		g.Examples = append(g.Examples, exam)
+		exam = &doc.Example{}
+	}
+
+	return g, nil
 }
