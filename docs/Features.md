@@ -41,13 +41,20 @@ Get examples from test files.
 ![](images/example.png?raw=true)
 
 ##Control panel
-
 Press "?" in any page to call control panel.
 
 ![](images/controlpanel.png?raw=true)
 
 ##Label project
-
 Press "g" then "t" to label your project.
 
 ![](images/label.png?raw=true)
+
+##Add examples
+Press "g" then "e" to add examples through Github Gist.
+
+![](images/gist.png?raw=true)
+
+[Here](https://gist.github.com/Unknwon/5892664) is an example of usable Gist.
+
+![](images/gist_example.png?raw=true)

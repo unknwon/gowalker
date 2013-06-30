@@ -39,8 +39,8 @@
 					{{if .IsCmd}}{{else}}<li><a href="#_index"><i class="icon-chevron-right"></i>Index</a></li>{{end}}
 					{{if .IsHasConst}}<li><a href="#_constants"><i class="icon-chevron-right"></i>Constants</a></li>{{end}}
 					{{if .IsHasVar}}<li><a href="#_variables"><i class="icon-chevron-right"></i>Variables</a></li>{{end}}
-					<li><a href="#_files"><i class="icon-chevron-right"></i>Files</a></li>
 					{{if .IsHasExams}}<li><a href="#_exams"><i class="icon-chevron-right"></i>Examples</a></li>{{end}}
+					<li><a href="#example_modal" data-toggle="modal"><i class="icon-chevron-right"></i>Add examples</a></li>
 					{{if .IsHasSubdirs}}<li><a href="#_subdirs"><i class="icon-chevron-right"></i>Directories</a></li>{{end}}
 					<li><a href="#_bottom"><i class="icon-chevron-right"></i>Bottom</a></li>
 					{{if .HasExports}}<li><a href="#search_exports" data-toggle="modal"><i class="icon-chevron-right"></i>Search Exports</a></li>{{end}}

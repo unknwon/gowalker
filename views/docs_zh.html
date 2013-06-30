@@ -17,14 +17,30 @@
 			{{else}}
 				{{template "labelmodal_zh" .}}
 			{{end}}
+			<div id="example_modal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+				<form id="example_form" class="modal-form" action="/examples">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+						<h3 id="myModalLabel" style="margin: 10px">增加示例.</h3>
+					</div>
+					<input type="hidden" name="q" value="{{.ImportPath}}"></input>	
+					<div class="modal-body" style="overflow-y: visible;">
+						<input id="example_box" autofocus="autofocus" class="span5" type="text" name="gist" placeholder="请输入 Gist 地址"></input>
+					</div>
+					<div class="modal-footer">
+						<button type='button' class="btn" data-dismiss="modal" aria-hidden="true">关闭</button>
+						<button class="btn btn-primary" type="submit">增加</button>
+					</div>
+				</form>
+			</div>
 			<div id="sidebar" class="span3 hide" style="margin-left: -220px; margin-top: 20px;">
 				<ul class="nav nav-tabs nav-stacked affix bs-docs-sidenav">
 					<li><a href="#"><i class="icon-chevron-right"></i>顶部</a></li>
 					{{if .IsCmd}}{{else}}<li><a href="#_index"><i class="icon-chevron-right"></i>索引</a></li>{{end}}
 					{{if .IsHasConst}}<li><a href="#_constants"><i class="icon-chevron-right"></i>常量</a></li>{{end}}
 					{{if .IsHasVar}}<li><a href="#_variables"><i class="icon-chevron-right"></i>变量</a></li>{{end}}
-					<li><a href="#_files"><i class="icon-chevron-right"></i>文件</a></li>
 					{{if .IsHasExams}}<li><a href="#_exams"><i class="icon-chevron-right"></i>示例</a></li>{{end}}
+					<li><a href="#example_modal" data-toggle="modal"><i class="icon-chevron-right"></i>增加示例</a></li>
 					{{if .IsHasSubdirs}}<li><a href="#_subdirs"><i class="icon-chevron-right"></i>目录</a></li>{{end}}
 					<li><a href="#_bottom"><i class="icon-chevron-right"></i>底部</a></li>
 					{{if .HasExports}}<li><a href="#search_exports" data-toggle="modal"><i class="icon-chevron-right"></i>搜索导出对象</a></li>{{end}}

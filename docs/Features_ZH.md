@@ -51,3 +51,12 @@
 按下 “g” 后再按 “t” 来标记您的项目。
 
 ![](images/label_ZH.png?raw=true)
+
+##增加示例
+按下 “g” 后再按 “e” 来通过 Github Gist 增加示例。
+
+![](images/gist_ZH.png?raw=true)
+
+[这里](https://gist.github.com/Unknwon/5892664) 有一个可用的示例。
+
+![](images/gist_example_ZH.png?raw=true)

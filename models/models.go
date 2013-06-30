@@ -90,10 +90,10 @@ func (*PkgDoc) Indexes(indexes *qbs.Indexes) {
 // PkgExam represents a package example.
 type PkgExam struct {
 	Id       int64
-	Path     string `qbs:"index"` // Import path of package.
-	Gist     string // Gist path.
-	Examples string // Examples.
-	Created  time.Time
+	Path     string    `qbs:"index"` // Import path of package.
+	Gist     string    // Gist path.
+	Examples string    // Examples.
+	Created  time.Time `qbs:"index"`
 }
 
 func connDb() *qbs.Qbs {
@@ -313,7 +313,7 @@ func SavePkgExam(gist *PkgExam) {
 	pexam := new(PkgExam)
 	cond := qbs.NewCondition("path = ?", gist.Path).And("gist = ?", gist.Gist)
 	err := q.Condition(cond).Find(pexam)
-	if err != nil {
+	if err == nil {
 		gist.Id = pexam.Id
 	}
 	gist.Created = time.Now().UTC()

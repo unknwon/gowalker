@@ -109,14 +109,7 @@
     // For example modal.
     var _ex = $('#example_modal');
     if (_ex.length != 0) {
-        //_ex.modal({ keyboard: false, show: false }); // For tags modal.
-
-        // $('#example_form').submit(function () {
-        //     var _ex = $('#example_modal');
-        //     _ex.modal('hide');
-        //     _ex.find('input[type=text]').val("");
-        //     return false;
-        // });
+        
     } else {
         _ex = null;
     }

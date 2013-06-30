@@ -54,6 +54,12 @@ func (this *ExamplesRouter) Get() {
 	}
 
 	this.Data["ImportPath"] = q
+
+	if !strings.Contains(gist, "gist.github.com") {
+		this.Data["ErrMsg"] = fmt.Sprintf("Gist path[ %s ] is not legal.", gist)
+		return
+	}
+
 	// Get Gist.
 	gist = strings.TrimPrefix(gist, "http://")
 	if !strings.HasPrefix(gist, "https://") {
