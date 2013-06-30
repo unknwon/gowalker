@@ -476,9 +476,14 @@ func calDocCP(comNum, totalNum int) (label, perStr string) {
 
 // getExamples returns index of function example if it exists.
 func getExamples(pdoc *doc.Package, typeName, name string) (exams []*doc.Example) {
+	matchName := name
+	if len(typeName) > 0 {
+		matchName = typeName + "_" + name
+	}
+
 	for i, v := range pdoc.Examples {
 		// Already used or doesn't match.
-		if v.IsUsed || !strings.HasPrefix(v.Name, name) {
+		if v.IsUsed || !strings.HasPrefix(v.Name, matchName) {
 			continue
 		}
 
@@ -490,7 +495,7 @@ func getExamples(pdoc *doc.Package, typeName, name string) (exams []*doc.Example
 		}
 
 		// Found "_", prefix length shoule be equal.
-		if index > -1 && (len(v.Name[:index]) != len(name)) {
+		if index > -1 && len(typeName) == 0 && (index > len(name)) {
 			continue
 		}
 
@@ -498,10 +503,6 @@ func getExamples(pdoc *doc.Package, typeName, name string) (exams []*doc.Example
 		exams = append(exams, v)
 	}
 
-	matchName := name
-	if len(typeName) > 0 {
-		matchName = typeName + "_" + name
-	}
 	for i, v := range pdoc.UserExamples {
 		// Already used or doesn't match.
 		if v.IsUsed || !strings.HasPrefix(v.Name, matchName) {
