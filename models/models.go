@@ -93,6 +93,7 @@ type PkgExam struct {
 	Path     string `qbs:"index"` // Import path of package.
 	Gist     string // Gist path.
 	Examples string // Examples.
+	Created  time.Time
 }
 
 func connDb() *qbs.Qbs {
@@ -315,6 +316,7 @@ func SavePkgExam(gist *PkgExam) {
 	if err != nil {
 		gist.Id = pexam.Id
 	}
+	gist.Created = time.Now().UTC()
 
 	_, err = q.Save(gist)
 	if err != nil {

@@ -129,6 +129,7 @@ func saveExamples(gist *doc.Gist) {
 func parseExamples(html []byte, gist, path string) (*doc.Gist, error) {
 	gist = strings.TrimPrefix(gist, "https://")
 	gist = strings.TrimSuffix(gist, "/raw")
+	gist = strings.TrimSuffix(gist, "/")
 	g := &doc.Gist{Gist: gist}
 	exam := &doc.Example{}
 

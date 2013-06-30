@@ -106,6 +106,21 @@
         _tf = null;
     }
 
+    // For example modal.
+    var _ex = $('#example_modal');
+    if (_ex.length != 0) {
+        //_ex.modal({ keyboard: false, show: false }); // For tags modal.
+
+        // $('#example_form').submit(function () {
+        //     var _ex = $('#example_modal');
+        //     _ex.modal('hide');
+        //     _ex.find('input[type=text]').val("");
+        //     return false;
+        // });
+    } else {
+        _ex = null;
+    }
+
     // For global modal.
     var _modal = $("#_keyshortcut");
     _modal.modal({ keyboard: true, show: false });
@@ -138,16 +153,19 @@
         if (code == 63) {// for '?'  equal as  63
             if (_ep) _ep.modal('hide');
             if (_tf) _tf.modal('hide');
+            if (_ex) _ex.modal('hide');
             _modal.modal('show');
         } else if (code == 47) { //for '/'    forward slash code:47
             if (_ep) _ep.modal('hide');
             if (_tf) _tf.modal('hide');
+            if (_ex) _ex.modal('hide');
             _modal.modal('hide');
             //site search focus
             $('input[name=q]').first().focus();
             return false;
         } else if (code == 46 && isProjectPage) { //for '.'    comma as 46   'go to export'
             if (_tf) _tf.modal('hide');
+            if (_ex) _ex.modal('hide');
             _modal.modal('hide');
             if (_ep) {
                 _ep.modal('show');
@@ -158,6 +176,7 @@
         } else if (code == 103) {// for 'g then g'   g 103
             if (_ep) _ep.modal('hide');
             if (_tf) _tf.modal('hide');
+            if (_ex) _ex.modal('hide');
             _modal.modal('hide');
             if (preKeyG == 0) {
                 preKeyG = 1;
@@ -174,6 +193,7 @@
         } else if (code == 98) {//for 'g then b'    b 98
             if (_ep) _ep.modal('hide');
             if (_tf) _tf.modal('hide');
+            if (_ex) _ex.modal('hide');
             _modal.modal('hide');
             GkeyCb(function () {
                 $("html,body").animate({ scrollTop: $("body").height() }, 120);
@@ -182,12 +202,14 @@
         } else if (code == 105) {//for 'g then i'     i  105
             if (_ep) _ep.modal('hide');
             if (_tf) _tf.modal('hide');
+            if (_ex) _ex.modal('hide');
             _modal.modal('hide');
             GkeyCb(function () {
                 location.hash = "#_index";
             });
         } else if (code == 116) { // for `g then t`	t 	116
             if (_ep) _ep.modal('hide');
+            if (_ex) _ex.modal('hide');
             _modal.modal('hide');
             if (_tf) {
                 _tf.modal('show');
@@ -197,10 +219,14 @@
             }
         } else if (code == 101) {// for 'g then e'   e 101
             if (_ep) _ep.modal('hide');
+            if (_tf) _tf.modal('hide');
             _modal.modal('hide');
-            GkeyCb(function () {
-                location.hash = "#Chunk";
-            });
+            if (_ex) {
+                _ex.modal('show');
+                _ex.on('shown', function () {
+                    $(this).find('#example_box').focus();
+                })
+            }
         }
     })
     //end

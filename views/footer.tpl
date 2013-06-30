@@ -14,7 +14,7 @@
 			      <tr><td align="right"><b>g</b> then <b>b</b></td><td> : Go to bottom of page</td></tr>
 			      <tr><td align="right"><b>g</b> then <b>i</b></td><td> : Go to index</td></tr>
 			      <tr><td align="right"><b>g</b> then <b>t</b></td><td> : Add or remove labels</td></tr>
-			      <tr><td align="right"><b>g</b> then <b>e</b></td><td> : Go to examples</td></tr>
+			      <tr><td align="right"><b>g</b> then <b>e</b></td><td> : Add examples</td></tr>
 		          </tbody>
 		      </table>
 		  </div>
@@ -63,7 +63,7 @@
 			      <tr><td align="right"><b>g</b> + <b>b</b></td><td> ： 跳至底部</td></tr>
 			      <tr><td align="right"><b>g</b> + <b>i</b></td><td> ： 跳至索引</td></tr>
 			      <tr><td align="right"><b>g</b> + <b>t</b></td><td> ： 增加或移除标签</td></tr>
-			      <tr><td align="right"><b>g</b> + <b>e</b></td><td> ： 浏览项目示例</td></tr>
+			      <tr><td align="right"><b>g</b> + <b>e</b></td><td> ： 增加示例</td></tr>
 		          </tbody>
 		      </table>
 		  </div>

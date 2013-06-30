@@ -18,6 +18,7 @@ Go Walker is a web server that generates <a target="_blank" href="http://golang.
 - **Control panel** for keyboard shortcuts and more function: compatible with godoc.org.
 - Use **Tag** to label your project: list by categories.
 - **Multiple language** support for readme(.md): [About](http://gowalker.org/about)
+- Add **third-party examples** for your favorite projects: through Github Gist.
 - [Full documentation](https://github.com/Unknwon/gowalker/blob/master/docs/Features.md).
 
 ## Third-party packages

@@ -132,7 +132,7 @@ func (this *HomeRouter) Get() {
 		// Recent projects
 		this.Data["RecentPros"] = recentViewedPros
 		// Get popular project and examples list from database.
-		this.Data["PopPros"], this.Data["PopExams"] = models.GetPopulars(20, 12)
+		this.Data["PopPros"], this.Data["RecentExams"] = models.GetPopulars(20, 12)
 		// Set standard library keyword type-ahead.
 		this.Data["DataSrc"] = utils.GoRepoSet
 	} else {
@@ -162,7 +162,6 @@ func (this *HomeRouter) Get() {
 		pdoc, err := doc.CheckDoc(reqUrl, tag, doc.HUMAN_REQUEST)
 		if err == nil {
 			pdoc.UserExamples = getUserExamples(pdoc.ImportPath)
-			fmt.Println(pdoc.UserExamples)
 			// Generate documentation page.
 			if generatePage(this, pdoc, broPath, tag, curLang.Lang) {
 				// Update recent project list.
@@ -204,10 +203,9 @@ func getUserExamples(path string) []*doc.Example {
 
 	pexams := make([]*doc.Example, 0, 5)
 	for _, g := range gists {
-		exams := convertDataFormatExample(g.Examples, "_"+g.Gist)
+		exams := convertDataFormatExample(g.Examples, "_"+g.Gist[strings.LastIndex(g.Gist, "/")+1:])
 		pexams = append(pexams, exams...)
 	}
-	fmt.Println(pexams)
 	return pexams
 }
 
@@ -417,8 +415,8 @@ func generatePage(this *HomeRouter, pdoc *doc.Package, q, tag, lang string) bool
 		this.Data["DocCPLabel"], this.Data["DocCP"] = calDocCP(comNum, totalNum)
 
 		// Examples.
-		this.Data["IsHasExams"] = len(pdoc.Examples) > 0
-		this.Data["Exams"] = pdoc.Examples
+		this.Data["IsHasExams"] = len(pdoc.Examples)+len(pdoc.UserExamples) > 0
+		this.Data["Exams"] = append(pdoc.Examples, pdoc.UserExamples...)
 
 		// Tags.
 		this.Data["IsHasTags"] = len(pdoc.Tags) > 1
@@ -509,7 +507,6 @@ func getExamples(pdoc *doc.Package, typeName, name string) (exams []*doc.Example
 		if v.IsUsed || !strings.HasPrefix(v.Name, matchName) {
 			continue
 		}
-		fmt.Println(v.Name)
 
 		pdoc.UserExamples[i].IsUsed = true
 		exams = append(exams, v)

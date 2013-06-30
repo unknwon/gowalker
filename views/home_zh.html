@@ -77,10 +77,10 @@
 						</ul>
 	    			</div>
 	    			<div>
-	    				<h4>热门示例</h4>
+	    				<h4>最近更新示例</h4>
 						<ul class="unstyled">
-							{{range .PopExams}}
-							<li><span class="badge">{{.Views}}</span> <a href="/{{.Path}}">{{.Path}}</a></li>
+							{{range .RecentExams}}
+							<li><a href="/{{.Path}}">{{.Path}}</a></li>
 							{{end}}
 						</ul>
 	    			</div>

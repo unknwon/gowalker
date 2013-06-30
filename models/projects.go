@@ -44,7 +44,7 @@ func GetPopulars(proNum, examNum int) ([]*PkgInfo, []*PkgExam) {
 	var popPros []*PkgInfo
 	var popExams []*PkgExam
 	q.Limit(proNum).OrderByDesc("views").FindAll(&popPros)
-	q.Limit(examNum).OrderByDesc("views").FindAll(&popExams)
+	q.Limit(examNum).OrderByDesc("created").FindAll(&popExams)
 	return popPros, popExams
 }
 
