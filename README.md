@@ -35,7 +35,11 @@ Go Walker is a web server that generates <a target="_blank" href="http://golang.
 
 ## Todo
 
-- Add specialized markdown to HTML function for parsing readme in gowalker.
+- Admin dashboard.
+- Update to Beego 1.0.
+- Change database to MySQL.
+- Function search.
+- Use AJAX to load function source code instead reader with documentation at once.
 
 ## License
 
