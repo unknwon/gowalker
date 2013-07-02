@@ -42,7 +42,7 @@ func GetPkgInfo(path, tag string) (*PkgInfo, error) {
 	cond := qbs.NewCondition("path = ?", path).And("tag = ?", tag)
 	err = q.Condition(cond).Find(pdecl)
 	if err != nil {
-		return &PkgInfo{}, err
+		pinfo.Etag = ""
 	}
 	return pinfo, err
 }

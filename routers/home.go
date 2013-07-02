@@ -123,11 +123,11 @@ func (this *HomeRouter) Get() {
 		return
 	}
 
+	this.TplNames = "home_" + curLang.Lang + ".html"
 	// Check show home page or documentation page.
 	if len(reqUrl) == 0 && len(q) == 0 {
 		// Home page.
 		this.Data["IsHome"] = true
-		this.TplNames = "home_" + curLang.Lang + ".html"
 
 		// Recent projects
 		this.Data["RecentPros"] = recentViewedPros
@@ -160,7 +160,7 @@ func (this *HomeRouter) Get() {
 
 		// Check documentation of this import path, and update automatically as needed.
 		pdoc, err := doc.CheckDoc(reqUrl, tag, doc.HUMAN_REQUEST)
-		if err == nil || pdoc == nil {
+		if err == nil && pdoc != nil {
 			pdoc.UserExamples = getUserExamples(pdoc.ImportPath)
 			// Generate documentation page.
 			if generatePage(this, pdoc, broPath, tag, curLang.Lang) {

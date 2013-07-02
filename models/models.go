@@ -177,7 +177,7 @@ func SearchDoc(key string) ([]*PkgInfo, error) {
 
 	var pkgInfos []*PkgInfo
 	condition := qbs.NewCondition("path like ?", "%"+key+"%").Or("synopsis like ?", "%"+key+"%")
-	err := q.Condition(condition).Limit(200).OrderBy("pro_name").FindAll(&pkgInfos)
+	err := q.Condition(condition).Limit(200).OrderByDesc("views").FindAll(&pkgInfos)
 	return pkgInfos, err
 }
 
