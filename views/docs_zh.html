@@ -150,6 +150,18 @@
 					<pre class="pre-x-scrollable">{{str2html .FmtDecl}}</pre>
 					<p>{{str2html .Doc}}</p>
 	    			{{template "example_en" .}}
+					{{with .Consts}}
+						{{range .}}
+							<pre class="pre-x-scrollable">{{str2html .FmtDecl}}</pre>
+							<p>{{str2html .Doc}}</p>
+						{{end}}
+					{{end}}
+					{{with .Vars}}
+						{{range .}}
+							<pre class="pre-x-scrollable">{{str2html .FmtDecl}}</pre>
+							<p>{{str2html .Doc}}</p>
+						{{end}}
+					{{end}}
 					{{range .Funcs}}
 						<h4 id="{{.Name}}">函数 <a target="_blank" href="{{.URL}}">{{.Name}}</a> <small><a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion" href="#collapse_{{.Name}}">查看代码</a></small></h4>
 						<pre>{{str2html .FmtDecl}}</pre>

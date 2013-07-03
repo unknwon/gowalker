@@ -353,6 +353,21 @@ func generatePage(this *HomeRouter, pdoc *doc.Package, q, tag, lang string) bool
 
 	this.Data["Types"] = pdoc.Types
 	for i, t := range pdoc.Types {
+		for j, v := range t.Consts {
+			buf.Reset()
+			v.Decl = template.HTMLEscapeString(v.Decl)
+			v.Decl = strings.Replace(v.Decl, "&#34;", "\"", -1)
+			utils.FormatCode(&buf, &v.Decl, links)
+			v.FmtDecl = buf.String()
+			t.Consts[j] = v
+		}
+		for j, v := range t.Vars {
+			buf.Reset()
+			utils.FormatCode(&buf, &v.Decl, links)
+			v.FmtDecl = buf.String()
+			t.Vars[j] = v
+		}
+
 		for j, f := range t.Funcs {
 			if len(f.Doc) > 0 {
 				buf.Reset()
@@ -695,8 +710,46 @@ func ConvertDataFormat(pdoc *doc.Package, pdecl *models.PkgDecl) error {
 						val.URL = s2
 					}
 				}
-			case 1: // Functions
-				val.Funcs = make([]*doc.Func, 0, 2)
+			case 1: // Constants.
+				val.Consts = make([]*doc.Value, 0, 1)
+				for _, v2 := range strings.Split(s, "&M#") {
+					val2 := new(doc.Value)
+					for z, s2 := range strings.Split(v2, "&V#") {
+						switch z {
+						case 0: // Name
+							val2.Name = s2
+						case 1: // Doc
+							val2.Doc = s2
+						case 2: // Decl
+							val2.Decl = s2
+						case 3: // URL
+							val2.URL = s2
+						}
+					}
+					val.Consts = append(val.Consts, val2)
+				}
+				val.Consts = val.Consts[:len(val.Consts)-1]
+			case 2: // Variables.
+				val.Vars = make([]*doc.Value, 0, 1)
+				for _, v2 := range strings.Split(s, "&M#") {
+					val2 := new(doc.Value)
+					for z, s2 := range strings.Split(v2, "&V#") {
+						switch z {
+						case 0: // Name
+							val2.Name = s2
+						case 1: // Doc
+							val2.Doc = s2
+						case 2: // Decl
+							val2.Decl = s2
+						case 3: // URL
+							val2.URL = s2
+						}
+					}
+					val.Vars = append(val.Vars, val2)
+				}
+				val.Vars = val.Vars[:len(val.Vars)-1]
+			case 3: // Functions.
+				val.Funcs = make([]*doc.Func, 0, 3)
 				for _, v2 := range strings.Split(s, "&M#") {
 					val2 := new(doc.Func)
 					for y, s2 := range strings.Split(v2, "&F#") {
@@ -716,7 +769,7 @@ func ConvertDataFormat(pdoc *doc.Package, pdecl *models.PkgDecl) error {
 					val.Funcs = append(val.Funcs, val2)
 				}
 				val.Funcs = val.Funcs[:len(val.Funcs)-1]
-			case 3: // Methods.
+			case 5: // Methods.
 				val.Methods = make([]*doc.Func, 0, 5)
 				for _, v2 := range strings.Split(s, "&M#") {
 					val2 := new(doc.Func)

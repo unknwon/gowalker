@@ -154,6 +154,31 @@ func SaveProject(pdoc *Package, info *models.PkgInfo) error {
 		buf.WriteString("&T#")
 		buf.WriteString(v.URL)
 		buf.WriteString("&$#")
+		// Constats.
+		for _, c := range v.Consts {
+			buf.WriteString(c.Name)
+			buf.WriteString("&V#")
+			buf.WriteString(c.Doc)
+			buf.WriteString("&V#")
+			buf.WriteString(c.Decl)
+			buf.WriteString("&V#")
+			buf.WriteString(c.URL)
+			buf.WriteString("&M#")
+		}
+		buf.WriteString("&$#")
+		// Variables.
+		for _, c := range v.Vars {
+			buf.WriteString(c.Name)
+			buf.WriteString("&V#")
+			buf.WriteString(c.Doc)
+			buf.WriteString("&V#")
+			buf.WriteString(c.Decl)
+			buf.WriteString("&V#")
+			buf.WriteString(c.URL)
+			buf.WriteString("&M#")
+		}
+		buf.WriteString("&$#")
+
 		// Functions.
 		for _, m := range v.Funcs {
 			buf.WriteString(m.Name)
@@ -274,17 +299,7 @@ func SaveProject(pdoc *Package, info *models.PkgInfo) error {
 	}
 	pdecl.TestFiles = buf.String()
 
-	// Save package documentation.
-	doc := &models.PkgDoc{
-		Path: pdoc.ImportPath,
-		Lang: "zh",
-	}
-
-	// Documentataion.
-	buf.Reset()
-	doc.Doc = buf.String()
-
-	err := models.SaveProject(pinfo, pdecl, doc, pdoc.Imports)
+	err := models.SaveProject(pinfo, pdecl, pdoc.Imports)
 	return err
 }
 
