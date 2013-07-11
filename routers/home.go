@@ -226,7 +226,7 @@ func generatePage(this *HomeRouter, pdoc *doc.Package, q, tag, lang string) bool
 	this.Data["IsRefresh"] = pdoc.Created.Add(10 * time.Second).UTC().After(time.Now().UTC())
 
 	// Get VCS name, project name, project home page, and Upper level project URL.
-	this.Data["VCS"], this.Data["ProName"], this.Data["ProPath"], this.Data["ProDocPath"] =
+	this.Data["VCS"], this.Data["ProName"], this.Data["ProPath"], this.Data["ProDocPath"], this.Data["PkgTag"] =
 		getVCSInfo(q, tag, pdoc)
 
 	if utils.IsGoRepoPath(pdoc.ImportPath) &&
@@ -515,8 +515,9 @@ func getExamples(pdoc *doc.Package, typeName, name string) (exams []*doc.Example
 	return exams
 }
 
-// getVCSInfo returns VCS name, project name, project home page, and Upper level project URL.
-func getVCSInfo(q, tag string, pdoc *doc.Package) (vcs, proName, proPath, pkgDocPath string) {
+// getVCSInfo returns VCS name, project name, project home page, Upper level project URL and package tag.
+func getVCSInfo(q, tag string, pdoc *doc.Package) (vcs, proName, proPath, pkgDocPath, pkgTag string) {
+	// pkgTag is only for Google Code which needs tag information as GET argument.
 	// Get project name.
 	lastIndex := strings.LastIndex(q, "/")
 	proName = q[lastIndex+1:]
@@ -547,7 +548,7 @@ func getVCSInfo(q, tag string, pdoc *doc.Package) (vcs, proName, proPath, pkgDoc
 			q = strings.Replace(q, "source/browse/", "", 1)
 			lastIndex = strings.LastIndex(q, "/")
 		}
-		proPath += "?r=" + tag // Set tag.
+		pkgTag = "?r=" + tag // Set tag.
 	case q[0] == 'b': // bitbucket.org
 		vcs = "BitBucket"
 		if len(tag) == 0 {
@@ -589,7 +590,7 @@ func getVCSInfo(q, tag string, pdoc *doc.Package) (vcs, proName, proPath, pkgDoc
 	}
 
 	pkgDocPath = q[:lastIndex]
-	return vcs, proName, proPath, pkgDocPath
+	return vcs, proName, proPath, pkgDocPath, pkgTag
 }
 
 func getLabels(rawLabel string) []string {

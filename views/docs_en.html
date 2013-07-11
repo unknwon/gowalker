@@ -176,8 +176,9 @@
 				<h3 id="_files"><a target="_blank" href="http://{{.ProPath}}">Files</a></h3>
 				<p>
 				{{$proPath := .ProPath}}
+				{{$pkgTag := .PkgTag}}
 				{{range .Files}}
-					<a target="_blank" href="http://{{$proPath}}/{{.}}">{{.}}</a>
+					<a target="_blank" href="http://{{$proPath}}/{{.}}{{$pkgTag}}">{{.}}</a>
 				{{end}}
 				</p>
 				{{if .IsHasSubdirs}}
@@ -190,7 +191,6 @@
 							</tr>
 						</thead>
 						<tbody>
-						{{$proPath := .ProPath}}
 						{{range .Subdirs}}
 							<tr>
 								<td><a href="/{{.Path}}">{{.Path}}</a></td>
