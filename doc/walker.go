@@ -193,12 +193,12 @@ func (w *walker) types(tdocs []*doc.Type) []*Type {
 	var result []*Type
 	for _, d := range tdocs {
 		result = append(result, &Type{
-			Doc:  d.Doc,
-			Name: d.Name,
-			Decl: w.printDecl(d.Decl),
-			URL:  w.printPos(d.Decl.Pos()),
-			//Consts:  w.values(d.Consts),
-			//Vars:    w.values(d.Vars),
+			Doc:     d.Doc,
+			Name:    d.Name,
+			Decl:    w.printDecl(d.Decl),
+			URL:     w.printPos(d.Decl.Pos()),
+			Consts:  w.values(d.Consts),
+			Vars:    w.values(d.Vars),
 			Funcs:   w.funcs(d.Funcs),
 			Methods: w.funcs(d.Methods),
 			//Examples: w.getExamples(d.Name),

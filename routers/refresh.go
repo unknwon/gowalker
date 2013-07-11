@@ -60,7 +60,7 @@ func (this *RefreshRouter) Get() {
 			ImportedNum: pdoc.ImportedNum,
 			ImportPid:   pdoc.ImportPid,
 		}
-		models.SaveProject(pinfo, nil, nil, nil)
+		models.SaveProject(pinfo, nil, nil)
 		// Show search page
 		this.Redirect("/"+q, 302)
 		return

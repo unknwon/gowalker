@@ -45,8 +45,9 @@ type Func struct {
 type Type struct {
 	Name          string // Type name.
 	Doc           string
-	Decl, FmtDecl string  // Normal and formatted form of declaration.
-	URL           string  // VCS URL.
+	Decl, FmtDecl string // Normal and formatted form of declaration.
+	URL           string // VCS URL.
+	Consts, Vars  []*Value
 	Funcs         []*Func // Exported functions that return this type.
 	IFuncs        []*Func // Internal functions that return this type.
 	Methods       []*Func // Exported methods.
@@ -74,7 +75,7 @@ type Gist struct {
 }
 
 // PACKAGE_VER is modified when previously stored packages are invalid.
-const PACKAGE_VER = "8"
+const PACKAGE_VER = "9"
 
 // Package represents full information and documentation for a package.
 type Package struct {

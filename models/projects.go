@@ -48,8 +48,8 @@ func GetPopulars(proNum, examNum int) ([]*PkgInfo, []*PkgExam) {
 	return popPros, popExams
 }
 
-// SaveProject save package information, declaration, documentation to database, and update import information.
-func SaveProject(pinfo *PkgInfo, pdecl *PkgDecl, pdoc *PkgDoc, imports []string) error {
+// SaveProject save package information, declaration to database, and update import information.
+func SaveProject(pinfo *PkgInfo, pdecl *PkgDecl, imports []string) error {
 	// Connect to database.
 	q := connDb()
 	defer q.Close()
@@ -78,14 +78,6 @@ func SaveProject(pinfo *PkgInfo, pdecl *PkgDecl, pdoc *PkgDoc, imports []string)
 		_, err = q.Save(pdecl)
 		if err != nil {
 			beego.Error("models.SaveProject -> Declaration:", err)
-		}
-	}
-
-	// Save package documentation
-	if pdoc != nil && len(pdoc.Doc) > 0 {
-		_, err = q.Save(pdoc)
-		if err != nil {
-			beego.Error("models.SaveProject -> Documentation:", err)
 		}
 	}
 
