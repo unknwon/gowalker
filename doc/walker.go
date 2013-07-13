@@ -111,6 +111,7 @@ func (w *walker) printPos(pos token.Pos) string {
 	return src.browseURL + fmt.Sprintf(w.lineFmt, position.Line)
 }
 
+// printCode returns function or method code from source files.
 func (w *walker) printCode(decl ast.Node) string {
 	pos := decl.Pos()
 	posPos := w.fset.Position(pos)
@@ -120,10 +121,10 @@ func (w *walker) printCode(decl ast.Node) string {
 		return ""
 	}
 
-	var code []string
 	code, ok := w.srcLines[posPos.Filename]
 	// Check source file line arrays.
 	if !ok {
+		// Split source file to array and save into map when at the 1st time.
 		w.srcLines[posPos.Filename] = strings.Split(string(src.data), "\n")
 		code = w.srcLines[posPos.Filename]
 	}
@@ -136,6 +137,8 @@ CutCode:
 		// Check end of code block.
 		switch {
 		case len(code[i]) > 0 && code[i][0] == '}': // Normal end.
+			break CutCode
+		case (i == posPos.Line) && len(code[i]) == 0 && (strings.Index(code[i-1], "{") == -1): // Package `builtin`.
 			break CutCode
 		case len(code[i-1]) > 4 && code[i-1][:4] == "func" &&
 			code[i-1][len(code[i-1])-1] == '}': // One line functions.
