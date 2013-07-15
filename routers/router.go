@@ -79,7 +79,7 @@ func setLangVer(ctx *beego.Context, input url.Values, data map[interface{}]inter
 	}
 
 	// Save language information in cookies.
-	ctx.SetCookie("lang", curLang.Lang+";path=/", 0)
+	ctx.SetCookie("lang", curLang.Lang, 9999999999, "/")
 
 	restLangs := make([]*langType, 0, len(langTypes)-1)
 	for _, v := range langTypes {
