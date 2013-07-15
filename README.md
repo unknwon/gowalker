@@ -33,14 +33,6 @@ Go Walker is a web server that generates <a target="_blank" href="http://golang.
 - [atotto](https://github.com/atotto) Thanks for translating site user interface to Japanese.
 - Source files that contain code that is from [gddo](https://github.com/garyburd/gddo) is honored in specific.
 
-## Todo
-
-- Admin dashboard.
-- Update to Beego 1.0.
-- Change database to MySQL.
-- Function search.
-- Use AJAX to load function source code instead reader with documentation at once.
-
 ## License
 
 [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.html).
