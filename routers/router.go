@@ -22,6 +22,8 @@ import (
 	"github.com/astaxie/beego"
 )
 
+var AppVer string // Application version.
+
 var langTypes []*langType // Languages are supported.
 
 // langType represents a language type.
@@ -40,6 +42,17 @@ func init() {
 			Name: names[i],
 		})
 	}
+}
+
+// globalSetting sets global applications configuration for every response.
+func globalSetting(ctx *beego.Context, input url.Values, data map[interface{}]interface{}) (curLang langType) {
+	// Setting application version.
+	data["AppVer"] = AppVer
+
+	// Setting language version.
+	curLang = setLangVer(ctx, input, data)
+
+	return curLang
 }
 
 // setLangVer sets site language version.
@@ -69,7 +82,7 @@ func setLangVer(ctx *beego.Context, input url.Values, data map[interface{}]inter
 		}
 	}
 
-	// 4. Default language is English.
+	// 4. DefaucurLang language is English.
 	if len(lang) == 0 {
 		lang = "en"
 	}

@@ -190,14 +190,14 @@ func updateImportInfo(q *qbs.Qbs, path string, pid int, add bool) {
 		switch {
 		case i == -1 && add: // Add operation and does not contain.
 			info.ImportPid += "$" + strconv.Itoa(pid) + "|"
-			info.ImportedNum = len(strings.Split(info.ImportPid, "|"))
+			info.ImportedNum = len(strings.Split(info.ImportPid, "|")) - 1
 			_, err = q.Save(info)
 			if err != nil {
 				beego.Error("models.updateImportInfo -> add:", path, err)
 			}
 		case i > -1 && !add: // Delete operation and contains.
 			info.ImportPid = strings.Replace(info.ImportPid, "$"+strconv.Itoa(pid)+"|", "", 1)
-			info.ImportedNum = len(strings.Split(info.ImportPid, "|"))
+			info.ImportedNum = len(strings.Split(info.ImportPid, "|")) - 1
 			_, err = q.Save(info)
 			if err != nil {
 				beego.Error("models.updateImportInfo -> delete:", path, err)

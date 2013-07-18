@@ -95,7 +95,7 @@ func (this *HomeRouter) Get() {
 	}
 
 	// Set language version.
-	curLang := setLangVer(this.Ctx, this.Input(), this.Data)
+	curLang := globalSetting(this.Ctx, this.Input(), this.Data)
 
 	// Get query field.
 	q := strings.TrimSpace(this.Input().Get("q"))

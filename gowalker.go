@@ -25,12 +25,15 @@ import (
 )
 
 const (
-	VERSION = "0.6.2.0713" // Application version.
+	VERSION = "0.6.3.0718" // Application version.
 )
 
 func init() {
 	// Try to have highest performance.
 	runtime.GOMAXPROCS(runtime.NumCPU())
+
+	// Setting application version.
+	routers.AppVer = "v" + VERSION
 
 	// Set application log level.
 	if beego.AppConfig.String("runmode") == "pro" {

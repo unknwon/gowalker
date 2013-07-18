@@ -17,36 +17,90 @@ package models
 
 import (
 	"encoding/base32"
-	"os"
+	"fmt"
 	"regexp"
 	"strings"
 	"time"
 
 	"github.com/astaxie/beego"
 	"github.com/coocood/qbs"
-	_ "github.com/mattn/go-sqlite3"
 	"github.com/russross/blackfriday"
-)
-
-const (
-	DB_NAME         = "data/gowalker.db"
-	_SQLITE3_DRIVER = "sqlite3"
 )
 
 // PkgInfo is package information.
 type PkgInfo struct {
-	Id           int64
-	Path         string `qbs:"index"` // Import path of package.
-	Tags         string // All tags of project.
-	IsCmd        bool
-	Synopsis     string
-	Views        int64     `qbs:"index"`
-	Created      time.Time `qbs:"index"` // Time when information last updated.
-	ViewedTime   int64     // User viewed time(Unix-timestamp).
-	ProName      string    // Name of the project.
-	Etag, Labels string    // Revision tag and project labels.
-	ImportedNum  int       // Number of packages that imports this project.
-	ImportPid    string    // Packages id of packages that imports this project.
+	// Primary key.
+	Id int64
+
+	/*
+		- Import path of package.
+		eg.
+			github.com/Unknwon/gowalker
+		- Name of the project.
+		eg.
+			gowalker
+		- Project synopsis.
+		eg.
+			Go Walker is a web server that generates Go projects API documentation with source code on the fly.
+		- Indicates whether it's a command line tool or package.
+		eg.
+			True
+	*/
+	Path     string `qbs:"size:100,index"`
+	ProName  string
+	Synopsis string
+	IsCmd    bool
+
+	/*
+		- All tags of project.
+		eg.
+			master|v0.6.2.0718
+		- Views of projects.
+		eg.
+			1342
+		- User viewed time(Unix-timestamp).
+		eg.
+			1374127619
+		- Time when information last updated(UTC).
+		eg.
+			2013-07-16 21:09:27.48932087
+	*/
+	Tags       string
+	Views      int64 `qbs:"index"`
+	ViewedTime int64
+	Created    time.Time `qbs:"index"`
+
+	/*
+		- BaseRank is project specificed rank value.
+		eg.
+			Github: stars, forks, watches.
+		- Rank is the benchmark of projects, it's based on BaseRank and views.
+		eg.
+			826
+	*/
+	BaseRank int64
+	Rank     int64 `qbs:"index"`
+
+	/*
+		- Revision tag with package (structure) version.
+		eg.
+			9-ed5cfa7eb95cfa6787209e7d6bd5d3af0ed3679f
+		- Project labels.
+		eg.
+			$tool|
+	*/
+	Etag, Labels string // Revision tag and project labels.
+
+	/*
+		- Number of packages that imports this project.
+		eg.
+			11
+		- Package ids of packages that imports this project.
+		eg.
+			$47|$89|$5464|$8586|$8595|$8787|$8789|$8790|$8918|$9134|$9139|
+	*/
+	ImportedNum int
+	ImportPid   string
 }
 
 // PkgDecl is package declaration in database acceptable form.
@@ -109,9 +163,11 @@ func setMg() (*qbs.Migration, error) {
 
 func init() {
 	// Initialize database.
-	os.Mkdir("data/", os.ModePerm)
+	qbs.Register("mysql", fmt.Sprintf("%v:%v@%v/%v?charset=utf8",
+		beego.AppConfig.String("dbuser"), beego.AppConfig.String("dbpasswd"),
+		beego.AppConfig.String("dbhost"), beego.AppConfig.String("dbname")),
+		beego.AppConfig.String("dbname"), qbs.NewMysql())
 
-	qbs.Register(_SQLITE3_DRIVER, DB_NAME, "", qbs.NewSqlite3())
 	// Connect to database.
 	q := connDb()
 	defer q.Close()
@@ -128,7 +184,7 @@ func init() {
 	mg.CreateTableIfNotExists(new(PkgDoc))
 	mg.CreateTableIfNotExists(new(PkgExam))
 
-	beego.Trace("Initialized database ->", DB_NAME)
+	beego.Trace("Initialized database ->", beego.AppConfig.String("dbname"))
 }
 
 // AddViews add views in database by 1 each time

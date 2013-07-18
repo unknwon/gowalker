@@ -12,8 +12,7 @@
     });
 
     function Responsive() {
-        var fixedTop = document.getElementById("fixed_top");
-        var navbar = document.getElementById("navbar");
+        var navbarFrame = document.getElementById("navbar_frame");
         var searchForm = document.getElementById("top_search_form");
         var searchBox = document.getElementById("navbar_search_box");
         var body = document.getElementById("body");
@@ -21,32 +20,28 @@
         var delta = document.body.clientWidth - 1100;
 
         if (delta > 0) {
+            navbarFrame.style.width = "";
             if (document.getElementById("sidebar") == null) {
-            fixedTop.className = "navbar navbar-fixed-top";
-            body.style.paddingTop = "60px";
-        }else{
-            fixedTop.className = "navbar";
-            body.style.paddingTop = "0px";
-        }
-            navbar.style.paddingLeft = delta / 2 + 40 + "px";
-            navbar.style.paddingRight = delta / 2 + 70 + "px";
+                navbarFrame.className = "navbar navbar-fixed-top";
+                body.style.paddingTop = "60px";
+            }else{
+                navbarFrame.className = "navbar";
+                body.style.paddingTop = "0px";
+            }
+
+            searchForm.className = "navbar-search pull-right";
             searchBox.style.width = "";
 
             // Home page.
             if (homeBody != null) {
                 homeBody.style.marginLeft = "-20px";
             }
-        } else {
-            fixedTop.className = "navbar";
-            navbar.style.paddingLeft = "30px";
-            navbar.style.paddingRight = "10px";
 
-            if (document.body.clientWidth < 700) {
-                searchForm.className = "navbar-search pull-right hide";
-            } else {
-                searchForm.className = "navbar-search pull-right";
-                searchBox.style.width = "150px";
-            }
+        } else {
+            navbarFrame.style.width = "1000px";
+            navbarFrame.className = "navbar";
+            searchForm.className = "navbar-search";
+            searchBox.style.width = "150px";
             body.style.paddingTop = "0px";
 
             // Home page.
