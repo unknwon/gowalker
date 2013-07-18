@@ -106,7 +106,7 @@ type PkgInfo struct {
 // PkgDecl is package declaration in database acceptable form.
 type PkgDecl struct {
 	Id   int64
-	Path string `qbs:"index"` // Import path of package.
+	Path string `qbs:"size:100,index"`
 	Tag  string // Project tag.
 	Doc  string // Package documentation.
 
@@ -131,7 +131,7 @@ func (*PkgDecl) Indexes(indexes *qbs.Indexes) {
 // PkgDoc is package documentation for multi-language usage.
 type PkgDoc struct {
 	Id   int64
-	Path string `qbs:"index"` // Import path of package.
+	Path string `qbs:"size:100,index"`
 	Lang string // Documentation language.
 	Type string
 	Doc  string // Documentataion.
@@ -144,7 +144,7 @@ func (*PkgDoc) Indexes(indexes *qbs.Indexes) {
 // PkgExam represents a package example.
 type PkgExam struct {
 	Id       int64
-	Path     string    `qbs:"index"` // Import path of package.
+	Path     string    `qbs:"size:100,index"`
 	Gist     string    // Gist path.
 	Examples string    // Examples.
 	Created  time.Time `qbs:"index"`

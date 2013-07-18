@@ -30,7 +30,7 @@ type SearchRouter struct {
 // Get implemented Get method for SearchRouter.
 func (this *SearchRouter) Get() {
 	// Set language version.
-	curLang := setLangVer(this.Ctx, this.Input(), this.Data)
+	curLang := globalSetting(this.Ctx, this.Input(), this.Data)
 
 	// Get arguments.
 	q := strings.TrimSpace(this.Input().Get("q"))

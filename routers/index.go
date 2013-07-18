@@ -28,7 +28,7 @@ type IndexRouter struct {
 func (this *IndexRouter) Get() {
 	this.Data["IsIndex"] = true
 	// Set language version.
-	curLang := setLangVer(this.Ctx, this.Input(), this.Data)
+	curLang := globalSetting(this.Ctx, this.Input(), this.Data)
 
 	// Set properties
 	this.TplNames = "index_" + curLang.Lang + ".html"

@@ -36,7 +36,7 @@ type ExamplesRouter struct {
 func (this *ExamplesRouter) Get() {
 	this.Data["IsExamples"] = true
 	// Set language version.
-	curLang := setLangVer(this.Ctx, this.Input(), this.Data)
+	curLang := globalSetting(this.Ctx, this.Input(), this.Data)
 
 	// Set properties
 	this.TplNames = "examples_" + curLang.Lang + ".html"

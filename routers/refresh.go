@@ -30,7 +30,7 @@ type RefreshRouter struct {
 // Get implemented Get method for RefreshRouter.
 func (this *RefreshRouter) Get() {
 	// Set language version.
-	curLang := setLangVer(this.Ctx, this.Input(), this.Data)
+	curLang := globalSetting(this.Ctx, this.Input(), this.Data)
 
 	// Get query field
 	q := this.Input().Get("q")

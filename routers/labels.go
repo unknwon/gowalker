@@ -28,7 +28,7 @@ type LabelsRouter struct {
 func (this *LabelsRouter) Get() {
 	this.Data["IsLabels"] = true
 	// Set language version.
-	curLang := setLangVer(this.Ctx, this.Input(), this.Data)
+	curLang := globalSetting(this.Ctx, this.Input(), this.Data)
 
 	// Set properties
 	this.TplNames = "labels_" + curLang.Lang + ".html"

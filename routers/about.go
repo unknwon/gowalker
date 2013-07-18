@@ -27,7 +27,7 @@ type AboutRouter struct {
 func (this *AboutRouter) Get() {
 	this.Data["IsAbout"] = true
 	// Set language version.
-	curLang := setLangVer(this.Ctx, this.Input(), this.Data)
+	curLang := globalSetting(this.Ctx, this.Input(), this.Data)
 
 	// Set properties
 	this.TplNames = "about_" + curLang.Lang + ".html"

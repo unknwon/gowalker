@@ -30,51 +30,131 @@
 						and <a target="_blank" href="https://github.com/Unknwon/gowalker/blob/master/docs/Features.md">More</a>.</p>
 						<p class="text-success">Please read the  <a href="/about">About Page</a> for information about adding projects to Go Walker and more.</p>
 					</div>
-		    		<div>
-						<h4>What other people are looking at.</h4>
-						<table id="rectable" class="table table-bordered table-hover">
-							<thead>
-								<tr>
-									<th>Import Path</th>
-									<th>Viewd Time(Local)</th>
-								</tr>
-							</thead>
-							<tbody>
-							{{range .RecentPros}}
-								<tr>
-									<td><a title="{{.Synopsis}}" href="/{{.Path}}">{{.Path}}</a>{{if .IsGoRepo}} <span class="label label-info">Standard</span>{{end}}</td>
-									<td>{{.ViewedTime}}</td>
-								</tr>
-							{{end}}
-							</tbody>
-						</table>
-						<script>
-							(function(){
-								var node = document.getElementById("rectable");
-								var child = node.getElementsByTagName("tr");
-								var d1 = new Date();
-								for(var i=1;i<child.length;i++){
-									var t = parseInt(node.rows[i].cells[1].innerHTML);
-									var d = new Date(t * 1000);
-									node.rows[i].cells[1].innerHTML = d.toLocaleString();
-								}
-							})();
-						</script>
+
+					<div class="tab-content">
+						<div id="recent_view_global" class="tab-pane fade active in">
+							<h4>
+								What other people are looking at.
+								<a href="#recent_view_user" class="btn btn-inverse" data-toggle="tab">My history</a>
+							</h4>
+
+							<table id="rectable1" class="table table-bordered table-hover">
+								<thead>
+									<tr>
+										<th>Import Path</th>
+										<th>Viewd Time(Local)</th>
+									</tr>
+								</thead>
+								<tbody>
+								{{range .RecentPros}}
+									<tr>
+										<td><a title="{{.Synopsis}}" href="/{{.Path}}">{{.Path}}</a>{{if .IsGoRepo}} <span class="label label-info">Standard</span>{{end}}</td>
+										<td>{{.ViewedTime}}</td>
+									</tr>
+								{{end}}
+								</tbody>
+							</table>
+
+							<script>
+								(function(){
+									var node = document.getElementById("rectable1");
+									var child = node.getElementsByTagName("tr");
+									var d1 = new Date();
+									for(var i=1;i<child.length;i++){
+										var t = parseInt(node.rows[i].cells[1].innerHTML);
+										var d = new Date(t * 1000);
+										node.rows[i].cells[1].innerHTML = d.toLocaleString();
+									}
+								})();
+							</script>
+						</div>
+
+						<div id="recent_view_user" class="tab-pane fade">
+							<h4>
+								What you have been looking at.
+								<a href="#recent_view_global" class="btn btn-inverse" data-toggle="tab">Global history</a>
+							</h4>
+
+							<table id="rectable2" class="table table-bordered table-hover">
+								<thead>
+									<tr>
+										<th>Import Path</th>
+										<th>Viewd Time(Local)</th>
+									</tr>
+								</thead>
+								<tbody>
+								{{range .RecentPros}}
+									<tr>
+										<td><a title="{{.Synopsis}}" href="/{{.Path}}">{{.Path}}</a>{{if .IsGoRepo}} <span class="label label-info">Standard</span>{{end}}</td>
+										<td>{{.ViewedTime}}</td>
+									</tr>
+								{{end}}
+								</tbody>
+							</table>
+							<script>
+								(function(){
+									var node = document.getElementById("rectable2");
+									var child = node.getElementsByTagName("tr");
+									var d1 = new Date();
+									for(var i=1;i<child.length;i++){
+										var t = parseInt(node.rows[i].cells[1].innerHTML);
+										var d = new Date(t * 1000);
+										node.rows[i].cells[1].innerHTML = d.toLocaleString();
+									}
+								})();
+							</script>
+						</div>
 		    		</div>
 				</div>
 	    		<div id="homeright" class="span6 homeright">
 	    			<div>
 	    				<h4>Announcement</h4>
-	    				<p>New version of Go Walker has been released, features including add examples for projects by <a target="_blank" href="https://gist.github.com/">Gist</a>, view project documentation by Tags.</p>
+	    				<p>
+	    					New version of Go Walker has been released, features including add examples for projects by <a target="_blank" href="https://gist.github.com/">Gist</a>, view project documentation by Tags.
+	    				</p>
 	    				<a class="btn btn-primary" target="_blank" href="https://github.com/Unknwon/gowalker/blob/master/docs/Features.md">Learn more</a>
 	    			</div>
 	    			<div>
 						<h4>Popular Projects</h4>
-						<ul class="unstyled">
-							{{range .PopPros}}
-							<li><span class="badge">{{.Views}}</span> <a title="{{.Synopsis}}" href="/{{.Path}}">{{.Path}}</a></li>
-							{{end}}
+						<ul class="nav nav-tabs nav-tabs-google">
+							<li class="active">
+								<a href="#pop_rank" data-toggle="tab">Total Rank</a>
+							</li>
+
+							<li>
+								<a href="#pop_views" data-toggle="tab">Total Views</a>
+							</li>
+
+							<li>
+								<a href="#pop_rock" data-toggle="tab">Rock this week</a>
+							</li>
 						</ul>
+
+						<div class="tab-content">
+							<div id="pop_rank" class="tab-pane fade active in">
+								<ul class="unstyled">
+									{{range .PopPros}}
+									<li><span class="badge">{{.Views}}</span> <a title="{{.Synopsis}}" href="/{{.Path}}">{{.Path}}</a></li>
+									{{end}}
+								</ul>
+							</div>
+
+							<div id="pop_views" class="tab-pane fade">
+								<ul class="unstyled">
+									{{range .PopPros}}
+									<li><span class="badge">{{.Views}}</span> <a title="{{.Synopsis}}" href="/{{.Path}}">{{.Path}}</a></li>
+									{{end}}
+								</ul>
+							</div>
+
+							<div id="pop_rock" class="tab-pane fade">
+								<ul class="unstyled">
+									{{range .PopPros}}
+									<li><span class="badge">{{.Views}}</span> <a title="{{.Synopsis}}" href="/{{.Path}}">{{.Path}}</a></li>
+									{{end}}
+								</ul>
+							</div>
+						</div>
 	    			</div>
 	    			<div>
 	    				<h4>Recent Updated Examples</h4>
