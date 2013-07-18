@@ -30,7 +30,7 @@
 					<script type="text/javascript" src="/static/js/bootstrap.min.js"></script>
 					<script type='text/javascript' src='/static/js/site.js'></script>
 					<p><strong>Copyright © 2013 Go Walker</strong></p>
-					<p>Website built by <a target="_blank" href="https://github.com/Unknwon"><i class="icon-user"></i> @Unknown</a>. Powered by <a target="_blank" href="https://github.com/astaxie/beego"><i class="icon-bold"></i>eego</a>, <a target="_blank" href="https://github.com/coocood/qbs">Qbs</a>, <a target="_blank" href="https://github.com/mattn/go-sqlite3">go-sqlite3</a>.</p>
+					<p>Website built by <a target="_blank" href="https://github.com/Unknwon"><i class="icon-user"></i> @Unknown</a>. Powered by <a target="_blank" href="https://github.com/astaxie/beego"><i class="icon-bold"></i>eego</a> and <a target="_blank" href="https://github.com/coocood/qbs">Qbs</a>.</p>
 					{{if .IsHome}}<p>Based on <a target="_blank" href="http://twitter.github.io/bootstrap/">Bootstrap</a>. Icons from <a target="_blank" href="http://glyphicons.com/">Glyphicons</a>.</p>{{end}}
 					{{if .IsHome}}<p>{{end}}Send us <a href="mailto:joe2010xtmf#163.com"><i class="icon-envelope"></i> Feedback</a> or submit <a target="_blank" href="https://github.com/Unknwon/gowalker/issues"><i class="icon-tasks"></i> Website Issues</a>. {{if .IsHome}}</p>{{end}}<strong>Language:</strong>
 				    <div class="btn-group dropup">
@@ -79,7 +79,7 @@
 					<script type="text/javascript" src="/static/js/bootstrap.min.js"></script>
 					<script type='text/javascript' src='/static/js/site.js'></script>
 					<p><strong>版权所有 © 2013 Go 步行者</strong></p>
-					<p>网站建设者 <a target="_blank" href="https://github.com/Unknwon"><i class="icon-user"></i> @Unknown</a>. 项目基于 <a target="_blank" href="https://github.com/astaxie/beego"><i class="icon-bold"></i>eego</a>，<a target="_blank" href="https://github.com/coocood/qbs">Qbs</a> 和 <a target="_blank" href="https://github.com/mattn/go-sqlite3">go-sqlite3</a> 构建。</p>
+					<p>网站建设者 <a target="_blank" href="https://github.com/Unknwon"><i class="icon-user"></i> @Unknown</a>. 项目基于 <a target="_blank" href="https://github.com/astaxie/beego"><i class="icon-bold"></i>eego</a> 和 <a target="_blank" href="https://github.com/coocood/qbs">Qbs</a> 构建。</p>
 					{{if .IsHome}}<p>界面基于 <a target="_blank" href="http://twitter.github.io/bootstrap/">Bootstrap</a>. 图标来自 <a target="_blank" href="http://glyphicons.com/">Glyphicons</a>.</p>{{end}}
 					{{if .IsHome}}<p>{{end}}发送 <a href="mailto:joe2010xtmf#163.com"><i class="icon-envelope"></i> 反馈</a> 或者提交 <a target="_blank" href="https://github.com/Unknwon/gowalker/issues"><i class="icon-tasks"></i> 网站问题</a>. {{if .IsHome}}</p>{{end}}<strong>语言选项：</strong>
 				    <div class="btn-group dropup">
@@ -128,12 +128,12 @@
 				</script>
 				{{end}}
 				<script>
-				  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-				  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-				  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-				  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+				  // (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+				  // (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+				  // m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+				  // })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
 
-				  ga('create', 'UA-40109089-2', 'gowalker.org');
-				  ga('send', 'pageview');
+				  // ga('create', 'UA-40109089-2', 'gowalker.org');
+				  // ga('send', 'pageview');
 				</script>
 {{end}}
