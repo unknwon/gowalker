@@ -1,7 +1,7 @@
 {{define "navbar_en"}}
 		<div id="fixed_top" class="navbar navbar-fixed-top">
 			<div class="navbar-inner">
-				<div id="navbar">
+				<div id="navbar" class="container">
 					<a class="brand" href="/">Go Walker</a>
 					<ul class="nav">
 						<li {{if .IsHome}}class="active"{{end}}><a href="/">Home</a></li>
