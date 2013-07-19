@@ -105,17 +105,19 @@ func SaveProject(pdoc *Package, info *models.PkgInfo) error {
 	// Save package information.
 	pinfo := &models.PkgInfo{
 		Path:        pdoc.ImportPath,
-		Tags:        strings.Join(pdoc.Tags, "|||"),
-		IsCmd:       pdoc.IsCmd,
-		Synopsis:    pdoc.Synopsis,
-		Views:       info.Views,
-		Created:     time.Now().UTC(),
-		ViewedTime:  time.Now().UTC().Unix(),
 		ProName:     pdoc.ProjectName,
+		Synopsis:    pdoc.Synopsis,
+		IsCmd:       pdoc.IsCmd,
+		Tags:        strings.Join(pdoc.Tags, "|||"),
+		Views:       info.Views,
+		ViewedTime:  time.Now().UTC().Unix(),
+		Created:     time.Now().UTC(),
+		Rank:        pdoc.Rank,
 		Etag:        pdoc.Etag,
 		Labels:      pdoc.Labels,
 		ImportedNum: info.ImportedNum,
 		ImportPid:   info.ImportPid,
+		Note:        pdoc.Note,
 	}
 
 	// Save package declaration.

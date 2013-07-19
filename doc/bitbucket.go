@@ -109,7 +109,7 @@ func getBitbucketDoc(client *http.Client, match map[string]string, tag, savedEta
 	// Get subdirectories.
 	dirs := make([]string, 0, len(node.Directories))
 	for _, d := range node.Directories {
-		if utils.FilterFileName(d) {
+		if utils.FilterDirName(d) {
 			dirs = append(dirs, d)
 		}
 	}

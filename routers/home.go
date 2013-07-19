@@ -169,17 +169,19 @@ func (this *HomeRouter) Get() {
 				// Update project views.
 				pinfo := &models.PkgInfo{
 					Path:        pdoc.ImportPath,
-					Synopsis:    pdoc.Synopsis,
-					Created:     pdoc.Created,
 					ProName:     pdoc.ProjectName,
-					ViewedTime:  pdoc.ViewedTime,
-					Views:       pdoc.Views,
+					Synopsis:    pdoc.Synopsis,
 					IsCmd:       pdoc.IsCmd,
+					Tags:        strings.Join(pdoc.Tags, "|||"),
+					Views:       pdoc.Views,
+					ViewedTime:  pdoc.ViewedTime,
+					Created:     pdoc.Created,
+					Rank:        pdoc.Rank,
 					Etag:        pdoc.Etag,
 					Labels:      pdoc.Labels,
-					Tags:        strings.Join(pdoc.Tags, "|||"),
 					ImportedNum: pdoc.ImportedNum,
 					ImportPid:   pdoc.ImportPid,
+					Note:        pdoc.Note,
 				}
 				models.AddViews(pinfo)
 				return

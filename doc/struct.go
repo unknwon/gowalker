@@ -75,12 +75,12 @@ type Gist struct {
 }
 
 // PACKAGE_VER is modified when previously stored packages are invalid.
-const PACKAGE_VER = "9"
+const PACKAGE_VER = "0"
 
 // Package represents full information and documentation for a package.
 type Package struct {
-	// Package import path.
-	ImportPath string
+	ImportPath  string
+	ProjectName string
 
 	// Tags of project.
 	Tag  string
@@ -90,18 +90,14 @@ type Package struct {
 	Synopsis string
 	Doc      string
 
-	// Indicates whether it's a main package or not.
 	IsCmd bool
 
-	// Name of the project.
-	ProjectName string
+	Created           time.Time
+	Views, ViewedTime int64
 
-	// Time when information last updated.
-	Created time.Time
+	Rank int64
 
-	Views, ViewedTime int64 // User viewed time(Unix-timestamp).
-
-	Etag, Labels string // Revision tag and project labels.
+	Etag, Labels string
 
 	// Top-level declarations.
 	Consts []*Value
@@ -122,8 +118,10 @@ type Package struct {
 
 	Imports, TestImports []string // Imports.
 
-	ImportedNum int    // Number of packages that imports this project.
-	ImportPid   string // Packages id of packages that imports this project.
+	ImportedNum int
+	ImportPid   string
+
+	Note string
 }
 
 // source is source code file.

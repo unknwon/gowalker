@@ -127,14 +127,16 @@ func CheckDoc(path, tag string, requestType int) (*Package, error) {
 func assginPkgInfo(pdoc *Package, pinfo *models.PkgInfo) {
 	// Assgin package information
 	pdoc.ImportPath = pinfo.Path
-	pdoc.Tags = strings.Split(pinfo.Tags, "|||")
-	pdoc.IsCmd = pinfo.IsCmd
+	pdoc.ProjectName = pinfo.ProName
 	pdoc.Synopsis = pinfo.Synopsis
+	pdoc.IsCmd = pinfo.IsCmd
+	pdoc.Tags = strings.Split(pinfo.Tags, "|||")
 	pdoc.Views = pinfo.Views
 	pdoc.Created = pinfo.Created
-	pdoc.ProjectName = pinfo.ProName
+	pdoc.Rank = pinfo.Rank
 	pdoc.Etag = pinfo.Etag
 	pdoc.Labels = pinfo.Labels
 	pdoc.ImportedNum = pinfo.ImportedNum
 	pdoc.ImportPid = pinfo.ImportPid
+	pdoc.Note = pinfo.Note
 }

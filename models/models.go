@@ -71,15 +71,11 @@ type PkgInfo struct {
 	Created    time.Time `qbs:"index"`
 
 	/*
-		- BaseRank is project specificed rank value.
-		eg.
-			Github: stars, forks, watches.
 		- Rank is the benchmark of projects, it's based on BaseRank and views.
 		eg.
 			826
 	*/
-	BaseRank int64
-	Rank     int64 `qbs:"index"`
+	Rank int64 `qbs:"index"`
 
 	/*
 		- Revision tag with package (structure) version.
@@ -95,12 +91,19 @@ type PkgInfo struct {
 		- Number of packages that imports this project.
 		eg.
 			11
-		- Package ids of packages that imports this project.
+		- Ids of packages that imports this project.
 		eg.
 			$47|$89|$5464|$8586|$8595|$8787|$8789|$8790|$8918|$9134|$9139|
 	*/
 	ImportedNum int
 	ImportPid   string
+
+	/*
+		- Addtional information.
+		eg.
+			Github: <forks>|<watchers>|
+	*/
+	Note string
 }
 
 // PkgDecl is package declaration in database acceptable form.
@@ -163,7 +166,7 @@ func setMg() (*qbs.Migration, error) {
 
 func init() {
 	// Initialize database.
-	qbs.Register("mysql", fmt.Sprintf("%v:%v@%v/%v?charset=utf8",
+	qbs.Register("mysql", fmt.Sprintf("%v:%v@%v/%v?charset=utf8&parseTime=true",
 		beego.AppConfig.String("dbuser"), beego.AppConfig.String("dbpasswd"),
 		beego.AppConfig.String("dbhost"), beego.AppConfig.String("dbname")),
 		beego.AppConfig.String("dbname"), qbs.NewMysql())

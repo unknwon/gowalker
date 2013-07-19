@@ -20,6 +20,7 @@ import (
 	"net/http"
 	"path"
 	"regexp"
+	"strconv"
 	"strings"
 
 	"github.com/Unknwon/gowalker/utils"
@@ -113,22 +114,29 @@ func getGithubDoc(client *http.Client, match map[string]string, tag, savedEtag s
 	dirs := make([]string, 0, 5)
 	files := make([]*source, 0, 5)
 	for _, node := range tree.Tree {
+		// Skip directories and files in wrong directories, get them later.
 		if node.Type != "blob" || !strings.HasPrefix(node.Path, dirPrefix) {
-			if len(dirPrefix) > 0 && strings.HasPrefix(node.Path, dirPrefix) {
-				p := node.Path[preLen:]
-				dirs = append(dirs, p)
-			} else if len(dirPrefix) == 0 && strings.Index(node.Path, "/") == -1 &&
-				utils.FilterFileName(node.Path) {
-				dirs = append(dirs, node.Path)
-			}
 			continue
 		}
-		if d, f := path.Split(node.Path); d == dirPrefix && utils.IsDocFile(f) {
-			files = append(files, &source{
-				name:      f,
-				browseURL: expand("https://github.com/{owner}/{repo}/blob/{tag}/{0}", match, node.Path),
-				rawURL:    node.Url + "?" + githubCred,
-			})
+
+		// Get files and check if directories have acceptable files.
+		if d, f := path.Split(node.Path); utils.IsDocFile(f) &&
+			utils.FilterDirName(d) {
+			// Check if file is in the directory that is corresponding to import path.
+			if d == dirPrefix {
+				// Yes.
+				files = append(files, &source{
+					name:      f,
+					browseURL: expand("https://github.com/{owner}/{repo}/blob/{tag}/{0}", match, node.Path),
+					rawURL:    node.Url + "?" + githubCred,
+				})
+			} else {
+				sd, _ := path.Split(d[preLen:])
+				sd = strings.TrimSuffix(sd, "/")
+				if !checkDir(sd, dirs) {
+					dirs = append(dirs, sd)
+				}
+			}
 		}
 	}
 
@@ -141,10 +149,16 @@ func getGithubDoc(client *http.Client, match map[string]string, tag, savedEtag s
 		return nil, err
 	}
 
-	/*browseURL := expand("https://github.com/{owner}/{repo}", match)
-	if match["dir"] != "" {
-		browseURL = expand("https://github.com/{owner}/{repo}/tree/{tag}{dir}", match)
-	}*/
+	// Get addtional information: forks, watchers.
+	var note struct {
+		Forks    int
+		Watchers int `json:"watchers_count"`
+	}
+
+	err = httpGetJSON(client, expand("https://api.github.com/repos/{owner}/{repo}?{cred}", match), &note)
+	if err != nil {
+		return nil, errors.New("doc.getGithubDoc(" + match["importPath"] + ") -> get note: " + err.Error())
+	}
 
 	// Start generating data.
 	w := &walker{
@@ -156,7 +170,19 @@ func getGithubDoc(client *http.Client, match map[string]string, tag, savedEtag s
 			Tag:         tag,
 			Etag:        commit,
 			Dirs:        dirs,
+			Note: strconv.Itoa(note.Forks) + "|" +
+				strconv.Itoa(note.Watchers) + "|",
 		},
 	}
 	return w.build(files)
+}
+
+// checkDir checks if directory has been appended to slice.
+func checkDir(dir string, dirs []string) bool {
+	for _, d := range dirs {
+		if dir == d {
+			return true
+		}
+	}
+	return false
 }

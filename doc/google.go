@@ -71,7 +71,7 @@ func getStandardDoc(client *http.Client, importPath, tag, savedEtag string) (pdo
 		dirName := strings.Split(string(m[1]), "?")[0]
 		// Make sure we get directories.
 		if strings.HasSuffix(dirName, "/") &&
-			utils.FilterFileName(dirName) {
+			utils.FilterDirName(dirName) {
 			dirs = append(dirs, strings.Replace(dirName, "/", "", -1))
 		}
 	}
@@ -171,7 +171,7 @@ func getGoogleDoc(client *http.Client, match map[string]string, tag, savedEtag s
 		dirName := strings.Split(string(m[1]), "?")[0]
 		// Make sure we get directories.
 		if strings.HasSuffix(dirName, "/") &&
-			utils.FilterFileName(dirName) {
+			utils.FilterDirName(dirName) {
 			dirs = append(dirs, strings.Replace(dirName, "/", "", -1))
 		}
 	}

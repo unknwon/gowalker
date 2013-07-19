@@ -642,13 +642,13 @@ func joinPath(importPath string, num int) string {
 	return importPath
 }
 
-var filterFileNames = []string{
-	"test", "static", "docs", "views", "js", "assets", "public", "img"}
+var filterDirNames = []string{
+	"static", "docs", "views", "js", "assets", "public", "img", "conf", "css"}
 
-// FilterFileName guess the file or directory is or contains Go source files.
-func FilterFileName(name string) bool {
-	for _, v := range filterFileNames {
-		if strings.Contains(strings.ToLower(name), v) {
+// FilterDirName guess the file or directory is or contains Go source files.
+func FilterDirName(name string) bool {
+	for _, v := range filterDirNames {
+		if strings.Contains(strings.ToLower(name), v+"/") {
 			return false
 		}
 	}

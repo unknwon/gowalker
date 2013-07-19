@@ -85,7 +85,7 @@ func getCSDNDoc(client *http.Client, match map[string]string, tag, savedEtag str
 		}
 
 		// Directory.
-		if strings.HasSuffix(fileName, "/") && utils.FilterFileName(fileName[dirLen+1:]) {
+		if strings.HasSuffix(fileName, "/") && utils.FilterDirName(fileName[dirLen+1:]) {
 			dirs = append(dirs, fileName[dirLen+1:])
 		}
 	}
