@@ -30,54 +30,72 @@ import (
 	"github.com/astaxie/beego"
 )
 
-// Recent viewed project.
-type recentPro struct {
-	Path, Synopsis string
-	IsGoRepo       bool
-	ViewedTime     int64
+// A proInfo represents a project information.
+type proInfo struct {
+	Path, Synopsis    string
+	IsGoRepo          bool
+	Views, ViewedTime int64
+
+	/*
+		For recent and popular projects, Rank is the total rank value;
+		for Rock projects, Rank is for rank value in this week.
+	*/
+	Rank int64
 }
 
 var (
-	recentViewedProNum = 20         // Maximum element number of recent viewed project list.
-	recentViewedPros   []*recentPro // Recent viewed project list.
+	maxProInfoNum = 20
+	maxExamNum    = 15
+
+	recentViewedPros, topRankPros, topViewedPros, RockPros []*proInfo
 
 	labelList []string // Projects label list.
 	labelSet  string   // Label data source.
 )
 
 func init() {
-	// Initialized recent viewed project list.
-	num, err := beego.AppConfig.Int("recentViewedProNum")
-	if err == nil {
-		recentViewedProNum = num
-		beego.Trace("Loaded 'recentViewedProNum' -> value:", recentViewedProNum)
-	} else {
-		beego.Trace("Failed to load 'recentViewedProNum' -> Use default value:", recentViewedProNum)
-	}
-
-	recentViewedPros = make([]*recentPro, 0, recentViewedProNum)
-	// Get recent viewed projects from database.
-	proinfos, _ := models.GetRecentPros(recentViewedProNum)
-	for _, p := range proinfos {
-		// Only projects with import path length is less than 40 letters will be showed.
-		if len(p.Path) < 40 {
-			recentViewedPros = append(recentViewedPros,
-				&recentPro{
-					Path:       p.Path,
-					Synopsis:   p.Synopsis,
-					ViewedTime: p.ViewedTime,
-					IsGoRepo: p.ProName == "Go" &&
-						strings.Index(p.Path, ".") == -1,
-				})
-		}
-	}
-
 	// Initialize project tags.
-	labelList = strings.Split(beego.AppConfig.String("labels"), "|")
+	labelList = strings.Split(utils.Cfg.MustGetVlaue("setting", "lables"), "|")
 	for _, s := range labelList {
 		labelSet += "&quot;" + s + "&quot;,"
 	}
 	labelSet = labelSet[:len(labelSet)-1]
+}
+
+// initPopPros initializes popular projects.
+func initPopPros() {
+	popPros := make([][]*models.PkgInfo, 4)
+	var err error
+	err, _, popPros[0], popPros[1], popPros[2], _ =
+		models.GetPopulars(maxProInfoNum, maxExamNum)
+	if err != nil {
+		panic("initPopPros -> " + err.Error())
+	}
+
+	for i, ps := range popPros {
+		tmpPros := make([]*proInfo, 0, maxProInfoNum)
+		for _, p := range ps {
+			tmpPros = append(tmpPros,
+				&proInfo{
+					Path:     p.Path,
+					Synopsis: p.Synopsis,
+					IsGoRepo: p.ProName == "Go" &&
+						strings.Index(p.Path, ".") == -1,
+					Views:      p.Views,
+					ViewedTime: p.ViewedTime,
+					Rank:       p.Rank,
+				})
+		}
+
+		switch i {
+		case 0:
+			recentViewedPros = tmpPros
+		case 1:
+			topRankPros = tmpPros
+		case 2:
+			topViewedPros = tmpPros
+		}
+	}
 }
 
 // HomeRouter serves home and documentation pages.
@@ -129,10 +147,12 @@ func (this *HomeRouter) Get() {
 		// Home page.
 		this.Data["IsHome"] = true
 
-		// Recent projects
-		this.Data["RecentPros"] = recentViewedPros
-		// Get popular project and examples list from database.
-		this.Data["PopPros"], this.Data["RecentExams"] = models.GetPopulars(20, 12)
+		// Global Recent projects.
+		this.Data["GlobalRecentPros"] = recentViewedPros
+		// Get popular projects and examples.
+		this.Data["TopRankPros"] = topRankPros
+		this.Data["TopViewedPros"] = topViewedPros
+		this.Data["RockPros"] = RockPros
 		// Set standard library keyword type-ahead.
 		this.Data["DataSrc"] = utils.GoRepoSet
 	} else {
@@ -165,7 +185,7 @@ func (this *HomeRouter) Get() {
 			// Generate documentation page.
 			if generatePage(this, pdoc, broPath, tag, curLang.Lang) {
 				// Update recent project list.
-				updateRecentPros(pdoc)
+				updateproInfos(pdoc)
 				// Update project views.
 				pinfo := &models.PkgInfo{
 					Path:        pdoc.ImportPath,
@@ -846,19 +866,21 @@ func codeDecode(code *string) *string {
 	return str
 }
 
-func updateRecentPros(pdoc *doc.Package) {
+func updateproInfos(pdoc *doc.Package) {
 	pdoc.ViewedTime = time.Now().UTC().Unix()
 
 	// Only projects with import path length is less than 40 letters will be showed.
 	if len(pdoc.ImportPath) < 40 {
 		index := -1
 		listLen := len(recentViewedPros)
-		curPro := &recentPro{
-			Path:       pdoc.ImportPath,
-			Synopsis:   pdoc.Synopsis,
-			ViewedTime: pdoc.ViewedTime,
+		curPro := &proInfo{
+			Path:     pdoc.ImportPath,
+			Synopsis: pdoc.Synopsis,
 			IsGoRepo: pdoc.ProjectName == "Go" &&
 				strings.Index(pdoc.ImportPath, ".") == -1,
+			Views:      pdoc.Views,
+			ViewedTime: pdoc.ViewedTime,
+			Rank:       pdoc.Rank,
 		}
 
 		// Check if in the list
@@ -869,15 +891,15 @@ func updateRecentPros(pdoc *doc.Package) {
 			}
 		}
 
-		s := make([]*recentPro, 0, recentViewedProNum)
+		s := make([]*proInfo, 0, maxProInfoNum)
 		s = append(s, curPro)
 		switch {
-		case index == -1 && listLen < recentViewedProNum:
+		case index == -1 && listLen < maxProInfoNum:
 			// Not found and list is not full
 			s = append(s, recentViewedPros...)
-		case index == -1 && listLen >= recentViewedProNum:
+		case index == -1 && listLen >= maxProInfoNum:
 			// Not found but list is full
-			s = append(s, recentViewedPros[:recentViewedProNum-1]...)
+			s = append(s, recentViewedPros[:maxProInfoNum-1]...)
 		case index > -1:
 			// Found
 			s = append(s, recentViewedPros[:index]...)

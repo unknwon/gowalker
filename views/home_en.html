@@ -21,89 +21,107 @@
 	    		<div id="homeleft" class="span6 homeleft">
 					<div>
 						<h4>What is this?</h4>
-						<p>Go Walker is a web server that generates <a target="_blank" href="http://golang.org/">Go</a> projects API documentation with source code on the fly from projects on <b><a target="_blank" href="https://bitbucket.org/">Bitbucket</a></b>, <b><a target="_blank" href="https://github.com/">Github</a></b>, <b><a target="_blank" href="http://code.google.com/">Google Code</a></b>, <b><a target="_blank" href="https://launchpad.net/">Launchpad</a></b> and <b><a target="_blank" href="http://git.oschina.net/">Git @ OSC</a></b>.</p>
-						<p>Awesome features  
-						<button class="btn feature" title="" data-content="View function and method code with nice highlight in the same page, reduce rake up space and do more work at the same time." data-placement="left" data-toggle="popover" data-original-title="Code View">Code View</button>
-						<button class="btn feature" title="" data-content="Quick jump to functions, methods and types from imported packages, reduce time to find." data-placement="top" data-toggle="popover" data-original-title="Link Jump">Link Jump</button>
-						<button class="btn feature" title="" data-content="Add examples for your favorite projects through Github Gist." data-placement="bottom" data-toggle="popover" data-original-title="Add Example">Add Example</button>
-						<button class="btn feature" title="" data-content="Don't worry if you use old version of a project, now you can view documentation by its Tags!" data-placement="right" data-toggle="popover" data-original-title="View by Tag">Doc Tag</button>
-						and <a target="_blank" href="https://github.com/Unknwon/gowalker/blob/master/docs/Features.md">More</a>.</p>
-						<p class="text-success">Please read the  <a href="/about">About Page</a> for information about adding projects to Go Walker and more.</p>
+						<p>
+							Go Walker is a web server that generates <a target="_blank" href="http://golang.org/">Go</a> projects API documentation with source code on the fly from projects on <b><a target="_blank" href="https://bitbucket.org/">Bitbucket</a></b>, <b><a target="_blank" href="https://github.com/">Github</a></b>, <b><a target="_blank" href="http://code.google.com/">Google Code</a></b>, <b><a target="_blank" href="https://launchpad.net/">Launchpad</a></b> and <b><a target="_blank" href="http://git.oschina.net/">Git @ OSC</a></b>.
+						</p>
+
+						<p>
+							Awesome features  
+							<button class="btn feature" title="" data-content="View function and method code with nice highlight in the same page, reduce rake up space and do more work at the same time." data-placement="left" data-toggle="popover" data-original-title="Code View">Code View</button>
+
+							<button class="btn feature" title="" data-content="Quick jump to functions, methods and types from imported packages, reduce time to find." data-placement="top" data-toggle="popover" data-original-title="Link Jump">Link Jump</button>
+
+							<button class="btn feature" title="" data-content="Add examples for your favorite projects through Github Gist." data-placement="bottom" data-toggle="popover" data-original-title="Add Example">Add Example</button>
+
+							<button class="btn feature" title="" data-content="Don't worry if you use old version of a project, now you can view documentation by its Tags!" data-placement="right" data-toggle="popover" data-original-title="View by Tag">Doc Tag</button>
+
+							and <a target="_blank" href="https://github.com/Unknwon/gowalker/blob/master/docs/Features.md">More</a>.</p>
+							<p class="text-success">Please read the  <a href="/about">About Page</a> for information about adding projects to Go Walker and more.
+						</p>
 					</div>
 
 					<div class="tab-content">
-						<div id="recent_view_global" class="tab-pane fade active in">
+						<div id="global_recent_view" class="tab-pane fade active in">
 							<h4>
 								What other people are looking at.
-								<a href="#recent_view_user" class="btn btn-inverse" data-toggle="tab">My history</a>
+								<a href="#user_recent_view" class="btn btn-inverse" data-toggle="tab">My history</a>
 							</h4>
 
-							<table id="rectable1" class="table table-bordered table-hover">
+							<table name="recent_table" class="table table-bordered table-hover">
 								<thead>
 									<tr>
-										<th>Import Path</th>
+										<th>Import Path(Rank)</th>
 										<th>Viewd Time(Local)</th>
 									</tr>
 								</thead>
+
 								<tbody>
-								{{range .RecentPros}}
+								{{range .GlobalRecentPros}}
 									<tr>
-										<td><a title="{{.Synopsis}}" href="/{{.Path}}">{{.Path}}</a>{{if .IsGoRepo}} <span class="label label-info">Standard</span>{{end}}</td>
+										<td>
+											<a title="{{.Synopsis}}" href="/{{.Path}}">{{.Path}}</a>
+											{{if .IsGoRepo}} 
+												<span class="label label-info">Standard</span>
+											{{else}}
+												<span class="badge badge-inverse">{{.Rank}}</span>
+											{{end}}
+										</td>
+
 										<td>{{.ViewedTime}}</td>
 									</tr>
 								{{end}}
 								</tbody>
 							</table>
-
-							<script>
-								(function(){
-									var node = document.getElementById("rectable1");
-									var child = node.getElementsByTagName("tr");
-									var d1 = new Date();
-									for(var i=1;i<child.length;i++){
-										var t = parseInt(node.rows[i].cells[1].innerHTML);
-										var d = new Date(t * 1000);
-										node.rows[i].cells[1].innerHTML = d.toLocaleString();
-									}
-								})();
-							</script>
 						</div>
 
-						<div id="recent_view_user" class="tab-pane fade">
+						<div id="user_recent_view" class="tab-pane fade">
 							<h4>
 								What you have been looking at.
-								<a href="#recent_view_global" class="btn btn-inverse" data-toggle="tab">Global history</a>
+								<a href="#global_recent_view" class="btn btn-inverse" data-toggle="tab">Global history</a>
 							</h4>
 
-							<table id="rectable2" class="table table-bordered table-hover">
+							<table name="recent_table" class="table table-bordered table-hover">
 								<thead>
 									<tr>
-										<th>Import Path</th>
+										<th>Import Path(Rank)</th>
 										<th>Viewd Time(Local)</th>
 									</tr>
 								</thead>
+
 								<tbody>
-								{{range .RecentPros}}
+								{{range .UserRecentPros}}
 									<tr>
-										<td><a title="{{.Synopsis}}" href="/{{.Path}}">{{.Path}}</a>{{if .IsGoRepo}} <span class="label label-info">Standard</span>{{end}}</td>
+										<td>
+											<a title="{{.Synopsis}}" href="/{{.Path}}">{{.Path}}</a>
+											{{if .IsGoRepo}} 
+												<span class="label label-info">Standard</span>
+											{{else}}
+												<span class="badge badge-inverse">{{.Rank}}</span>
+											{{end}}
+										</td>
+										
 										<td>{{.ViewedTime}}</td>
 									</tr>
 								{{end}}
 								</tbody>
 							</table>
-							<script>
-								(function(){
-									var node = document.getElementById("rectable2");
-									var child = node.getElementsByTagName("tr");
-									var d1 = new Date();
-									for(var i=1;i<child.length;i++){
-										var t = parseInt(node.rows[i].cells[1].innerHTML);
-										var d = new Date(t * 1000);
-										node.rows[i].cells[1].innerHTML = d.toLocaleString();
-									}
-								})();
-							</script>
 						</div>
+
+						<script>
+							(function(){
+								var tables = document.getElementsByName("recent_table");
+								var now = new Date();
+								for (var n = 0; n < tables.length; n++) {
+									var table = tables[n];
+									var items = table.getElementsByTagName("tr");
+									for (var i = 1; i < items.length; i++){
+										var t = parseInt(table.rows[i].cells[1].innerHTML);
+										var d = new Date(t * 1000);
+										table.rows[i].cells[1].innerHTML = d.toLocaleString();
+									}
+								}
+							})();
+						</script>
 		    		</div>
 				</div>
 	    		<div id="homeright" class="span6 homeright">
@@ -118,58 +136,79 @@
 						<h4>Popular Projects</h4>
 						<ul class="nav nav-tabs nav-tabs-google">
 							<li class="active">
-								<a href="#pop_rank" data-toggle="tab">Total Rank</a>
+								<a href="#top_rank" data-toggle="tab">Total Rank</a>
 							</li>
 
 							<li>
-								<a href="#pop_views" data-toggle="tab">Total Views</a>
+								<a href="#top_viewd" data-toggle="tab">Total Views</a>
 							</li>
 
 							<li>
-								<a href="#pop_rock" data-toggle="tab">Rock this week</a>
+								<a href="#rock_this_week" data-toggle="tab">Rock this week</a>
 							</li>
 						</ul>
 
 						<div class="tab-content">
-							<div id="pop_rank" class="tab-pane fade active in">
+							<div id="top_rank" class="tab-pane fade active in">
 								<ul class="unstyled">
-									{{range .PopPros}}
-									<li><span class="badge">{{.Views}}</span> <a title="{{.Synopsis}}" href="/{{.Path}}">{{.Path}}</a></li>
-									{{end}}
+								{{range .TopRankPros}}
+									<li>
+										<span class="badge badge-inverse">{{.Rank}}</span> 
+										<a title="{{.Synopsis}}" href="/{{.Path}}">{{.Path}}</a>
+									</li>
+								{{end}}
 								</ul>
 							</div>
 
-							<div id="pop_views" class="tab-pane fade">
+							<div id="top_viewd" class="tab-pane fade">
 								<ul class="unstyled">
-									{{range .PopPros}}
-									<li><span class="badge">{{.Views}}</span> <a title="{{.Synopsis}}" href="/{{.Path}}">{{.Path}}</a></li>
-									{{end}}
+								{{range .TopViewedPros}}
+									<li>
+										<span class="badge">{{.Views}}</span> 
+										<a title="{{.Synopsis}}" href="/{{.Path}}">{{.Path}}</a>
+									</li>
+								{{end}}
 								</ul>
 							</div>
 
-							<div id="pop_rock" class="tab-pane fade">
+							<div id="rock_this_week" class="tab-pane fade">
 								<ul class="unstyled">
-									{{range .PopPros}}
-									<li><span class="badge">{{.Views}}</span> <a title="{{.Synopsis}}" href="/{{.Path}}">{{.Path}}</a></li>
-									{{end}}
+								{{range .RockPros}}
+									<li>
+										<span class="badge badge-success">{{.Rank}}</span> 
+										<a title="{{.Synopsis}}" href="/{{.Path}}">{{.Path}}</a>
+									</li>
+								{{end}}
 								</ul>
 							</div>
 						</div>
 	    			</div>
+
 	    			<div>
 	    				<h4>Recent Updated Examples</h4>
 						<ul class="unstyled">
-							{{range .RecentExams}}
-							<li><a href="/{{.Path}}">{{.Path}}</a></li>
-							{{end}}
+						{{range .RecentExams}}
+							<li>
+								<a href="/{{.Path}}">{{.Path}}</a>
+							</li>
+						{{end}}
 						</ul>
 	    			</div>
+
 	    			<div>
 						<h4>More Projects</h4>
 						<ul class="unstyled">
-							<li><a href="/index">Index</a></li>
-							<li><a href="/search?q=gorepo">Standard Library</a></li>
-							<li><a target="_blank" href="https://code.google.com/p/go-wiki/wiki/Projects">Projects @ go-wiki</a></li>
+							<li>
+								<a href="/index">Index</a>
+							</li>
+
+							<li>
+								<a href="/search?q=gorepo">Standard Library</a>
+							</li>
+
+							<li>
+								<a target="_blank" href="https://code.google.com/p/go-wiki/wiki/Projects">Projects @ go-wiki</a>
+							</li>
 						</ul>
 	    			</div>
 	    		</div>

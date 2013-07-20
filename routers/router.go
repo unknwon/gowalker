@@ -16,9 +16,12 @@
 package routers
 
 import (
+	"fmt"
 	"net/url"
 	"strings"
+	"time"
 
+	"github.com/Unknwon/gowalker/utils"
 	"github.com/astaxie/beego"
 )
 
@@ -109,4 +112,34 @@ func setLangVer(ctx *beego.Context, input url.Values, data map[interface{}]inter
 	data["RestLangs"] = restLangs
 
 	return curLang
+}
+
+var cacheTicker *time.Ticker
+
+func init() {
+	// Load max element numbers.
+	num := utils.Cfg.MustGetInt("setting", "max_pro_info_num")
+	if num > 0 {
+		maxProInfoNum = num
+	}
+
+	num = utils.Cfg.MustGetInt("setting", "max_exam_num")
+	if num > 0 {
+		maxExamNum = num
+	}
+	beego.Trace(fmt.Sprintf("maxProInfoNum: %d; maxExamNum: %d",
+		maxProInfoNum, maxExamNum))
+
+	// Start cache ticker.
+	cacheTicker = time.NewTicker(time.Minute)
+	go cacheTickerCheck(cacheTicker.C)
+
+	initPopPros()
+}
+
+func cacheTickerCheck(cacheChan <-chan time.Time) {
+	for {
+		<-cacheChan
+		initPopPros()
+	}
 }

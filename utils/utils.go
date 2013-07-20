@@ -24,7 +24,20 @@ import (
 	"strings"
 	"unicode"
 	"unicode/utf8"
+
+	"github.com/Unknwon/goconfig"
+	"github.com/astaxie/beego"
 )
+
+var Cfg *goconfig.ConfigFile
+
+func init() {
+	var err error
+	Cfg, err = goconfig.LoadConfigFile("conf/app.ini")
+	if err == nil {
+		beego.Info("Initialize app.ini")
+	}
+}
 
 // IsExist returns if a file or directory exists
 func IsExist(path string) bool {

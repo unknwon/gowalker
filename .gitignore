@@ -26,3 +26,4 @@ _testmain.go
 *.exe
 .DS_Store
 gowalker
+app.ini

@@ -24,9 +24,8 @@ import (
 	"github.com/coocood/qbs"
 )
 
-// GetRecentPros gets recent viewed projects from database
+// GetRecentPros returns global recent viewed projects.
 func GetRecentPros(num int) ([]*PkgInfo, error) {
-	// Connect to database.
 	q := connDb()
 	defer q.Close()
 
@@ -35,17 +34,37 @@ func GetRecentPros(num int) ([]*PkgInfo, error) {
 	return pkgInfos, err
 }
 
-// GetPopulars gets <num> most viewed projects and examples from database.
-func GetPopulars(proNum, examNum int) ([]*PkgInfo, []*PkgExam) {
+/*
+	GetPopulars returns <num>
+		1. Recent viewed
+		2. Top rank
+		3. Top viewed
+		4. Rock this week
+	projects and recent updated examples.
+*/
+func GetPopulars(proNum, exNum int) (error, []*PkgExam,
+	[]*PkgInfo, []*PkgInfo, []*PkgInfo, []*PkgInfo) {
 	// Connect to database.
 	q := connDb()
 	defer q.Close()
 
-	var popPros []*PkgInfo
-	var popExams []*PkgExam
-	q.Limit(proNum).OrderByDesc("views").FindAll(&popPros)
-	q.Limit(examNum).OrderByDesc("created").FindAll(&popExams)
-	return popPros, popExams
+	var ruExs []*PkgExam
+	// q.Limit(examNum).OrderByDesc("created").FindAll(&popExams)
+
+	var rvPros, trPros, tvPros, rtwPros []*PkgInfo
+	err := q.Limit(proNum).OrderByDesc("viewed_time").FindAll(&rvPros)
+	if err != nil {
+		return err, nil, nil, nil, nil, nil
+	}
+	err = q.Limit(proNum).OrderByDesc("rank").FindAll(&trPros)
+	if err != nil {
+		return err, nil, nil, nil, nil, nil
+	}
+	err = q.Limit(proNum).OrderByDesc("views").FindAll(&tvPros)
+	if err != nil {
+		return err, nil, nil, nil, nil, nil
+	}
+	return nil, ruExs, rvPros, trPros, tvPros, rtwPros
 }
 
 // SaveProject save package information, declaration to database, and update import information.
