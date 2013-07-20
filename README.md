@@ -25,6 +25,7 @@ Go Walker is a web server that generates <a target="_blank" href="http://golang.
 
 - [Beego](http://gowalker.org/github.com/astaxie/beego): a **lightweight** web framework for web application **quick** development.
 - [Qbs](http://gowalker.org/github.com/coocood/qbs): **Query by Struct** is an excellent ORM, it supports MySQL, SQLite3 and PosgreSQL.
+- [goconfig](https://github.com/Unknwon/goconfig): a easy-use **comments-support** configuration file(.ini) parser for the Go Programming Language.
 
 ## Credits
 

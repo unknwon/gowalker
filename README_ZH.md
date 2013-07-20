@@ -24,6 +24,7 @@ Go 步行者是一个用于在线生成并浏览 <a target="_blank" href="http:/
 
 - [Beego](http://gowalker.org/github.com/astaxie/beego)：轻量级 Web 框架，适用于 Web 应用快速开发。
 - [Qbs](http://gowalker.org/github.com/coocood/qbs)： **结构化查询（Query by Struct）** 是一个非常给力的 ORM，目前支持 MySQL、SQLite3 和 PosgreSQL.
+- [goconfig](https://github.com/Unknwon/goconfig)：一款使用 Go 语言编写的 INI 配置文件解析器。
 
 ## 授权许可
 
