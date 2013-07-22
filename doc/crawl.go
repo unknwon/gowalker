@@ -20,7 +20,6 @@ import (
 	"encoding/base32"
 	"encoding/xml"
 	"errors"
-	"fmt"
 	"html/template"
 	"io"
 	"net/http"
@@ -103,7 +102,6 @@ func getRepo(client *http.Client, importPath, tag, etag string) (pdoc *Package, 
 
 // SaveProject saves project information to database.
 func SaveProject(pdoc *Package, info *models.PkgInfo) error {
-	now := time.Now()
 	// Save package information.
 	pinfo := &models.PkgInfo{
 		Path:        pdoc.ImportPath,
@@ -298,7 +296,6 @@ func SaveProject(pdoc *Package, info *models.PkgInfo) error {
 	pdecl.TestFiles = buf.String()
 
 	err := models.SaveProject(pinfo, pdecl, pfuncs, pdoc.Imports)
-	fmt.Println("SAVE:", time.Since(now))
 	return err
 }
 

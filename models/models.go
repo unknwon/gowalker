@@ -481,7 +481,7 @@ func GetPkgFunc(name, pidS string) string {
 	err := q.Condition(cond).Find(pfunc)
 	fmt.Println(err)
 	if err != nil {
-		return "Function not found:\n" +
+		pfunc.Code = "Function not found:\n" +
 			"Pid: " + pidS +
 			"\nName: " + name
 	}

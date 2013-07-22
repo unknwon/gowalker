@@ -105,7 +105,6 @@ type HomeRouter struct {
 
 // Get implemented Get method for HomeRouter.
 func (this *HomeRouter) Get() {
-	now := time.Now()
 	// Filter unusual User-Agent.
 	ua := this.Ctx.Request.Header.Get("User-Agent")
 	if len(ua) < 20 {
@@ -205,7 +204,6 @@ func (this *HomeRouter) Get() {
 					Note:        pdoc.Note,
 				}
 				models.AddViews(pinfo)
-				fmt.Println("SHOW:", time.Since(now))
 				return
 			}
 		} else {
@@ -483,11 +481,32 @@ func generatePage(this *HomeRouter, pdoc *doc.Package, q, tag, lang string) bool
 	this.Data["Pid"] = pdecl.Id
 	this.Data["ImportPkgs"] = pdecl.Imports
 	this.Data["ImportPkgNum"] = len(pdoc.Imports) - 1
+	this.Data["IsHasImports"] = len(pdoc.Imports)-1 > 0
 	this.Data["IsImported"] = pdoc.ImportedNum > 0
 	this.Data["ImportPid"] = pdoc.ImportPid
 	this.Data["ImportedNum"] = pdoc.ImportedNum
-	this.Data["UtcTime"] = pdoc.Created
+	this.Data["TimeSince"] = calTimeSince(pdoc.Created)
 	return true
+}
+
+// calTimeSince returns documentation generated time to now with friendly format.
+func calTimeSince(created time.Time) string {
+	mins := int(time.Since(created).Minutes())
+
+	switch {
+	case mins < 1:
+		return "less than 1 minute"
+	case mins < 60:
+		return fmt.Sprintf("%d minutes ago", mins)
+	case mins < 60*24:
+		return fmt.Sprintf("%d hours ago", mins/(60))
+	case mins < 60*24*30:
+		return fmt.Sprintf("%d days ago", mins/(60*24))
+	case mins < 60*24*365:
+		return fmt.Sprintf("%d months ago", mins/(60*24*30))
+	default:
+		return fmt.Sprintf("%d years ago", mins/(60*24*365))
+	}
 }
 
 // calDocCP returns label style name and percentage string according to commented and total pbjects number.

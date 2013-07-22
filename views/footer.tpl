@@ -1,53 +1,56 @@
 {{define "footer_en"}}
-		<div id='_keyshortcut' class="modal hide fade" tabindex="-1" role="dialog" aria-hidden="false">
-		  <div class="modal-header">
-		      <h3>Control panel</h3>
-		  </div>
-		  <div class="modal-body">
-		      <table>
-		          <tbody>
-			      <tr><td align="right"><b>?</b></td><td> : This menu</td></tr>
-			      <tr><td align="right"><b>/</b></td><td> : Search site</td></tr>
-			      <tr><td align="right"><b>.</b></td><td> : Go to export</td></tr>
-			      <tr><td align="right"><b>g</b> then <b>g</b></td><td> : Go to top of page</td></tr>
-			      <tr><td align="right"><b>g</b> then <b>b</b></td><td> : Go to bottom of page</td></tr>
-			      <tr><td align="right"><b>g</b> then <b>i</b></td><td> : Go to index</td></tr>
-			      <tr><td align="right"><b>g</b> then <b>t</b></td><td> : Add or remove labels</td></tr>
-			      <tr><td align="right"><b>g</b> then <b>e</b></td><td> : Add examples</td></tr>
-		          </tbody>
-		      </table>
-		  </div>
-		  <div class="modal-footer">
-		      <a href="#" class="btn" data-dismiss='modal' aria-hidden="true">Close</a>
-		      <!--<a href="#" class="btn btn-primary">Save changes</a>-->
-		  </div>
-		</div>
-		<footer id="_bottom">
-			<div class="container" style="padding-top: 10px; padding-bottom: 10px; width: 1050px;">
-				<div id="footer" class="span6" style="width: {{if .IsHome}}440{{else}}600{{end}}px;">
-					<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
-					<script type="text/javascript" src="/static/js/bootstrap.min.js"></script>
-					<script type='text/javascript' src='/static/js/site.js'></script>
-					<p><strong>Copyright © 2013 Go Walker</strong></p>
-					<p>Website built by <a target="_blank" href="https://github.com/Unknwon"><i class="icon-user"></i> @Unknown</a>. Powered by <a target="_blank" href="https://github.com/astaxie/beego"><i class="icon-bold"></i>eego</a> and <a target="_blank" href="https://github.com/coocood/qbs">Qbs</a>.</p>
-					{{if .IsHome}}<p>Based on <a target="_blank" href="http://twitter.github.io/bootstrap/">Bootstrap</a>. Icons from <a target="_blank" href="http://glyphicons.com/">Glyphicons</a>.</p>{{end}}
-					{{if .IsHome}}<p>{{end}}Send us <a href="mailto:joe2010xtmf#163.com"><i class="icon-envelope"></i> Feedback</a> or submit <a target="_blank" href="https://github.com/Unknwon/gowalker/issues"><i class="icon-tasks"></i> Website Issues</a>. {{if .IsHome}}</p>{{end}}<strong>Language:</strong>
-				    <div class="btn-group dropup">
-					    <button class="btn dropdown-toggle" data-toggle="dropdown">{{.CurLang}} <span class="caret"></span></button>
-					    <ul class="dropdown-menu">
-						{{$keyword := .Keyword}}
-					    {{range .RestLangs}}
-					    	<li><a href="?lang={{.Lang}}&q={{$keyword}}">{{.Name}}</a></li>
-					    {{end}}
-					    </ul>
-				    </div>
-				   {{template "static_file" .}}
-			</div>
-		</footer>
+<div id='_keyshortcut' class="modal hide fade" tabindex="-1" role="dialog" aria-hidden="false">
+  <div class="modal-header">
+      <h3>Control panel</h3>
+  </div>
+
+  <div class="modal-body">
+      <table>
+          <tbody>
+	      <tr><td align="right"><b>?</b></td><td> : This menu</td></tr>
+	      <tr><td align="right"><b>/</b></td><td> : Search site</td></tr>
+	      <tr><td align="right"><b>.</b></td><td> : Go to export</td></tr>
+	      <tr><td align="right"><b>g</b> then <b>g</b></td><td> : Go to top of page</td></tr>
+	      <tr><td align="right"><b>g</b> then <b>b</b></td><td> : Go to bottom of page</td></tr>
+	      <tr><td align="right"><b>g</b> then <b>i</b></td><td> : Go to index</td></tr>
+	      <tr><td align="right"><b>g</b> then <b>t</b></td><td> : Add or remove labels</td></tr>
+	      <tr><td align="right"><b>g</b> then <b>e</b></td><td> : Add examples</td></tr>
+          </tbody>
+      </table>
+  </div>
+
+  <div class="modal-footer">
+      <a href="#" class="btn" data-dismiss='modal' aria-hidden="true">Close</a>
+      <!--<a href="#" class="btn btn-primary">Save changes</a>-->
+  </div>
+</div>
+
+<footer id="_bottom">
+	<div class="container" style="padding-top: 10px; padding-bottom: 10px; width: 1050px;">
+		<div id="footer" class="span6" style="width: {{if .IsHome}}440{{else}}600{{end}}px;">
+			<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
+			<script type="text/javascript" src="/static/js/bootstrap.min.js"></script>
+			<script type='text/javascript' src='/static/js/site.js'></script>
+			<p><strong>Copyright © 2013 Go Walker</strong></p>
+			<p>Website built by <a target="_blank" href="https://github.com/Unknwon"><i class="icon-user"></i> @Unknown</a>. Powered by <a target="_blank" href="https://github.com/astaxie/beego"><i class="icon-bold"></i>eego</a> and <a target="_blank" href="https://github.com/coocood/qbs">Qbs</a>.</p>
+			{{if .IsHome}}<p>Based on <a target="_blank" href="http://twitter.github.io/bootstrap/">Bootstrap</a>. Icons from <a target="_blank" href="http://glyphicons.com/">Glyphicons</a>.</p>{{end}}
+			{{if .IsHome}}<p>{{end}}Send us <a href="mailto:joe2010xtmf#163.com"><i class="icon-envelope"></i> Feedback</a> or submit <a target="_blank" href="https://github.com/Unknwon/gowalker/issues"><i class="icon-tasks"></i> Website Issues</a>. {{if .IsHome}}</p>{{end}}<strong>Language:</strong>
+
+		    <div class="btn-group dropup">
+			    <button class="btn dropdown-toggle" data-toggle="dropdown">{{.CurLang}} <span class="caret"></span></button>
+			    <ul class="dropdown-menu">
+				{{$keyword := .Keyword}}
+			    	{{range .RestLangs}}
+			    	<li><a href="?lang={{.Lang}}&q={{$keyword}}">{{.Name}}</a></li>
+			    	{{end}}
+			    </ul>
+		    </div>
+		   {{template "static_file" .}}
+	</div>
+</footer>
 {{end}}
 
 {{define "footer_zh"}}
-<!DOCTYPE html>
 		<div id='_keyshortcut' class="modal hide fade" tabindex="-1" role="dialog" aria-hidden="false">
 		  <div class="modal-header">
 		      <h3>控制面板</h3>

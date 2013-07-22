@@ -1,42 +1,49 @@
 {{define "labelmodal_en"}}
-			<div id="label_modal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-				<form id="label_form" class="modal-form">
-					<div class="modal-header">
-						<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-						<h3 id="myModalLabel" style="margin: 10px">Add or remove tags.<small> <a target="_blank" href="/about#label">Learn more</a></small></h3>
-					</div>
-					<div class="modal-body" style="overflow-y: visible;">
-						<table class="table table-condensed table-bordered">
-							<tbody>
-								<tr>
-									<td><code>wf</code></td>
-									<td>Web Framework</td>
-									<td><code>orm</code></td>
-									<td>Object Relation Mapping</td>
-								</tr>
-								<tr>
-									<td><code>dbd</code></td>
-									<td>Database Driver</td>
-									<td><code>gui</code></td>
-									<td>Graphic User Interface</td>
-								</tr>
-								<tr>
-									<td><code>net</code></td>
-									<td>Networking</td>
-									<td><code>tool</code></td>
-									<td>Toolkit</td>
-								</tr>
-							</tbody>
-						</table>
-						<input id="label_box" autofocus="autofocus" class="span5" autocomplete="off" type="text" placeholder="type label" data-source="[{{str2html .LabelDataSrc}}]" data-provide="typeahead">
-					</div>
-					<div class="modal-footer">
-						<button type='button' class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
-						<button type='button' class="btn" onclick="AddLabelSubmit(this)">Add</button>
-						<button type='button' class="btn btn-primary" onclick="RemoveLabelSubmit(this)">Remove</button>
-					</div>
-				</form>
-			</div>
+<div id="label_modal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+	<form id="label_form" class="modal-form">
+		<div class="modal-header">
+			<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+			<h3 id="myModalLabel" style="margin: 10px">
+				Add or remove tags.
+				<small> 
+					<a target="_blank" href="/about#label">Learn more</a>
+				</small>
+			</h3>
+		</div>
+
+		<div class="modal-body" style="overflow-y: visible;">
+			<table class="table table-condensed table-bordered">
+				<tbody>
+					<tr>
+						<td><code>wf</code></td>
+						<td>Web Framework</td>
+						<td><code>orm</code></td>
+						<td>Object Relation Mapping</td>
+					</tr>
+					<tr>
+						<td><code>dbd</code></td>
+						<td>Database Driver</td>
+						<td><code>gui</code></td>
+						<td>Graphic User Interface</td>
+					</tr>
+					<tr>
+						<td><code>net</code></td>
+						<td>Networking</td>
+						<td><code>tool</code></td>
+						<td>Toolkit</td>
+					</tr>
+				</tbody>
+			</table>
+			<input id="label_box" autofocus="autofocus" class="span5" autocomplete="off" type="text" placeholder="type label" data-source="[{{str2html .LabelDataSrc}}]" data-provide="typeahead">
+		</div>
+		
+		<div class="modal-footer">
+			<button type='button' class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+			<button type='button' class="btn" onclick="AddLabelSubmit(this)">Add</button>
+			<button type='button' class="btn btn-primary" onclick="RemoveLabelSubmit(this)">Remove</button>
+		</div>
+	</form>
+</div>
 {{end}}
 
 {{define "labelmodal_zh"}}
