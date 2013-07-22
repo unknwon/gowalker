@@ -15,7 +15,7 @@
 				<li {{if .IsAbout}}class="active"{{end}}><a href="/about">About</a></li>
 			</ul>
 			<form id="top_search_form" class="navbar-search pull-right" action="/">
-				<input id="navbar_search_box" class="search-query" type="text" placeholder="Search" name="q"></input>
+				<input id="navbar_search_box" class="search-query" type="text" placeholder="Search" name="q">
 			</form>
 		</div>
 	</div>
@@ -39,7 +39,7 @@
 				<li {{if .IsAbout}}class="active"{{end}}><a href="/about">关于</a></li>
 			</ul>
 			<form id="top_search_form" class="navbar-search pull-right" action="/">
-				<input id="navbar_search_box" class="search-query" type="text" placeholder="搜索文档" name="q"></input>
+				<input id="navbar_search_box" class="search-query" type="text" placeholder="搜索文档" name="q">
 			</form>
 		</div>
 	</div>

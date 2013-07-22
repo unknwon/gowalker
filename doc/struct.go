@@ -32,13 +32,13 @@ type Value struct {
 
 // Func represents functions
 type Func struct {
-	Name          string // Function name.
-	Doc           string
-	Decl, FmtDecl string // Normal and formatted form of declaration.
-	URL           string // VCS URL.
-	Code          string // Source code.
-	IsHasExam     bool
-	Exams         []*Example
+	Name, FullName string
+	Doc            string
+	Decl, FmtDecl  string // Normal and formatted form of declaration.
+	URL            string // VCS URL.
+	Code           string // Source code.
+	IsHasExam      bool
+	Exams          []*Example
 }
 
 // Type represents structs and interfaces

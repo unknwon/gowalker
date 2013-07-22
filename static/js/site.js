@@ -24,7 +24,7 @@
             if (document.getElementById("sidebar") == null) {
                 navbarFrame.className = "navbar navbar-fixed-top";
                 body.style.paddingTop = "60px";
-            }else{
+            } else {
                 navbarFrame.className = "navbar";
                 body.style.paddingTop = "0px";
             }
@@ -104,7 +104,7 @@
     // For example modal.
     var _ex = $('#example_modal');
     if (_ex.length != 0) {
-        
+
     } else {
         _ex = null;
     }
@@ -249,4 +249,53 @@ function RemoveLabelSubmit(obj) {
         return false;
     }
 }
-//end
+
+// -----------------------------
+// AJAX load code.
+// -----------------------------
+
+var xmlHttp;
+var funcName;
+function createXMLHttpRequest() {
+    if (window.ActiveXObject) {
+        xmlHttp = new ActiveXObject("Microsoft.XMLHTTP");
+    } else if (window.XMLHttpRequest) {
+        xmlHttp = new XMLHttpRequest();
+    } else {
+        xmlHttp = new ActiveXObject("Msxml2.XMLHTTP");
+    }
+}
+
+var okFunc = function () {
+    if (xmlHttp.readyState == 4) {
+        if (xmlHttp.status == 200) {
+            var pre = document.getElementById("collapse_" + funcName);
+            var nodes = pre.getElementsByTagName("pre");
+            nodes[0].innerHTML = xmlHttp.responseText;
+        }
+    }
+};
+
+function getFuncCode(name) {
+    var pid = document.getElementById("pid");
+    var pre = document.getElementById("collapse_" + name);
+    var nodes = pre.getElementsByTagName("pre");
+
+    // Check if need to load code.
+    if (nodes[0].innerHTML != "LOADING...") {
+        return;
+    }
+
+    createXMLHttpRequest();
+    if (!xmlHttp) {
+        nodes[0].innerHTML = "Fail to create XMLHTTP.";
+    }
+
+    funcName = name;
+    xmlHttp.open("GET", "/funcs?q=" + name + "&pid=" + pid.innerHTML, true);
+    xmlHttp.onreadystatechange = okFunc;
+    xmlHttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+    xmlHttp.send();
+}
+
+// ------------- END ------------

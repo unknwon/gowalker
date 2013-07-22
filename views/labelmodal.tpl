@@ -28,7 +28,7 @@
 								</tr>
 							</tbody>
 						</table>
-						<input id="label_box" autofocus="autofocus" class="span5" autocomplete="off" type="text" placeholder="type label" data-source="[{{str2html .LabelDataSrc}}]" data-provide="typeahead"></input>
+						<input id="label_box" autofocus="autofocus" class="span5" autocomplete="off" type="text" placeholder="type label" data-source="[{{str2html .LabelDataSrc}}]" data-provide="typeahead">
 					</div>
 					<div class="modal-footer">
 						<button type='button' class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
@@ -69,11 +69,11 @@
 								</tr>
 							</tbody>
 						</table>
-						<input id="label_box" autofocus="autofocus" class="span5" autocomplete="off" type="text" placeholder="请输入标签" data-source="[{{str2html .LabelDataSrc}}]" data-provide="typeahead"></input>
+						<input id="label_box" autofocus="autofocus" class="span5" autocomplete="off" type="text" placeholder="请输入标签" data-source="[{{str2html .LabelDataSrc}}]" data-provide="typeahead">
 					</div>
 					<div class="modal-footer">
 						<button type='button' class="btn" data-dismiss="modal" aria-hidden="true">关闭</button>
-						<button type='button' class="btn" onclick="AddLabelSubmit(this)">增加</input>
+						<button type='button' class="btn" onclick="AddLabelSubmit(this)">增加
 						<button type='button' class="btn btn-primary" onclick="RemoveLabelSubmit(this)">移除</button>
 					</div>
 				</form>

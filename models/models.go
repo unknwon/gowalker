@@ -19,6 +19,7 @@ import (
 	"encoding/base32"
 	"fmt"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 
@@ -54,7 +55,7 @@ type PkgInfo struct {
 	/*
 		- All tags of project.
 		eg.
-			master|v0.6.2.0718
+			master|||v0.6.2.0718
 		- Views of projects.
 		eg.
 			1342
@@ -153,6 +154,17 @@ type PkgExam struct {
 	Created  time.Time `qbs:"index"`
 }
 
+// PkgFunc represents a package function.
+type PkgFunc struct {
+	Id    int64
+	Pid   int64 // Id of package documentation it belongs to.
+	Path  string
+	Name  string `qbs:"size:100,index"`
+	Doc   string
+	Code  string // Included field 'Decl', formatted.
+	IsOld bool   // Indicates if the function no longer exists.
+}
+
 func connDb() *qbs.Qbs {
 	// 'sql.Open' only returns error when unknown driver, so it's not necessary to check in other places.
 	q, _ := qbs.GetQbs()
@@ -186,6 +198,7 @@ func init() {
 	mg.CreateTableIfNotExists(new(PkgDecl))
 	mg.CreateTableIfNotExists(new(PkgDoc))
 	mg.CreateTableIfNotExists(new(PkgExam))
+	mg.CreateTableIfNotExists(new(PkgFunc))
 
 	beego.Trace("Initialized database ->", beego.AppConfig.String("dbname"))
 }
@@ -439,7 +452,6 @@ func SavePkgDoc(path, lang string, docBys []byte) {
 
 // LoadPkgDoc loads project introduction documentation.
 func LoadPkgDoc(path, lang, docType string) (doc string) {
-	// Connect to database.
 	q := connDb()
 	defer q.Close()
 
@@ -456,4 +468,23 @@ func LoadPkgDoc(path, lang, docType string) (doc string) {
 		return pdoc.Doc
 	}
 	return doc
+}
+
+// GetPkgFunc returns code of given function name and pid.
+func GetPkgFunc(name, pidS string) string {
+	q := connDb()
+	defer q.Close()
+
+	pfunc := new(PkgFunc)
+	pid, _ := strconv.Atoi(pidS)
+	cond := qbs.NewCondition("pid = ?", int64(pid)).And("name = ?", name)
+	err := q.Condition(cond).Find(pfunc)
+	fmt.Println(err)
+	if err != nil {
+		return "Function not found:\n" +
+			"Pid: " + pidS +
+			"\nName: " + name
+	}
+
+	return pfunc.Code
 }

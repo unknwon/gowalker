@@ -24,16 +24,6 @@ import (
 	"github.com/coocood/qbs"
 )
 
-// GetRecentPros returns global recent viewed projects.
-func GetRecentPros(num int) ([]*PkgInfo, error) {
-	q := connDb()
-	defer q.Close()
-
-	var pkgInfos []*PkgInfo
-	err := q.Limit(num).OrderByDesc("viewed_time").FindAll(&pkgInfos)
-	return pkgInfos, err
-}
-
 /*
 	GetPopulars returns <num>
 		1. Recent viewed
@@ -67,9 +57,9 @@ func GetPopulars(proNum, exNum int) (error, []*PkgExam,
 	return nil, ruExs, rvPros, trPros, tvPros, rtwPros
 }
 
-// SaveProject save package information, declaration to database, and update import information.
-func SaveProject(pinfo *PkgInfo, pdecl *PkgDecl, imports []string) error {
-	// Connect to database.
+// SaveProject saves package information, declaration and functions;
+// update import information.
+func SaveProject(pinfo *PkgInfo, pdecl *PkgDecl, pfuncs []*PkgFunc, imports []string) error {
 	q := connDb()
 	defer q.Close()
 
@@ -82,12 +72,12 @@ func SaveProject(pinfo *PkgInfo, pdecl *PkgDecl, imports []string) error {
 
 	_, err = q.Save(pinfo)
 	if err != nil {
-		beego.Error("models.SaveProject -> Information:", err)
+		beego.Error("models.SaveProject(", pinfo.Path, ") -> Information:", err)
 	}
 
-	// Save package declaration
+	// Save package declaration.
+	decl := new(PkgDecl)
 	if pdecl != nil {
-		decl := new(PkgDecl)
 		cond := qbs.NewCondition("path = ?", pinfo.Path).And("tag = ?", pdecl.Tag)
 		err = q.Condition(cond).Find(decl)
 		if err == nil {
@@ -96,9 +86,54 @@ func SaveProject(pinfo *PkgInfo, pdecl *PkgDecl, imports []string) error {
 
 		_, err = q.Save(pdecl)
 		if err != nil {
-			beego.Error("models.SaveProject -> Declaration:", err)
+			beego.Error("models.SaveProject(", pinfo.Path, ") -> Declaration:", err)
 		}
 	}
+
+	// ------------------------------
+	// Save package functions.
+	// ------------------------------
+
+	if pfuncs != nil {
+		// Old package need to clean old data.
+		if decl.Id > 0 {
+			// Update all old functions' 'IsOle' to be true.
+			type pkgFunc struct {
+				IsOld bool
+			}
+			pfunc := new(pkgFunc)
+			pfunc.IsOld = true
+			_, err = q.WhereEqual("pid", pdecl.Id).Update(pfunc)
+		}
+
+		// Save new ones.
+		for _, pf := range pfuncs {
+			f := new(PkgFunc)
+			cond := qbs.NewCondition("pid = ?", pdecl.Id).And("name = ?", pf.Name)
+			err = q.Condition(cond).Find(f)
+			if err == nil {
+				pf.Id = f.Id
+			}
+
+			pf.Pid = pdecl.Id
+			pf.Path = pinfo.Path
+			_, err = q.Save(pf)
+			if err != nil {
+				beego.Error("models.SaveProject(", pinfo.Path, ") -> Update function(", pf.Name, "):", err)
+			}
+		}
+
+		if decl.Id > 0 {
+			// Delete old ones if exist.
+			cond := qbs.NewCondition("pid = ?", pdecl.Id).And("is_old = ?", true)
+			_, err = q.Condition(cond).Delete(new(PkgFunc))
+			if err != nil {
+				beego.Error("models.SaveProject(", pinfo.Path, ") -> Delete functions:", err)
+			}
+		}
+	}
+
+	// ------------- END ------------
 
 	// Don't need to check standard library.
 	if imports != nil && !utils.IsGoRepoPath(pinfo.Path) {
@@ -113,11 +148,11 @@ func SaveProject(pinfo *PkgInfo, pdecl *PkgDecl, imports []string) error {
 	return nil
 }
 
-// LoadProject gets package declaration from database.
+// LoadProject returns package declaration.
 func LoadProject(path, tag string) (*PkgDecl, error) {
 	// Check path length to reduce connect times.
 	if len(path) == 0 {
-		return nil, errors.New("models.LoadProject -> Empty path as not found.")
+		return nil, errors.New("models.LoadProject( " + path + " ) -> Empty path as not found.")
 	}
 
 	// Connect to database.
@@ -134,7 +169,8 @@ func LoadProject(path, tag string) (*PkgDecl, error) {
 func DeleteProject(path string) error {
 	// Check path length to reduce connect times. (except launchpad.net)
 	if path[0] != 'l' && len(strings.Split(path, "/")) <= 2 {
-		return errors.New("models.DeleteProject -> Short path as not needed")
+		beego.Error("models.DeleteProject(", path, ") -> Short path as not needed")
+		return nil
 	}
 
 	// Connect to database.
@@ -148,10 +184,11 @@ func DeleteProject(path string) error {
 	if err == nil {
 		i1, err = q.WhereEqual("path", path).Delete(info)
 		if err != nil {
-			beego.Error("models.DeleteProject -> Information:", err)
+			beego.Error("models.DeleteProject(", path, ") -> Information:", err)
 		}
 	}
 
+	// TODO: return once and update one by one.
 	// Delete package declaration.
 	for {
 		pdecl := new(PkgDecl)
@@ -163,7 +200,7 @@ func DeleteProject(path string) error {
 
 		i2, err = q.Delete(pdecl)
 		if err != nil {
-			beego.Error("models.DeleteProject -> Declaration:", err)
+			beego.Error("models.DeleteProject(", path, ") -> Declaration:", err)
 		} else if info.Id > 0 && !utils.IsGoRepoPath(path) {
 			// Don't need to check standard library.
 			// Update import information.
@@ -182,14 +219,14 @@ func DeleteProject(path string) error {
 	pdoc := new(PkgDoc)
 	i3, err = q.WhereEqual("path", path).Delete(pdoc)
 	if err != nil {
-		beego.Error("models.DeleteProject -> Documentation:", err)
+		beego.Error("models.DeleteProject(", path, ") -> Documentation:", err)
 	}
 
 	// Delete package examples.
 	pexam := new(PkgExam)
 	i4, err = q.WhereEqual("path", path).Delete(pexam)
 	if err != nil {
-		beego.Error("models.DeleteProject -> Example:", err)
+		beego.Error("models.DeleteProject(", path, ") -> Example:", err)
 	}
 
 	if i1+i2+i3+i4 > 0 {

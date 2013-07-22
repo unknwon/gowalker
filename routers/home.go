@@ -105,6 +105,7 @@ type HomeRouter struct {
 
 // Get implemented Get method for HomeRouter.
 func (this *HomeRouter) Get() {
+	now := time.Now()
 	// Filter unusual User-Agent.
 	ua := this.Ctx.Request.Header.Get("User-Agent")
 	if len(ua) < 20 {
@@ -204,6 +205,7 @@ func (this *HomeRouter) Get() {
 					Note:        pdoc.Note,
 				}
 				models.AddViews(pinfo)
+				fmt.Println("SHOW:", time.Since(now))
 				return
 			}
 		} else {
@@ -318,7 +320,7 @@ func generatePage(this *HomeRouter, pdoc *doc.Package, q, tag, lang string) bool
 
 	exportDataSrc := buf.String()
 	if len(exportDataSrc) > 0 {
-		this.Data["HasExports"] = true
+		this.Data["IsHasExports"] = true
 		exportDataSrc = exportDataSrc[:len(exportDataSrc)-1]
 		// Set export keyword type-ahead.
 		this.Data["ExportDataSrc"] = exportDataSrc
@@ -362,9 +364,6 @@ func generatePage(this *HomeRouter, pdoc *doc.Package, q, tag, lang string) bool
 		buf.Reset()
 		utils.FormatCode(&buf, &f.Decl, links)
 		f.FmtDecl = buf.String()
-		buf.Reset()
-		utils.FormatCode(&buf, &f.Code, links)
-		f.Code = buf.String()
 		if exs := getExamples(pdoc, "", f.Name); len(exs) > 0 {
 			f.IsHasExam = true
 			f.Exams = exs
@@ -400,9 +399,6 @@ func generatePage(this *HomeRouter, pdoc *doc.Package, q, tag, lang string) bool
 			buf.Reset()
 			utils.FormatCode(&buf, &f.Decl, links)
 			f.FmtDecl = buf.String()
-			buf.Reset()
-			utils.FormatCode(&buf, &f.Code, links)
-			f.Code = buf.String()
 			if exs := getExamples(pdoc, "", f.Name); len(exs) > 0 {
 				f.IsHasExam = true
 				f.Exams = exs
@@ -420,9 +416,6 @@ func generatePage(this *HomeRouter, pdoc *doc.Package, q, tag, lang string) bool
 			buf.Reset()
 			utils.FormatCode(&buf, &m.Decl, links)
 			m.FmtDecl = buf.String()
-			buf.Reset()
-			utils.FormatCode(&buf, &m.Code, links)
-			m.Code = buf.String()
 			if exs := getExamples(pdoc, t.Name, m.Name); len(exs) > 0 {
 				m.IsHasExam = true
 				m.Exams = exs
@@ -482,7 +475,12 @@ func generatePage(this *HomeRouter, pdoc *doc.Package, q, tag, lang string) bool
 	// Labels.
 	this.Data["LabelDataSrc"] = labelSet
 
-	this.Data["Files"] = pdoc.Files
+	if len(pdoc.Files) > 0 {
+		this.Data["IsHasFiles"] = pdoc.Files
+		this.Data["Files"] = pdoc.Files
+	}
+
+	this.Data["Pid"] = pdecl.Id
 	this.Data["ImportPkgs"] = pdecl.Imports
 	this.Data["ImportPkgNum"] = len(pdoc.Imports) - 1
 	this.Data["IsImported"] = pdoc.ImportedNum > 0
@@ -706,8 +704,6 @@ func ConvertDataFormat(pdoc *doc.Package, pdecl *models.PkgDecl) error {
 				val.Decl = s
 			case 3: // URL
 				val.URL = s
-			case 4: // Code
-				val.Code = *codeDecode(&s)
 			}
 		}
 		pdoc.Funcs = append(pdoc.Funcs, val)
@@ -785,8 +781,6 @@ func ConvertDataFormat(pdoc *doc.Package, pdecl *models.PkgDecl) error {
 							val2.Decl = s2
 						case 3: // URL
 							val2.URL = s2
-						case 4: // Code
-							val2.Code = *codeDecode(&s2)
 						}
 					}
 					val.Funcs = append(val.Funcs, val2)
@@ -806,10 +800,9 @@ func ConvertDataFormat(pdoc *doc.Package, pdecl *models.PkgDecl) error {
 							val2.Decl = s2
 						case 3: // URL
 							val2.URL = s2
-						case 4: // Code
-							val2.Code = *codeDecode(&s2)
 						}
 					}
+					val2.FullName = val.Name + "_" + val2.Name
 					val.Methods = append(val.Methods, val2)
 				}
 				val.Methods = val.Methods[:len(val.Methods)-1]

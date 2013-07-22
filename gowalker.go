@@ -25,7 +25,7 @@ import (
 )
 
 const (
-	VERSION = "0.6.5.0720" // Application version.
+	VERSION = "0.6.6.0723" // Application version.
 )
 
 func init() {
@@ -66,6 +66,9 @@ func main() {
 	beego.Router("/examples", &routers.ExamplesRouter{})
 	beego.Router("/refresh", &routers.RefreshRouter{})
 	beego.Router("/about", &routers.AboutRouter{})
+	beego.Router("/funcs", &routers.FuncsRouter{})
+
+	// Register template functions.
 
 	// For all unknown pages.
 	beego.Router("/:all", &routers.HomeRouter{})

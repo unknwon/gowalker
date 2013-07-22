@@ -20,6 +20,8 @@ import (
 	"encoding/base32"
 	"encoding/xml"
 	"errors"
+	"fmt"
+	"html/template"
 	"io"
 	"net/http"
 	"path"
@@ -101,7 +103,7 @@ func getRepo(client *http.Client, importPath, tag, etag string) (pdoc *Package, 
 
 // SaveProject saves project information to database.
 func SaveProject(pdoc *Package, info *models.PkgInfo) error {
-
+	now := time.Now()
 	// Save package information.
 	pinfo := &models.PkgInfo{
 		Path:        pdoc.ImportPath,
@@ -120,30 +122,28 @@ func SaveProject(pdoc *Package, info *models.PkgInfo) error {
 		Note:        pdoc.Note,
 	}
 
-	// Save package declaration.
+	// Save package declaration and functions.
 	pdecl := &models.PkgDecl{
 		Path: pdoc.ImportPath,
 		Tag:  pdoc.Tag,
 		Doc:  pdoc.Doc,
 	}
+	pfuncs := make([]*models.PkgFunc, 0, len(pdoc.Funcs)+len(pdoc.Types)*3)
 	var buf bytes.Buffer
 
 	// Consts.
 	addValues(&buf, &pdecl.Consts, pdoc.Consts)
-	buf.Reset()
 	addValues(&buf, &pdecl.Iconsts, pdoc.Iconsts)
 
 	// Variables.
-	buf.Reset()
 	addValues(&buf, &pdecl.Vars, pdoc.Vars)
-	buf.Reset()
 	addValues(&buf, &pdecl.Ivars, pdoc.Ivars)
 
+	links := getLinks(pdoc)
+
 	// Functions.
-	buf.Reset()
-	addFuncs(&buf, &pdecl.Funcs, pdoc.Funcs)
-	buf.Reset()
-	addFuncs(&buf, &pdecl.Ifuncs, pdoc.Ifuncs)
+	pfuncs = addFuncs(pfuncs, pdoc.Funcs, pinfo.Path, &buf, &pdecl.Funcs, links)
+	pfuncs = addFuncs(pfuncs, pdoc.Ifuncs, pinfo.Path, &buf, &pdecl.Ifuncs, links)
 
 	// Types.
 	buf.Reset()
@@ -190,9 +190,8 @@ func SaveProject(pdoc *Package, info *models.PkgInfo) error {
 			buf.WriteString(m.Decl)
 			buf.WriteString("&F#")
 			buf.WriteString(m.URL)
-			buf.WriteString("&F#")
-			buf.WriteString(*CodeEncode(&m.Code))
 			buf.WriteString("&M#")
+			pfuncs = addFunc(pfuncs, m, pinfo.Path, m.Name, links)
 		}
 		buf.WriteString("&$#")
 		for _, m := range v.IFuncs {
@@ -203,9 +202,8 @@ func SaveProject(pdoc *Package, info *models.PkgInfo) error {
 			buf.WriteString(m.Decl)
 			buf.WriteString("&F#")
 			buf.WriteString(m.URL)
-			buf.WriteString("&F#")
-			buf.WriteString(*CodeEncode(&m.Code))
 			buf.WriteString("&M#")
+			pfuncs = addFunc(pfuncs, m, pinfo.Path, m.Name, links)
 		}
 		buf.WriteString("&$#")
 
@@ -218,9 +216,8 @@ func SaveProject(pdoc *Package, info *models.PkgInfo) error {
 			buf.WriteString(m.Decl)
 			buf.WriteString("&F#")
 			buf.WriteString(m.URL)
-			buf.WriteString("&F#")
-			buf.WriteString(*CodeEncode(&m.Code))
 			buf.WriteString("&M#")
+			pfuncs = addFunc(pfuncs, m, pinfo.Path, v.Name+"_"+m.Name, links)
 		}
 		buf.WriteString("&$#")
 		for _, m := range v.IMethods {
@@ -231,9 +228,8 @@ func SaveProject(pdoc *Package, info *models.PkgInfo) error {
 			buf.WriteString(m.Decl)
 			buf.WriteString("&F#")
 			buf.WriteString(m.URL)
-			buf.WriteString("&F#")
-			buf.WriteString(*CodeEncode(&m.Code))
 			buf.WriteString("&M#")
+			pfuncs = addFunc(pfuncs, m, pinfo.Path, v.Name+"_"+m.Name, links)
 		}
 		buf.WriteString("&##")
 	}
@@ -301,11 +297,49 @@ func SaveProject(pdoc *Package, info *models.PkgInfo) error {
 	}
 	pdecl.TestFiles = buf.String()
 
-	err := models.SaveProject(pinfo, pdecl, pdoc.Imports)
+	err := models.SaveProject(pinfo, pdecl, pfuncs, pdoc.Imports)
+	fmt.Println("SAVE:", time.Since(now))
 	return err
 }
 
+// getLinks returns exported objects with its jump link.
+func getLinks(pdoc *Package) []*utils.Link {
+	links := make([]*utils.Link, 0, len(pdoc.Types)+len(pdoc.Imports)+len(pdoc.Funcs)+10)
+	// Get all types, functions and import packages
+	for _, t := range pdoc.Types {
+		links = append(links, &utils.Link{
+			Name:    t.Name,
+			Comment: template.HTMLEscapeString(t.Doc),
+		})
+	}
+
+	for _, f := range pdoc.Funcs {
+		links = append(links, &utils.Link{
+			Name:    f.Name,
+			Comment: template.HTMLEscapeString(f.Doc),
+		})
+	}
+
+	for _, t := range pdoc.Types {
+		for _, f := range t.Funcs {
+			links = append(links, &utils.Link{
+				Name:    f.Name,
+				Comment: template.HTMLEscapeString(f.Doc),
+			})
+		}
+	}
+
+	for _, v := range pdoc.Imports {
+		links = append(links, &utils.Link{
+			Name: path.Base(v) + ".",
+			Path: v,
+		})
+	}
+	return links
+}
+
 func addValues(buf *bytes.Buffer, pvals *string, vals []*Value) {
+	buf.Reset()
 	for _, v := range vals {
 		buf.WriteString(v.Name)
 		buf.WriteString("&V#")
@@ -319,20 +353,36 @@ func addValues(buf *bytes.Buffer, pvals *string, vals []*Value) {
 	*pvals = buf.String()
 }
 
-func addFuncs(buf *bytes.Buffer, pfuncs *string, funcs []*Func) {
-	for _, v := range funcs {
-		buf.WriteString(v.Name)
+// addFuncs appends functions to 'pfuncs'.
+// NOTE: it can be only use for pure functions(not belong to any type), not methods.
+func addFuncs(pfuncs []*models.PkgFunc, fs []*Func, path string, buf *bytes.Buffer, pfs *string, links []*utils.Link) []*models.PkgFunc {
+	buf.Reset()
+	for _, f := range fs {
+		buf.WriteString(f.Name)
 		buf.WriteString("&F#")
-		buf.WriteString(v.Doc)
+		buf.WriteString(f.Doc)
 		buf.WriteString("&F#")
-		buf.WriteString(v.Decl)
+		buf.WriteString(f.Decl)
 		buf.WriteString("&F#")
-		buf.WriteString(v.URL)
-		buf.WriteString("&F#")
-		buf.WriteString(*CodeEncode(&v.Code))
+		buf.WriteString(f.URL)
 		buf.WriteString("&$#")
+		pfuncs = addFunc(pfuncs, f, path, f.Name, links)
 	}
-	*pfuncs = buf.String()
+	*pfs = buf.String()
+	return pfuncs
+}
+
+// addFunc appends a function to 'pfuncs'.
+func addFunc(pfuncs []*models.PkgFunc, f *Func, path, name string, links []*utils.Link) []*models.PkgFunc {
+	var buf bytes.Buffer
+	f.Code = f.Decl + " {\n" + f.Code + "}"
+	utils.FormatCode(&buf, &f.Code, links)
+	f.Code = buf.String()
+	return append(pfuncs, &models.PkgFunc{
+		Name: name,
+		Doc:  f.Doc,
+		Code: *CodeEncode(&f.Code),
+	})
 }
 
 func CodeEncode(code *string) *string {
