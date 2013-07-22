@@ -78,7 +78,7 @@ func SaveProject(pinfo *PkgInfo, pdecl *PkgDecl, pfuncs []*PkgFunc, imports []st
 	// Save package declaration.
 	decl := new(PkgDecl)
 	if pdecl != nil {
-		cond := qbs.NewCondition("path = ?", pinfo.Path).And("tag = ?", pdecl.Tag)
+		cond := qbs.NewCondition("pid = ?", pinfo.Path).And("tag = ?", pdecl.Tag)
 		err = q.Condition(cond).Find(decl)
 		if err == nil {
 			pdecl.Id = decl.Id

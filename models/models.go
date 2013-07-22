@@ -479,7 +479,6 @@ func GetPkgFunc(name, pidS string) string {
 	pid, _ := strconv.Atoi(pidS)
 	cond := qbs.NewCondition("pid = ?", int64(pid)).And("name = ?", name)
 	err := q.Condition(cond).Find(pfunc)
-	fmt.Println(err)
 	if err != nil {
 		pfunc.Code = "Function not found:\n" +
 			"Pid: " + pidS +
