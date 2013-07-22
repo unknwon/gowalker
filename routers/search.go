@@ -106,7 +106,7 @@ func checkSpecialUsage(this *SearchRouter, q string) bool {
 		return true
 	case q == "imported": // Show packages that import this project.
 		pkgs := strings.Split(this.Input().Get("pkgs"), "|")
-		pinfos, _ := models.GetGroupPkgInfoById(pkgs)
+		pinfos := models.GetGroupPkgInfoById(pkgs)
 		if len(pinfos) > 0 {
 			this.Data["IsFindPro"] = true
 			this.Data["AllPros"] = pinfos

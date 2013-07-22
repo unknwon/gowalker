@@ -109,10 +109,10 @@ type PkgInfo struct {
 
 // PkgDecl is package declaration in database acceptable form.
 type PkgDecl struct {
-	Id   int64
-	Path string `qbs:"size:100,index"`
-	Tag  string // Project tag.
-	Doc  string // Package documentation.
+	Id  int64
+	Pid int64  `qbs:"index"`
+	Tag string // Project tag.
+	Doc string // Package documentation.
 
 	// Top-level declarations.
 	Consts, Funcs, Types, Vars string
@@ -157,7 +157,7 @@ type PkgExam struct {
 // PkgFunc represents a package function.
 type PkgFunc struct {
 	Id    int64
-	Pid   int64 // Id of package documentation it belongs to.
+	Pid   int64 `qbs:"index"` // Id of package documentation it belongs to.
 	Path  string
 	Name  string `qbs:"size:100,index"`
 	Doc   string
@@ -378,7 +378,6 @@ func SavePkgExam(gist *PkgExam) {
 
 // SavePkgDoc saves readered readme.md file data.
 func SavePkgDoc(path, lang string, docBys []byte) {
-	// Connect to database.
 	q := connDb()
 	defer q.Close()
 

@@ -49,6 +49,7 @@ func crawlDoc(path, tag string, pinfo *models.PkgInfo) (pdoc *Package, err error
 
 	if err != errNotModified && pdocNew != nil {
 		pdoc = pdocNew
+		pdoc.Id = pinfo.Id
 		pdoc.Views = pinfo.Views
 		pdoc.Labels = pinfo.Labels
 		pdoc.ImportedNum = pinfo.ImportedNum
@@ -122,9 +123,8 @@ func SaveProject(pdoc *Package, info *models.PkgInfo) error {
 
 	// Save package declaration and functions.
 	pdecl := &models.PkgDecl{
-		Path: pdoc.ImportPath,
-		Tag:  pdoc.Tag,
-		Doc:  pdoc.Doc,
+		Tag: pdoc.Tag,
+		Doc: pdoc.Doc,
 	}
 	pfuncs := make([]*models.PkgFunc, 0, len(pdoc.Funcs)+len(pdoc.Types)*3)
 	var buf bytes.Buffer

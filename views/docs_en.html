@@ -215,9 +215,13 @@
 				{{if .IsHasExams}}
 				<h3 id="_exams">Examples</h3>
 				<ul class="unstyled">
-				{{range .Exams}}
-					<li><a href="#_ex_btn_{{.Name}}">{{.Name}}</a></li>
-				{{end}}
+					{{range .Exams}}
+					{{if .IsUsed}}
+					<li><a href="#_ex_btn_{{.Name}}" onclick="showExample({{.Name}})">{{.Name}}</a></li>
+					{{else}}
+					{{template "example_en" .}}
+					{{end}}
+					{{end}}
 				</ul>
 				{{end}}
 				{{end}}
@@ -264,7 +268,12 @@
 						<pre class="accordion-inner">LOADING...</pre>
 					</div>
     			</div>
-    			{{template "example_en" .}}
+
+				{{if .IsHasExam}}
+				{{range .Exams}}
+				{{template "example_en" .}}
+				{{end}}
+				{{end}}
 				{{end}}
 				<!-- END: Functions -->
 
@@ -277,7 +286,12 @@
 				
 				<pre class="pre-x-scrollable">{{str2html .FmtDecl}}</pre>
 				{{str2html .Doc}}
-    			{{template "example_en" .}}
+
+				{{if .IsHasExam}}
+				{{range .Exams}}
+				{{template "example_en" .}}
+				{{end}}
+				{{end}}
 
 				<!-- START: Types.Constants -->
 				{{with .Consts}}
@@ -314,7 +328,12 @@
 						<pre class="accordion-inner">LOADING...</pre>
 					</div>
     			</div>
+				
+				{{if .IsHasExam}}
+				{{range .Exams}}
 				{{template "example_en" .}}
+				{{end}}
+				{{end}}
 				{{end}}
 				<!-- END: Types.Functions -->
 
@@ -335,7 +354,12 @@
 						<pre class="accordion-inner">LOADING...</pre>
 					</div>
 	   			</div>
+
+				{{if .IsHasExam}}
+				{{range .Exams}}
 				{{template "example_en" .}}
+				{{end}}
+				{{end}}
 				{{end}}
 				<!-- END: Types.Methods -->
 				{{end}}
@@ -400,8 +424,6 @@
 </html>
 
 {{define "example_en"}}
-{{if .IsHasExam}}
-{{range .Exams}}
 <div class="accordion">
 	<div class="accordion-group">
 		<div class="accordion-heading">
@@ -417,6 +439,4 @@
 		</div>
 	</div>
 </div>
-{{end}}
-{{end}}
 {{end}}

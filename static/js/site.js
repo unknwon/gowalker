@@ -250,6 +250,12 @@ function RemoveLabelSubmit(obj) {
     }
 }
 
+function showExample(name) {
+    var ex = document.getElementById("_ex_" + name);
+    ex.className = "accordion-body collapse in";
+    ex.style.height = "auto";
+}
+
 // -----------------------------
 // AJAX load code.
 // -----------------------------

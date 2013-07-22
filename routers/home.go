@@ -20,7 +20,9 @@ import (
 	"fmt"
 	godoc "go/doc"
 	"html/template"
+	"net/http"
 	"path"
+	"strconv"
 	"strings"
 	"time"
 
@@ -141,6 +143,9 @@ func (this *HomeRouter) Get() {
 		return
 	}
 
+	// User Recent projects.
+	ck, _ := this.Ctx.Request.Cookie("UserRecentPros")
+
 	this.TplNames = "home_" + curLang.Lang + ".html"
 	// Check show home page or documentation page.
 	if len(reqUrl) == 0 && len(q) == 0 {
@@ -149,6 +154,12 @@ func (this *HomeRouter) Get() {
 
 		// Global Recent projects.
 		this.Data["GlobalRecentPros"] = recentViewedPros
+		// User Recent projects.
+		if ck != nil {
+			this.Data["UserRecentPros"] =
+				models.GetGroupPkgInfoById(strings.Split(ck.Value, "|"))
+		}
+
 		// Get popular projects and examples.
 		this.Data["TopRankPros"] = topRankPros
 		this.Data["TopViewedPros"] = topViewedPros
@@ -184,7 +195,7 @@ func (this *HomeRouter) Get() {
 			pdoc.UserExamples = getUserExamples(pdoc.ImportPath)
 			// Generate documentation page.
 			if generatePage(this, pdoc, broPath, tag, curLang.Lang) {
-				updateCacheInfo(pdoc)
+				this.Ctx.SetCookie("UserRecentPros", updateCacheInfo(pdoc, ck), 9999999999, "/")
 				return
 			}
 		} else {
@@ -216,7 +227,7 @@ func getUserExamples(path string) []*doc.Example {
 // it returns false when its a invaild(empty) project.
 func generatePage(this *HomeRouter, pdoc *doc.Package, q, tag, lang string) bool {
 	// Load project data from database.
-	pdecl, err := models.LoadProject(pdoc.ImportPath, tag)
+	pdecl, err := models.LoadProject(pdoc.Id, tag)
 	if err != nil {
 		beego.Error("HomeController.generatePage ->", err)
 		return false
@@ -466,6 +477,7 @@ func generatePage(this *HomeRouter, pdoc *doc.Package, q, tag, lang string) bool
 	this.Data["IsImported"] = pdoc.ImportedNum > 0
 	this.Data["ImportPid"] = pdoc.ImportPid
 	this.Data["ImportedNum"] = pdoc.ImportedNum
+	this.Data["UtcTime"] = pdoc.Created
 	this.Data["TimeSince"] = calTimeSince(pdoc.Created)
 	return true
 }
@@ -859,49 +871,12 @@ func codeDecode(code *string) *string {
 	return str
 }
 
-func updateCacheInfo(pdoc *doc.Package) {
+func updateCacheInfo(pdoc *doc.Package, ck *http.Cookie) string {
 	pdoc.ViewedTime = time.Now().UTC().Unix()
 
 	updateCachePros(pdoc)
-	updateproInfos(pdoc)
-}
-
-func updateproInfos(pdoc *doc.Package) {
-	index := -1
-	listLen := len(recentViewedPros)
-	curPro := &proInfo{
-		Path:     pdoc.ImportPath,
-		Synopsis: pdoc.Synopsis,
-		IsGoRepo: pdoc.ProjectName == "Go" &&
-			strings.Index(pdoc.ImportPath, ".") == -1,
-		Views:      pdoc.Views,
-		ViewedTime: pdoc.ViewedTime,
-		Rank:       pdoc.Rank,
-	}
-
-	// Check if in the list
-	for i, s := range recentViewedPros {
-		if s.Path == curPro.Path {
-			index = i
-			break
-		}
-	}
-
-	s := make([]*proInfo, 0, maxProInfoNum)
-	s = append(s, curPro)
-	switch {
-	case index == -1 && listLen < maxProInfoNum:
-		// Not found and list is not full
-		s = append(s, recentViewedPros...)
-	case index == -1 && listLen >= maxProInfoNum:
-		// Not found but list is full
-		s = append(s, recentViewedPros[:maxProInfoNum-1]...)
-	case index > -1:
-		// Found
-		s = append(s, recentViewedPros[:index]...)
-		s = append(s, recentViewedPros[index+1:]...)
-	}
-	recentViewedPros = s
+	updateProInfos(pdoc)
+	return updateUrPros(pdoc, ck)
 }
 
 func updateCachePros(pdoc *doc.Package) {
@@ -941,4 +916,81 @@ func updateCachePros(pdoc *doc.Package) {
 		ImportPid:   pdoc.ImportPid,
 		Note:        pdoc.Note,
 	})
+}
+
+func updateProInfos(pdoc *doc.Package) {
+	index := -1
+	listLen := len(recentViewedPros)
+	curPro := &proInfo{
+		Path:     pdoc.ImportPath,
+		Synopsis: pdoc.Synopsis,
+		IsGoRepo: pdoc.ProjectName == "Go" &&
+			strings.Index(pdoc.ImportPath, ".") == -1,
+		Views:      pdoc.Views,
+		ViewedTime: pdoc.ViewedTime,
+		Rank:       pdoc.Rank,
+	}
+
+	// Check if in the list
+	for i, s := range recentViewedPros {
+		if s.Path == curPro.Path {
+			index = i
+			break
+		}
+	}
+
+	s := make([]*proInfo, 0, maxProInfoNum)
+	s = append(s, curPro)
+	switch {
+	case index == -1 && listLen < maxProInfoNum:
+		// Not found and list is not full
+		s = append(s, recentViewedPros...)
+	case index == -1 && listLen >= maxProInfoNum:
+		// Not found but list is full
+		s = append(s, recentViewedPros[:maxProInfoNum-1]...)
+	case index > -1:
+		// Found
+		s = append(s, recentViewedPros[:index]...)
+		s = append(s, recentViewedPros[index+1:]...)
+	}
+	recentViewedPros = s
+}
+
+func updateUrPros(pdoc *doc.Package, ck *http.Cookie) string {
+	var urPros []string
+	if ck != nil {
+		urPros = strings.Split(ck.Value, "|")
+	}
+
+	index := -1
+	listLen := len(urPros)
+
+	// Check if in the list
+	for i, s := range urPros {
+		id, err := strconv.Atoi(s)
+		pid := int64(id)
+		if err != nil {
+			return ck.Value
+		}
+		if pid == pdoc.Id {
+			index = i
+			break
+		}
+	}
+
+	s := make([]string, 0, maxProInfoNum)
+	s = append(s, strconv.Itoa(int(pdoc.Id)))
+	switch {
+	case index == -1 && listLen < maxProInfoNum:
+		// Not found and list is not full
+		s = append(s, urPros...)
+	case index == -1 && listLen >= maxProInfoNum:
+		// Not found but list is full
+		s = append(s, urPros[:maxProInfoNum-1]...)
+	case index > -1:
+		// Found
+		s = append(s, urPros[:index]...)
+		s = append(s, urPros[index+1:]...)
+	}
+	return strings.Join(s, "|")
 }

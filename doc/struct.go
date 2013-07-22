@@ -79,6 +79,7 @@ const PACKAGE_VER = "0"
 
 // Package represents full information and documentation for a package.
 type Package struct {
+	Id          int64
 	ImportPath  string
 	ProjectName string
 

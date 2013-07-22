@@ -78,12 +78,13 @@ func SaveProject(pinfo *PkgInfo, pdecl *PkgDecl, pfuncs []*PkgFunc, imports []st
 	// Save package declaration.
 	decl := new(PkgDecl)
 	if pdecl != nil {
-		cond := qbs.NewCondition("pid = ?", pinfo.Path).And("tag = ?", pdecl.Tag)
+		cond := qbs.NewCondition("pid = ?", pinfo.Id).And("tag = ?", pdecl.Tag)
 		err = q.Condition(cond).Find(decl)
 		if err == nil {
 			pdecl.Id = decl.Id
 		}
 
+		pdecl.Pid = pinfo.Id
 		_, err = q.Save(pdecl)
 		if err != nil {
 			beego.Error("models.SaveProject(", pinfo.Path, ") -> Declaration:", err)
@@ -149,18 +150,17 @@ func SaveProject(pinfo *PkgInfo, pdecl *PkgDecl, pfuncs []*PkgFunc, imports []st
 }
 
 // LoadProject returns package declaration.
-func LoadProject(path, tag string) (*PkgDecl, error) {
+func LoadProject(pid int64, tag string) (*PkgDecl, error) {
 	// Check path length to reduce connect times.
-	if len(path) == 0 {
-		return nil, errors.New("models.LoadProject( " + path + " ) -> Empty path as not found.")
+	if pid == 0 {
+		return nil, errors.New("models.LoadProject -> Zero id.")
 	}
 
-	// Connect to database.
 	q := connDb()
 	defer q.Close()
 
 	pdecl := new(PkgDecl)
-	cond := qbs.NewCondition("path = ?", path).And("tag = ?", tag)
+	cond := qbs.NewCondition("pid = ?", pid).And("tag = ?", tag)
 	err := q.Condition(cond).Find(pdecl)
 	return pdecl, err
 }

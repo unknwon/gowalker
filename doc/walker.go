@@ -218,6 +218,7 @@ func (w *walker) getExamples(name string) []*Example {
 		// if !strings.HasPrefix(e.Name, name) {
 		// 	continue
 		// }
+		e.Name = strings.TrimPrefix(e.Name, "_")
 
 		output := e.Output
 		code := w.printNode(&printer.CommentedNode{

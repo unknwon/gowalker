@@ -55,6 +55,9 @@ func CheckDoc(path, tag string, requestType int) (*Package, error) {
 	pinfo, err := models.GetPkgInfo(path, tag)
 	// If PACKAGE_VER does not match, refresh anyway.
 	if err != nil || !strings.HasPrefix(pinfo.Etag, PACKAGE_VER) {
+		if err != nil {
+			beego.Error("doc.CheckDoc -> ", err)
+		}
 		// No package information in database.
 		needsCrawl = true
 	} else {
@@ -126,6 +129,7 @@ func CheckDoc(path, tag string, requestType int) (*Package, error) {
 
 func assginPkgInfo(pdoc *Package, pinfo *models.PkgInfo) {
 	// Assgin package information
+	pdoc.Id = pinfo.Id
 	pdoc.ImportPath = pinfo.Path
 	pdoc.ProjectName = pinfo.ProName
 	pdoc.Synopsis = pinfo.Synopsis

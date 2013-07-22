@@ -18,6 +18,7 @@ import (
 	"errors"
 	"strconv"
 
+	"github.com/astaxie/beego"
 	"github.com/coocood/qbs"
 )
 
@@ -39,10 +40,11 @@ func GetPkgInfo(path, tag string) (*PkgInfo, error) {
 	}
 
 	pdecl := new(PkgDecl)
-	cond := qbs.NewCondition("path = ?", path).And("tag = ?", tag)
+	cond := qbs.NewCondition("pid = ?", pinfo.Id).And("tag = ?", tag)
 	err = q.Condition(cond).Find(pdecl)
 	if err != nil {
 		pinfo.Etag = ""
+		err = errors.New("models.GetPkgInfo -> " + err.Error())
 	}
 	return pinfo, err
 }
@@ -82,23 +84,23 @@ func GetGroupPkgInfo(paths []string) ([]*PkgInfo, error) {
 
 // GetGroupPkgInfoById returns group of package infomration by pid in order to reduce database connect times.
 // The formatted pid looks like '$<pid>|', so we need to cut '$' here.
-func GetGroupPkgInfoById(pids []string) ([]*PkgInfo, error) {
+func GetGroupPkgInfoById(pids []string) []*PkgInfo {
 	// Connect to database.
 	q := connDb()
 	defer q.Close()
 
 	pinfos := make([]*PkgInfo, 0, len(pids))
 	for _, v := range pids {
-		if len(v) > 1 {
-			pid, err := strconv.Atoi(v[1:])
+		pid, _ := strconv.Atoi(v)
+		if pid > 0 {
+			pinfo := new(PkgInfo)
+			err := q.WhereEqual("id", int64(pid)).Find(pinfo)
 			if err == nil {
-				pinfo := new(PkgInfo)
-				err = q.WhereEqual("id", pid).Find(pinfo)
-				if err == nil {
-					pinfos = append(pinfos, pinfo)
-				}
+				pinfos = append(pinfos, pinfo)
+			} else {
+				beego.Error("models.GetGroupPkgInfoById ->", err)
 			}
 		}
 	}
-	return pinfos, nil
+	return pinfos
 }

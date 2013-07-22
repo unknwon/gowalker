@@ -61,9 +61,9 @@
 										<td>
 											<a title="{{.Synopsis}}" href="/{{.Path}}">{{.Path}}</a>
 											{{if .IsGoRepo}} 
-												<span class="label label-info">Standard</span>
+											<span class="label label-info">Standard</span>
 											{{else}}
-												<span class="badge badge-inverse">{{.Rank}}</span>
+											<span class="badge badge-inverse">{{.Rank}}</span>
 											{{end}}
 										</td>
 
@@ -89,20 +89,16 @@
 								</thead>
 
 								<tbody>
-								{{range .UserRecentPros}}
+									{{range .UserRecentPros}}
 									<tr>
 										<td>
 											<a title="{{.Synopsis}}" href="/{{.Path}}">{{.Path}}</a>
-											{{if .IsGoRepo}} 
-												<span class="label label-info">Standard</span>
-											{{else}}
-												<span class="badge badge-inverse">{{.Rank}}</span>
-											{{end}}
+											<span class="badge badge-inverse">{{.Rank}}</span>
 										</td>
 										
 										<td>{{.ViewedTime}}</td>
 									</tr>
-								{{end}}
+									{{end}}
 								</tbody>
 							</table>
 						</div>
