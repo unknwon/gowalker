@@ -184,26 +184,7 @@ func (this *HomeRouter) Get() {
 			pdoc.UserExamples = getUserExamples(pdoc.ImportPath)
 			// Generate documentation page.
 			if generatePage(this, pdoc, broPath, tag, curLang.Lang) {
-				// Update recent project list.
-				updateproInfos(pdoc)
-				// Update project views.
-				pinfo := &models.PkgInfo{
-					Path:        pdoc.ImportPath,
-					ProName:     pdoc.ProjectName,
-					Synopsis:    pdoc.Synopsis,
-					IsCmd:       pdoc.IsCmd,
-					Tags:        strings.Join(pdoc.Tags, "|||"),
-					Views:       pdoc.Views,
-					ViewedTime:  pdoc.ViewedTime,
-					Created:     pdoc.Created,
-					Rank:        pdoc.Rank,
-					Etag:        pdoc.Etag,
-					Labels:      pdoc.Labels,
-					ImportedNum: pdoc.ImportedNum,
-					ImportPid:   pdoc.ImportPid,
-					Note:        pdoc.Note,
-				}
-				models.AddViews(pinfo)
+				updateCacheInfo(pdoc)
 				return
 			}
 		} else {
@@ -480,8 +461,8 @@ func generatePage(this *HomeRouter, pdoc *doc.Package, q, tag, lang string) bool
 
 	this.Data["Pid"] = pdecl.Id
 	this.Data["ImportPkgs"] = pdecl.Imports
-	this.Data["ImportPkgNum"] = len(pdoc.Imports) - 1
-	this.Data["IsHasImports"] = len(pdoc.Imports)-1 > 0
+	this.Data["ImportPkgNum"] = len(pdoc.Imports)
+	this.Data["IsHasImports"] = len(pdoc.Imports) > 0
 	this.Data["IsImported"] = pdoc.ImportedNum > 0
 	this.Data["ImportPid"] = pdoc.ImportPid
 	this.Data["ImportedNum"] = pdoc.ImportedNum
@@ -878,45 +859,86 @@ func codeDecode(code *string) *string {
 	return str
 }
 
-func updateproInfos(pdoc *doc.Package) {
+func updateCacheInfo(pdoc *doc.Package) {
 	pdoc.ViewedTime = time.Now().UTC().Unix()
 
-	// Only projects with import path length is less than 40 letters will be showed.
-	if len(pdoc.ImportPath) < 40 {
-		index := -1
-		listLen := len(recentViewedPros)
-		curPro := &proInfo{
-			Path:     pdoc.ImportPath,
-			Synopsis: pdoc.Synopsis,
-			IsGoRepo: pdoc.ProjectName == "Go" &&
-				strings.Index(pdoc.ImportPath, ".") == -1,
-			Views:      pdoc.Views,
-			ViewedTime: pdoc.ViewedTime,
-			Rank:       pdoc.Rank,
-		}
+	updateCachePros(pdoc)
+	updateproInfos(pdoc)
+}
 
-		// Check if in the list
-		for i, s := range recentViewedPros {
-			if s.Path == curPro.Path {
-				index = i
-				break
-			}
-		}
-
-		s := make([]*proInfo, 0, maxProInfoNum)
-		s = append(s, curPro)
-		switch {
-		case index == -1 && listLen < maxProInfoNum:
-			// Not found and list is not full
-			s = append(s, recentViewedPros...)
-		case index == -1 && listLen >= maxProInfoNum:
-			// Not found but list is full
-			s = append(s, recentViewedPros[:maxProInfoNum-1]...)
-		case index > -1:
-			// Found
-			s = append(s, recentViewedPros[:index]...)
-			s = append(s, recentViewedPros[index+1:]...)
-		}
-		recentViewedPros = s
+func updateproInfos(pdoc *doc.Package) {
+	index := -1
+	listLen := len(recentViewedPros)
+	curPro := &proInfo{
+		Path:     pdoc.ImportPath,
+		Synopsis: pdoc.Synopsis,
+		IsGoRepo: pdoc.ProjectName == "Go" &&
+			strings.Index(pdoc.ImportPath, ".") == -1,
+		Views:      pdoc.Views,
+		ViewedTime: pdoc.ViewedTime,
+		Rank:       pdoc.Rank,
 	}
+
+	// Check if in the list
+	for i, s := range recentViewedPros {
+		if s.Path == curPro.Path {
+			index = i
+			break
+		}
+	}
+
+	s := make([]*proInfo, 0, maxProInfoNum)
+	s = append(s, curPro)
+	switch {
+	case index == -1 && listLen < maxProInfoNum:
+		// Not found and list is not full
+		s = append(s, recentViewedPros...)
+	case index == -1 && listLen >= maxProInfoNum:
+		// Not found but list is full
+		s = append(s, recentViewedPros[:maxProInfoNum-1]...)
+	case index > -1:
+		// Found
+		s = append(s, recentViewedPros[:index]...)
+		s = append(s, recentViewedPros[index+1:]...)
+	}
+	recentViewedPros = s
+}
+
+func updateCachePros(pdoc *doc.Package) {
+	for _, p := range cachePros {
+		if p.Path == pdoc.ImportPath {
+			p.ProName = pdoc.ProjectName
+			p.Synopsis = pdoc.Synopsis
+			p.IsCmd = pdoc.IsCmd
+			p.Tags = strings.Join(pdoc.Tags, "|||")
+			p.Views++
+			p.ViewedTime = pdoc.ViewedTime
+			p.Created = pdoc.Created
+			p.Rank = int64(pdoc.ImportedNum*30) + p.Views
+			p.Etag = pdoc.Etag
+			p.Labels = pdoc.Labels
+			p.ImportedNum = pdoc.ImportedNum
+			p.ImportPid = pdoc.ImportPid
+			p.Note = pdoc.Note
+			return
+		}
+	}
+
+	pdoc.Views++
+	cachePros = append(cachePros, &models.PkgInfo{
+		Path:        pdoc.ImportPath,
+		ProName:     pdoc.ProjectName,
+		Synopsis:    pdoc.Synopsis,
+		IsCmd:       pdoc.IsCmd,
+		Tags:        strings.Join(pdoc.Tags, "|||"),
+		Views:       pdoc.Views,
+		ViewedTime:  pdoc.ViewedTime,
+		Created:     pdoc.Created,
+		Rank:        int64(pdoc.ImportedNum*30) + pdoc.Views,
+		Etag:        pdoc.Etag,
+		Labels:      pdoc.Labels,
+		ImportedNum: pdoc.ImportedNum,
+		ImportPid:   pdoc.ImportPid,
+		Note:        pdoc.Note,
+	})
 }

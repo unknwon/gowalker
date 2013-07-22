@@ -21,6 +21,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/Unknwon/gowalker/models"
 	"github.com/Unknwon/gowalker/utils"
 	"github.com/astaxie/beego"
 )
@@ -114,7 +115,10 @@ func setLangVer(ctx *beego.Context, input url.Values, data map[interface{}]inter
 	return curLang
 }
 
-var cacheTicker *time.Ticker
+var (
+	cacheTicker *time.Ticker
+	cachePros   []*models.PkgInfo
+)
 
 func init() {
 	// Load max element numbers.
@@ -140,6 +144,14 @@ func init() {
 func cacheTickerCheck(cacheChan <-chan time.Time) {
 	for {
 		<-cacheChan
+		flushCache()
 		initPopPros()
 	}
+}
+
+func flushCache() {
+	// Flush cache projects.
+	models.FlushCacheProjects(cachePros)
+	num := len(cachePros)
+	cachePros = make([]*models.PkgInfo, 0, num)
 }

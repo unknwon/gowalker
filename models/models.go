@@ -203,26 +203,6 @@ func init() {
 	beego.Trace("Initialized database ->", beego.AppConfig.String("dbname"))
 }
 
-// AddViews add views in database by 1 each time
-func AddViews(pinfo *PkgInfo) error {
-	// Connect to database.
-	q := connDb()
-	defer q.Close()
-
-	pinfo.Views++
-
-	info := new(PkgInfo)
-	err := q.WhereEqual("path", pinfo.Path).Find(info)
-	if err != nil {
-		_, err = q.Save(pinfo)
-	} else {
-		pinfo.Id = info.Id
-		_, err = q.Save(pinfo)
-	}
-	_, err = q.Save(pinfo)
-	return err
-}
-
 // GetGoRepo returns packages in go standard library.
 func GetGoRepo() ([]*PkgInfo, error) {
 	// Connect to database.

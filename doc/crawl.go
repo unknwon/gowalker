@@ -266,19 +266,8 @@ func SaveProject(pdoc *Package, info *models.PkgInfo) error {
 	pdecl.Dirs = buf.String()
 
 	// Imports.
-	buf.Reset()
-	for _, s := range pdoc.Imports {
-		buf.WriteString(s)
-		buf.WriteString("|")
-	}
-	pdecl.Imports = buf.String()
-
-	buf.Reset()
-	for _, s := range pdoc.TestImports {
-		buf.WriteString(s)
-		buf.WriteString("|")
-	}
-	pdecl.TestImports = buf.String()
+	pdecl.Imports = strings.Join(pdoc.Imports, "|")
+	pdecl.TestImports = strings.Join(pdoc.TestImports, "|")
 
 	// Files.
 	buf.Reset()

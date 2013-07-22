@@ -263,3 +263,26 @@ func updateImportInfo(q *qbs.Qbs, path string, pid int, add bool) {
 
 	// Error means this project does not exist, simply skip.
 }
+
+// FlushCacheProjects saves cache data to database.
+func FlushCacheProjects(pinfos []*PkgInfo) {
+	q := connDb()
+	defer q.Close()
+
+	for _, p := range pinfos {
+		info := new(PkgInfo)
+		err := q.WhereEqual("path", p.Path).Find(info)
+		if err == nil {
+			// Shoule always be nil, just in case not exist.
+			p.Id = info.Id
+			// Limit 10 views each period.
+			if p.Views-info.Views > 10 {
+				p.Views = info.Views + 10
+			}
+		}
+		_, err = q.Save(p)
+		if err != nil {
+			beego.Error("models.FlushCacheProjects(", p.Path, ") ->", err)
+		}
+	}
+}
