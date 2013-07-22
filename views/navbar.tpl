@@ -21,7 +21,7 @@
 {{define "navbar_zh"}}
 		<div id="fixed_top" class="navbar navbar-fixed-top">
 			<div class="navbar-inner">
-				<div id="navbar">
+				<div id="navbar" class="container">
 					<a class="brand" href="/">Go 步行者</a>
 					<ul class="nav">
 						<li {{if .IsHome}}class="active"{{end}}><a href="/">首页</a></li>
