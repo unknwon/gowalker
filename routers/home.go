@@ -50,6 +50,7 @@ var (
 	maxProInfoNum = 20
 	maxExamNum    = 15
 
+	recentUpdatedExs                                       []*models.PkgExam
 	recentViewedPros, topRankPros, topViewedPros, RockPros []*proInfo
 
 	labelList []string // Projects label list.
@@ -58,7 +59,7 @@ var (
 
 func init() {
 	// Initialize project tags.
-	labelList = strings.Split(utils.Cfg.MustGetVlaue("setting", "lables"), "|")
+	labelList = strings.Split(utils.Cfg.MustGetValue("setting", "lables"), "|")
 	for _, s := range labelList {
 		labelSet += "&quot;" + s + "&quot;,"
 	}
@@ -69,7 +70,7 @@ func init() {
 func initPopPros() {
 	popPros := make([][]*models.PkgInfo, 4)
 	var err error
-	err, _, popPros[0], popPros[1], popPros[2], popPros[3] =
+	err, recentUpdatedExs, popPros[0], popPros[1], popPros[2], popPros[3] =
 		models.GetPopulars(maxProInfoNum, maxExamNum)
 	if err != nil {
 		panic("initPopPros -> " + err.Error())
@@ -168,6 +169,7 @@ func (this *HomeRouter) Get() {
 		this.Data["TopRankPros"] = topRankPros
 		this.Data["TopViewedPros"] = topViewedPros
 		this.Data["RockPros"] = RockPros
+		this.Data["RecentExams"] = recentUpdatedExs
 		// Set standard library keyword type-ahead.
 		this.Data["DataSrc"] = utils.GoRepoSet
 	} else {

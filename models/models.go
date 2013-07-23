@@ -129,7 +129,7 @@ type PkgDecl struct {
 }
 
 func (*PkgDecl) Indexes(indexes *qbs.Indexes) {
-	indexes.AddUnique("path", "tag")
+	indexes.AddUnique("pid", "tag")
 }
 
 // PkgDoc is package documentation for multi-language usage.
@@ -173,6 +173,10 @@ type PkgRock struct {
 	Delta int64 `qbs:"index"`
 }
 
+func (*PkgRock) Indexes(indexes *qbs.Indexes) {
+	indexes.AddUnique("path")
+}
+
 func connDb() *qbs.Qbs {
 	// 'sql.Open' only returns error when unknown driver, so it's not necessary to check in other places.
 	q, _ := qbs.GetQbs()
@@ -186,7 +190,7 @@ func setMg() (*qbs.Migration, error) {
 
 func init() {
 	// Initialize database.
-	qbs.Register("mysql", fmt.Sprintf("%v:%v@%v/%v?charset=utf8&parseTime=true",
+	qbs.Register("mysql", fmt.Sprintf("%v:%v@%v/%v?charset=utf8&parseTime=true&loc=Local",
 		beego.AppConfig.String("dbuser"), beego.AppConfig.String("dbpasswd"),
 		beego.AppConfig.String("dbhost"), beego.AppConfig.String("dbname")),
 		beego.AppConfig.String("dbname"), qbs.NewMysql())

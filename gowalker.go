@@ -21,6 +21,7 @@ import (
 
 	"github.com/Unknwon/gowalker/doc"
 	"github.com/Unknwon/gowalker/routers"
+	"github.com/Unknwon/gowalker/utils"
 	"github.com/astaxie/beego"
 )
 
@@ -50,8 +51,8 @@ func init() {
 		beego.Critical("NewFileWriter ->", err)
 	}
 
-	doc.SetGithubCredentials(beego.AppConfig.String("client_id"),
-		beego.AppConfig.String("client_secret"))
+	doc.SetGithubCredentials(utils.Cfg.MustGetValue("github", "client_id"),
+		utils.Cfg.MustGetValue("github", "client_secret"))
 }
 
 func main() {

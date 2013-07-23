@@ -35,16 +35,18 @@ import (
 */
 func GetPopulars(proNum, exNum int) (error, []*PkgExam,
 	[]*PkgInfo, []*PkgInfo, []*PkgInfo, []*PkgInfo) {
-	// Connect to database.
 	q := connDb()
 	defer q.Close()
 
 	var ruExs []*PkgExam
-	// q.Limit(examNum).OrderByDesc("created").FindAll(&popExams)
+	err := q.Limit(exNum).OrderByDesc("created").FindAll(&ruExs)
+	if err != nil {
+		return err, nil, nil, nil, nil, nil
+	}
 
 	var rvPros, trPros, tvPros, rtwPros []*PkgInfo
 	var procks []*PkgRock
-	err := q.Limit(proNum).OrderByDesc("viewed_time").FindAll(&rvPros)
+	err = q.Limit(proNum).OrderByDesc("viewed_time").FindAll(&rvPros)
 	if err != nil {
 		return err, nil, nil, nil, nil, nil
 	}
@@ -186,11 +188,10 @@ func DeleteProject(path string) error {
 		return nil
 	}
 
-	// Connect to database.
 	q := connDb()
 	defer q.Close()
 
-	var i1, i2, i3, i4 int64
+	var i1, i2, i3, i4, i5 int64
 	// Delete package information.
 	info := new(PkgInfo)
 	err := q.WhereEqual("path", path).Find(info)
@@ -201,49 +202,60 @@ func DeleteProject(path string) error {
 		}
 	}
 
-	// TODO: return once and update one by one.
 	// Delete package declaration.
-	for {
-		pdecl := new(PkgDecl)
-		err = q.WhereEqual("path", path).Find(pdecl)
+	if info.Id > 0 {
+		// Find.
+		var pdecls []*PkgDecl
+		err = q.WhereEqual("pid", info.Id).FindAll(&pdecls)
 		if err != nil {
-			// Not found, finish delete.
-			break
+			beego.Error("models.DeleteProject(", path, ") -> Find declaration:", err)
 		}
 
-		i2, err = q.Delete(pdecl)
-		if err != nil {
-			beego.Error("models.DeleteProject(", path, ") -> Declaration:", err)
-		} else if info.Id > 0 && !utils.IsGoRepoPath(path) {
-			// Don't need to check standard library.
-			// Update import information.
-			imports := strings.Split(pdecl.Imports, "|")
-			imports = imports[:len(imports)-1]
-			for _, v := range imports {
-				if !utils.IsGoRepoPath(v) {
-					// Only count non-standard library.
-					updateImportInfo(q, v, int(info.Id), false)
+		// Update.
+		if !utils.IsGoRepoPath(path) {
+			for _, pd := range pdecls {
+				// Don't need to check standard library.
+				// Update import information.
+				imports := strings.Split(pd.Imports, "|")
+				imports = imports[:len(imports)-1]
+				for _, v := range imports {
+					if !utils.IsGoRepoPath(v) {
+						// Only count non-standard library.
+						updateImportInfo(q, v, int(info.Id), false)
+					}
 				}
 			}
+		}
+
+		// Delete.
+		i2, err = q.WhereEqual("pid", info.Id).Delete(new(PkgDecl))
+		if err != nil {
+			beego.Error("models.DeleteProject(", path, ") -> Delete declaration:", err)
 		}
 	}
 
 	// Delete package documentation.
-	pdoc := new(PkgDoc)
-	i3, err = q.WhereEqual("path", path).Delete(pdoc)
+	i3, err = q.WhereEqual("path", path).Delete(new(PkgDoc))
 	if err != nil {
 		beego.Error("models.DeleteProject(", path, ") -> Documentation:", err)
 	}
 
 	// Delete package examples.
-	pexam := new(PkgExam)
-	i4, err = q.WhereEqual("path", path).Delete(pexam)
+	i4, err = q.WhereEqual("path", path).Delete(new(PkgExam))
 	if err != nil {
-		beego.Error("models.DeleteProject(", path, ") -> Example:", err)
+		beego.Error("models.DeleteProject(", path, ") -> Examples:", err)
 	}
 
-	if i1+i2+i3+i4 > 0 {
-		beego.Info("models.DeleteProject(", path, i1, i2, i3, i4, ")")
+	// Delete package functions.
+	if info.Id > 0 {
+		i5, err = q.WhereEqual("pid", info.Id).Delete(new(PkgExam))
+		if err != nil {
+			beego.Error("models.DeleteProject(", path, ") -> Functions:", err)
+		}
+	}
+
+	if i1+i2+i3+i4+i5 > 0 {
+		beego.Info("models.DeleteProject(", path, i1, i2, i3, i4, i5, ")")
 	}
 
 	return nil
@@ -311,9 +323,11 @@ func FlushCacheProjects(pinfos []*PkgInfo, procks []*PkgRock) {
 
 	for _, pr := range procks {
 		r := new(PkgRock)
-		q.WhereEqual("pid", pr.Pid).Find(r)
-		r.Delta += pr.Rank - r.Rank
-		pr.Delta = r.Delta
+		err := q.WhereEqual("pid", pr.Pid).Find(r)
+		if err == nil {
+			r.Delta += pr.Rank - r.Rank
+			pr.Delta = r.Delta
+		}
 		q.Save(pr)
 	}
 }
