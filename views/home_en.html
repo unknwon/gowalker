@@ -180,7 +180,7 @@
 
                         <div class="tab-content">
                             <div id="top_rank" class="tab-pane fade active in">
-                                <ul class="unstyled">
+                                <ul name="pop_list" class="unstyled">
                                     {{range .TopRankPros}}
                                     <li>
                                         <span class="badge badge-inverse">{{.Rank}}</span>
@@ -191,7 +191,7 @@
                             </div>
 
                             <div id="top_viewd" class="tab-pane fade">
-                                <ul class="unstyled">
+                                <ul name="pop_list" class="unstyled">
                                     {{range .TopViewedPros}}
                                     <li>
                                         <span class="badge">{{.Views}}</span>
@@ -202,7 +202,7 @@
                             </div>
 
                             <div id="rock_this_week" class="tab-pane fade">
-                                <ul class="unstyled">
+                                <ul name="pop_list" class="unstyled">
                                     {{range .RockPros}}
                                     <li>
                                         <span class="badge badge-success">{{.Rank}}</span>
@@ -212,6 +212,25 @@
                                 </ul>
                             </div>
                         </div>
+
+                        <script>
+                            (function () {
+                                var lists = document.getElementsByName("pop_list");
+                                var now = new Date();
+                                for (var n = 0; n < lists.length; n++) {
+                                    var list = lists[n];
+                                    var items = list.getElementsByTagName("li");
+                                    for (var i = 0; i < items.length; i++) {
+                                        // Limit length.
+                                        var s = items[i].getElementsByTagName("a")[0];
+                                        if (s.innerHTML.length > 40) {
+                                            s.title="Path: "+ s.innerHTML+"\n"+ s.title;
+                                            s.innerHTML = "..." + s.innerHTML.substr(s.innerHTML.length - 37);
+                                        }
+                                    }
+                                }
+                            })();
+                        </script>
                     </div>
 
                     <div>
