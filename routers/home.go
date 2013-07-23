@@ -874,6 +874,9 @@ func convertDataFormatExample(examStr, suffix string) []*doc.Example {
 			switch j {
 			case 0: // Name
 				val.Name = s + suffix
+				if len(val.Name) == 0 {
+					val.Name = "Package"
+				}
 			case 1: // Doc
 				val.Doc = s
 			case 2: // Code

@@ -404,14 +404,14 @@ func SavePkgDoc(path, lang string, docBys []byte) {
 		doc = doc[1:]
 	}
 	// Remove title and `==========`.
-	doc = doc[strings.Index(doc, "\n")+1:]
-	if len(doc) == 0 {
-		return
-	}
+	// doc = doc[strings.Index(doc, "\n")+1:]
+	// if len(doc) == 0 {
+	// 	return
+	// }
 
-	if doc[0] == '=' {
-		doc = doc[strings.Index(doc, "\n")+1:]
-	}
+	// if doc[0] == '=' {
+	// 	doc = doc[strings.Index(doc, "\n")+1:]
+	// }
 
 	// doc = strings.Replace(doc, "h3>", "h5>", -1)
 	// doc = strings.Replace(doc, "h2>", "h4>", -1)
