@@ -20,7 +20,7 @@ import (
 	"net/http"
 	"path"
 	"regexp"
-	"strconv"
+	//"strconv"
 	"strings"
 
 	"github.com/Unknwon/gowalker/utils"
@@ -150,15 +150,15 @@ func getGithubDoc(client *http.Client, match map[string]string, tag, savedEtag s
 	}
 
 	// Get addtional information: forks, watchers.
-	var note struct {
-		Forks    int
-		Watchers int `json:"watchers_count"`
-	}
+	// var note struct {
+	// 	Forks    int
+	// 	Watchers int `json:"watchers_count"`
+	// }
 
-	err = httpGetJSON(client, expand("https://api.github.com/repos/{owner}/{repo}?{cred}", match), &note)
-	if err != nil {
-		return nil, errors.New("doc.getGithubDoc(" + match["importPath"] + ") -> get note: " + err.Error())
-	}
+	// err = httpGetJSON(client, expand("https://api.github.com/repos/{owner}/{repo}?{cred}", match), &note)
+	// if err != nil {
+	// 	return nil, errors.New("doc.getGithubDoc(" + match["importPath"] + ") -> get note: " + err.Error())
+	// }
 
 	// Start generating data.
 	w := &walker{
@@ -170,8 +170,8 @@ func getGithubDoc(client *http.Client, match map[string]string, tag, savedEtag s
 			Tag:         tag,
 			Etag:        commit,
 			Dirs:        dirs,
-			Note: strconv.Itoa(note.Forks) + "|" +
-				strconv.Itoa(note.Watchers) + "|",
+			//Note: strconv.Itoa(note.Forks) + "|" +
+			//	strconv.Itoa(note.Watchers) + "|",
 		},
 	}
 	return w.build(files)

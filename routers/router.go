@@ -151,7 +151,16 @@ func cacheTickerCheck(cacheChan <-chan time.Time) {
 
 func flushCache() {
 	// Flush cache projects.
-	models.FlushCacheProjects(cachePros)
 	num := len(cachePros)
+	rtwPros := make([]*models.PkgRock, 0, num)
+	for _, p := range cachePros {
+		rtwPros = append(rtwPros, &models.PkgRock{
+			Pid:  p.Id,
+			Path: p.Path,
+			Rank: p.Rank,
+		})
+	}
+	models.FlushCacheProjects(cachePros, rtwPros)
+
 	cachePros = make([]*models.PkgInfo, 0, num)
 }

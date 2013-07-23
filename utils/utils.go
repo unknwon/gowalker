@@ -178,8 +178,13 @@ func FormatCode(w io.Writer, code *string, links []*Link) {
 					fmt.Fprintf(w, `<a class="int" title="%s" href="#%s">%s</a>%s`,
 						link.Comment, link.Name, link.Name, seg[l-1:])
 				case len(link.Path) > 0 && len(link.Name) > 0:
-					fmt.Fprintf(w, `<a class="ext" title="%s" target="_blank" href="%s">%s</a>%s`,
-						link.Comment, link.Path, link.Name, seg[l-1:])
+					if strings.HasPrefix(link.Path, "#") {
+						fmt.Fprintf(w, `<a class="ext" title="%s" href="%s">%s</a>%s`,
+							link.Comment, link.Path, link.Name, seg[l-1:])
+					} else {
+						fmt.Fprintf(w, `<a class="ext" title="%s" target="_blank" href="%s">%s</a>%s`,
+							link.Comment, link.Path, link.Name, seg[l-1:])
+					}
 				}
 			} else if seg[len(seg)-1] == ' ' {
 				fmt.Fprintf(w, "<span id=\"%s\">%s</span> ", seg[:len(seg)-1], seg[:len(seg)-1])
@@ -218,7 +223,11 @@ func findType(name string, links []*Link) (*Link, bool) {
 		} else {
 			// Functions and types from imported packages.
 			if l.Name == left {
-				return &Link{Name: name, Path: "/" + l.Path + "#" + right}, true
+				if len(l.Path) > 0 {
+					return &Link{Name: name, Path: "/" + l.Path + "#" + right}, true
+				} else {
+					return &Link{Name: name, Path: "#" + right}, true
+				}
 			}
 		}
 	}

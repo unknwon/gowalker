@@ -165,6 +165,14 @@ type PkgFunc struct {
 	IsOld bool   // Indicates if the function no longer exists.
 }
 
+// PkgRock represents a package rock information.
+type PkgRock struct {
+	Pid   int64 `qbs:"pk,index"`
+	Path  string
+	Rank  int64
+	Delta int64 `qbs:"index"`
+}
+
 func connDb() *qbs.Qbs {
 	// 'sql.Open' only returns error when unknown driver, so it's not necessary to check in other places.
 	q, _ := qbs.GetQbs()
@@ -199,6 +207,7 @@ func init() {
 	mg.CreateTableIfNotExists(new(PkgDoc))
 	mg.CreateTableIfNotExists(new(PkgExam))
 	mg.CreateTableIfNotExists(new(PkgFunc))
+	mg.CreateTableIfNotExists(new(PkgRock))
 
 	beego.Trace("Initialized database ->", beego.AppConfig.String("dbname"))
 }
@@ -293,7 +302,7 @@ func GetIndexPageInfo() (totalNum int64, popPkgs, importedPkgs []*PkgInfo, err e
 	defer q.Close()
 
 	totalNum = q.Count(&PkgInfo{})
-	err = q.Offset(25).Limit(39).OrderByDesc("views").FindAll(&popPkgs)
+	err = q.Offset(21).Limit(35).OrderByDesc("views").FindAll(&popPkgs)
 	if err != nil {
 		beego.Error("models.GetIndexPageInfo(): popPkgs:", err)
 	}

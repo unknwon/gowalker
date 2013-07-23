@@ -18,6 +18,7 @@ import (
 	"errors"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/Unknwon/gowalker/utils"
 	"github.com/astaxie/beego"
@@ -42,6 +43,7 @@ func GetPopulars(proNum, exNum int) (error, []*PkgExam,
 	// q.Limit(examNum).OrderByDesc("created").FindAll(&popExams)
 
 	var rvPros, trPros, tvPros, rtwPros []*PkgInfo
+	var procks []*PkgRock
 	err := q.Limit(proNum).OrderByDesc("viewed_time").FindAll(&rvPros)
 	if err != nil {
 		return err, nil, nil, nil, nil, nil
@@ -53,6 +55,17 @@ func GetPopulars(proNum, exNum int) (error, []*PkgExam,
 	err = q.Limit(proNum).OrderByDesc("views").FindAll(&tvPros)
 	if err != nil {
 		return err, nil, nil, nil, nil, nil
+	}
+	err = q.Limit(proNum).OrderByDesc("delta").FindAll(&procks)
+	if err != nil {
+		return err, nil, nil, nil, nil, nil
+	}
+	for _, pr := range procks {
+		rtwPros = append(rtwPros, &PkgInfo{
+			Id:   pr.Pid,
+			Path: pr.Path,
+			Rank: pr.Rank,
+		})
 	}
 	return nil, ruExs, rvPros, trPros, tvPros, rtwPros
 }
@@ -265,10 +278,11 @@ func updateImportInfo(q *qbs.Qbs, path string, pid int, add bool) {
 }
 
 // FlushCacheProjects saves cache data to database.
-func FlushCacheProjects(pinfos []*PkgInfo) {
+func FlushCacheProjects(pinfos []*PkgInfo, procks []*PkgRock) {
 	q := connDb()
 	defer q.Close()
 
+	// Update project data.
 	for _, p := range pinfos {
 		info := new(PkgInfo)
 		err := q.WhereEqual("path", p.Path).Find(info)
@@ -284,5 +298,22 @@ func FlushCacheProjects(pinfos []*PkgInfo) {
 		if err != nil {
 			beego.Error("models.FlushCacheProjects(", p.Path, ") ->", err)
 		}
+	}
+
+	// Update rock this week.
+	if time.Now().Weekday() == time.Monday && !utils.Cfg.MustGetBool("task", "rock_reset") {
+		// Reset rock table.
+		_, err := q.Where("id > ?", int64(0)).Delete(new(PkgRock))
+		if err != nil {
+			beego.Error("models.FlushCacheProjects -> Reset rock table:", err)
+		}
+	}
+
+	for _, pr := range procks {
+		r := new(PkgRock)
+		q.WhereEqual("pid", pr.Pid).Find(r)
+		r.Delta += pr.Rank - r.Rank
+		pr.Delta = r.Delta
+		q.Save(pr)
 	}
 }

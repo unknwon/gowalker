@@ -1,216 +1,245 @@
 {{template "header_en"}}
-		<title>Go Walker - Go API documentation</title>
-	</head>
+<title>Go Walker - Go API documentation</title>
+</head>
 
-	<body id="body" style="padding-top: 60px; font-family: Microsoft Yahei; font-size: 13px;">
-		{{template "navbar_en" .}}
-		<div class="container" style="width: 1000px;">
-			<!-- <div class="alert">
-				<button type="button" class="close" data-dismiss="alert">&times;</button><strong>Warning!</strong> This is the <span class="label label-important">Beta</span> version of Go Walker, errors may occur at any time.
+<body id="body" style="padding-top: 60px; font-family: Microsoft Yahei; font-size: 13px;">
+{{template "navbar_en" .}}
+<div class="container" style="width: 1000px;">
+<!-- <div class="alert">
+    <button type="button" class="close" data-dismiss="alert">&times;</button><strong>Warning!</strong> This is the <span class="label label-important">Beta</span> version of Go Walker, errors may occur at any time.
 			</div> -->
-			<div id="home_content" class="row">
-	    		<div class="page-header" style="margin-left: 20px;">
-					<h2 style="margin-top: 0">Search for Go projects. <small>Find a cup of source code.</small></h2>
-					<form action="/">
-						<div class="input-append">
-							<input autocomplete="off" class="span6" type="text" placeholder="Type import path to add or keywords to search" value="{{.Keyword}}" name="q" data-source="[{{str2html .DataSrc}}]" data-items="8" data-provide="typeahead"></input>
-							<button class="btn" type="submit"><i class="icon-search"></i> Go!</button>
-						</div>
-					</form>
-	    		</div>
-	    		<div id="homeleft" class="span6 homeleft">
-					<div>
-						<h4>What is this?</h4>
-						<p>
-							Go Walker is a web server that generates <a target="_blank" href="http://golang.org/">Go</a> projects API documentation with source code on the fly from projects on <b><a target="_blank" href="https://bitbucket.org/">Bitbucket</a></b>, <b><a target="_blank" href="https://github.com/">Github</a></b>, <b><a target="_blank" href="http://code.google.com/">Google Code</a></b>, <b><a target="_blank" href="https://launchpad.net/">Launchpad</a></b> and <b><a target="_blank" href="http://git.oschina.net/">Git @ OSC</a></b>.
-						</p>
+<div id="home_content" class="row">
+<div class="page-header" style="margin-left: 20px;">
+    <h2 style="margin-top: 0">Search for Go projects.
+        <small>Find a cup of source code.</small>
+    </h2>
+    <form action="/">
+        <div class="input-append">
+            <input autocomplete="off" class="span6" type="text"
+                   placeholder="Type import path to add or keywords to search" value="{{.Keyword}}" name="q"
+                   data-source="[{{str2html .DataSrc}}]" data-items="8" data-provide="typeahead"></input>
+            <button class="btn" type="submit"><i class="icon-search"></i> Go!</button>
+        </div>
+    </form>
+</div>
+<div id="homeleft" class="span6 homeleft">
+    <div>
+        <h4>What is this?</h4>
 
-						<p>
-							Awesome features  
-							<button class="btn feature" title="" data-content="View function and method code with nice highlight in the same page, reduce rake up space and do more work at the same time." data-placement="left" data-toggle="popover" data-original-title="Code View">Code View</button>
+        <p>
+            Go Walker is a web server that generates 
+            <a target="_blank" href="http://golang.org/">Go</a> projects API documentation with source code on the fly from projects on <b><a target="_blank" href="https://bitbucket.org/">Bitbucket</a></b>, <b><a target="_blank" href="https://github.com/">Github</a></b>, <b><a target="_blank" href="http://code.google.com/">Google Code</a></b>, <b><a target="_blank" href="https://launchpad.net/">Launchpad</a></b> and <b><a target="_blank" href="http://git.oschina.net/">Git @ OSC</a></b>.
+        </p>
 
-							<button class="btn feature" title="" data-content="Quick jump to functions, methods and types from imported packages, reduce time to find." data-placement="top" data-toggle="popover" data-original-title="Link Jump">Link Jump</button>
+        <p>
+            Awesome features
+            <button class="btn feature" title=""
+                    data-content="View function and method code with nice highlight in the same page, reduce rake up space and do more work at the same time."
+                    data-placement="left" data-toggle="popover" data-original-title="Code View">Code View
+            </button>
 
-							<button class="btn feature" title="" data-content="Add examples for your favorite projects through Github Gist." data-placement="bottom" data-toggle="popover" data-original-title="Add Example">Add Example</button>
+            <button class="btn feature" title=""
+                    data-content="Quick jump to functions, methods and types from imported packages, reduce time to find."
+                    data-placement="top" data-toggle="popover" data-original-title="Link Jump">Link Jump
+            </button>
 
-							<button class="btn feature" title="" data-content="Don't worry if you use old version of a project, now you can view documentation by its Tags!" data-placement="right" data-toggle="popover" data-original-title="View by Tag">Doc Tag</button>
+            <button class="btn feature" title=""
+                    data-content="Add examples for your favorite projects through Github Gist." data-placement="bottom"
+                    data-toggle="popover" data-original-title="Add Example">Add Example
+            </button>
 
-							and <a target="_blank" href="https://github.com/Unknwon/gowalker/blob/master/docs/Features.md">More</a>.</p>
-							<p class="text-success">Please read the  <a href="/about">About Page</a> for information about adding projects to Go Walker and more.
-						</p>
-					</div>
+            <button class="btn feature" title=""
+                    data-content="Don't worry if you use old version of a project, now you can view documentation by its Tags!"
+                    data-placement="right" data-toggle="popover" data-original-title="View by Tag">Doc Tag
+            </button>
 
-					<div class="tab-content">
-						<div id="global_recent_view" class="tab-pane fade active in">
-							<h4>
-								What other people are looking at.
-								<a href="#user_recent_view" class="btn btn-inverse" data-toggle="tab">My history</a>
-							</h4>
+            and <a target="_blank" href="https://github.com/Unknwon/gowalker/blob/master/docs/Features.md">More</a>.
+        </p>
+        <p class="text-success">Please read the <a href="/about">About Page</a> for information about adding projects to Go Walker and more.
+        </p>
+    </div>
 
-							<table name="recent_table" class="table table-bordered table-hover">
-								<thead>
-									<tr>
-										<th>Import Path(Rank)</th>
-										<th>Viewd Time(Local)</th>
-									</tr>
-								</thead>
+    <div class="tab-content">
+        <div id="global_recent_view" class="tab-pane fade active in">
+            <h4>
+                What other people are looking at.
+                <a href="#user_recent_view" class="btn btn-inverse" data-toggle="tab">My history</a>
+            </h4>
 
-								<tbody>
-								{{range .GlobalRecentPros}}
-									<tr>
-										<td>
-											<a title="{{.Synopsis}}" href="/{{.Path}}">{{.Path}}</a>
-											{{if .IsGoRepo}} 
-											<span class="label label-info">Standard</span>
-											{{else}}
-											<span class="badge badge-inverse">{{.Rank}}</span>
-											{{end}}
-										</td>
+            <table name="recent_table" class="table table-bordered table-hover">
+                <thead>
+                <tr>
+                    <th>Import Path(Rank)</th>
+                    <th>Viewd Time(Local)</th>
+                </tr>
+                </thead>
 
-										<td>{{.ViewedTime}}</td>
-									</tr>
-								{{end}}
-								</tbody>
-							</table>
-						</div>
+                <tbody>
+                {{range .GlobalRecentPros}}
+                <tr>
+                    <td>
+                        <a title="{{.Synopsis}}" href="/{{.Path}}">{{.Path}}</a>
+                        {{if .IsGoRepo}}
+                        <span class="label label-info">Standard</span>
+                        {{else}}
+                        <span class="badge badge-inverse">{{.Rank}}</span>
+                        {{end}}
+                    </td>
 
-						<div id="user_recent_view" class="tab-pane fade">
-							<h4>
-								What you have been looking at.
-								<a href="#global_recent_view" class="btn btn-inverse" data-toggle="tab">Global history</a>
-							</h4>
+                    <td>{{.ViewedTime}}</td>
+                </tr>
+                {{end}}
+                </tbody>
+            </table>
+        </div>
 
-							<table name="recent_table" class="table table-bordered table-hover">
-								<thead>
-									<tr>
-										<th>Import Path(Rank)</th>
-										<th>Viewd Time(Local)</th>
-									</tr>
-								</thead>
+        <div id="user_recent_view" class="tab-pane fade">
+            <h4>
+                What you have been looking at.
+                <a href="#global_recent_view" class="btn btn-inverse" data-toggle="tab">Global history</a>
+            </h4>
 
-								<tbody>
-									{{range .UserRecentPros}}
-									<tr>
-										<td>
-											<a title="{{.Synopsis}}" href="/{{.Path}}">{{.Path}}</a>
-											<span class="badge badge-inverse">{{.Rank}}</span>
-										</td>
-										
-										<td>{{.ViewedTime}}</td>
-									</tr>
-									{{end}}
-								</tbody>
-							</table>
-						</div>
+            <table name="recent_table" class="table table-bordered table-hover">
+                <thead>
+                <tr>
+                    <th>Import Path(Rank)</th>
+                    <th>Viewd Time(Local)</th>
+                </tr>
+                </thead>
 
-						<script>
-							(function(){
-								var tables = document.getElementsByName("recent_table");
-								var now = new Date();
-								for (var n = 0; n < tables.length; n++) {
-									var table = tables[n];
-									var items = table.getElementsByTagName("tr");
-									for (var i = 1; i < items.length; i++){
-										var t = parseInt(table.rows[i].cells[1].innerHTML);
-										var d = new Date(t * 1000);
-										table.rows[i].cells[1].innerHTML = d.toLocaleString();
-									}
-								}
-							})();
-						</script>
-		    		</div>
-				</div>
-	    		<div id="homeright" class="span6 homeright">
-	    			<div>
-	    				<h4>Announcement</h4>
-	    				<p>
-	    					New version of Go Walker has been released, features including add examples for projects by <a target="_blank" href="https://gist.github.com/">Gist</a>, view project documentation by Tags.
-	    				</p>
-	    				<a class="btn btn-primary" target="_blank" href="https://github.com/Unknwon/gowalker/blob/master/docs/Features.md">Learn more</a>
-	    			</div>
-	    			<div>
-						<h4>Popular Projects</h4>
-						<ul class="nav nav-tabs nav-tabs-google">
-							<li class="active">
-								<a href="#top_rank" data-toggle="tab">Total Rank</a>
-							</li>
+                <tbody>
+                {{range .UserRecentPros}}
+                <tr>
+                    <td>
+                        <a title="{{.Synopsis}}" href="/{{.Path}}">{{.Path}}</a>
+                        <span class="badge badge-inverse">{{.Rank}}</span>
+                    </td>
 
-							<li>
-								<a href="#top_viewd" data-toggle="tab">Total Views</a>
-							</li>
+                    <td>{{.ViewedTime}}</td>
+                </tr>
+                {{end}}
+                </tbody>
+            </table>
+        </div>
 
-							<li>
-								<a href="#rock_this_week" data-toggle="tab">Rock this week</a>
-							</li>
-						</ul>
+        <script>
+            (function () {
+                var tables = document.getElementsByName("recent_table");
+                var now = new Date();
+                for (var n = 0; n < tables.length; n++) {
+                    var table = tables[n];
+                    var items = table.getElementsByTagName("tr");
+                    for (var i = 1; i < items.length; i++) {
+                        // Limit length.
+                        var s = table.rows[i].cells[0].getElementsByTagName("a")[0];
+                        if (s.innerHTML.length > 40) {
+                            s.title="Path: "+ s.innerHTML+"\n"+ s.title;
+                            s.innerHTML = "..." + s.innerHTML.substr(s.innerHTML.length - 37);
+                        }
+                        // Convert timestamp to local time.
+                        var t = parseInt(table.rows[i].cells[1].innerHTML);
+                        var d = new Date(t * 1000);
+                        table.rows[i].cells[1].innerHTML = d.toLocaleString();
+                    }
+                }
+            })();
+        </script>
+    </div>
+</div>
+<div id="homeright" class="span6 homeright">
+    <div>
+        <h4>Announcement</h4>
 
-						<div class="tab-content">
-							<div id="top_rank" class="tab-pane fade active in">
-								<ul class="unstyled">
-								{{range .TopRankPros}}
-									<li>
-										<span class="badge badge-inverse">{{.Rank}}</span> 
-										<a title="{{.Synopsis}}" href="/{{.Path}}">{{.Path}}</a>
-									</li>
-								{{end}}
-								</ul>
-							</div>
+        <p>
+            New version of Go Walker has been released, features including add examples for projects by <a
+                target="_blank" href="https://gist.github.com/">Gist</a>, view project documentation by Tags.
+        </p>
+        <a class="btn btn-primary" target="_blank"
+           href="https://github.com/Unknwon/gowalker/blob/master/docs/Features.md">Learn more</a>
+    </div>
+    <div>
+        <h4>Popular Projects</h4>
+        <ul class="nav nav-tabs nav-tabs-google">
+            <li class="active">
+                <a href="#top_rank" data-toggle="tab">Total Rank</a>
+            </li>
 
-							<div id="top_viewd" class="tab-pane fade">
-								<ul class="unstyled">
-								{{range .TopViewedPros}}
-									<li>
-										<span class="badge">{{.Views}}</span> 
-										<a title="{{.Synopsis}}" href="/{{.Path}}">{{.Path}}</a>
-									</li>
-								{{end}}
-								</ul>
-							</div>
+            <li>
+                <a href="#top_viewd" data-toggle="tab">Total Views</a>
+            </li>
 
-							<div id="rock_this_week" class="tab-pane fade">
-								<ul class="unstyled">
-								{{range .RockPros}}
-									<li>
-										<span class="badge badge-success">{{.Rank}}</span> 
-										<a title="{{.Synopsis}}" href="/{{.Path}}">{{.Path}}</a>
-									</li>
-								{{end}}
-								</ul>
-							</div>
-						</div>
-	    			</div>
+            <li>
+                <a href="#rock_this_week" data-toggle="tab">Rock this week</a>
+            </li>
+        </ul>
 
-	    			<div>
-	    				<h4>Recent Updated Examples</h4>
-						<ul class="unstyled">
-						{{range .RecentExams}}
-							<li>
-								<a href="/{{.Path}}">{{.Path}}</a>
-							</li>
-						{{end}}
-						</ul>
-	    			</div>
+        <div class="tab-content">
+            <div id="top_rank" class="tab-pane fade active in">
+                <ul class="unstyled">
+                    {{range .TopRankPros}}
+                    <li>
+                        <span class="badge badge-inverse">{{.Rank}}</span>
+                        <a title="{{.Synopsis}}" href="/{{.Path}}">{{.Path}}</a>
+                    </li>
+                    {{end}}
+                </ul>
+            </div>
 
-	    			<div>
-						<h4>More Projects</h4>
-						<ul class="unstyled">
-							<li>
-								<a href="/index">Index</a>
-							</li>
+            <div id="top_viewd" class="tab-pane fade">
+                <ul class="unstyled">
+                    {{range .TopViewedPros}}
+                    <li>
+                        <span class="badge">{{.Views}}</span>
+                        <a title="{{.Synopsis}}" href="/{{.Path}}">{{.Path}}</a>
+                    </li>
+                    {{end}}
+                </ul>
+            </div>
 
-							<li>
-								<a href="/search?q=gorepo">Standard Library</a>
-							</li>
+            <div id="rock_this_week" class="tab-pane fade">
+                <ul class="unstyled">
+                    {{range .RockPros}}
+                    <li>
+                        <span class="badge badge-success">{{.Rank}}</span>
+                        <a title="{{.Synopsis}}" href="/{{.Path}}">{{.Path}}</a>
+                    </li>
+                    {{end}}
+                </ul>
+            </div>
+        </div>
+    </div>
 
-							<li>
-								<a target="_blank" href="https://code.google.com/p/go-wiki/wiki/Projects">Projects @ go-wiki</a>
-							</li>
-						</ul>
-	    			</div>
-	    		</div>
-    		</div>
-		</div>
-		{{template "footer_en" .}}
-	</body>
+    <div>
+        <h4>Recent Updated Examples</h4>
+        <ul class="unstyled">
+            {{range .RecentExams}}
+            <li>
+                <a href="/{{.Path}}">{{.Path}}</a>
+            </li>
+            {{end}}
+        </ul>
+    </div>
+
+    <div>
+        <h4>More Projects</h4>
+        <ul class="unstyled">
+            <li>
+                <a href="/index">Index</a>
+            </li>
+
+            <li>
+                <a href="/search?q=gorepo">Standard Library</a>
+            </li>
+
+            <li>
+                <a target="_blank" href="https://code.google.com/p/go-wiki/wiki/Projects">Projects @ go-wiki</a>
+            </li>
+        </ul>
+    </div>
+</div>
+</div>
+</div>
+{{template "footer_en" .}}
+</body>
 </html>
 

@@ -432,8 +432,8 @@
 
 		<div id="_ex_{{.Name}}" class="accordion-body collapse">
 			<div class="accordion-inner">
-			<p>Code:
-			</p><pre class="pre-x-scrollable">{{.Code}}</pre>
+			<p>Code:</p>
+			<pre class="pre-x-scrollable">{{str2html .Code}}</pre>
 			{{if .IsHasOutput}}<p>Output:</p><pre class="pre-x-scrollable">{{.Output}}</pre>{{end}}
 			</div>
 		</div>

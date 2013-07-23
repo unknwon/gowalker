@@ -34,6 +34,7 @@ import (
 
 // A proInfo represents a project information.
 type proInfo struct {
+	Pid               int64
 	Path, Synopsis    string
 	IsGoRepo          bool
 	Views, ViewedTime int64
@@ -68,7 +69,7 @@ func init() {
 func initPopPros() {
 	popPros := make([][]*models.PkgInfo, 4)
 	var err error
-	err, _, popPros[0], popPros[1], popPros[2], _ =
+	err, _, popPros[0], popPros[1], popPros[2], popPros[3] =
 		models.GetPopulars(maxProInfoNum, maxExamNum)
 	if err != nil {
 		panic("initPopPros -> " + err.Error())
@@ -79,6 +80,7 @@ func initPopPros() {
 		for _, p := range ps {
 			tmpPros = append(tmpPros,
 				&proInfo{
+					Pid:      p.Id,
 					Path:     p.Path,
 					Synopsis: p.Synopsis,
 					IsGoRepo: p.ProName == "Go" &&
@@ -96,6 +98,8 @@ func initPopPros() {
 			topRankPros = tmpPros
 		case 2:
 			topViewedPros = tmpPros
+		case 3:
+			RockPros = tmpPros
 		}
 	}
 }
@@ -470,6 +474,22 @@ func generatePage(this *HomeRouter, pdoc *doc.Package, q, tag, lang string) bool
 		this.Data["Files"] = pdoc.Files
 	}
 
+	// Examples.
+	links = append(links, &utils.Link{
+		Name: path.Base(pdoc.ImportPath) + ".",
+	})
+
+	for _, e := range pdoc.Examples {
+		buf.Reset()
+		utils.FormatCode(&buf, &e.Code, links)
+		e.Code = buf.String()
+	}
+	for _, e := range pdoc.UserExamples {
+		buf.Reset()
+		utils.FormatCode(&buf, &e.Code, links)
+		e.Code = buf.String()
+	}
+
 	this.Data["Pid"] = pdecl.Id
 	this.Data["ImportPkgs"] = pdecl.Imports
 	this.Data["ImportPkgNum"] = len(pdoc.Imports)
@@ -487,6 +507,8 @@ func calTimeSince(created time.Time) string {
 	mins := int(time.Since(created).Minutes())
 
 	switch {
+	case mins < 0:
+		return fmt.Sprintf("in %d minutes later", -mins)
 	case mins < 1:
 		return "less than 1 minute"
 	case mins < 60:
@@ -881,7 +903,7 @@ func updateCacheInfo(pdoc *doc.Package, ck *http.Cookie) string {
 
 func updateCachePros(pdoc *doc.Package) {
 	for _, p := range cachePros {
-		if p.Path == pdoc.ImportPath {
+		if p.Id == pdoc.Id {
 			p.ProName = pdoc.ProjectName
 			p.Synopsis = pdoc.Synopsis
 			p.IsCmd = pdoc.IsCmd
@@ -901,6 +923,7 @@ func updateCachePros(pdoc *doc.Package) {
 
 	pdoc.Views++
 	cachePros = append(cachePros, &models.PkgInfo{
+		Id:          pdoc.Id,
 		Path:        pdoc.ImportPath,
 		ProName:     pdoc.ProjectName,
 		Synopsis:    pdoc.Synopsis,
