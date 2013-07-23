@@ -1009,7 +1009,6 @@ func updateUrPros(pdoc *doc.Package, urpids, urpts *http.Cookie) (string, string
 				strings.Repeat(strconv.Itoa(int(time.Now().UTC().Unix()))+"|", len(urPros)), "|")
 			urTs = urTs[:len(urTs)-1]
 		}
-		fmt.Println(len(urTs), len(urPros))
 	}
 
 	index := -1

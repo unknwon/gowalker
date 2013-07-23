@@ -13,9 +13,11 @@
 
             <div id="home_content" class="row">
                 <div class="page-header" style="margin-left: 20px;">
-                    <h2 style="margin-top: 0">Search for Go projects.
+                    <h2 style="margin-top: 0">
+                        Search for Go projects.
                         <small>Find a cup of source code.</small>
                     </h2>
+
                     <form action="/">
                         <div class="input-append">
                             <input autocomplete="off" class="span6" type="text"
@@ -39,27 +41,25 @@
                             Awesome features
                             <button class="btn feature" title=""
                                     data-content="View function and method code with nice highlight in the same page, reduce rake up space and do more work at the same time."
-                                    data-placement="left" data-toggle="popover" data-original-title="Code View">Code View
-                            </button>
+                                    data-placement="left" data-toggle="popover" data-original-title="Code View">Code View</button>
 
                             <button class="btn feature" title=""
                                     data-content="Quick jump to functions, methods and types from imported packages, reduce time to find."
-                                    data-placement="top" data-toggle="popover" data-original-title="Link Jump">Link Jump
-                            </button>
+                                    data-placement="top" data-toggle="popover" data-original-title="Link Jump">Link Jump</button>
 
                             <button class="btn feature" title=""
                                     data-content="Add examples for your favorite projects through Github Gist." data-placement="bottom"
-                                    data-toggle="popover" data-original-title="Add Example">Add Example
-                            </button>
+                                    data-toggle="popover" data-original-title="Add Example">Add Example</button>
 
                             <button class="btn feature" title=""
                                     data-content="Don't worry if you use old version of a project, now you can view documentation by its Tags!"
-                                    data-placement="right" data-toggle="popover" data-original-title="View by Tag">Doc Tag
-                            </button>
+                                    data-placement="right" data-toggle="popover" data-original-title="View by Tag">Doc Tag</button>
 
                             and <a target="_blank" href="https://github.com/Unknwon/gowalker/blob/master/docs/Features.md">More</a>.
                         </p>
-                        <p class="text-success">Please read the <a href="/about">About Page</a> for information about adding projects to Go Walker and more.
+
+                        <p class="text-success">
+                            Please read the <a href="/about">About Page</a> for information about adding projects to Go Walker and more.
                         </p>
                     </div>
 
@@ -72,10 +72,10 @@
 
                             <table name="recent_table" class="table table-bordered table-hover">
                                 <thead>
-                                <tr>
-                                    <th>Import Path(Rank)</th>
-                                    <th>Viewd Time(Local)</th>
-                                </tr>
+                                    <tr>
+                                        <th>Import Path(Rank)</th>
+                                        <th>Viewd Time(Local)</th>
+                                    </tr>
                                 </thead>
 
                                 <tbody>
@@ -83,6 +83,7 @@
                                 <tr>
                                     <td>
                                         <a title="{{.Synopsis}}" href="/{{.Path}}">{{.Path}}</a>
+
                                         {{if .IsGoRepo}}
                                         <span class="label label-info">Standard</span>
                                         {{else}}
@@ -105,10 +106,10 @@
 
                             <table name="recent_table" class="table table-bordered table-hover">
                                 <thead>
-                                <tr>
-                                    <th>Import Path(Rank)</th>
-                                    <th>Viewd Time(Local)</th>
-                                </tr>
+                                    <tr>
+                                        <th>Import Path(Rank)</th>
+                                        <th>Viewd Time(Local)</th>
+                                    </tr>
                                 </thead>
 
                                 <tbody>
@@ -154,7 +155,6 @@
                 <div id="homeright" class="span6 homeright">
                     <div>
                         <h4>Announcement</h4>
-
                         <p>
                             New version of Go Walker has been released, features including add examples for projects by <a
                                 target="_blank" href="https://gist.github.com/">Gist</a>, view project documentation by Tags.
@@ -162,6 +162,7 @@
                         <a class="btn btn-primary" target="_blank"
                            href="https://github.com/Unknwon/gowalker/blob/master/docs/Features.md">Learn more</a>
                     </div>
+                    
                     <div>
                         <h4>Popular Projects</h4>
                         <ul class="nav nav-tabs nav-tabs-google">

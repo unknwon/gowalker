@@ -48,12 +48,29 @@
 				<sub class="version">{{.AppVer}}</sub>
 			</a>
 			<ul class="nav">
-				<li {{if .IsHome}}class="active"{{end}}><a href="/">首页</a></li>
-				<li {{if .IsIndex}}class="active"{{end}}><a href="/index">索引</a></li>
-				<li {{if .IsLabels}}class="active"{{end}}><a href="/labels">标签</a></li>
-				<li {{if .IsFuncs}}class="active"{{end}}><a href="/funcs">函数</a></li>
-				<li {{if .IsExamples}}class="active"{{end}}><a href="/examples">示例</a></li>
-				<li {{if .IsAbout}}class="active"{{end}}><a href="/about">关于</a></li>
+				<li {{if .IsHome}}class="active"{{end}}>
+					<a href="/">首页</a>
+				</li>
+				
+				<li {{if .IsIndex}}class="active"{{end}}>
+					<a href="/index">索引</a>
+				</li>
+				
+				<li {{if .IsLabels}}class="active"{{end}}>
+					<a href="/labels">标签</a>
+				</li>
+				
+				<li {{if .IsFuncs}}class="active"{{end}}>
+					<a href="/funcs">函数</a>
+				</li>
+				
+				<li {{if .IsExamples}}class="active"{{end}}>
+					<a href="/examples">示例</a>
+				</li>
+				
+				<li {{if .IsAbout}}class="active"{{end}}>
+					<a href="/about">关于</a>
+				</li>
 			</ul>
 			<form id="top_search_form" class="navbar-search pull-right" action="/">
 				<input id="navbar_search_box" class="search-query" type="text" placeholder="搜索文档" name="q">
