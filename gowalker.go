@@ -26,7 +26,7 @@ import (
 )
 
 const (
-	VERSION = "0.7.4.0723" // Application version.
+	VERSION = "0.7.5.0723 Beta" // Application version.
 )
 
 func init() {
@@ -43,7 +43,7 @@ func init() {
 
 	beego.Info("Go Walker", VERSION)
 
-	// ----- Initialize log file -----
+	// Initialize log file.
 	os.Mkdir("./log", os.ModePerm)
 	filew := beego.NewFileWriter("log/log", true)
 	err := filew.StartLogger()
@@ -51,8 +51,8 @@ func init() {
 		beego.Critical("NewFileWriter ->", err)
 	}
 
-	doc.SetGithubCredentials(utils.Cfg.MustGetValue("github", "client_id"),
-		utils.Cfg.MustGetValue("github", "client_secret"))
+	doc.SetGithubCredentials(utils.Cfg.MustValue("github", "client_id"),
+		utils.Cfg.MustValue("github", "client_secret"))
 }
 
 func main() {

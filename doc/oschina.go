@@ -19,6 +19,7 @@ import (
 	"bytes"
 	"errors"
 	"net/http"
+	"path"
 	"regexp"
 	"strings"
 
@@ -37,6 +38,9 @@ func getOSCDoc(client *http.Client, match map[string]string, tag, savedEtag stri
 		match["tag"] = tag
 	}
 
+	// Force to lower case.
+	match["importPath"] = strings.ToLower(match["importPath"])
+
 	match["projectRoot"] = utils.GetProjectPath(match["importPath"])
 	// Download zip.
 	p, err := httpGetBytes(client, expand("http://{projectRoot}/repository/archive?ref={tag}", match), nil)
@@ -52,42 +56,52 @@ func getOSCDoc(client *http.Client, match map[string]string, tag, savedEtag stri
 	commit := r.Comment
 	// Get source file data and subdirectories.
 	nameLen := len(match["repo"])
-	dirLen := nameLen + len(match["dir"])
+	dirPrefix := match["dir"]
+	if dirPrefix != "" {
+		dirPrefix = dirPrefix[1:] + "/"
+	}
+	preLen := len(dirPrefix)
+
 	dirs := make([]string, 0, 5)
 	files := make([]*source, 0, 5)
 	for _, f := range r.File {
-		fileName := f.FileInfo().Name()
-		if len(fileName) <= dirLen {
+		fileName := f.FileInfo().Name()[nameLen+1:]
+		// Skip directories and files in wrong directories, get them later.
+		if strings.HasSuffix(fileName, "/") || !strings.HasPrefix(fileName, dirPrefix) {
 			continue
 		}
 
-		// File.
-		if utils.IsDocFile(fileName[dirLen+1:]) && strings.LastIndex(fileName, "/") == dirLen {
-			// Get file from archive.
-			rc, err := f.Open()
-			if err != nil {
-				return nil, errors.New("doc.getOSCDoc(" + match["importPath"] + ") -> open file: " + err.Error())
+		// Get files and check if directories have acceptable files.
+		if d, fn := path.Split(fileName); utils.IsDocFile(fn) &&
+			utils.FilterDirName(d) {
+			// Check if file is in the directory that is corresponding to import path.
+			if d == dirPrefix {
+				// Yes.
+				// Get file from archive.
+				rc, err := f.Open()
+				if err != nil {
+					return nil, errors.New("doc.getOSCDoc(" + match["importPath"] + ") -> open file: " + err.Error())
+				}
+
+				p := make([]byte, f.FileInfo().Size())
+				rc.Read(p)
+				if err != nil {
+					return nil, errors.New("doc.getOSCDoc(" + match["importPath"] + ") -> read file: " + err.Error())
+				}
+
+				files = append(files, &source{
+					name:      fn,
+					browseURL: expand("http://git.oschina.net/{owner}/{repo}/blob/{tag}/{0}", match, fileName),
+					rawURL:    expand("http://git.oschina.net/{owner}/{repo}/raw/{tag}/{0}", match, fileName[preLen:]),
+					data:      p,
+				})
+			} else {
+				sd, _ := path.Split(d[preLen:])
+				sd = strings.TrimSuffix(sd, "/")
+				if !checkDir(sd, dirs) {
+					dirs = append(dirs, sd)
+				}
 			}
-
-			p := make([]byte, f.FileInfo().Size())
-			rc.Read(p)
-			if err != nil {
-				return nil, errors.New("doc.getOSCDoc(" + match["importPath"] + ") -> read file: " + err.Error())
-			}
-
-			files = append(files, &source{
-				name:      fileName[dirLen+1:],
-				browseURL: expand("http://git.oschina.net/{owner}/{repo}/blob/{tag}/{0}", match, fileName[nameLen+1:]),
-				rawURL:    expand("http://git.oschina.net/{owner}/{repo}/raw/{tag}/{0}", match, fileName[dirLen+1:]),
-				data:      p,
-			})
-			continue
-		}
-
-		// Directory.
-		if strings.HasSuffix(fileName, "/") && strings.LastIndex(fileName, "/") != dirLen &&
-			utils.FilterDirName(fileName[dirLen+1:]) {
-			dirs = append(dirs, strings.TrimSuffix(fileName[dirLen+1:], "/"))
 		}
 	}
 

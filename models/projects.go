@@ -33,8 +33,7 @@ import (
 		4. Rock this week
 	projects and recent updated examples.
 */
-func GetPopulars(proNum, exNum int) (error, []*PkgExam,
-	[]*PkgInfo, []*PkgInfo, []*PkgInfo, []*PkgInfo) {
+func GetPopulars(proNum, exNum int) (error, []*PkgExam, []*PkgInfo, []*PkgInfo, []*PkgInfo, []*PkgInfo) {
 	q := connDb()
 	defer q.Close()
 
@@ -313,7 +312,7 @@ func FlushCacheProjects(pinfos []*PkgInfo, procks []*PkgRock) {
 	}
 
 	// Update rock this week.
-	if time.Now().Weekday() == time.Monday && !utils.Cfg.MustGetBool("task", "rock_reset") {
+	if time.Now().Weekday() == time.Monday && !utils.Cfg.MustBool("task", "rock_reset") {
 		// Reset rock table.
 		_, err := q.Where("id > ?", int64(0)).Delete(new(PkgRock))
 		if err != nil {

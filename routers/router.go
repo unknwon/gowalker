@@ -122,12 +122,12 @@ var (
 
 func init() {
 	// Load max element numbers.
-	num := utils.Cfg.MustGetInt("setting", "max_pro_info_num")
+	num := utils.Cfg.MustInt("setting", "max_pro_info_num")
 	if num > 0 {
 		maxProInfoNum = num
 	}
 
-	num = utils.Cfg.MustGetInt("setting", "max_exam_num")
+	num = utils.Cfg.MustInt("setting", "max_exam_num")
 	if num > 0 {
 		maxExamNum = num
 	}

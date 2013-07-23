@@ -23,6 +23,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/Unknwon/gowalker/utils"
 	"github.com/astaxie/beego"
 	"github.com/coocood/qbs"
 )
@@ -191,9 +192,9 @@ func setMg() (*qbs.Migration, error) {
 func init() {
 	// Initialize database.
 	qbs.Register("mysql", fmt.Sprintf("%v:%v@%v/%v?charset=utf8&parseTime=true&loc=Local",
-		beego.AppConfig.String("dbuser"), beego.AppConfig.String("dbpasswd"),
-		beego.AppConfig.String("dbhost"), beego.AppConfig.String("dbname")),
-		beego.AppConfig.String("dbname"), qbs.NewMysql())
+		utils.Cfg.MustValue("db", "user"), utils.Cfg.MustValue("db", "passwd"),
+		utils.Cfg.MustValue("db", "host"), utils.Cfg.MustValue("db", "name")),
+		utils.Cfg.MustValue("db", "name"), qbs.NewMysql())
 
 	// Connect to database.
 	q := connDb()

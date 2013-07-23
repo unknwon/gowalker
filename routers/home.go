@@ -59,7 +59,7 @@ var (
 
 func init() {
 	// Initialize project tags.
-	labelList = strings.Split(utils.Cfg.MustGetValue("setting", "lables"), "|")
+	labelList = strings.Split(utils.Cfg.MustValue("setting", "lables"), "|")
 	for _, s := range labelList {
 		labelSet += "&quot;" + s + "&quot;,"
 	}
