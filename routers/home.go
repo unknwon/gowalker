@@ -149,7 +149,8 @@ func (this *HomeRouter) Get() {
 	}
 
 	// User Recent projects.
-	ck, _ := this.Ctx.Request.Cookie("UserRecentPros")
+	urpids, _ := this.Ctx.Request.Cookie("UserRecentPros")
+	urpts, _ := this.Ctx.Request.Cookie("URPTimestamps")
 
 	this.TplNames = "home_" + curLang.Lang + ".html"
 	// Check show home page or documentation page.
@@ -160,9 +161,14 @@ func (this *HomeRouter) Get() {
 		// Global Recent projects.
 		this.Data["GlobalRecentPros"] = recentViewedPros
 		// User Recent projects.
-		if ck != nil {
-			this.Data["UserRecentPros"] =
-				models.GetGroupPkgInfoById(strings.Split(ck.Value, "|"))
+		if urpids != nil && urpts != nil {
+			upros := models.GetGroupPkgInfoById(strings.Split(urpids.Value, "|"))
+			pts := strings.Split(urpts.Value, "|")
+			for i, p := range upros {
+				ts, _ := strconv.Atoi(pts[i])
+				p.ViewedTime = int64(ts)
+			}
+			this.Data["UserRecentPros"] = upros
 		}
 
 		// Get popular projects and examples.
@@ -201,7 +207,9 @@ func (this *HomeRouter) Get() {
 			pdoc.UserExamples = getUserExamples(pdoc.ImportPath)
 			// Generate documentation page.
 			if generatePage(this, pdoc, broPath, tag, curLang.Lang) {
-				this.Ctx.SetCookie("UserRecentPros", updateCacheInfo(pdoc, ck), 9999999999, "/")
+				ps, ts := updateCacheInfo(pdoc, urpids, urpts)
+				this.Ctx.SetCookie("UserRecentPros", ps, 9999999999, "/")
+				this.Ctx.SetCookie("URPTimestamps", ts, 9999999999, "/")
 				return
 			}
 		} else {
@@ -901,12 +909,12 @@ func codeDecode(code *string) *string {
 	return str
 }
 
-func updateCacheInfo(pdoc *doc.Package, ck *http.Cookie) string {
+func updateCacheInfo(pdoc *doc.Package, urpids, urpts *http.Cookie) (string, string) {
 	pdoc.ViewedTime = time.Now().UTC().Unix()
 
 	updateCachePros(pdoc)
 	updateProInfos(pdoc)
-	return updateUrPros(pdoc, ck)
+	return updateUrPros(pdoc, urpids, urpts)
 }
 
 func updateCachePros(pdoc *doc.Package) {
@@ -987,10 +995,21 @@ func updateProInfos(pdoc *doc.Package) {
 	recentViewedPros = s
 }
 
-func updateUrPros(pdoc *doc.Package, ck *http.Cookie) string {
-	var urPros []string
-	if ck != nil {
-		urPros = strings.Split(ck.Value, "|")
+func updateUrPros(pdoc *doc.Package, urpids, urpts *http.Cookie) (string, string) {
+	if pdoc.Id == 0 {
+		return urpids.Value, urpts.Value
+	}
+
+	var urPros, urTs []string
+	if urpids != nil && urpts != nil {
+		urPros = strings.Split(urpids.Value, "|")
+		urTs = strings.Split(urpts.Value, "|")
+		if len(urTs) != len(urPros) {
+			urTs = strings.Split(
+				strings.Repeat(strconv.Itoa(int(time.Now().UTC().Unix()))+"|", len(urPros)), "|")
+			urTs = urTs[:len(urTs)-1]
+		}
+		fmt.Println(len(urTs), len(urPros))
 	}
 
 	index := -1
@@ -1001,7 +1020,7 @@ func updateUrPros(pdoc *doc.Package, ck *http.Cookie) string {
 		id, err := strconv.Atoi(s)
 		pid := int64(id)
 		if err != nil {
-			return ck.Value
+			return urpids.Value, urpts.Value
 		}
 		if pid == pdoc.Id {
 			index = i
@@ -1010,18 +1029,25 @@ func updateUrPros(pdoc *doc.Package, ck *http.Cookie) string {
 	}
 
 	s := make([]string, 0, maxProInfoNum)
+	ts := make([]string, 0, maxProInfoNum)
 	s = append(s, strconv.Itoa(int(pdoc.Id)))
+	ts = append(ts, strconv.Itoa(int(time.Now().UTC().Unix())))
+
 	switch {
 	case index == -1 && listLen < maxProInfoNum:
 		// Not found and list is not full
 		s = append(s, urPros...)
+		ts = append(ts, urTs...)
 	case index == -1 && listLen >= maxProInfoNum:
 		// Not found but list is full
 		s = append(s, urPros[:maxProInfoNum-1]...)
+		ts = append(ts, urTs[:maxProInfoNum-1]...)
 	case index > -1:
 		// Found
 		s = append(s, urPros[:index]...)
 		s = append(s, urPros[index+1:]...)
+		ts = append(ts, urTs[:index]...)
+		ts = append(ts, urTs[index+1:]...)
 	}
-	return strings.Join(s, "|")
+	return strings.Join(s, "|"), strings.Join(ts, "|")
 }
