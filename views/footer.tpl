@@ -31,6 +31,17 @@
 			<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
 			<script type="text/javascript" src="/static/js/bootstrap.min.js"></script>
 			<script type='text/javascript' src='/static/js/site.js'></script>
+
+			{{if .IsHasReadme}}
+			<script type="text/javascript" src="/static/js/showdown.js"></script>
+			<script type="text/javascript">
+				var converter = new Showdown.converter({});
+				var readme = document.getElementById("readme");
+				readme.innerHTML = converter.makeHtml(document.getElementById("readme").innerHTML);
+				readme.style.display = "block";
+			</script>
+			{{end}}
+
 			<p><strong>Copyright © 2013 Go Walker</strong></p>
 			<p>Website built by <a target="_blank" href="https://github.com/Unknwon"><i class="icon-user"></i> @Unknown</a>. Powered by <a target="_blank" href="https://github.com/astaxie/beego"><i class="icon-bold"></i>eego</a> and <a target="_blank" href="https://github.com/coocood/qbs">Qbs</a>.</p>
 			{{if .IsHome}}<p>Based on <a target="_blank" href="http://twitter.github.io/bootstrap/">Bootstrap</a>. Icons from <a target="_blank" href="http://glyphicons.com/">Glyphicons</a>.</p>{{end}}

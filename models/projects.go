@@ -325,6 +325,7 @@ func FlushCacheProjects(pinfos []*PkgInfo, procks []*PkgRock) {
 		r := new(PkgRock)
 		err := q.WhereEqual("pid", pr.Pid).Find(r)
 		if err == nil {
+			pr.Id = r.Id
 			r.Delta += pr.Rank - r.Rank
 			pr.Delta = r.Delta
 		}

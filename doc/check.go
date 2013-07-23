@@ -56,7 +56,7 @@ func CheckDoc(path, tag string, requestType int) (*Package, error) {
 	// If PACKAGE_VER does not match, refresh anyway.
 	if err != nil || !strings.HasPrefix(pinfo.Etag, PACKAGE_VER) {
 		if err != nil {
-			beego.Error("doc.CheckDoc -> ", err)
+			beego.Trace("doc.CheckDoc -> ", err)
 		}
 		// No package information in database.
 		needsCrawl = true

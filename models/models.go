@@ -25,7 +25,6 @@ import (
 
 	"github.com/astaxie/beego"
 	"github.com/coocood/qbs"
-	"github.com/russross/blackfriday"
 )
 
 // PkgInfo is package information.
@@ -167,14 +166,15 @@ type PkgFunc struct {
 
 // PkgRock represents a package rock information.
 type PkgRock struct {
-	Pid   int64 `qbs:"pk,index"`
+	Id    int64
+	Pid   int64 `qbs:"index"`
 	Path  string
 	Rank  int64
 	Delta int64 `qbs:"index"`
 }
 
 func (*PkgRock) Indexes(indexes *qbs.Indexes) {
-	indexes.AddUnique("path")
+	indexes.AddUnique("pid", "path")
 }
 
 func connDb() *qbs.Qbs {
@@ -412,22 +412,12 @@ func SavePkgDoc(path, lang string, docBys []byte) {
 	if doc[0] == '=' {
 		doc = doc[strings.Index(doc, "\n")+1:]
 	}
-	// Find all picture path of build system. HAVE BUG!!!
-	for _, m := range buildPicPattern.FindAllString(doc, -1) {
-		start := strings.Index(m, "http")
-		end := strings.Index(m, ")")
-		if (start > -1) && (end > -1) && (start < end) {
-			picPath := m[start:end]
-			doc = strings.Replace(doc, m, "![]("+picPath+")", 1)
-		}
-	}
-	doc = string(blackfriday.MarkdownCommon([]byte(doc)))
-	doc = strings.Replace(doc, "h3>", "h5>", -1)
-	doc = strings.Replace(doc, "h2>", "h4>", -1)
-	doc = strings.Replace(doc, "h1>", "h3>", -1)
-	doc = strings.Replace(doc, "<center>", "", -1)
-	doc = strings.Replace(doc, "</center>", "", -1)
-	doc = "<div style='display:block; padding: 3px; border:1px solid #4F4F4F;'>" + doc + "</div>"
+
+	// doc = strings.Replace(doc, "h3>", "h5>", -1)
+	// doc = strings.Replace(doc, "h2>", "h4>", -1)
+	// doc = strings.Replace(doc, "h1>", "h3>", -1)
+	// doc = strings.Replace(doc, "<center>", "", -1)
+	// doc = strings.Replace(doc, "</center>", "", -1)
 
 	pdoc := new(PkgDoc)
 	cond := qbs.NewCondition("path = ?", path).And("lang = ?", lang).And("type = ?", "rm")

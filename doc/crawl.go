@@ -49,7 +49,6 @@ func crawlDoc(path, tag string, pinfo *models.PkgInfo) (pdoc *Package, err error
 
 	if err != errNotModified && pdocNew != nil {
 		pdoc = pdocNew
-		pdoc.Id = pinfo.Id
 		pdoc.Views = pinfo.Views
 		pdoc.Labels = pinfo.Labels
 		pdoc.ImportedNum = pinfo.ImportedNum
@@ -58,7 +57,8 @@ func crawlDoc(path, tag string, pinfo *models.PkgInfo) (pdoc *Package, err error
 
 	switch {
 	case err == nil:
-		if err = SaveProject(pdoc, pinfo); err != nil {
+		pdoc.Id, err = SaveProject(pdoc, pinfo)
+		if err != nil {
 			beego.Error("doc.SaveProject(", path, ") ->", err)
 		}
 	case isNotFound(err):
@@ -102,7 +102,7 @@ func getRepo(client *http.Client, importPath, tag, etag string) (pdoc *Package, 
 }
 
 // SaveProject saves project information to database.
-func SaveProject(pdoc *Package, info *models.PkgInfo) error {
+func SaveProject(pdoc *Package, info *models.PkgInfo) (int64, error) {
 	// Save package information.
 	pinfo := &models.PkgInfo{
 		Path:        pdoc.ImportPath,
@@ -285,7 +285,7 @@ func SaveProject(pdoc *Package, info *models.PkgInfo) error {
 	pdecl.TestFiles = buf.String()
 
 	err := models.SaveProject(pinfo, pdecl, pfuncs, pdoc.Imports)
-	return err
+	return pinfo.Id, err
 }
 
 // getLinks returns exported objects with its jump link.

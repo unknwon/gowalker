@@ -36,7 +36,7 @@ func GetPkgInfo(path, tag string) (*PkgInfo, error) {
 	pinfo := new(PkgInfo)
 	err := q.WhereEqual("path", path).Find(pinfo)
 	if err != nil {
-		return pinfo, err
+		return pinfo, errors.New("models.GetPkgInfo -> " + err.Error())
 	}
 
 	pdecl := new(PkgDecl)
