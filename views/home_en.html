@@ -82,12 +82,11 @@
                                 {{range .GlobalRecentPros}}
                                 <tr>
                                     <td>
+                                        <span class="label label-inverse">{{.Rank}}</span>
                                         <a title="{{.Synopsis}}" href="/{{.Path}}">{{.Path}}</a>
 
                                         {{if .IsGoRepo}}
                                         <span class="label label-info">Standard</span>
-                                        {{else}}
-                                        <span class="badge badge-inverse">{{.Rank}}</span>
                                         {{end}}
                                     </td>
 
@@ -116,8 +115,8 @@
                                 {{range .UserRecentPros}}
                                 <tr>
                                     <td>
+                                        <span class="label label-inverse">{{.Rank}}</span>
                                         <a title="{{.Synopsis}}" href="/{{.Path}}">{{.Path}}</a>
-                                        <span class="badge badge-inverse">{{.Rank}}</span>
                                     </td>
 
                                     <td>{{.ViewedTime}}</td>
@@ -137,9 +136,9 @@
                                     for (var i = 1; i < items.length; i++) {
                                         // Limit length.
                                         var s = table.rows[i].cells[0].getElementsByTagName("a")[0];
-                                        if (s.innerHTML.length > 40) {
-                                            s.title="Path: "+ s.innerHTML+"\n"+ s.title;
-                                            s.innerHTML = "..." + s.innerHTML.substr(s.innerHTML.length - 37);
+                                        if (s.innerHTML.length > 48) {
+                                            s.title = "Path: " + s.innerHTML + "\n" + s.title;
+                                            s.innerHTML = "..." + s.innerHTML.substr(s.innerHTML.length - 45);
                                         }
                                         // Convert timestamp to local time.
                                         var t = parseInt(table.rows[i].cells[1].innerHTML);

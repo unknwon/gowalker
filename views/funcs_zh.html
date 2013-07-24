@@ -1,0 +1,68 @@
+{{template "header_en"}}
+		<title>Go Walker - Functions</title>
+	</head>
+		
+	<body id="body" style="padding-top: 60px; font-family: Microsoft Yahei; font-size: 13px;">
+		{{template "navbar_en" .}}
+		<div class="container" style="width: 1000px;">
+			<div class="row" style="margin-left: 0px;">
+				<h1>Functions</h1>
+				<form action="/funcs">
+					<div class="input-append">
+						<input autocomplete="off" class="span6" type="text" placeholder="Type keywords to search" value="{{.Keyword}}" name="q">
+						<button class="btn" type="submit">Go!</button>
+					</div>
+				</form>
+
+				{{if .IsFindFunc}}
+				<table name="result_table" class="table table-condensed table-hover">
+					<thead>
+						<tr>
+							<th>函数名称</th>
+							<th>项目路径</th>
+							<th>简介（悬浮可见完整提示）</th>
+						</tr>
+					</thead>
+
+					<tbody>
+						{{range .Results}}
+						<tr>
+							<td>{{.Name}}</td>
+							<td><a href="/{{.Path}}#{{.Name}}">{{.Path}}</a></td>
+							<td>{{.Doc}}</td>
+						</tr>
+						{{end}}
+					</tbody>
+				</table>
+
+	            <script>
+	                (function () {
+	                    var tables = document.getElementsByName("result_table");
+	                    var now = new Date();
+	                    for (var n = 0; n < tables.length; n++) {
+	                        var table = tables[n];
+	                        var items = table.getElementsByTagName("tr");
+	                        for (var i = 1; i < items.length; i++) {
+                                var s = table.rows[i].cells[1].getElementsByTagName("a")[0];
+                                if (s.innerHTML.length > 40) {
+	                                s.title = s.innerHTML;
+                                    s.innerHTML = "..." + s.innerHTML.substr(s.innerHTML.length - 37);
+                                }
+	                            // Limit length.
+	                            s = table.rows[i].cells[2];
+	                            if (s.innerHTML.length > 65) {
+	                                s.title = s.innerHTML;
+	                                s.innerHTML = s.innerHTML.substr(0, 65) + "...";
+	                            }
+	                        }
+	                    }
+	                })();
+	            </script>
+				{{else}}
+				<p>No functions found.</p>
+				{{end}}
+			</div>
+		</div>
+		{{template "footer_en" .}}
+	</body>
+</html>

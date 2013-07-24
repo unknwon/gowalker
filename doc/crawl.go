@@ -316,10 +316,12 @@ func getLinks(pdoc *Package) []*utils.Link {
 	}
 
 	for _, v := range pdoc.Imports {
-		links = append(links, &utils.Link{
-			Name: path.Base(v) + ".",
-			Path: v,
-		})
+		if v != "C" {
+			links = append(links, &utils.Link{
+				Name: path.Base(v) + ".",
+				Path: v,
+			})
+		}
 	}
 	return links
 }

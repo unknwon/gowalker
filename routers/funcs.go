@@ -28,9 +28,34 @@ type FuncsRouter struct {
 
 // Get implemented Get method for FuncsRouter.
 func (this *FuncsRouter) Get() {
+	// Set language version.
+	curLang := globalSetting(this.Ctx, this.Input(), this.Data)
+
+	// Get arguments.
 	q := strings.TrimSpace(this.Input().Get("q"))
+	name := strings.TrimSpace(this.Input().Get("name"))
 	pid := strings.TrimSpace(this.Input().Get("pid"))
-	this.TplNames = "funcs.tpl"
-	code := models.GetPkgFunc(q, pid)
-	this.Data["Code"] = *codeDecode(&code)
+
+	// AJAX.
+	if len(name) != 0 && len(pid) != 0 {
+		this.TplNames = "funcs.tpl"
+		code := models.GetPkgFunc(name, pid)
+		this.Data["Code"] = *codeDecode(&code)
+		return
+	}
+
+	// Set properties.
+	this.TplNames = "funcs_" + curLang.Lang + ".html"
+	this.Data["Keyword"] = q
+
+	if len(q) > 0 {
+		// Function search.
+		pfuncs := models.SearchFunc(q)
+
+		// Show results after searched.
+		if len(pfuncs) > 0 {
+			this.Data["IsFindFunc"] = true
+			this.Data["Results"] = pfuncs
+		}
+	}
 }

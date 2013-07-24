@@ -121,6 +121,7 @@ func SaveProject(pinfo *PkgInfo, pdecl *PkgDecl, pfuncs []*PkgFunc, imports []st
 			_, err = q.WhereEqual("pid", pdecl.Id).Update(pfunc)
 		}
 
+		isMaster := pdecl.Tag == ""
 		// Save new ones.
 		for _, pf := range pfuncs {
 			f := new(PkgFunc)
@@ -132,6 +133,7 @@ func SaveProject(pinfo *PkgInfo, pdecl *PkgDecl, pfuncs []*PkgFunc, imports []st
 
 			pf.Pid = pdecl.Id
 			pf.Path = pinfo.Path
+			pf.IsMaster = isMaster
 			_, err = q.Save(pf)
 			if err != nil {
 				beego.Error("models.SaveProject(", pinfo.Path, ") -> Update function(", pf.Name, "):", err)
@@ -247,7 +249,7 @@ func DeleteProject(path string) error {
 
 	// Delete package functions.
 	if info.Id > 0 {
-		i5, err = q.WhereEqual("pid", info.Id).Delete(new(PkgExam))
+		i5, err = q.WhereEqual("path", path).Delete(new(PkgExam))
 		if err != nil {
 			beego.Error("models.DeleteProject(", path, ") -> Functions:", err)
 		}

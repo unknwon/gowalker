@@ -75,7 +75,7 @@ func (this *SearchRouter) Get() {
 	// }
 
 	// Returns a slice of results.
-	pinfos, _ := models.SearchPkg(q)
+	pinfos := models.SearchPkg(q)
 
 	// Show results after searched.
 	if len(pinfos) > 0 {

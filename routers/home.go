@@ -205,14 +205,16 @@ func (this *HomeRouter) Get() {
 
 		// Check documentation of this import path, and update automatically as needed.
 		pdoc, err := doc.CheckDoc(reqUrl, tag, doc.HUMAN_REQUEST)
-		if err == nil && pdoc != nil {
-			pdoc.UserExamples = getUserExamples(pdoc.ImportPath)
-			// Generate documentation page.
-			if generatePage(this, pdoc, broPath, tag, curLang.Lang) {
-				ps, ts := updateCacheInfo(pdoc, urpids, urpts)
-				this.Ctx.SetCookie("UserRecentPros", ps, 9999999999, "/")
-				this.Ctx.SetCookie("URPTimestamps", ts, 9999999999, "/")
-				return
+		if err == nil {
+			if pdoc != nil {
+				pdoc.UserExamples = getUserExamples(pdoc.ImportPath)
+				// Generate documentation page.
+				if generatePage(this, pdoc, broPath, tag, curLang.Lang) {
+					ps, ts := updateCacheInfo(pdoc, urpids, urpts)
+					this.Ctx.SetCookie("UserRecentPros", ps, 9999999999, "/")
+					this.Ctx.SetCookie("URPTimestamps", ts, 9999999999, "/")
+					return
+				}
 			}
 		} else {
 			beego.Error("HomeRouter.Get ->", err)
@@ -321,10 +323,12 @@ func generatePage(this *HomeRouter, pdoc *doc.Package, q, tag, lang string) bool
 	}
 
 	for _, v := range pdoc.Imports {
-		links = append(links, &utils.Link{
-			Name: path.Base(v) + ".",
-			Path: v,
-		})
+		if v != "C" {
+			links = append(links, &utils.Link{
+				Name: path.Base(v) + ".",
+				Path: v,
+			})
+		}
 	}
 
 	exportDataSrc := buf.String()
@@ -505,6 +509,7 @@ func generatePage(this *HomeRouter, pdoc *doc.Package, q, tag, lang string) bool
 		e.Code = buf.String()
 	}
 
+	this.Data["Rank"] = pdoc.Rank
 	this.Data["Pid"] = pdecl.Id
 	this.Data["ImportPkgs"] = pdecl.Imports
 	this.Data["ImportPkgNum"] = len(pdoc.Imports)

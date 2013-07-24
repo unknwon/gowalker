@@ -23,17 +23,17 @@ import (
 )
 
 // SearchPkg returns packages that import path and synopsis contains keyword.
-func SearchPkg(key string) ([]*PkgInfo, error) {
+func SearchPkg(key string) []*PkgInfo {
 	q := connDb()
 	defer q.Close()
 
 	var pinfos []*PkgInfo
-	condition := qbs.NewCondition("path like ?", "%"+key+"%").Or("synopsis like ?", "%"+key+"%")
-	err := q.Limit(200).Condition(condition).OrderByDesc("rank").FindAll(&pinfos)
-	return pinfos, err
+	cond := qbs.NewCondition("path like ?", "%"+key+"%").Or("synopsis like ?", "%"+key+"%")
+	q.Limit(200).Condition(cond).OrderByDesc("rank").FindAll(&pinfos)
+	return pinfos
 }
 
-// GetProInfo returns package information from database.
+// GetPkgInfo returns package information.
 func GetPkgInfo(path, tag string) (*PkgInfo, error) {
 	// Check path length to reduce connect times.
 	if len(path) == 0 {
@@ -100,10 +100,10 @@ func GetGroupPkgInfoById(pids []string) []*PkgInfo {
 
 	pinfos := make([]*PkgInfo, 0, len(pids))
 	for _, v := range pids {
-		pid, _ := strconv.Atoi(v)
+		pid, _ := strconv.ParseInt(v, 10, 64)
 		if pid > 0 {
 			pinfo := new(PkgInfo)
-			err := q.WhereEqual("id", int64(pid)).Find(pinfo)
+			err := q.WhereEqual("id", pid).Find(pinfo)
 			if err == nil {
 				pinfos = append(pinfos, pinfo)
 			} else {
@@ -119,7 +119,7 @@ func GetIndexPkgs(page int) (pkgs []*PkgInfo) {
 	q := connDb()
 	defer q.Close()
 
-	err := q.Limit(100).FindAll(&pkgs)
+	err := q.Limit(100).OrderByDesc("Rank").FindAll(&pkgs)
 	if err != nil {
 		beego.Error("models.GetIndexPkgs ->", err)
 	}

@@ -298,7 +298,7 @@ function getFuncCode(name) {
     }
 
     funcName = name;
-    xmlHttp.open("GET", "/funcs?q=" + name + "&pid=" + pid.innerHTML, true);
+    xmlHttp.open("GET", "/funcs?name=" + name + "&pid=" + pid.innerHTML, true);
     xmlHttp.onreadystatechange = okFunc;
     xmlHttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
     xmlHttp.send();

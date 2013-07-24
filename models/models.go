@@ -156,13 +156,14 @@ type PkgExam struct {
 
 // PkgFunc represents a package function.
 type PkgFunc struct {
-	Id    int64
-	Pid   int64 `qbs:"index"` // Id of package documentation it belongs to.
-	Path  string
-	Name  string `qbs:"size:100,index"`
-	Doc   string
-	Code  string // Included field 'Decl', formatted.
-	IsOld bool   // Indicates if the function no longer exists.
+	Id       int64
+	Pid      int64 `qbs:"index"` // Id of package documentation it belongs to.
+	Path     string
+	Name     string `qbs:"size:100,index"`
+	Doc      string
+	Code     string // Included field 'Decl', formatted.
+	IsMaster bool
+	IsOld    bool // Indicates if the function no longer exists.
 }
 
 // PkgRock represents a package rock information.
@@ -431,8 +432,8 @@ func GetPkgFunc(name, pidS string) string {
 	defer q.Close()
 
 	pfunc := new(PkgFunc)
-	pid, _ := strconv.Atoi(pidS)
-	cond := qbs.NewCondition("pid = ?", int64(pid)).And("name = ?", name)
+	pid, _ := strconv.ParseInt(pidS, 10, 64)
+	cond := qbs.NewCondition("pid = ?", pid).And("name = ?", name)
 	err := q.Condition(cond).Find(pfunc)
 	if err != nil {
 		pfunc.Code = "Function not found:\n" +
@@ -449,4 +450,15 @@ func GetIndexStats() (int64, int64, int64) {
 	defer q.Close()
 
 	return q.Count(new(PkgInfo)), q.Count(new(PkgDecl)), q.Count(new(PkgFunc))
+}
+
+// SearchFunc returns functions that name contains keyword.
+func SearchFunc(key string) []*PkgFunc {
+	q := connDb()
+	defer q.Close()
+
+	var pfuncs []*PkgFunc
+	cond := qbs.NewCondition("is_master = ?", false).And("name like ?", "%"+key+"%")
+	q.Limit(200).Condition(cond).FindAll(&pfuncs)
+	return pfuncs
 }
