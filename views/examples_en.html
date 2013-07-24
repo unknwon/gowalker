@@ -6,6 +6,7 @@
 		{{template "navbar_en" .}}
 		<div class="container" style="width: 1000px;">
 			<h1>Examples</h1>
+
 			{{if .IsShowExam}}
 			<p>Number of total examples: {{.ExamNum}}.</p>
 			<table class="table table-condensed">
@@ -15,6 +16,7 @@
 						<th>Gist</th>
 					</tr>
 				</thead>
+				
 				<tbody>
 					{{range .AllExams}}
 					<tr>

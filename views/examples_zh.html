@@ -5,7 +5,8 @@
 	<body id="body" style="padding-top: 60px; font-family: Microsoft Yahei; font-size: 13px;">
 		{{template "navbar_zh" .}}
 		<div class="container" style="width: 1000px;">
-			<h1>Examples</h1>
+			<h1>示例</h1>
+
 			{{if .IsShowExam}}
 			<p>示例总数：{{.ExamNum}}.</p>
 			<table class="table table-condensed">
@@ -15,6 +16,7 @@
 						<th>Gist</th>
 					</tr>
 				</thead>
+				
 				<tbody>
 					{{range .AllExams}}
 					<tr>
