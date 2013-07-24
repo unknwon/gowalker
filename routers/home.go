@@ -251,7 +251,7 @@ func generatePage(this *HomeRouter, pdoc *doc.Package, q, tag, lang string) bool
 	this.TplNames = "docs_" + lang + ".html"
 
 	// Refresh (within 10 seconds).
-	this.Data["IsRefresh"] = pdoc.Created.Add(10 * time.Second).UTC().After(time.Now().UTC())
+	this.Data["IsRefresh"] = pdoc.Created.UTC().Add(10 * time.Second).After(time.Now().UTC())
 
 	// Get VCS name, project name, project home page, and Upper level project URL.
 	this.Data["VCS"], this.Data["ProName"], this.Data["ProPath"], this.Data["ProDocPath"], this.Data["PkgTag"] =
@@ -1016,8 +1016,7 @@ func updateUrPros(pdoc *doc.Package, urpids, urpts *http.Cookie) (string, string
 
 	// Check if in the list
 	for i, s := range urPros {
-		id, err := strconv.Atoi(s)
-		pid := int64(id)
+		pid, err := strconv.ParseInt(s, 10, 64)
 		if err != nil {
 			return urpids.Value, urpts.Value
 		}

@@ -6,36 +6,66 @@
 		{{template "navbar_zh" .}}
 		<div class="container" style="width: 1000px;">
 			<h1>索引</h1>
-			<p>当前收录项目总数：{{.ProNum}}.</p>
-			<div class="row">
-				<div class="span6 homeright">
-					<h4>Top 26-64 热门项目</h4>
-					<ul class="unstyled">
-						{{range .PopPros}}
-						<li><span class="badge">{{.Views}}</span> <a title="{{.Synopsis}}" href="/{{.Path}}">{{.Path}}</a></li>
+
+			{{with .IndexStats}}
+			<p>统计信息：<b>{{.ProNum}}</b> 个项目，<b>{{.DeclNum}}</b> 种文档以及 <b>{{.FuncNum}}</b> 个函数.</p>
+			{{end}}
+
+			<div>
+				<table class="table table-condensed table-hover">
+					<thead>
+						<tr>
+							<th>项目路径</th>
+							<th>简介</th>
+							<th>排名值</th>
+						</tr>
+					</thead>
+
+					<tbody>
+						{{range .IndexPkgs}}
+						<tr>
+							<td><a href="/{{.Path}}">{{.Path}}</a></td>
+							<td>{{.Synopsis}}</td>
+							<td><span class="label label-info">{{.Rank}}</span></td>
+						</tr>
+						{{end}}
+					</tbody>
+				</table>
+			</div>
+
+			<div class="row" style="margin: 0px;">
+				<div class="pagination span6">
+					<ul>
+						<li {{if .IsBackDisable}}class="disabled"{{end}}><a href="/index?p={{.BackPageNum}}">&laquo;</a></li>
+
+						{{range .BackPageList}}
+						<li {{if .IsActive}}class="active"{{end}}>
+							{{if .IsActive}}
+							<a href="#_buttom">{{.PageNum}}</a>
+							{{else}}
+							<a href="/index?p={{.PageNum}}">{{.PageNum}}</a>
+							{{end}}
+						</li>
 						{{end}}
 					</ul>
 				</div>
-				<div class="span6 homeleft">
-					<h4>项目引用排行榜</h4>
-					<table id="rectable" class="table table-bordered table-hover">
-						<thead>
-							<tr>
-								<th>导入路径</th>
-								<th>引用信息</th>
-							</tr>
-						</thead>
-						<tbody>
-						{{range .ImportedPros}}
-							<tr>
-								<td><a title="{{.Synopsis}}" href="/{{.Path}}">{{.Path}}</a></td>
-								<td><a href="/search?q=imported&pkgs={{.ImportPid}}">{{.ImportedNum}} 个包</a></td>
-							</tr>
+
+				<div class="pagination pagination-right span7">
+					<ul>
+						{{range .ForwardPageList}}
+						<li {{if .IsActive}}class="active"{{end}}>
+							{{if .IsActive}}
+							<a href="#_buttom">{{.PageNum}}</a>
+							{{else}}
+							<a href="/index?p={{.PageNum}}">{{.PageNum}}</a>
+							{{end}}
+						</li>
 						{{end}}
-						</tbody>
-					</table>
+
+						<li {{if .IsForwardDisable}}class="disabled"{{end}}><a href="/index?p={{.ForwardPageNum}}">&raquo;</a></li>
+					</ul>
 				</div>
-			</div>
+			</div>	
 		</div>
 		{{template "footer_zh" .}}
 	</body>

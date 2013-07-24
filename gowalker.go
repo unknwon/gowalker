@@ -26,7 +26,7 @@ import (
 )
 
 const (
-	VERSION = "0.7.8.0723 Beta" // Application version.
+	VERSION = "0.7.9.0724 Beta" // Application version.
 )
 
 func init() {

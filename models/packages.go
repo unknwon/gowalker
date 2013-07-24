@@ -82,10 +82,8 @@ func GetGroupPkgInfo(paths []string) ([]*PkgInfo, error) {
 	return pinfos, nil
 }
 
-// GetGroupPkgInfoById returns group of package infomration by pid in order to reduce database connect times.
-// The formatted pid looks like '$<pid>|', so we need to cut '$' here.
+// GetGroupPkgInfoById returns group of package infomration by pid.
 func GetGroupPkgInfoById(pids []string) []*PkgInfo {
-	// Connect to database.
 	q := connDb()
 	defer q.Close()
 
@@ -103,4 +101,17 @@ func GetGroupPkgInfoById(pids []string) []*PkgInfo {
 		}
 	}
 	return pinfos
+}
+
+// GetIndexPkgs returns package information in given page.
+func GetIndexPkgs(page int) (pkgs []*PkgInfo) {
+	q := connDb()
+	defer q.Close()
+
+	err := q.Limit(100).FindAll(&pkgs)
+	if err != nil {
+		beego.Error("models.GetIndexPkgs ->", err)
+	}
+
+	return pkgs
 }

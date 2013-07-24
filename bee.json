@@ -1,0 +1,9 @@
+{
+	"dir_structure":{
+		"controllers": "routers",
+		"models": ""
+	},
+	"files": [
+		"gowalker.go"
+	]
+}

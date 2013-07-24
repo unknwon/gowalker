@@ -139,6 +139,7 @@ func init() {
 	go cacheTickerCheck(cacheTicker.C)
 
 	initPopPros()
+	initIndexStats()
 }
 
 func cacheTickerCheck(cacheChan <-chan time.Time) {
@@ -146,6 +147,7 @@ func cacheTickerCheck(cacheChan <-chan time.Time) {
 		<-cacheChan
 		flushCache()
 		initPopPros()
+		initIndexStats()
 	}
 }
 

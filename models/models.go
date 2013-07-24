@@ -190,8 +190,8 @@ func setMg() (*qbs.Migration, error) {
 }
 
 func init() {
-	// Initialize database.
-	qbs.Register("mysql", fmt.Sprintf("%v:%v@%v/%v?charset=utf8&parseTime=true&loc=Local",
+	// Initialize database. &loc=Local
+	qbs.Register("mysql", fmt.Sprintf("%v:%v@%v/%v?charset=utf8&parseTime=true",
 		utils.Cfg.MustValue("db", "user"), utils.Cfg.MustValue("db", "passwd"),
 		utils.Cfg.MustValue("db", "host"), utils.Cfg.MustValue("db", "name")),
 		utils.Cfg.MustValue("db", "name"), qbs.NewMysql())
@@ -297,22 +297,6 @@ func GetAllExams() ([]*PkgExam, error) {
 	var pkgExams []*PkgExam
 	err := q.OrderBy("path").FindAll(&pkgExams)
 	return pkgExams, err
-}
-
-// GetIndexPageInfo returns all data that used for index page.
-// One function is for reducing database connect times.
-func GetIndexPageInfo() (totalNum int64, popPkgs, importedPkgs []*PkgInfo, err error) {
-	// Connect to database.
-	q := connDb()
-	defer q.Close()
-
-	totalNum = q.Count(&PkgInfo{})
-	err = q.Offset(21).Limit(35).OrderByDesc("views").FindAll(&popPkgs)
-	if err != nil {
-		beego.Error("models.GetIndexPageInfo(): popPkgs:", err)
-	}
-	err = q.Limit(20).OrderByDesc("imported_num").OrderByDesc("views").FindAll(&importedPkgs)
-	return totalNum, popPkgs, importedPkgs, nil
 }
 
 // GetLabelsPageInfo returns all data that used for labels page.
@@ -469,4 +453,12 @@ func GetPkgFunc(name, pidS string) string {
 	}
 
 	return pfunc.Code
+}
+
+// GetIndexStats returns index page statistic information.
+func GetIndexStats() (int64, int64, int64) {
+	q := connDb()
+	defer q.Close()
+
+	return q.Count(new(PkgInfo)), q.Count(new(PkgDecl)), q.Count(new(PkgFunc))
 }
