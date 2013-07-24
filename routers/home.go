@@ -55,15 +55,17 @@ var (
 
 	labelList []string // Projects label list.
 	labelSet  string   // Label data source.
+	labels    []string
 )
 
 func init() {
-	// Initialize project tags.
-	labelList = strings.Split(utils.Cfg.MustValue("setting", "lables"), "|")
+	// Initialize project labels.
+	labelList = strings.Split(utils.Cfg.MustValue("setting", "labels"), "|")
 	for _, s := range labelList {
 		labelSet += "&quot;" + s + "&quot;,"
 	}
 	labelSet = labelSet[:len(labelSet)-1]
+	labels = strings.Split(utils.Cfg.MustValue("setting", "label_names"), "|")
 }
 
 // initPopPros initializes popular projects.
@@ -677,8 +679,6 @@ func getVCSInfo(q, tag string, pdoc *doc.Package) (vcs, proName, proPath, pkgDoc
 
 func getLabels(rawLabel string) []string {
 	// Get labels.
-	labels := strings.Split(beego.AppConfig.String("label_names"), "|")
-
 	rawLabels := strings.Split(rawLabel, "|")
 	rawLabels = rawLabels[:len(rawLabels)-1] // The last element is always empty.
 	// Remove first character '$' in every label.

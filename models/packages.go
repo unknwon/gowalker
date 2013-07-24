@@ -22,6 +22,17 @@ import (
 	"github.com/coocood/qbs"
 )
 
+// SearchPkg returns packages that import path and synopsis contains keyword.
+func SearchPkg(key string) ([]*PkgInfo, error) {
+	q := connDb()
+	defer q.Close()
+
+	var pinfos []*PkgInfo
+	condition := qbs.NewCondition("path like ?", "%"+key+"%").Or("synopsis like ?", "%"+key+"%")
+	err := q.Limit(200).Condition(condition).OrderByDesc("rank").FindAll(&pinfos)
+	return pinfos, err
+}
+
 // GetProInfo returns package information from database.
 func GetPkgInfo(path, tag string) (*PkgInfo, error) {
 	// Check path length to reduce connect times.

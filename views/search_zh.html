@@ -5,27 +5,31 @@
 	<body id="body" style="padding-top: 60px; font-family: Microsoft Yahei; font-size: 13px;">
 		{{template "navbar_zh" .}}
 		<div class="container" style="width: 1000px;">
-			<div class="row" style="margin-left: 20px;">
+			<div class="row" style="margin-left: 0px;">
 				<h1>搜索</h1>
 				<form action="/">
 					<div class="input-append">
-						<input autocomplete="off" class="span6" type="text" placeholder="输入导入路径来添加文档或使用关键字搜索" value="{{.Keyword}}" name="q" data-source="[{{str2html .DataSrc}}]" data-items="8" data-provide="typeahead"></input>
+						<input autocomplete="off" class="span6" type="text" placeholder="输入导入路径来添加文档或使用关键字搜索" value="{{.Keyword}}" name="q" data-source="[{{str2html .DataSrc}}]" data-items="8" data-provide="typeahead">
 						<button class="btn" type="submit">手气不错</button>
 					</div>
 				</form>
+
 				{{if .IsFindPro}}
-				<table class="table table-condensed">
+				<table class="table table-condensed table-hover">
 					<thead>
 						<tr>
 							<th>项目路径</th>
 							<th>简介</th>
+							<th>排名值</th>
 						</tr>
 					</thead>
+
 					<tbody>
-						{{range .AllPros}}
+						{{range .Results}}
 						<tr>
 							<td><a href="/{{.Path}}">{{.Path}}</a></td>
 							<td>{{.Synopsis}}</td>
+							<td><span class="label label-info">{{.Rank}}</span></td>
 						</tr>
 						{{end}}
 					</tbody>

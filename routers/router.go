@@ -116,8 +116,9 @@ func setLangVer(ctx *beego.Context, input url.Values, data map[interface{}]inter
 }
 
 var (
-	cacheTicker *time.Ticker
-	cachePros   []*models.PkgInfo
+	refreshCount int
+	cacheTicker  *time.Ticker
+	cachePros    []*models.PkgInfo
 )
 
 func init() {
@@ -145,9 +146,18 @@ func init() {
 func cacheTickerCheck(cacheChan <-chan time.Time) {
 	for {
 		<-cacheChan
+		refreshCount++
 		flushCache()
 		initPopPros()
 		initIndexStats()
+
+		if refreshCount%3 == 0 {
+
+		}
+
+		if refreshCount == 3 {
+			refreshCount = 0
+		}
 	}
 }
 

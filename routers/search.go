@@ -75,12 +75,12 @@ func (this *SearchRouter) Get() {
 	// }
 
 	// Returns a slice of results.
-	pkgInfos, _ := models.SearchDoc(q)
+	pinfos, _ := models.SearchPkg(q)
 
 	// Show results after searched.
-	if len(pkgInfos) > 0 {
+	if len(pinfos) > 0 {
 		this.Data["IsFindPro"] = true
-		this.Data["AllPros"] = pkgInfos
+		this.Data["Results"] = pinfos
 	}
 }
 

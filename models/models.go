@@ -235,18 +235,6 @@ func GetGoRepo() ([]*PkgInfo, error) {
 	return infos, err
 }
 
-// SearchDoc returns packages that import path contains keyword.
-func SearchDoc(key string) ([]*PkgInfo, error) {
-	// Connect to database.
-	q := connDb()
-	defer q.Close()
-
-	var pkgInfos []*PkgInfo
-	condition := qbs.NewCondition("path like ?", "%"+key+"%").Or("synopsis like ?", "%"+key+"%")
-	err := q.Condition(condition).Limit(200).OrderByDesc("views").FindAll(&pkgInfos)
-	return pkgInfos, err
-}
-
 // SearchRawDoc returns results for raw page,
 // which are package that import path and synopsis contains keyword.
 func SearchRawDoc(key string, isMatchSub bool) (pkgInfos []*PkgInfo, err error) {
