@@ -155,9 +155,7 @@
 			    {{end}}
 
 				{{if .IsHasReadme}}
-				<div id="readme" style='display:none; padding: 3px; border:1px solid #4F4F4F;'>
-			    	{{str2html .PkgDoc}}
-				</div>
+				<div id="readme" style='display:none; padding: 3px; border:1px solid #4F4F4F;'>{{str2html .PkgDoc}}</div>
 			    {{end}}
 
 				{{str2html .PkgFullIntro}}

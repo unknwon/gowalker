@@ -93,7 +93,7 @@ func checkSpecialUsage(this *SearchRouter, q string) bool {
 		// Show results after searched.
 		if len(pkgInfos) > 0 {
 			this.Data["IsFindPro"] = true
-			this.Data["AllPros"] = pkgInfos
+			this.Data["Results"] = pkgInfos
 		}
 		return true
 	case q == "imports": // Show imports package list.
@@ -101,7 +101,7 @@ func checkSpecialUsage(this *SearchRouter, q string) bool {
 		pinfos, _ := models.GetGroupPkgInfo(pkgs)
 		if len(pinfos) > 0 {
 			this.Data["IsFindPro"] = true
-			this.Data["AllPros"] = pinfos
+			this.Data["Results"] = pinfos
 		}
 		return true
 	case q == "imported": // Show packages that import this project.
@@ -110,7 +110,7 @@ func checkSpecialUsage(this *SearchRouter, q string) bool {
 		pinfos := models.GetGroupPkgInfoById(pkgs)
 		if len(pinfos) > 0 {
 			this.Data["IsFindPro"] = true
-			this.Data["AllPros"] = pinfos
+			this.Data["Results"] = pinfos
 		}
 		return true
 	case strings.Index(q, ":l=") > -1: // Add tag(s) to the project.
