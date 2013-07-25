@@ -59,7 +59,13 @@
 	                })();
 	            </script>
 				{{else}}
+
+				{{if .IsShowIntro}}
+				<p>Type keyword to search tens of thousands of functions.</p>
+				{{else}}
 				<p>No functions found.</p>
+				{{end}}
+
 				{{end}}
 			</div>
 		</div>

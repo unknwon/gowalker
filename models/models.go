@@ -19,7 +19,6 @@ import (
 	"encoding/base32"
 	"fmt"
 	"regexp"
-	"strconv"
 	"strings"
 	"time"
 
@@ -161,7 +160,6 @@ type PkgFunc struct {
 	Path     string
 	Name     string `qbs:"size:100,index"`
 	Doc      string
-	Code     string // Included field 'Decl', formatted.
 	IsMaster bool
 	IsOld    bool // Indicates if the function no longer exists.
 }
@@ -215,7 +213,7 @@ func init() {
 	mg.CreateTableIfNotExists(new(PkgFunc))
 	mg.CreateTableIfNotExists(new(PkgRock))
 
-	beego.Trace("Initialized database ->", beego.AppConfig.String("dbname"))
+	beego.Trace("Initialized database ->", utils.Cfg.MustValue("db", "name"))
 }
 
 // GetGoRepo returns packages in go standard library.
@@ -424,24 +422,6 @@ func LoadPkgDoc(path, lang, docType string) (doc string) {
 		return pdoc.Doc
 	}
 	return doc
-}
-
-// GetPkgFunc returns code of given function name and pid.
-func GetPkgFunc(name, pidS string) string {
-	q := connDb()
-	defer q.Close()
-
-	pfunc := new(PkgFunc)
-	pid, _ := strconv.ParseInt(pidS, 10, 64)
-	cond := qbs.NewCondition("pid = ?", pid).And("name = ?", name)
-	err := q.Condition(cond).Find(pfunc)
-	if err != nil {
-		pfunc.Code = "Function not found:\n" +
-			"Pid: " + pidS +
-			"\nName: " + name
-	}
-
-	return pfunc.Code
 }
 
 // GetIndexStats returns index page statistic information.

@@ -33,38 +33,26 @@
 				</table>
 			</div>
 
-			<div class="row" style="margin: 0px;">
-				<div class="pagination span6">
-					<ul>
-						<li {{if .IsBackDisable}}class="disabled"{{end}}><a href="/index?p={{.BackPageNum}}">&laquo;</a></li>
+			<div class="pagination pagination-right">
+				<ul>
+					<li>
+						<a href="/index?p={{.BackPageNum}}">&laquo;</a>
+					</li>
 
-						{{range .BackPageList}}
-						<li {{if .IsActive}}class="active"{{end}}>
-							{{if .IsActive}}
-							<a href="#_buttom">{{.PageNum}}</a>
-							{{else}}
-							<a href="/index?p={{.PageNum}}">{{.PageNum}}</a>
-							{{end}}
-						</li>
+					{{range .PageList}}
+					<li {{if .IsActive}}class="active"{{end}}>
+						{{if .IsActive}}
+						<a href="#_buttom">{{.PageNum}}</a>
+						{{else}}
+						<a href="/index?p={{.PageNum}}">{{.PageNum}}</a>
 						{{end}}
-					</ul>
-				</div>
+					</li>
+					{{end}}
 
-				<div class="pagination pagination-right span7">
-					<ul>
-						{{range .ForwardPageList}}
-						<li {{if .IsActive}}class="active"{{end}}>
-							{{if .IsActive}}
-							<a href="#_buttom">{{.PageNum}}</a>
-							{{else}}
-							<a href="/index?p={{.PageNum}}">{{.PageNum}}</a>
-							{{end}}
-						</li>
-						{{end}}
-
-						<li {{if .IsForwardDisable}}class="disabled"{{end}}><a href="/index?p={{.ForwardPageNum}}">&raquo;</a></li>
-					</ul>
-				</div>
+					<li>
+						<a href="/index?p={{.ForwardPageNum}}">&raquo;</a>
+					</li>
+				</ul>
 			</div>	
 		</div>
 		{{template "footer_zh" .}}

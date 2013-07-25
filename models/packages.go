@@ -119,7 +119,7 @@ func GetIndexPkgs(page int) (pkgs []*PkgInfo) {
 	q := connDb()
 	defer q.Close()
 
-	err := q.Limit(100).OrderByDesc("Rank").FindAll(&pkgs)
+	err := q.Limit(100).Offset((page - 1) * 100).OrderByDesc("Rank").FindAll(&pkgs)
 	if err != nil {
 		beego.Error("models.GetIndexPkgs ->", err)
 	}

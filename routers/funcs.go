@@ -33,16 +33,6 @@ func (this *FuncsRouter) Get() {
 
 	// Get arguments.
 	q := strings.TrimSpace(this.Input().Get("q"))
-	name := strings.TrimSpace(this.Input().Get("name"))
-	pid := strings.TrimSpace(this.Input().Get("pid"))
-
-	// AJAX.
-	if len(name) != 0 && len(pid) != 0 {
-		this.TplNames = "funcs.tpl"
-		code := models.GetPkgFunc(name, pid)
-		this.Data["Code"] = *codeDecode(&code)
-		return
-	}
 
 	// Set properties.
 	this.TplNames = "funcs_" + curLang.Lang + ".html"
@@ -57,5 +47,7 @@ func (this *FuncsRouter) Get() {
 			this.Data["IsFindFunc"] = true
 			this.Data["Results"] = pfuncs
 		}
+	} else {
+		this.Data["IsShowIntro"] = true
 	}
 }

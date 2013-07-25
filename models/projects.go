@@ -132,7 +132,6 @@ func SaveProject(pinfo *PkgInfo, pdecl *PkgDecl, pfuncs []*PkgFunc, imports []st
 			}
 
 			pf.Pid = pdecl.Id
-			pf.Path = pinfo.Path
 			pf.IsMaster = isMaster
 			_, err = q.Save(pf)
 			if err != nil {

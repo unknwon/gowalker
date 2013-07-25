@@ -34,9 +34,9 @@ type Value struct {
 type Func struct {
 	Name, FullName string
 	Doc            string
-	Decl, FmtDecl  string // Normal and formatted form of declaration.
+	Decl, FmtDecl  string
 	URL            string // VCS URL.
-	Code           string // Source code.
+	Code           string // Included field 'Decl', formatted.
 	IsHasExam      bool
 	Exams          []*Example
 }
@@ -75,7 +75,7 @@ type Gist struct {
 }
 
 // PACKAGE_VER is modified when previously stored packages are invalid.
-const PACKAGE_VER = "0"
+const PACKAGE_VER = "1"
 
 // Package represents full information and documentation for a package.
 type Package struct {

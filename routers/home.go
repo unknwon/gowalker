@@ -621,13 +621,8 @@ func getVCSInfo(q, tag string, pdoc *doc.Package) (vcs, proName, proPath, pkgDoc
 		if len(tag) == 0 {
 			tag = "master" // Set tag.
 		}
-		if proName != pdoc.ProjectName {
-			// Not root.
-			proName := utils.GetProjectPath(pdoc.ImportPath)
-			proPath = strings.Replace(q, proName, proName+"/tree/"+tag, 1)
-		} else {
-			proPath = q + "/tree/" + tag
-		}
+		proName := utils.GetProjectPath(pdoc.ImportPath)
+		proPath = strings.Replace(q, proName, proName+"/tree/"+tag, 1)
 	case strings.HasPrefix(q, "code.google.com"): // code.google.com
 		vcs = "Google Code"
 		if strings.Index(q, "source/") == -1 {
@@ -756,6 +751,8 @@ func ConvertDataFormat(pdoc *doc.Package, pdecl *models.PkgDecl) error {
 				val.Decl = s
 			case 3: // URL
 				val.URL = s
+			case 4: // Code
+				val.Code = *codeDecode(&s)
 			}
 		}
 		pdoc.Funcs = append(pdoc.Funcs, val)
@@ -833,6 +830,8 @@ func ConvertDataFormat(pdoc *doc.Package, pdecl *models.PkgDecl) error {
 							val2.Decl = s2
 						case 3: // URL
 							val2.URL = s2
+						case 4: // Code
+							val2.Code = *codeDecode(&s2)
 						}
 					}
 					val.Funcs = append(val.Funcs, val2)
@@ -852,6 +851,8 @@ func ConvertDataFormat(pdoc *doc.Package, pdecl *models.PkgDecl) error {
 							val2.Decl = s2
 						case 3: // URL
 							val2.URL = s2
+						case 4: // Code
+							val2.Code = *codeDecode(&s2)
 						}
 					}
 					val2.FullName = val.Name + "_" + val2.Name

@@ -260,7 +260,7 @@
 					函数 
 					<a target="_blank" href="{{.URL}}">{{.Name}}</a> 
 					<small>
-						<a class="accordion-toggle" data-toggle="collapse" href="#collapse_{{.Name}}" onclick='getFuncCode({{.Name}});'>查看代码</a>
+						<a class="accordion-toggle" data-toggle="collapse" href="#collapse_{{.Name}}">查看代码</a>
 					</small>
 				</h3>
 				
@@ -268,7 +268,7 @@
 				{{str2html .Doc}}
     			<div class="accordion">
  					<div id="collapse_{{.Name}}" class="accordion-body collapse">
-						<pre class="accordion-inner">LOADING...</pre>
+						<pre class="accordion-inner">{{str2html .Code}}</pre>
 					</div>
     			</div>
 
@@ -320,7 +320,7 @@
 					func 
 					<a target="_blank" href="{{.URL}}">{{.Name}}</a>
 					<small>
-						<a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion" href="#collapse_{{.Name}}" onclick='getFuncCode({{.Name}});'>View Code</a>
+						<a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion" href="#collapse_{{.Name}}">View Code</a>
 					</small>
 				</h4>
 
@@ -328,7 +328,7 @@
 				{{str2html .Doc}}
 	    		<div class="accordion">
 	 				<div id="collapse_{{.Name}}" class="accordion-body collapse">
-						<pre class="accordion-inner">LOADING...</pre>
+						<pre class="accordion-inner">{{str2html .Code}}</pre>
 					</div>
     			</div>
 				
@@ -346,7 +346,7 @@
 					func 
 					<a target="_blank" href="{{.URL}}">{{.Name}}</a> 
 					<small>
-						<a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion" href="#collapse_{{.FullName}}" onclick='getFuncCode({{.FullName}});'>View Code</a>
+						<a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion" href="#collapse_{{.FullName}}">View Code</a>
 					</small>
 				</h4>
 
@@ -354,7 +354,7 @@
 				{{str2html .Doc}}
 	   			<div class="accordion">
 	 				<div id="collapse_{{.FullName}}" class="accordion-body collapse">
-						<pre class="accordion-inner">LOADING...</pre>
+						<pre class="accordion-inner">{{str2html .Code}}</pre>
 					</div>
 	   			</div>
 

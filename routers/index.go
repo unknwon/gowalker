@@ -49,22 +49,22 @@ func (this *IndexRouter) Get() {
 		pn = 1
 	}
 
-	if pn == 1 {
-		this.Data["IsBackDisable"] = true
+	if pn < 10 {
+		this.Data["BackPageNum"] = 1
 	} else {
-		this.Data["BackPageNum"] = pn - 1
+		this.Data["BackPageNum"] = pn - 10
 	}
 
-	if pn == maxPageNum {
-		this.Data["IsForwardDisable"] = true
+	if pn > maxPageNum-10 {
+		this.Data["ForwardPageNum"] = maxPageNum
 	} else {
-		this.Data["ForwardPageNum"] = pn + 1
+		this.Data["ForwardPageNum"] = pn + 10
 	}
 
 	this.Data["IndexPkgs"] = models.GetIndexPkgs(pn)
 
 	// Calculate page list.
-	this.Data["BackPageList"], this.Data["ForwardPageList"] = calPageList(pn, maxPageNum)
+	this.Data["PageList"] = calPageList(pn, maxPageNum)
 
 	// Set properties
 	this.TplNames = "index_" + curLang.Lang + ".html"
@@ -76,14 +76,14 @@ type page struct {
 	PageNum  int
 }
 
-// calPageList returns back and forward page lists.
-func calPageList(p, maxPageNum int) ([]*page, []*page) {
-	listSize := 9
-	bl := make([]*page, 0, listSize)
-	fl := make([]*page, 0, listSize)
+// calPageList returns page lists.
+func calPageList(p, maxPageNum int) []*page {
+	listSize := 15
+	hls := listSize / 2
+	pl := make([]*page, 0, listSize)
 
-	start, end := p-listSize/2, p+listSize/2
-	if p < listSize/2+1 {
+	start, end := p-hls, p+hls
+	if p < hls+1 {
 		start, end = 1, listSize
 	}
 
@@ -92,24 +92,10 @@ func calPageList(p, maxPageNum int) ([]*page, []*page) {
 	}
 
 	for i := start; i <= end; i++ {
-		bl = append(bl, &page{
+		pl = append(pl, &page{
 			IsActive: i == p,
 			PageNum:  i,
 		})
 	}
-
-	if maxPageNum > listSize {
-		start, end = p-listSize/2, p+listSize/2
-		if p > maxPageNum-3 {
-			start, end = maxPageNum-listSize+1, maxPageNum
-		}
-
-		for i := start; i <= end; i++ {
-			fl = append(fl, &page{
-				IsActive: i == p,
-				PageNum:  i,
-			})
-		}
-	}
-	return bl, fl
+	return pl
 }

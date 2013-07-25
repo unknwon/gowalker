@@ -188,8 +188,10 @@ func SaveProject(pdoc *Package, info *models.PkgInfo) (int64, error) {
 			buf.WriteString(m.Decl)
 			buf.WriteString("&F#")
 			buf.WriteString(m.URL)
-			buf.WriteString("&M#")
+			buf.WriteString("&F#")
 			pfuncs = addFunc(pfuncs, m, pinfo.Path, m.Name, links)
+			buf.WriteString(m.Code)
+			buf.WriteString("&M#")
 		}
 		buf.WriteString("&$#")
 		for _, m := range v.IFuncs {
@@ -200,8 +202,10 @@ func SaveProject(pdoc *Package, info *models.PkgInfo) (int64, error) {
 			buf.WriteString(m.Decl)
 			buf.WriteString("&F#")
 			buf.WriteString(m.URL)
-			buf.WriteString("&M#")
+			buf.WriteString("&F#")
 			pfuncs = addFunc(pfuncs, m, pinfo.Path, m.Name, links)
+			buf.WriteString(m.Code)
+			buf.WriteString("&M#")
 		}
 		buf.WriteString("&$#")
 
@@ -214,8 +218,10 @@ func SaveProject(pdoc *Package, info *models.PkgInfo) (int64, error) {
 			buf.WriteString(m.Decl)
 			buf.WriteString("&F#")
 			buf.WriteString(m.URL)
-			buf.WriteString("&M#")
+			buf.WriteString("&F#")
 			pfuncs = addFunc(pfuncs, m, pinfo.Path, v.Name+"_"+m.Name, links)
+			buf.WriteString(m.Code)
+			buf.WriteString("&M#")
 		}
 		buf.WriteString("&$#")
 		for _, m := range v.IMethods {
@@ -226,8 +232,10 @@ func SaveProject(pdoc *Package, info *models.PkgInfo) (int64, error) {
 			buf.WriteString(m.Decl)
 			buf.WriteString("&F#")
 			buf.WriteString(m.URL)
-			buf.WriteString("&M#")
+			buf.WriteString("&F#")
 			pfuncs = addFunc(pfuncs, m, pinfo.Path, v.Name+"_"+m.Name, links)
+			buf.WriteString(m.Code)
+			buf.WriteString("&M#")
 		}
 		buf.WriteString("&##")
 	}
@@ -353,8 +361,10 @@ func addFuncs(pfuncs []*models.PkgFunc, fs []*Func, path string, buf *bytes.Buff
 		buf.WriteString(f.Decl)
 		buf.WriteString("&F#")
 		buf.WriteString(f.URL)
-		buf.WriteString("&$#")
+		buf.WriteString("&F#")
 		pfuncs = addFunc(pfuncs, f, path, f.Name, links)
+		buf.WriteString(f.Code)
+		buf.WriteString("&$#")
 	}
 	*pfs = buf.String()
 	return pfuncs
@@ -366,10 +376,11 @@ func addFunc(pfuncs []*models.PkgFunc, f *Func, path, name string, links []*util
 	f.Code = f.Decl + " {\n" + f.Code + "}"
 	utils.FormatCode(&buf, &f.Code, links)
 	f.Code = buf.String()
+	f.Code = *CodeEncode(&f.Code)
 	return append(pfuncs, &models.PkgFunc{
 		Name: name,
+		Path: path,
 		Doc:  f.Doc,
-		Code: *CodeEncode(&f.Code),
 	})
 }
 

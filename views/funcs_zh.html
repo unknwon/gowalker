@@ -3,14 +3,14 @@
 	</head>
 		
 	<body id="body" style="padding-top: 60px; font-family: Microsoft Yahei; font-size: 13px;">
-		{{template "navbar_en" .}}
+		{{template "navbar_zh" .}}
 		<div class="container" style="width: 1000px;">
 			<div class="row" style="margin-left: 0px;">
-				<h1>Functions</h1>
+				<h1>函数</h1>
 				<form action="/funcs">
 					<div class="input-append">
-						<input autocomplete="off" class="span6" type="text" placeholder="Type keywords to search" value="{{.Keyword}}" name="q">
-						<button class="btn" type="submit">Go!</button>
+						<input autocomplete="off" class="span6" type="text" placeholder="请输入关键字" value="{{.Keyword}}" name="q">
+						<button class="btn" type="submit">手气不错</button>
 					</div>
 				</form>
 
@@ -59,10 +59,17 @@
 	                })();
 	            </script>
 				{{else}}
-				<p>No functions found.</p>
+
+
+				{{if .IsShowIntro}}
+				<p>输入关键字即可在几十万个函数中查找。</p>
+				{{else}}
+				<p>未搜索到包含关键字 <b>{{.Keyword}}</b> 的函数。</p>
+				{{end}}
+
 				{{end}}
 			</div>
 		</div>
-		{{template "footer_en" .}}
+		{{template "footer_zh" .}}
 	</body>
 </html>

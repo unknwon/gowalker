@@ -4,6 +4,6 @@
 		"models": ""
 	},
 	"files": [
-		"gowalker.go"
+		"gowalker.go", "doc"
 	]
 }
