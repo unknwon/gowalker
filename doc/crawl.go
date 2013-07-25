@@ -53,6 +53,7 @@ func crawlDoc(path, tag string, pinfo *models.PkgInfo) (pdoc *Package, err error
 		pdoc.Labels = pinfo.Labels
 		pdoc.ImportedNum = pinfo.ImportedNum
 		pdoc.ImportPid = pinfo.ImportPid
+		pdoc.Rank = pinfo.Rank
 	}
 
 	switch {
