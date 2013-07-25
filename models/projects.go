@@ -313,12 +313,17 @@ func FlushCacheProjects(pinfos []*PkgInfo, procks []*PkgRock) {
 	}
 
 	// Update rock this week.
-	if time.Now().Weekday() == time.Monday && !utils.Cfg.MustBool("task", "rock_reset") {
+	if time.Now().Weekday() == time.Monday && utils.Cfg.MustBool("task", "rock_reset") {
+		utils.Cfg.SetValue("task", "rock_reset", "0")
+		utils.SaveConfig()
 		// Reset rock table.
 		_, err := q.Where("id > ?", int64(0)).Delete(new(PkgRock))
 		if err != nil {
 			beego.Error("models.FlushCacheProjects -> Reset rock table:", err)
 		}
+	} else if time.Now().Weekday() != time.Monday && !utils.Cfg.MustBool("task", "rock_reset") {
+		utils.Cfg.SetValue("task", "rock_reset", "1")
+		utils.SaveConfig()
 	}
 
 	for _, pr := range procks {

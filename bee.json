@@ -1,4 +1,5 @@
 {
+	"go_install": true,
 	"dir_structure":{
 		"controllers": "routers",
 		"models": ""

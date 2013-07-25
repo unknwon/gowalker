@@ -26,29 +26,28 @@ import (
 )
 
 const (
-	VERSION = "0.8.1.0725 Beta" // Application version.
+	APP_VER = "0.8.2.0726 Beta"
 )
 
 func init() {
-	// Try to have highest performance.
 	runtime.GOMAXPROCS(runtime.NumCPU())
 
 	// Setting application version.
-	routers.AppVer = "v" + VERSION
+	routers.AppVer = "v" + APP_VER
 
 	// Set application log level.
 	if beego.AppConfig.String("runmode") == "pro" {
 		beego.SetLevel(beego.LevelInfo)
-	}
 
-	beego.Info("Go Walker", VERSION)
+		beego.Info("Go Walker", APP_VER)
 
-	// Initialize log file.
-	os.Mkdir("./log", os.ModePerm)
-	filew := beego.NewFileWriter("log/log", true)
-	err := filew.StartLogger()
-	if err != nil {
-		beego.Critical("NewFileWriter ->", err)
+		// Initialize log file.
+		os.Mkdir("./log", os.ModePerm)
+		filew := beego.NewFileWriter("log/log", true)
+		err := filew.StartLogger()
+		if err != nil {
+			beego.Critical("NewFileWriter ->", err)
+		}
 	}
 
 	doc.SetGithubCredentials(utils.Cfg.MustValue("github", "client_id"),
@@ -57,7 +56,7 @@ func init() {
 
 func main() {
 	beego.AppName = "Go Walker"
-	beego.Info("Go Walker", VERSION)
+	beego.Info("Go Walker", APP_VER)
 
 	// Register routers.
 	beego.Router("/", &routers.HomeRouter{})

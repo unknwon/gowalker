@@ -24,40 +24,37 @@ import (
 	"net"
 	"net/http"
 	"time"
+
+	"github.com/astaxie/beego"
 )
 
 var userAgent = "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/29.0.1541.0 Safari/537.36"
 
 var (
-	dialTimeout  = flag.Duration("dial_timeout", 10*time.Second, "Timeout for dialing an HTTP connection.")
-	readTimeout  = flag.Duration("read_timeout", 10*time.Second, "Timeoout for reading an HTTP response.")
-	writeTimeout = flag.Duration("write_timeout", 5*time.Second, "Timeout writing an HTTP request.")
+	dialTimeout    = flag.Duration("dial_timeout", 10*time.Second, "Timeout for dialing an HTTP connection.")
+	requestTimeout = flag.Duration("request_timeout", 20*time.Second, "Time out for roundtripping an HTTP request.")
 )
 
-type timeoutConn struct {
-	net.Conn
-}
-
-func (c *timeoutConn) Read(p []byte) (int, error) {
-	return c.Conn.Read(p)
-}
-
-func (c *timeoutConn) Write(p []byte) (int, error) {
-	// Reset timeouts when writing a request.
-	c.Conn.SetWriteDeadline(time.Now().Add(*readTimeout))
-	c.Conn.SetWriteDeadline(time.Now().Add(*writeTimeout))
-	return c.Conn.Write(p)
-}
 func timeoutDial(network, addr string) (net.Conn, error) {
-	c, err := net.DialTimeout(network, addr, *dialTimeout)
-	if err != nil {
-		return nil, err
-	}
-	return &timeoutConn{Conn: c}, nil
+	return net.DialTimeout(network, addr, *dialTimeout)
+}
+
+type transport struct {
+	t http.Transport
+}
+
+func (t *transport) RoundTrip(req *http.Request) (*http.Response, error) {
+	timer := time.AfterFunc(*requestTimeout, func() {
+		t.t.CancelRequest(req)
+		beego.Warn("Canceled request for %s", req.URL)
+	})
+	defer timer.Stop()
+	resp, err := t.t.RoundTrip(req)
+	return resp, err
 }
 
 var (
-	httpTransport = &http.Transport{Dial: timeoutDial}
+	httpTransport = &transport{t: http.Transport{Dial: timeoutDial, ResponseHeaderTimeout: *requestTimeout / 2}}
 	httpClient    = &http.Client{Transport: httpTransport}
 )
 

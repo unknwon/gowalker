@@ -44,9 +44,6 @@ func crawlDoc(path, tag string, pinfo *models.PkgInfo) (pdoc *Package, err error
 	var pdocNew *Package
 	pdocNew, err = getRepo(httpClient, path, tag, pinfo.Etag)
 
-	// For timeout logic in client.go to work, we cannot leave connections idling. This is ugly.
-	httpTransport.CloseIdleConnections()
-
 	if err != errNotModified && pdocNew != nil {
 		pdoc = pdocNew
 		pdoc.Views = pinfo.Views

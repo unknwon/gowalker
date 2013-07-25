@@ -26,7 +26,7 @@ import (
 	"github.com/astaxie/beego"
 )
 
-var AppVer string // Application version.
+var AppVer string
 
 var langTypes []*langType // Languages are supported.
 

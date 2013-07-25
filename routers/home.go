@@ -118,6 +118,7 @@ func (this *HomeRouter) Get() {
 	ua := this.Ctx.Request.Header.Get("User-Agent")
 	if len(ua) < 20 {
 		beego.Warn("User-Agent:", this.Ctx.Request.Header.Get("User-Agent"))
+		this.Ctx.WriteString("")
 		return
 	}
 

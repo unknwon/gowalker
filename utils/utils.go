@@ -39,6 +39,11 @@ func init() {
 	}
 }
 
+// SaveConfig saves configuration file.
+func SaveConfig() error {
+	return goconfig.SaveConfigFile(Cfg, "conf/app.ini")
+}
+
 // IsExist returns if a file or directory exists
 func IsExist(path string) bool {
 	_, err := os.Stat(path)
