@@ -5,54 +5,59 @@
 	<body id="body" style="padding-top: 60px; font-family: Microsoft Yahei; font-size: 13px;">
 		{{template "navbar_en" .}}
 		<div class="container" style="width: 1000px;">
-			<h1>Index</h1>
+			<div id="main_content" class="row">
+				<div style="margin-left: 20px;">
+	                {{template "alert_en" .}}
+					<h1>Index</h1>
 
-			{{with .IndexStats}}
-			<p>Statistic information: <b>{{.ProNum}}</b> projects, <b>{{.DeclNum}}</b> documentations and <b>{{.FuncNum}}</b> functions.</p>
-			{{end}}
-
-			<div>
-				<table class="table table-condensed table-hover">
-					<thead>
-						<tr>
-							<th>Import Path</th>
-							<th>Synopsis</th>
-							<th>Rank</th>
-						</tr>
-					</thead>
-
-					<tbody>
-						{{range .IndexPkgs}}
-						<tr>
-							<td><a href="/{{.Path}}">{{.Path}}</a></td>
-							<td>{{.Synopsis}}</td>
-							<td><span class="label label-info">{{.Rank}}</span></td>
-						</tr>
-						{{end}}
-					</tbody>
-				</table>
-			</div>
-
-			<div class="pagination pagination-right">
-				<ul>
-					<li>
-						<a href="/index?p={{.BackPageNum}}">&laquo;</a>
-					</li>
-
-					{{range .PageList}}
-					<li {{if .IsActive}}class="active"{{end}}>
-						{{if .IsActive}}
-						<a href="#_buttom">{{.PageNum}}</a>
-						{{else}}
-						<a href="/index?p={{.PageNum}}">{{.PageNum}}</a>
-						{{end}}
-					</li>
+					{{with .IndexStats}}
+					<p>Statistic information: <b>{{.ProNum}}</b> projects, <b>{{.DeclNum}}</b> documentations and <b>{{.FuncNum}}</b> functions.</p>
 					{{end}}
 
-					<li>
-						<a href="/index?p={{.ForwardPageNum}}">&raquo;</a>
-					</li>
-				</ul>
+					<div>
+						<table class="table table-condensed table-hover">
+							<thead>
+								<tr>
+									<th>Import Path</th>
+									<th>Synopsis</th>
+									<th>Rank</th>
+								</tr>
+							</thead>
+
+							<tbody>
+								{{range .IndexPkgs}}
+								<tr>
+									<td><a href="/{{.Path}}">{{.Path}}</a></td>
+									<td>{{.Synopsis}}</td>
+									<td><span class="label label-info">{{.Rank}}</span></td>
+								</tr>
+								{{end}}
+							</tbody>
+						</table>
+					</div>
+
+					<div class="pagination pagination-right">
+						<ul>
+							<li>
+								<a href="/index?p={{.BackPageNum}}">&laquo;</a>
+							</li>
+
+							{{range .PageList}}
+							<li {{if .IsActive}}class="active"{{end}}>
+								{{if .IsActive}}
+								<a href="#_buttom">{{.PageNum}}</a>
+								{{else}}
+								<a href="/index?p={{.PageNum}}">{{.PageNum}}</a>
+								{{end}}
+							</li>
+							{{end}}
+
+							<li>
+								<a href="/index?p={{.ForwardPageNum}}">&raquo;</a>
+							</li>
+						</ul>
+					</div>
+				</div>
 			</div>
 		</div>
 		{{template "footer_en" .}}

@@ -5,70 +5,75 @@
 	<body id="body" style="padding-top: 60px; font-family: Microsoft Yahei; font-size: 13px;">
 		{{template "navbar_en" .}}
 		<div class="container" style="width: 1000px;">
-			<h1>About</h1>
-			<p>
-				Go Walker displays API documentation for <a target="_blank" href="http://golang.org/">Go</a> projects on <b><a target="_blank" href="https://bitbucket.org/">Bitbucket</a></b>, <b><a target="_blank" href="https://github.com/">Github</a></b>, <b><a target="_blank" href="http://code.google.com/">Google Code</a></b>, <b><a target="_blank" href="https://launchpad.net/">Launchpad</a></b> and <b><a target="_blank" href="http://git.oschina.net/">Git @ OSC</a></b>. 
-			</p>
+			<div id="main_content" class="row">
+				<div style="margin-left: 20px;">
+	                {{template "alert_en" .}}
+					<h1>About</h1>
+					<p>
+						Go Walker displays API documentation for <a target="_blank" href="http://golang.org/">Go</a> projects on <b><a target="_blank" href="https://bitbucket.org/">Bitbucket</a></b>, <b><a target="_blank" href="https://github.com/">Github</a></b>, <b><a target="_blank" href="http://code.google.com/">Google Code</a></b>, <b><a target="_blank" href="https://launchpad.net/">Launchpad</a></b> and <b><a target="_blank" href="http://git.oschina.net/">Git @ OSC</a></b>. 
+					</p>
 
-			<p>
-				The source code for Go Walker is available on <a target="_blank" href="https://github.com/Unknwon/gowalker">Github</a>(stable), <a target="_blank" href="http://git.oschina.net/Unknown/gowalker">Git @ OSC</a>(beta).  
-			</p>
+					<p>
+						The source code for Go Walker is available on <a target="_blank" href="https://github.com/Unknwon/gowalker">Github</a>(stable), <a target="_blank" href="http://git.oschina.net/Unknown/gowalker">Git @ OSC</a>(beta).  
+					</p>
 
-			<h4 id="howto">Add a project to Go Walker</h4> 
-			<p>
-				Go Walker generates API documentation from Go source code. The <a target="_blank" href="http://golang.org/doc/articles/godoc_documenting_go_code.html">guidelines</a> for writing documentation for the <a target="_blank" href="http://golang.org/cmd/godoc/">godoc</a> tool apply to Go Walker and display object relationships between packages in your project.
-			</p>
+					<h4 id="howto">Add a project to Go Walker</h4> 
+					<p>
+						Go Walker generates API documentation from Go source code. The <a target="_blank" href="http://golang.org/doc/articles/godoc_documenting_go_code.html">guidelines</a> for writing documentation for the <a target="_blank" href="http://golang.org/cmd/godoc/">godoc</a> tool apply to Go Walker and display object relationships between packages in your project.
+					</p>
 
-			<p>
-				It's important to write a good summary of the package in the first sentence of the package comment. Go Walker indexes the first sentence and displays the sentence in project lists.
-			</p>
+					<p>
+						It's important to write a good summary of the package in the first sentence of the package comment. Go Walker indexes the first sentence and displays the sentence in project lists.
+					</p>
 
-			<p>
-				To add a project to Go Walker, <a href="/">search</a> for the peoject by import path. If Go Walker does not already have the documentation for the project, then Go Walker will fetch the source from the version control system on the fly and add the documentation. It may take up to 5 seconds because source code are contained in same page also.
-			</p>
+					<p>
+						To add a project to Go Walker, <a href="/">search</a> for the peoject by import path. If Go Walker does not already have the documentation for the project, then Go Walker will fetch the source from the version control system on the fly and add the documentation. It may take up to 5 seconds because source code are contained in same page also.
+					</p>
 
-			<p>
-				Go Walker checks for package updates once per day. You can force Go Walker to refresh the documentation immediately by clicking the refresh link at the bottom of the package documentation page. 
-			</p>
+					<p>
+						Go Walker checks for package updates once per day. You can force Go Walker to refresh the documentation immediately by clicking the refresh link at the bottom of the package documentation page. 
+					</p>
 
-			<h4 id="remove">Remove a package from Go Walker</h4>
-			<p>
-				Go Walker automatically removes packages deleted from the version control system when Go Walker checks for updates to the package. You can force Go Walker to remove a deleted package immediately by clicking the refresh link at the bottom of the package documentation page, but be aware that this operation will not delete dependencies packages in case other packages use some of them.
-			</p>
-			
-			<p>
-				If you do not want Go Walker to display documentation for your package, please open an issue with the import path of the path of the package that you want to remove. 
-			</p>
+					<h4 id="remove">Remove a package from Go Walker</h4>
+					<p>
+						Go Walker automatically removes packages deleted from the version control system when Go Walker checks for updates to the package. You can force Go Walker to remove a deleted package immediately by clicking the refresh link at the bottom of the package documentation page, but be aware that this operation will not delete dependencies packages in case other packages use some of them.
+					</p>
+					
+					<p>
+						If you do not want Go Walker to display documentation for your package, please open an issue with the import path of the path of the package that you want to remove. 
+					</p>
 
-			<h4 id="control_panel">Control panel</h4>
-			<p>
-				Go Walker has control panel for keyboard shortcuts for navigating package documentation pages. Type '?' on a package page for help. Thanks for <a target="_blank" href="http://www.lavachen.cn">chenwenli</a>.
-			</p>
+					<h4 id="control_panel">Control panel</h4>
+					<p>
+						Go Walker has control panel for keyboard shortcuts for navigating package documentation pages. Type '?' on a package page for help. Thanks for <a target="_blank" href="http://www.lavachen.cn">chenwenli</a>.
+					</p>
 
-			<h4 id="labels">Add or remove labels for your project</h4> 
-			<p>
-				Like we show the different categories in <a href="/labels">Labels</a> page, you can also label your project by appending tags to URL or press <code>g + t</code> to call control panel in documentation page. For example, Qbs is a ORM, so to lable it by typing <a target="_blank" href="/github.com/coocood/qbs:l=orm" class="label label-inverse">github.com/coocood/qbs:tag=orm</a> in the search box, or just visit <a target="_blank" href="/github.com/coocood/qbs:l=orm">gowalker.org/github.com/coocood/qbs:l=orm</a>, and use <span class="label label-inverse">:rl=</span> to remove labels from your project. 
-			</p>
+					<h4 id="labels">Add or remove labels for your project</h4> 
+					<p>
+						Like we show the different categories in <a href="/labels">Labels</a> page, you can also label your project by appending tags to URL or press <code>g + t</code> to call control panel in documentation page. For example, Qbs is a ORM, so to lable it by typing <a target="_blank" href="/github.com/coocood/qbs:l=orm" class="label label-inverse">github.com/coocood/qbs:tag=orm</a> in the search box, or just visit <a target="_blank" href="/github.com/coocood/qbs:l=orm">gowalker.org/github.com/coocood/qbs:l=orm</a>, and use <span class="label label-inverse">:rl=</span> to remove labels from your project. 
+					</p>
 
-			<h4>Help translate site to your language</h4> 
-			<p>
-				Go Walker supports multiple languages for site user interface. You can translate files under folder "views" to help Go Walker support your language.
-			</p>
- 
- 			<h4>Multiple language documentation</h4>
-			<p>
-				If your project directories contain readme(.md) files, Go Walker uses readme(.md) for English version, readme_[zh|cn](.md) for Chinese version. Go Walker shows them according to user language option.
-			</p>
+					<h4>Help translate site to your language</h4> 
+					<p>
+						Go Walker supports multiple languages for site user interface. You can translate files under folder "views" to help Go Walker support your language.
+					</p>
+		 
+		 			<h4>Multiple language documentation</h4>
+					<p>
+						If your project directories contain readme(.md) files, Go Walker uses readme(.md) for English version, readme_[zh|cn](.md) for Chinese version. Go Walker shows them according to user language option.
+					</p>
 
-			<h4>Feedback</h4> 
-			<p>
-				Send your ideas, feature requests and questions to joe2010xtmf#163.com.  Report bugs using the <a target="_blank" href="https://github.com/Unknwon/gowalker/issues">Github Issue Tracker</a>.  Join the discussion at the <a target="_blank" href="https://groups.google.com/d/forum/gowalker">Go Walker group</a>.
-			</p>
+					<h4>Feedback</h4> 
+					<p>
+						Send your ideas, feature requests and questions to joe2010xtmf#163.com.  Report bugs using the <a target="_blank" href="https://github.com/Unknwon/gowalker/issues">Github Issue Tracker</a>.  Join the discussion at the <a target="_blank" href="https://groups.google.com/d/forum/gowalker">Go Walker group</a>.
+					</p>
 
-			<h4>Bookmarklet</h4>
-			<p>
-				The Go Walker bookmarklet navigates from pages on Bitbucket, Github Launchpad, Google code and Git @ OSC to the package documentation. To install the bookmarklet, click and drag the following link to your bookmark bar: <a  target="_blank" href="javascript:window.location='http://gowalker.org/'+encodeURIComponent(window.location)">Go Walker Bookmarklet</a>.
-			</p>
+					<h4>Bookmarklet</h4>
+					<p>
+						The Go Walker bookmarklet navigates from pages on Bitbucket, Github Launchpad, Google code and Git @ OSC to the package documentation. To install the bookmarklet, click and drag the following link to your bookmark bar: <a  target="_blank" href="javascript:window.location='http://gowalker.org/'+encodeURIComponent(window.location)">Go Walker Bookmarklet</a>.
+					</p>
+				</div>
+			</div>
 		</div>
 		{{template "footer_en" .}}
 	</body>
