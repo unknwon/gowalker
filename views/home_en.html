@@ -5,27 +5,24 @@
     <body id="body" style="padding-top: 60px; font-family: Microsoft Yahei; font-size: 13px;">
         {{template "navbar_en" .}}
         <div class="container" style="width: 1000px;">
-            <!-- <div class="alert">
-                <button type="button" class="close" data-dismiss="alert">&times;</button>
-                <strong>Warning!</strong> 
-                This is the <span class="label label-important">Beta</span> version of new release of Go Walker, errors may occur at any time(old data will be imported in few days).
-            </div> -->
+            <div id="main_content" class="row">
+                <div style="margin-left: 20px;">
+                    {{template "alert_en" .}}
+                    <div class="page-header">
+                        <h2 style="margin-top: 0">
+                            Search for Go projects.
+                            <small>Find a cup of source code.</small>
+                        </h2>
 
-            <div id="home_content" class="row">
-                <div class="page-header" style="margin-left: 20px;">
-                    <h2 style="margin-top: 0">
-                        Search for Go projects.
-                        <small>Find a cup of source code.</small>
-                    </h2>
-
-                    <form action="/">
-                        <div class="input-append">
-                            <input autocomplete="off" class="span6" type="text"
-                                   placeholder="Type import path to add or keywords to search" value="{{.Keyword}}" name="q"
-                                   data-source="[{{str2html .DataSrc}}]" data-items="8" data-provide="typeahead"></input>
-                            <button class="btn" type="submit"><i class="icon-search"></i> Go!</button>
-                        </div>
-                    </form>
+                        <form action="/">
+                            <div class="input-append">
+                                <input autocomplete="off" class="span6" type="text"
+                                       placeholder="Type import path to add or keywords to search" value="{{.Keyword}}" name="q"
+                                       data-source="[{{str2html .DataSrc}}]" data-items="8" data-provide="typeahead"></input>
+                                <button class="btn" type="submit"><i class="icon-search"></i> Go!</button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
 
                 <div id="homeleft" class="span6 homeleft">

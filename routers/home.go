@@ -114,6 +114,7 @@ type HomeRouter struct {
 
 // Get implemented Get method for HomeRouter.
 func (this *HomeRouter) Get() {
+	this.Data["IsHasError"] = true
 	// Filter unusual User-Agent.
 	ua := this.Ctx.Request.Header.Get("User-Agent")
 	if len(ua) < 20 {

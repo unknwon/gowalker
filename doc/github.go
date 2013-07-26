@@ -111,6 +111,7 @@ func getGithubDoc(client *http.Client, match map[string]string, tag, savedEtag s
 	preLen := len(dirPrefix)
 
 	// Get source file data and subdirectories.
+	isGoPro := false // Indicates whether
 	dirs := make([]string, 0, 5)
 	files := make([]*source, 0, 5)
 	for _, node := range tree.Tree {
@@ -122,6 +123,11 @@ func getGithubDoc(client *http.Client, match map[string]string, tag, savedEtag s
 		// Get files and check if directories have acceptable files.
 		if d, f := path.Split(node.Path); utils.IsDocFile(f) &&
 			utils.FilterDirName(d) {
+			// Check if it's a Go file again.
+			if !isGoPro && strings.HasSuffix(f, ".go") {
+				isGoPro = true
+			}
+
 			// Check if file is in the directory that is corresponding to import path.
 			if d == dirPrefix {
 				// Yes.

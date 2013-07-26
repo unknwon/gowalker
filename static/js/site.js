@@ -16,7 +16,7 @@
         var searchForm = document.getElementById("top_search_form");
         var searchBox = document.getElementById("navbar_search_box");
         var body = document.getElementById("body");
-        var homeBody = document.getElementById("home_content");
+        var mainBody = document.getElementById("main_content");
         var delta = document.body.clientWidth - 1100;
 
         if (delta > 0) {
@@ -33,8 +33,8 @@
             searchBox.style.width = "";
 
             // Home page.
-            if (homeBody != null) {
-                homeBody.style.marginLeft = "-20px";
+            if (mainBody != null) {
+                mainBody.style.marginLeft = "-20px";
             }
 
         } else {
@@ -45,8 +45,8 @@
             body.style.paddingTop = "0px";
 
             // Home page.
-            if (homeBody != null) {
-                homeBody.style.marginLeft = "0px";
+            if (mainBody != null) {
+                mainBody.style.marginLeft = "0px";
             }
         }
     }
@@ -267,9 +267,7 @@ function createXMLHttpRequest() {
         xmlHttp = new ActiveXObject("Microsoft.XMLHTTP");
     } else if (window.XMLHttpRequest) {
         xmlHttp = new XMLHttpRequest();
-    } else {
-        xmlHttp = new ActiveXObject("Msxml2.XMLHTTP");
-    }
+    } 
 }
 
 var okFunc = function () {
@@ -288,7 +286,7 @@ function getFuncCode(name) {
     var nodes = pre.getElementsByTagName("pre");
 
     // Check if need to load code.
-    if (nodes[0].innerHTML != "LOADING...") {
+    if (nodes[0].innerHTML !== "LOADING...") {
         return;
     }
 

@@ -5,26 +5,23 @@
 	<body id="body" style="padding-top: 60px; font-family: Microsoft Yahei; font-size: 13px;">
 		{{template "navbar_zh" .}}
 		<div class="container" style="width: 1000px;">
-           <!--  <div class="alert">
-                <button type="button" class="close" data-dismiss="alert">&times;</button>
-                <strong>注意事项</strong> 
-                当前运行的 Go 步行者版本为 <span class="label label-important">测试版</span>，任何错误都有可能发生（旧版本的数据将会在几天内导入）.
-            </div> -->
+			<div id="main_content" class="row">
+                <div style="margin-left: 20px;">
+                    {{template "alert_zh" .}}
+                    <div class="page-header">
+                        <h2 style="margin-top: 0">
+                            搜索 Go 项目. 
+                            <small>开源，让世界更和谐.</small>
+                        </h2>
 
-			<div id="home_content" class="row">
-	    		<div class="page-header" style="margin-left: 20px;">
-					<h2 style="margin-top: 0">
-						搜索 Go 项目. 
-						<small>开源，让世界更和谐.</small>
-					</h2>
-
-					<form action="/">
-						<div class="input-append">
-							<input autocomplete="off" class="span6" type="text" placeholder="输入导入路径来添加文档或使用关键字搜索" value="{{.Keyword}}" name="q" data-source="[{{str2html .DataSrc}}]" data-items="8" data-provide="typeahead"></input>
-							<button class="btn" type="submit"><i class="icon-search"></i> 手气不错</button>
-						</div>
-					</form>
-	    		</div>
+                        <form action="/">
+                            <div class="input-append">
+                                <input autocomplete="off" class="span6" type="text" placeholder="输入导入路径来添加文档或使用关键字搜索" value="{{.Keyword}}" name="q" data-source="[{{str2html .DataSrc}}]" data-items="8" data-provide="typeahead"></input>
+                                <button class="btn" type="submit"><i class="icon-search"></i> 手气不错</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
 
 	    		<div id="homeleft" class="span6 homeleft">
 					<div>
