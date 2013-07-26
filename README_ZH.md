@@ -20,6 +20,9 @@ Go 步行者是一个用于在线生成并浏览 <a target="_blank" href="http:/
 - 通过 Github Gist 为您喜爱的项目增加 **第三方示例**。
 - [完整文档](https://github.com/Unknwon/gowalker/blob/master/docs/Features_ZH.md).
 
+## 发展路线
+请到 [Trello](https://trello.com/b/wS7CzdcI/go-walker) 的面板上查看有关 Todo，Bugs 以及路线图的说明。
+
 ## 第三方包
 
 - [Beego](http://gowalker.org/github.com/astaxie/beego)：轻量级 Web 框架，适用于 Web 应用快速开发。
