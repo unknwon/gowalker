@@ -62,6 +62,7 @@ func getOSCDoc(client *http.Client, match map[string]string, tag, savedEtag stri
 	}
 	preLen := len(dirPrefix)
 
+	isGoPro := false // Indicates whether it's a Go project.
 	dirs := make([]string, 0, 5)
 	files := make([]*source, 0, 5)
 	for _, f := range r.File {
@@ -74,6 +75,11 @@ func getOSCDoc(client *http.Client, match map[string]string, tag, savedEtag stri
 		// Get files and check if directories have acceptable files.
 		if d, fn := path.Split(fileName); utils.IsDocFile(fn) &&
 			utils.FilterDirName(d) {
+			// Check if it's a Go file.
+			if !isGoPro && strings.HasSuffix(f, ".go") {
+				isGoPro = true
+			}
+
 			// Check if file is in the directory that is corresponding to import path.
 			if d == dirPrefix {
 				// Yes.
@@ -104,6 +110,8 @@ func getOSCDoc(client *http.Client, match map[string]string, tag, savedEtag stri
 			}
 		}
 	}
+
+	// TODO: show error if not Go project.
 
 	if len(files) == 0 && len(dirs) == 0 {
 		return nil, NotFoundError{"Directory tree does not contain Go files and subdirs."}

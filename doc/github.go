@@ -104,14 +104,14 @@ func getGithubDoc(client *http.Client, match map[string]string, tag, savedEtag s
 		return nil, NotFoundError{"Github import path has incorrect case."}
 	}
 
+	// Get source file data and subdirectories.
 	dirPrefix := match["dir"]
 	if dirPrefix != "" {
 		dirPrefix = dirPrefix[1:] + "/"
 	}
 	preLen := len(dirPrefix)
 
-	// Get source file data and subdirectories.
-	isGoPro := false // Indicates whether
+	isGoPro := false // Indicates whether it's a Go project.
 	dirs := make([]string, 0, 5)
 	files := make([]*source, 0, 5)
 	for _, node := range tree.Tree {
@@ -123,7 +123,7 @@ func getGithubDoc(client *http.Client, match map[string]string, tag, savedEtag s
 		// Get files and check if directories have acceptable files.
 		if d, f := path.Split(node.Path); utils.IsDocFile(f) &&
 			utils.FilterDirName(d) {
-			// Check if it's a Go file again.
+			// Check if it's a Go file.
 			if !isGoPro && strings.HasSuffix(f, ".go") {
 				isGoPro = true
 			}
@@ -145,6 +145,8 @@ func getGithubDoc(client *http.Client, match map[string]string, tag, savedEtag s
 			}
 		}
 	}
+
+	// TODO: show error if not Go project.
 
 	if len(files) == 0 && len(dirs) == 0 {
 		return nil, NotFoundError{"Directory tree does not contain Go files and subdirs."}

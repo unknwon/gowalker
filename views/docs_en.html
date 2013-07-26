@@ -166,12 +166,12 @@
 					{{if .IsHasExports}}
 					<h3 id="_index">
 						Index 
+						{{if .IsCmd}}
+						{{else}}
 						<span class="label label-{{.DocCPLabel}}">
-							{{if .IsCmd}}
-							{{else}}
 							Documentation complete {{.DocCP}}
-							{{end}}
 						</span>
+						{{end}}
 					</h3>
 
 					<ul class="unstyled">
