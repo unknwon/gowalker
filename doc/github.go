@@ -150,7 +150,9 @@ func getGithubDoc(client *http.Client, match map[string]string, tag, savedEtag s
 		}
 	}
 
-	// TODO: show error if not Go project.
+	if !isGoPro {
+		return nil, NotFoundError{"Cannot find Go files, it's not a Go project."}
+	}
 
 	if len(files) == 0 && len(dirs) == 0 {
 		return nil, NotFoundError{"Directory tree does not contain Go files and subdirs."}
