@@ -76,7 +76,7 @@ func getOSCDoc(client *http.Client, match map[string]string, tag, savedEtag stri
 		if d, fn := path.Split(fileName); utils.IsDocFile(fn) &&
 			utils.FilterDirName(d) {
 			// Check if it's a Go file.
-			if !isGoPro && strings.HasSuffix(f, ".go") {
+			if !isGoPro && strings.HasSuffix(fileName, ".go") {
 				isGoPro = true
 			}
 

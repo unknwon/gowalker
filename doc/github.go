@@ -36,6 +36,10 @@ func SetGithubCredentials(id, secret string) {
 	githubCred = "client_id=" + id + "&client_secret=" + secret
 }
 
+func GetGithubCredentials() string {
+	return githubCred
+}
+
 func getGithubDoc(client *http.Client, match map[string]string, tag, savedEtag string) (*Package, error) {
 	match["cred"] = githubCred
 

@@ -114,7 +114,6 @@ type HomeRouter struct {
 
 // Get implemented Get method for HomeRouter.
 func (this *HomeRouter) Get() {
-	this.Data["IsHasError"] = true
 	// Filter unusual User-Agent.
 	ua := this.Ctx.Request.Header.Get("User-Agent")
 	if len(ua) < 20 {
@@ -219,6 +218,9 @@ func (this *HomeRouter) Get() {
 				}
 			}
 		} else {
+			this.Data["IsHasError"] = true
+			this.Data["ErrMsg"] = strings.Replace(err.Error(),
+				doc.GetGithubCredentials(), "<githubCred>", 1)
 			beego.Error("HomeRouter.Get ->", err)
 		}
 
