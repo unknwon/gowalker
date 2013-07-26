@@ -18,6 +18,7 @@ package routers
 import (
 	"fmt"
 	"net/url"
+	"os"
 	"strings"
 	"time"
 
@@ -159,17 +160,21 @@ func cacheTickerCheck(cacheChan <-chan time.Time) {
 	for {
 		<-cacheChan
 		refreshCount++
-		flushCache()
-		initPopPros()
-		initIndexStats()
 
-		if refreshCount%3 == 0 {
-
-		}
-
-		if refreshCount == 3 {
+		// Check if reach the maximum limit of skip.
+		if refreshCount >= utils.Cfg.MustInt("task", "max_skip_time") {
+			// Yes.
 			refreshCount = 0
 		}
+
+		// Check if need to flush cache.
+		if refreshCount == 0 || len(cachePros) >= utils.Cfg.MustInt("task", "min_pro_num") {
+			flushCache()
+			initPopPros()
+			refreshCount = 0
+		}
+		shutdownCheck()
+		initIndexStats()
 	}
 }
 
@@ -187,4 +192,12 @@ func flushCache() {
 	models.FlushCacheProjects(cachePros, rtwPros)
 
 	cachePros = make([]*models.PkgInfo, 0, num)
+}
+
+func shutdownCheck() {
+	if utils.IsExist("SHUTDOWN.SIGN") {
+		os.Remove("SHUTDOWN.SIGN")
+		beego.Info("Detected SHUTDOWN.SIGN")
+		os.Exit(0)
+	}
 }
