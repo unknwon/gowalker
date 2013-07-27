@@ -69,6 +69,7 @@ func getLaunchpadDoc(client *http.Client, match map[string]string, tag, savedEta
 		return nil, err
 	}
 
+	// Get source file data.
 	gzr, err := gzip.NewReader(bytes.NewReader(p))
 	if err != nil {
 		return nil, err
@@ -79,8 +80,9 @@ func getLaunchpadDoc(client *http.Client, match map[string]string, tag, savedEta
 
 	var hash []byte
 	dirPrefix := expand("+branch/{repo}{dir}/", match)
+	preLen := len(dirPrefix)
 
-	// Get source file data.
+	isGoPro := false // Indicates whether it's a Go project.
 	dirs := make([]string, 0, 3)
 	files := make([]*source, 0, 5)
 	for {
@@ -92,34 +94,47 @@ func getLaunchpadDoc(client *http.Client, match map[string]string, tag, savedEta
 			return nil, err
 		}
 
+		// Skip directories and files in wrong directories, get them later.
+		if strings.HasSuffix(h.Name, "/") || !strings.HasPrefix(h.Name, dirPrefix) {
+			continue
+		}
+
 		d, f := path.Split(h.Name)
-		if !utils.IsDocFile(f) {
-			// Check directories.
-			if len(f) == 0 && strings.HasPrefix(d, dirPrefix) && len(d) > len(dirPrefix) {
-				sub := h.Name[:len(h.Name)-1]
-				dirs = append(dirs, sub[strings.LastIndex(sub, "/")+1:])
+		if utils.IsDocFile(f) && utils.FilterDirName(d) {
+			// Check if it's a Go file.
+			if !isGoPro && strings.HasSuffix(f, ".go") {
+				isGoPro = true
 			}
-			continue
-		}
-		b := make([]byte, h.Size)
-		if _, err := io.ReadFull(tr, b); err != nil {
-			return nil, err
-		}
 
-		m := md5.New()
-		m.Write(b)
-		hash = m.Sum(hash)
+			// Get file from archive.
+			b := make([]byte, h.Size)
+			if _, err := io.ReadFull(tr, b); err != nil {
+				return nil, err
+			}
 
-		if !strings.HasPrefix(h.Name, dirPrefix) {
-			continue
-		}
+			m := md5.New()
+			m.Write(b)
+			hash = m.Sum(hash)
 
-		if d == dirPrefix {
-			files = append(files, &source{
-				name:      f,
-				browseURL: expand("http://bazaar.launchpad.net/+branch/{repo}/view/head:{dir}/{0}", match, f),
-				data:      b})
+			// Check if file is in the directory that is corresponding to import path.
+			if d == dirPrefix {
+				// Yes.
+				files = append(files, &source{
+					name:      f,
+					browseURL: expand("http://bazaar.launchpad.net/+branch/{repo}/view/head:{dir}/{0}", match, f),
+					data:      b})
+			} else {
+				sd, _ := path.Split(d[preLen:])
+				sd = strings.TrimSuffix(sd, "/")
+				if !checkDir(sd, dirs) {
+					dirs = append(dirs, sd)
+				}
+			}
 		}
+	}
+
+	if !isGoPro {
+		return nil, NotFoundError{"Cannot find Go files, it's not a Go project."}
 	}
 
 	if len(files) == 0 && len(dirs) == 0 {
