@@ -46,7 +46,7 @@ func GetPopulars(proNum, exNum int) (error, []*PkgExam, []*PkgInfo, []*PkgInfo, 
 
 	var rvPros, trPros, tvPros, rtwPros []*PkgInfo
 	var procks []*PkgRock
-	err = q.OmitFields("ProName", "IsCmd", "Tags", "Views", "ViewedTime", "Created",
+	err = q.OmitFields("ProName", "IsCmd", "Tags", "Views", "Created",
 		"Etag", "Labels", "ImportedNum", "ImportPid", "Note").
 		Limit(proNum).OrderByDesc("viewed_time").FindAll(&rvPros)
 	if err != nil {
