@@ -224,7 +224,9 @@ func GetGoRepo() ([]*PkgInfo, error) {
 
 	var pkgInfos []*PkgInfo
 	condition := qbs.NewCondition("pro_name = ?", "Go")
-	err := q.Condition(condition).OrderBy("path").FindAll(&pkgInfos)
+	err := q.OmitFields("ProName", "IsCmd", "Tags", "Views", "ViewedTime", "Created",
+		"Etag", "Labels", "ImportedNum", "ImportPid", "Note").
+		Condition(condition).OrderBy("path").FindAll(&pkgInfos)
 	infos := make([]*PkgInfo, 0, 30)
 	for _, v := range pkgInfos {
 		if strings.Index(v.Path, ".") == -1 {
@@ -241,6 +243,7 @@ func SearchRawDoc(key string, isMatchSub bool) (pkgInfos []*PkgInfo, err error) 
 	q := connDb()
 	defer q.Close()
 
+	// TODO: need to use q.OmitFields to speed up.
 	// Check if need to match sub-packages.
 	if isMatchSub {
 		condition := qbs.NewCondition("pro_name != ?", "Go")
@@ -254,18 +257,7 @@ func SearchRawDoc(key string, isMatchSub bool) (pkgInfos []*PkgInfo, err error) 
 	return pkgInfos, err
 }
 
-// GetAllPkgs returns all packages information in database
-func GetAllPkgs() ([]*PkgInfo, error) {
-	// Connect to database.
-	q := connDb()
-	defer q.Close()
-
-	var pkgInfos []*PkgInfo
-	err := q.OrderBy("pro_name").OrderByDesc("views").FindAll(&pkgInfos)
-	return pkgInfos, err
-}
-
-// GetPkgExams returns user examples from database.
+// GetPkgExams returns user examples.
 func GetPkgExams(path string) ([]*PkgExam, error) {
 	// Connect to database.
 	q := connDb()
@@ -276,13 +268,14 @@ func GetPkgExams(path string) ([]*PkgExam, error) {
 	return pkgExams, err
 }
 
+// GetAllExams returns all user examples.
 func GetAllExams() ([]*PkgExam, error) {
 	// Connect to database.
 	q := connDb()
 	defer q.Close()
 
 	var pkgExams []*PkgExam
-	err := q.OrderBy("path").FindAll(&pkgExams)
+	err := q.OmitFields("Examples", "Created").OrderBy("path").FindAll(&pkgExams)
 	return pkgExams, err
 }
 
@@ -439,6 +432,6 @@ func SearchFunc(key string) []*PkgFunc {
 
 	var pfuncs []*PkgFunc
 	cond := qbs.NewCondition("is_master = ?", false).And("name like ?", "%"+key+"%")
-	q.Limit(200).Condition(cond).FindAll(&pfuncs)
+	q.OmitFields("Pid", "IsMaster", "IsOld").Limit(200).Condition(cond).FindAll(&pfuncs)
 	return pfuncs
 }

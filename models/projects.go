@@ -38,26 +38,35 @@ func GetPopulars(proNum, exNum int) (error, []*PkgExam, []*PkgInfo, []*PkgInfo, 
 	defer q.Close()
 
 	var ruExs []*PkgExam
-	err := q.Limit(exNum).OrderByDesc("created").FindAll(&ruExs)
+	err := q.OmitFields("examples", "created").
+		Limit(exNum).OrderByDesc("created").FindAll(&ruExs)
 	if err != nil {
 		return err, nil, nil, nil, nil, nil
 	}
 
 	var rvPros, trPros, tvPros, rtwPros []*PkgInfo
 	var procks []*PkgRock
-	err = q.Limit(proNum).OrderByDesc("viewed_time").FindAll(&rvPros)
+	err = q.OmitFields("ProName", "IsCmd", "Tags", "Views", "ViewedTime", "Created",
+		"Etag", "Labels", "ImportedNum", "ImportPid", "Note").
+		Limit(proNum).OrderByDesc("viewed_time").FindAll(&rvPros)
 	if err != nil {
 		return err, nil, nil, nil, nil, nil
 	}
-	err = q.Limit(proNum).OrderByDesc("rank").FindAll(&trPros)
+	err = q.OmitFields("ProName", "IsCmd", "Tags", "Views", "ViewedTime", "Created",
+		"Etag", "Labels", "ImportedNum", "ImportPid", "Note").
+		Limit(proNum).OrderByDesc("rank").FindAll(&trPros)
 	if err != nil {
 		return err, nil, nil, nil, nil, nil
 	}
-	err = q.Limit(proNum).OrderByDesc("views").FindAll(&tvPros)
+	err = q.OmitFields("ProName", "IsCmd", "Tags", "ViewedTime", "Created",
+		"Etag", "Labels", "ImportedNum", "ImportPid", "Note").
+		Limit(proNum).OrderByDesc("views").FindAll(&tvPros)
 	if err != nil {
 		return err, nil, nil, nil, nil, nil
 	}
-	err = q.Limit(proNum).OrderByDesc("delta").FindAll(&procks)
+	err = q.OmitFields("ProName", "IsCmd", "Tags", "Views", "ViewedTime", "Created",
+		"Etag", "Labels", "ImportedNum", "ImportPid", "Note").
+		Limit(proNum).OrderByDesc("delta").FindAll(&procks)
 	if err != nil {
 		return err, nil, nil, nil, nil, nil
 	}

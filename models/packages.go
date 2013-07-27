@@ -29,7 +29,9 @@ func SearchPkg(key string) []*PkgInfo {
 
 	var pinfos []*PkgInfo
 	cond := qbs.NewCondition("path like ?", "%"+key+"%").Or("synopsis like ?", "%"+key+"%")
-	q.Limit(200).Condition(cond).OrderByDesc("rank").FindAll(&pinfos)
+	q.OmitFields("ProName", "IsCmd", "Tags", "Views", "ViewedTime", "Created",
+		"Etag", "Labels", "ImportedNum", "ImportPid", "Note").
+		Limit(200).Condition(cond).OrderByDesc("rank").FindAll(&pinfos)
 	return pinfos
 }
 
@@ -119,7 +121,9 @@ func GetIndexPkgs(page int) (pkgs []*PkgInfo) {
 	q := connDb()
 	defer q.Close()
 
-	err := q.Limit(100).Offset((page - 1) * 100).OrderByDesc("Rank").FindAll(&pkgs)
+	err := q.OmitFields("pro_name", "is_cmd", "tags", "views", "viewd_time", "created",
+		"etag", "labels", "imported_num", "import_pid", "note").
+		Limit(100).Offset((page - 1) * 100).OrderByDesc("Rank").FindAll(&pkgs)
 	if err != nil {
 		beego.Error("models.GetIndexPkgs ->", err)
 	}
