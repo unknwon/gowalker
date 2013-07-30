@@ -86,16 +86,11 @@ func SaveProject(pinfo *PkgInfo, pdecl *PkgDecl, pfuncs []*PkgFunc, imports []st
 	q := connDb()
 	defer q.Close()
 
-	// Save package information.
+	// Load package information(save after checked import information).
 	info := new(PkgInfo)
 	err := q.WhereEqual("path", pinfo.Path).Find(info)
 	if err == nil {
 		pinfo.Id = info.Id
-	}
-
-	_, err = q.Save(pinfo)
-	if err != nil {
-		beego.Error("models.SaveProject(", pinfo.Path, ") -> Information:", err)
 	}
 
 	// Save package declaration.
@@ -160,9 +155,33 @@ func SaveProject(pinfo *PkgInfo, pdecl *PkgDecl, pfuncs []*PkgFunc, imports []st
 
 	// ------------- END ------------
 
+	// ------------------------------
+	// Update imported information.
+	// ------------------------------
+
+	if info.Id > 0 {
+		// Current package.
+		importeds := strings.Split(
+			strings.Replace(info.ImportPid, "$", "", -1), "|")
+		importPids := make([]string, 0, len(importeds))
+		for _, v := range importeds {
+			pid, _ := strconv.ParseInt(v, 10, 64)
+			if checkImport(q, info.Path, pid) {
+				importPids = append(importPids, "$"+v)
+			}
+		}
+		pinfo.ImportPid = strings.Join(importPids, "|")
+		pinfo.ImportedNum = len(importPids)
+	}
+
+	_, err = q.Save(pinfo)
+	if err != nil {
+		beego.Error("models.SaveProject(", pinfo.Path, ") -> Information:", err)
+	}
+
 	// Don't need to check standard library.
 	if imports != nil && !utils.IsGoRepoPath(pinfo.Path) {
-		// Update import information.
+		// Other packages.
 		for _, v := range imports {
 			if !utils.IsGoRepoPath(v) {
 				// Only count non-standard library.
@@ -170,7 +189,33 @@ func SaveProject(pinfo *PkgInfo, pdecl *PkgDecl, pfuncs []*PkgFunc, imports []st
 			}
 		}
 	}
+	// ------------- END ------------
+
 	return nil
+}
+
+// checkImport returns true if the package(id) imports given package(path).
+func checkImport(q *qbs.Qbs, path string, id int64) bool {
+	pinfo := &PkgInfo{
+		Id: id,
+	}
+	err := q.Find(pinfo)
+	if err != nil {
+		return false
+	}
+
+	decl := new(PkgDecl)
+	cond := qbs.NewCondition("pid = ?", pinfo.Id).And("tag = ?", "")
+	err = q.Condition(cond).Find(decl)
+	if err != nil {
+		return false
+	}
+
+	if strings.Index(decl.Imports, path) == -1 {
+		return false
+	}
+
+	return true
 }
 
 // LoadProject returns package declaration.

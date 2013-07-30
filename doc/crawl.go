@@ -256,39 +256,18 @@ func SaveProject(pdoc *Package, info *models.PkgInfo) (int64, error) {
 	pdecl.Examples = buf.String()
 
 	// Notes.
-	buf.Reset()
-	for _, s := range pdoc.Notes {
-		buf.WriteString(s)
-		buf.WriteString("|")
-	}
-	pdecl.Notes = buf.String()
+	pdecl.Notes = strings.Join(pdoc.Notes, "|")
 
 	// Dirs.
-	buf.Reset()
-	for _, s := range pdoc.Dirs {
-		buf.WriteString(s)
-		buf.WriteString("|")
-	}
-	pdecl.Dirs = buf.String()
+	pdecl.Dirs = strings.Join(pdoc.Dirs, "|")
 
 	// Imports.
 	pdecl.Imports = strings.Join(pdoc.Imports, "|")
 	pdecl.TestImports = strings.Join(pdoc.TestImports, "|")
 
 	// Files.
-	buf.Reset()
-	for _, s := range pdoc.Files {
-		buf.WriteString(s)
-		buf.WriteString("|")
-	}
-	pdecl.Files = buf.String()
-
-	buf.Reset()
-	for _, s := range pdoc.TestFiles {
-		buf.WriteString(s)
-		buf.WriteString("|")
-	}
-	pdecl.TestFiles = buf.String()
+	pdecl.Files = strings.Join(pdoc.Files, "|")
+	pdecl.TestFiles = strings.Join(pdoc.TestFiles, "|")
 
 	err := models.SaveProject(pinfo, pdecl, pfuncs, pdoc.Imports)
 	return pinfo.Id, err

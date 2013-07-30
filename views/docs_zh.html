@@ -418,7 +418,7 @@
 							{{end}}
 
 							{{if .IsImported}}
-							，并且有 <a href="/search?q=imported&pkgs={{.ImportPid}}">{{.ImportedNum}} 引用了该项目</a>
+							，并且有 <a href="/search?q=imported&pkgs={{.ImportPid}}">{{.ImportedNum}} 个包</a> 引用了该项目
 							{{end}}。 
 
 							Go 步行者在 <i>{{.TimeSince}}</i> 生成了此页面。 <a class="btn" href="/refresh?q={{.ImportPath}}">刷新文档</a>

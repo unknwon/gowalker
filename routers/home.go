@@ -477,16 +477,19 @@ func generatePage(this *HomeRouter, pdoc *doc.Package, q, tag, lang string) bool
 	}
 
 	// Dirs.
-	this.Data["IsHasSubdirs"] = len(pdoc.Dirs) > 0
 	pinfos := make([]*models.PkgInfo, 0, len(pdoc.Dirs))
 	for _, v := range pdoc.Dirs {
-		v = pdoc.ImportPath + "/" + v
-		if pinfo, err := models.GetPkgInfo(v, tag); err == nil {
-			pinfos = append(pinfos, pinfo)
-		} else {
-			pinfos = append(pinfos, &models.PkgInfo{Path: v})
+		if len(v) > 0 {
+			v = pdoc.ImportPath + "/" + v
+			// TODO: Can be reduce to once database connection.
+			if pinfo, err := models.GetPkgInfo(v, tag); err == nil {
+				pinfos = append(pinfos, pinfo)
+			} else {
+				pinfos = append(pinfos, &models.PkgInfo{Path: v})
+			}
 		}
 	}
+	this.Data["IsHasSubdirs"] = len(pinfos) > 0
 	this.Data["Subdirs"] = pinfos
 
 	// Labels.
@@ -874,7 +877,6 @@ func ConvertDataFormat(pdoc *doc.Package, pdecl *models.PkgDecl) error {
 
 	// Dirs.
 	pdoc.Dirs = strings.Split(pdecl.Dirs, "|")
-	pdoc.Dirs = pdoc.Dirs[:len(pdoc.Dirs)-1]
 
 	// Imports.
 	pdoc.Imports = strings.Split(pdecl.Imports, "|")

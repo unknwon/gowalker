@@ -116,6 +116,7 @@ func getGithubDoc(client *http.Client, match map[string]string, tag, savedEtag s
 	preLen := len(dirPrefix)
 
 	isGoPro := false // Indicates whether it's a Go project.
+	isRootPath := match["importPath"] == utils.GetProjectPath(match["importPath"])
 	dirs := make([]string, 0, 5)
 	files := make([]*source, 0, 5)
 	for _, node := range tree.Tree {
@@ -128,13 +129,16 @@ func getGithubDoc(client *http.Client, match map[string]string, tag, savedEtag s
 		if d, f := path.Split(node.Path); utils.IsDocFile(f) &&
 			utils.FilterDirName(d) {
 			// Check if it's a Go file.
-			if !isGoPro && strings.HasSuffix(f, ".go") {
+			if isRootPath && !isGoPro && strings.HasSuffix(f, ".go") {
 				isGoPro = true
 			}
 
 			// Check if file is in the directory that is corresponding to import path.
 			if d == dirPrefix {
 				// Yes.
+				if !isRootPath && !isGoPro && strings.HasSuffix(f, ".go") {
+					isGoPro = true
+				}
 				files = append(files, &source{
 					name:      f,
 					browseURL: expand("https://github.com/{owner}/{repo}/blob/{tag}/{0}", match, node.Path),

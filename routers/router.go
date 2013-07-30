@@ -28,7 +28,6 @@ import (
 )
 
 var AppVer string
-
 var langTypes []*langType // Languages are supported.
 
 // langType represents a language type.
@@ -167,13 +166,21 @@ func cacheTickerCheck(cacheChan <-chan time.Time) {
 			refreshCount = 0
 		}
 
+		isShutdown := shutdownCheck()
 		// Check if need to flush cache.
-		if refreshCount == 0 || len(cachePros) >= utils.Cfg.MustInt("task", "min_pro_num") {
+		if isShutdown || refreshCount == 0 || len(cachePros) >= utils.Cfg.MustInt("task", "min_pro_num") {
 			flushCache()
-			initPopPros()
-			refreshCount = 0
+
+			if !isShutdown {
+				initPopPros()
+				refreshCount = 0
+			}
 		}
-		shutdownCheck()
+
+		if isShutdown {
+			os.Exit(0)
+		}
+
 		initIndexStats()
 	}
 }
@@ -194,10 +201,11 @@ func flushCache() {
 	cachePros = make([]*models.PkgInfo, 0, num)
 }
 
-func shutdownCheck() {
+func shutdownCheck() bool {
 	if utils.IsExist("SHUTDOWN.SIGN") {
 		os.Remove("SHUTDOWN.SIGN")
 		beego.Info("Detected SHUTDOWN.SIGN")
-		os.Exit(0)
+		return true
 	}
+	return false
 }

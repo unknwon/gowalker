@@ -63,6 +63,7 @@ func getOSCDoc(client *http.Client, match map[string]string, tag, savedEtag stri
 	preLen := len(dirPrefix)
 
 	isGoPro := false // Indicates whether it's a Go project.
+	isRootPath := match["importPath"] == utils.GetProjectPath(match["importPath"])
 	dirs := make([]string, 0, 5)
 	files := make([]*source, 0, 5)
 	for _, f := range r.File {
@@ -76,13 +77,16 @@ func getOSCDoc(client *http.Client, match map[string]string, tag, savedEtag stri
 		if d, fn := path.Split(fileName); utils.IsDocFile(fn) &&
 			utils.FilterDirName(d) {
 			// Check if it's a Go file.
-			if !isGoPro && strings.HasSuffix(fileName, ".go") {
+			if isRootPath && !isGoPro && strings.HasSuffix(fn, ".go") {
 				isGoPro = true
 			}
 
 			// Check if file is in the directory that is corresponding to import path.
 			if d == dirPrefix {
 				// Yes.
+				if !isRootPath && !isGoPro && strings.HasSuffix(fn, ".go") {
+					isGoPro = true
+				}
 				// Get file from archive.
 				rc, err := f.Open()
 				if err != nil {
