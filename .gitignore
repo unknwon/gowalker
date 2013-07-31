@@ -26,6 +26,8 @@ _testmain.go
 *.exe
 *.exe~
 .DS_Store
-gowalker
+gw-server
+gw-local
+gw-admin
 app.ini
 bee
