@@ -20,31 +20,29 @@ import (
 	"runtime"
 
 	"github.com/Unknwon/gowalker/doc"
-	"github.com/Unknwon/gowalker/routers"
+	"github.com/Unknwon/gowalker/gw-server/routers"
 	"github.com/Unknwon/gowalker/utils"
 	"github.com/astaxie/beego"
 )
 
 const (
-	APP_VER = "0.8.6.0730"
+	APP_VER = "0.8.6.0731"
 )
 
 func init() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
 
-	// Setting application version.
+	// Set App version and log level.
 	routers.AppVer = "v" + APP_VER
 
-	// Set application log level.
 	if beego.AppConfig.String("runmode") == "pro" {
 		beego.SetLevel(beego.LevelInfo)
 
 		beego.Info("Go Walker", APP_VER)
 
-		// Initialize log file.
-		os.Mkdir("./log", os.ModePerm)
-		filew := beego.NewFileWriter("log/log", true)
-		err := filew.StartLogger()
+		os.Mkdir("../log", os.ModePerm)
+		fw := beego.NewFileWriter("../log/log", true)
+		err := fw.StartLogger()
 		if err != nil {
 			beego.Critical("NewFileWriter ->", err)
 		}
@@ -55,18 +53,18 @@ func init() {
 }
 
 func main() {
-	beego.AppName = "Go Walker"
-	beego.Info("Go Walker", APP_VER)
+	beego.AppName = "Go Walker Server"
+	beego.Info("Go Walker Server", APP_VER)
 
 	// Register routers.
 	beego.Router("/", &routers.HomeRouter{})
+	beego.Router("/refresh", &routers.RefreshRouter{})
 	beego.Router("/search", &routers.SearchRouter{})
 	beego.Router("/index", &routers.IndexRouter{})
 	beego.Router("/labels", &routers.LabelsRouter{})
 	beego.Router("/examples", &routers.ExamplesRouter{})
-	beego.Router("/refresh", &routers.RefreshRouter{})
-	beego.Router("/about", &routers.AboutRouter{})
 	beego.Router("/funcs", &routers.FuncsRouter{})
+	beego.Router("/about", &routers.AboutRouter{})
 
 	// Register template functions.
 

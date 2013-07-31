@@ -201,10 +201,14 @@ func flushCache() {
 	cachePros = make([]*models.PkgInfo, 0, num)
 }
 
+// shutdownCheck returns true if server detects shutdown signal.
 func shutdownCheck() bool {
 	if utils.IsExist("SHUTDOWN.SIGN") {
 		os.Remove("SHUTDOWN.SIGN")
 		beego.Info("Detected SHUTDOWN.SIGN")
+		if beego.Level() == beego.LevelInfo {
+			fmt.Println("Detected SHUTDOWN.SIGN")
+		}
 		return true
 	}
 	return false

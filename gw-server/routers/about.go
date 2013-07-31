@@ -29,6 +29,6 @@ func (this *AboutRouter) Get() {
 	// Set language version.
 	curLang := globalSetting(this.Ctx, this.Input(), this.Data)
 
-	// Set properties
+	// Set properties.
 	this.TplNames = "about_" + curLang.Lang + ".html"
 }
