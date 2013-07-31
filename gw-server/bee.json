@@ -2,13 +2,13 @@
 	"go_install": true,
 	"dir_structure":{
 		"controllers": "routers",
-		"models": "",
+		"models": "../models",
 		"others": [
-			"doc"
+			"../doc"
 		]
 	},
 	"main_files":{
-		"main.go": "gowalker.go",
+		"main.go": "gw-server.go",
 		"others": []
 	}
 }
