@@ -156,29 +156,7 @@ func (this *HomeRouter) Get() {
 	this.TplNames = "home_" + curLang.Lang + ".html"
 	// Check to show home page or documentation page.
 	if len(reqUrl) == 0 && len(q) == 0 {
-		// Home.
-		this.Data["IsHome"] = true
-
-		// Global Recent projects.
-		this.Data["GlobalRecentPros"] = recentViewedPros
-		// User Recent projects.
-		if urpids != nil && urpts != nil {
-			upros := models.GetGroupPkgInfoById(strings.Split(urpids.Value, "|"))
-			pts := strings.Split(urpts.Value, "|")
-			for i, p := range upros {
-				ts, _ := strconv.ParseInt(pts[i], 10, 64)
-				p.ViewedTime = ts
-			}
-			this.Data["UserRecentPros"] = upros
-		}
-
-		// Popular projects and examples.
-		this.Data["TopRankPros"] = topRankPros
-		this.Data["TopViewedPros"] = topViewedPros
-		this.Data["RockPros"] = RockPros
-		this.Data["RecentExams"] = recentUpdatedExs
-		// Standard library type-ahead.
-		this.Data["DataSrc"] = utils.GoRepoSet
+		serveHome(this, urpids, urpts)
 	} else {
 		// Documentation.
 		this.TplNames = "docs_" + curLang.Lang + ".html"
@@ -220,11 +198,39 @@ func (this *HomeRouter) Get() {
 			this.Data["ErrMsg"] = strings.Replace(err.Error(),
 				doc.GetGithubCredentials(), "<githubCred>", 1)
 			beego.Error("HomeRouter.Get ->", err)
+			this.TplNames = "home_" + curLang.Lang + ".html"
+			serveHome(this, urpids, urpts)
+			return
 		}
 
 		this.Redirect("/search?q="+reqUrl, 302)
 		return
 	}
+}
+
+func serveHome(this *HomeRouter, urpids, urpts *http.Cookie) {
+	this.Data["IsHome"] = true
+
+	// Global Recent projects.
+	this.Data["GlobalRecentPros"] = recentViewedPros
+	// User Recent projects.
+	if urpids != nil && urpts != nil {
+		upros := models.GetGroupPkgInfoById(strings.Split(urpids.Value, "|"))
+		pts := strings.Split(urpts.Value, "|")
+		for i, p := range upros {
+			ts, _ := strconv.ParseInt(pts[i], 10, 64)
+			p.ViewedTime = ts
+		}
+		this.Data["UserRecentPros"] = upros
+	}
+
+	// Popular projects and examples.
+	this.Data["TopRankPros"] = topRankPros
+	this.Data["TopViewedPros"] = topViewedPros
+	this.Data["RockPros"] = RockPros
+	this.Data["RecentExams"] = recentUpdatedExs
+	// Standard library type-ahead.
+	this.Data["DataSrc"] = utils.GoRepoSet
 }
 
 // getUserExamples returns user examples of given import path.
