@@ -56,6 +56,9 @@ func getGithubDoc(client *http.Client, match map[string]string, tag, savedEtag s
 
 	err := httpGetJSON(client, expand("https://api.github.com/repos/{owner}/{repo}/git/refs?{cred}", match), &refs)
 	if err != nil {
+		if strings.HasPrefix(err.Error(), "Resource not found") {
+			return nil, NotFoundError{"doc.getGithubDoc(" + match["importPath"] + ") -> " + err.Error()}
+		}
 		return nil, errors.New("doc.getGithubDoc(" + match["importPath"] + ") -> " + err.Error())
 	}
 
@@ -105,7 +108,7 @@ func getGithubDoc(client *http.Client, match map[string]string, tag, savedEtag s
 	// Because Github API URLs are case-insensitive, we need to check that the
 	// userRepo returned from Github matches the one that we are requesting.
 	if !strings.HasPrefix(tree.Url, expand("https://api.github.com/repos/{owner}/{repo}/", match)) {
-		return nil, NotFoundError{"Github import path has incorrect case."}
+		return nil, errors.New("Github import path has incorrect case.")
 	}
 
 	// Get source file data and subdirectories.

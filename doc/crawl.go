@@ -61,7 +61,7 @@ func crawlDoc(path, tag string, pinfo *models.PkgInfo) (pdoc *Package, err error
 		}
 	case isNotFound(err):
 		// We do not need to delete standard library, so here is fine.
-		if err = models.DeleteProject(path); err != nil {
+		if err := models.DeleteProject(path); err != nil {
 			beego.Error("doc.DeleteProject(", path, ") ->", err)
 		}
 	}
