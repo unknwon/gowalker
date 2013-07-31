@@ -139,6 +139,7 @@
 
 						{{if .IsCmd}}
 						{{else}}
+							{{if .IsHasFiles}}
 						<div style="min-height: 25px;">
 							<code>import "{{.ImportPath}}"</code>
 
@@ -156,6 +157,7 @@
 							{{end}}
 					    </div>
 					    {{end}}
+						{{end}}
 
 						{{if .IsHasReadme}}
 						<div id="readme" style='display:none; padding: 3px; border:1px solid #4F4F4F;'>{{str2html .PkgDoc}}</div>
@@ -410,6 +412,7 @@
 						{{end}}
 
 						<p>
+							{{if .IsHasFiles}}
 							项目 <b>{{.ProName}}</b> 共计导入 
 							{{if .IsHasImports}}
 							<a href="/search?q=imports&pkgs={{.ImportPkgs}}">{{.ImportPkgNum}} 个外部包</a>
@@ -420,6 +423,7 @@
 							{{if .IsImported}}
 							，并且有 <a href="/search?q=imported&pkgs={{.ImportPid}}">{{.ImportedNum}} 个包</a> 引用了该项目
 							{{end}}。 
+							{{end}}
 
 							Go 步行者在 <i>{{.TimeSince}}</i> 生成了此页面。 <a class="btn" href="/refresh?q={{.ImportPath}}">刷新文档</a>
 						</p>

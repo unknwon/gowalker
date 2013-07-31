@@ -126,7 +126,11 @@
 							{{if .IsCmd}}
 							Command
 							{{else}}
+							{{if .IsHasFiles}}
 							Package
+							{{else}}
+							Project
+							{{end}}
 							{{end}}
 
 							{{.ProName}} 
@@ -140,6 +144,7 @@
 
 						{{if .IsCmd}}
 						{{else}}
+						{{if .IsHasFiles}}
 						<div style="min-height: 25px;">
 							<code>import "{{.ImportPath}}"</code>
 							
@@ -156,6 +161,7 @@
 						    </div>
 							{{end}}
 					    </div>
+					    {{end}}
 					    {{end}}
 
 						{{if .IsHasReadme}}
@@ -411,6 +417,7 @@
 						{{end}}
 
 						<p>
+							{{if .IsHasFiles}}
 							Package <b>{{.ProName}}</b> imports 
 							{{if .IsHasImports}}
 							<a href="/search?q=imports&pkgs={{.ImportPkgs}}">{{.ImportPkgNum}} packages</a>
@@ -421,6 +428,7 @@
 							{{if .IsImported}} 
 							and imported by <a href="/search?q=imported&pkgs={{.ImportPid}}">{{.ImportedNum}} packages</a>
 							{{end}}.
+							{{end}}
 
 							Go Walker generated this page <i>{{.TimeSince}}</i>. <a class="btn" href="/refresh?q={{.ImportPath}}">Refresh</a>
 						</p>

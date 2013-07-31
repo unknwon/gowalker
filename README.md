@@ -4,8 +4,6 @@ Go Walker
 
 Go Walker is a web server that generates <a target="_blank" href="http://golang.org/">Go</a> projects API documentation with source code on the fly from projects on <b><a target="_blank" href="https://bitbucket.org/">Bitbucket</a></b>, <b><a target="_blank" href="https://github.com/">Github</a></b>, <b><a target="_blank" href="http://code.google.com/">Google Code</a></b>, <b><a target="_blank" href="https://launchpad.net/">Launchpad</a></b> and <b><a target="_blank" href="http://git.oschina.net/">Git @ OSC</a></b>.
 
-![](https://github.com/Unknwon/gowalker/blob/master/docs/images/whatisthis.png?raw=true)
-
 ## Features
 
 - **Search** and **view** huge amounts documentation of projects: over 7000 projects involved.
@@ -22,6 +20,7 @@ Go Walker is a web server that generates <a target="_blank" href="http://golang.
 - [Full documentation](https://github.com/Unknwon/gowalker/blob/master/docs/Features.md).
 
 ## Develop route
+
 See board on [Trello](https://trello.com/b/wS7CzdcI/go-walker) about to do, bugs and road map.
 
 ## Third-party packages
