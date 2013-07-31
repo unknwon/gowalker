@@ -38,7 +38,7 @@ func init() {
 	if beego.AppConfig.String("runmode") == "pro" {
 		beego.SetLevel(beego.LevelInfo)
 
-		beego.Info("Go Walker", APP_VER)
+		beego.Info("Go Walker Server", APP_VER)
 
 		os.Mkdir("../log", os.ModePerm)
 		fw := beego.NewFileWriter("../log/log", true)
