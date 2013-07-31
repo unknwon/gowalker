@@ -32,7 +32,7 @@ func (this *SearchRouter) Get() {
 	// Set language version.
 	curLang := globalSetting(this.Ctx, this.Input(), this.Data)
 
-	// Get arguments.
+	// Get argument(s).
 	q := strings.TrimSpace(this.Input().Get("q"))
 
 	// Empty query string shows home page.
@@ -44,16 +44,15 @@ func (this *SearchRouter) Get() {
 	// Set properties.
 	this.TplNames = "search_" + curLang.Lang + ".html"
 	this.Data["Keyword"] = q
-	// Set standard library keyword type-ahead.
 	this.Data["DataSrc"] = utils.GoRepoSet
 
 	if checkSpecialUsage(this, q) {
 		return
 	}
 
-	// Remove last "/".
-	q = strings.TrimRight(q, "/")
-	if path, ok := utils.IsBrowseURL(q); ok {
+	// Remove last "/" and check path.
+	if path, ok := utils.IsBrowseURL(
+		strings.TrimRight(q, "/")); ok {
 		q = path
 	}
 
@@ -65,19 +64,16 @@ func (this *SearchRouter) Get() {
 	// 		isMatchSub = true
 	// 	}
 
-	// 	pkgInfos, _ := models.SearchRawDoc(q, isMatchSub)
+	// 	pinfos, _ := models.SearchRawDoc(q, isMatchSub)
 	// 	var buf bytes.Buffer
-	// 	for _, p := range pkgInfos {
+	// 	for _, p := range pinfos {
 	// 		buf.WriteString(p.Path + "$" + p.Synopsis + "|||")
 	// 	}
 	// 	this.Ctx.WriteString(buf.String())
 	// 	return
 	// }
 
-	// Returns a slice of results.
 	pinfos := models.SearchPkg(q)
-
-	// Show results after searched.
 	if len(pinfos) > 0 {
 		this.Data["IsFindPro"] = true
 		this.Data["Results"] = pinfos
@@ -89,11 +85,10 @@ func (this *SearchRouter) Get() {
 func checkSpecialUsage(this *SearchRouter, q string) bool {
 	switch {
 	case q == "gorepo": // Show list of standard library.
-		pkgInfos, _ := models.GetGoRepo()
-		// Show results after searched.
-		if len(pkgInfos) > 0 {
+		pinfos, _ := models.GetGoRepo()
+		if len(pinfos) > 0 {
 			this.Data["IsFindPro"] = true
-			this.Data["Results"] = pkgInfos
+			this.Data["Results"] = pinfos
 		}
 		return true
 	case q == "imports": // Show imports package list.
@@ -113,8 +108,8 @@ func checkSpecialUsage(this *SearchRouter, q string) bool {
 			this.Data["Results"] = pinfos
 		}
 		return true
-	case strings.Index(q, ":l=") > -1: // Add tag(s) to the project.
-		// Get tag(s).
+	case strings.Index(q, ":l=") > -1: // Add label to the project.
+		// Get label(s).
 		i := strings.Index(q, ":l=")
 		if utils.IsGoRepoPath(q[:i]) {
 			this.Redirect("/"+q[:i], 302)
@@ -125,8 +120,8 @@ func checkSpecialUsage(this *SearchRouter, q string) bool {
 			this.Redirect("/"+q[:i], 302)
 		}
 		return true
-	case strings.Index(q, ":rl=") > -1: // Remove tag(s) to the project.
-		// Get tag(s).
+	case strings.Index(q, ":rl=") > -1: // Remove label to the project.
+		// Get label(s).
 		i := strings.Index(q, ":rl=")
 		if utils.IsGoRepoPath(q[:i]) {
 			this.Redirect("/"+q[:i], 302)
@@ -142,6 +137,7 @@ func checkSpecialUsage(this *SearchRouter, q string) bool {
 	return false
 }
 
+// isLabel retutns true if given string is a valid lable.
 func isLabel(input string) bool {
 	if len(input) > 0 {
 		for _, t := range labelList {

@@ -38,10 +38,10 @@ func (this *ExamplesRouter) Get() {
 	// Set language version.
 	curLang := globalSetting(this.Ctx, this.Input(), this.Data)
 
-	// Set properties
+	// Set properties.
 	this.TplNames = "examples_" + curLang.Lang + ".html"
 
-	// Get query field.
+	// Get argument(s).
 	gist := strings.TrimSpace(this.Input().Get("gist"))
 	q := strings.TrimSpace(this.Input().Get("q"))
 
@@ -56,6 +56,7 @@ func (this *ExamplesRouter) Get() {
 	this.Data["ImportPath"] = q
 
 	if !strings.Contains(gist, "gist.github.com") {
+		this.Data["IsHasError"] = true
 		this.Data["ErrMsg"] = fmt.Sprintf("Gist path[ %s ] is not legal.", gist)
 		return
 	}
@@ -70,6 +71,7 @@ func (this *ExamplesRouter) Get() {
 	req, err := http.NewRequest("GET", gist, nil)
 	if err != nil {
 		fmt.Println("ExamplesRouter.Get -> New request:", err)
+		this.Data["IsHasError"] = true
 		this.Data["ErrMsg"] = err.Error()
 		return
 	}
@@ -79,6 +81,7 @@ func (this *ExamplesRouter) Get() {
 	resp, err := client.Do(req)
 	if err != nil {
 		fmt.Println("ExamplesRouter.Get -> Get response:", err)
+		this.Data["IsHasError"] = true
 		this.Data["ErrMsg"] = err.Error()
 		return
 	}
@@ -87,6 +90,7 @@ func (this *ExamplesRouter) Get() {
 	html, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		fmt.Println("ExamplesRouter.Get -> Get body:", err)
+		this.Data["IsHasError"] = true
 		this.Data["ErrMsg"] = err.Error()
 		return
 	}
@@ -94,11 +98,13 @@ func (this *ExamplesRouter) Get() {
 	// Parse examples.
 	g, err := parseExamples(html, gist, q)
 	if err != nil {
+		this.Data["IsHasError"] = true
 		this.Data["ErrMsg"] = err.Error()
 		return
 	}
 
 	if len(g.Examples) == 0 {
+		this.Data["IsHasError"] = true
 		this.Data["ErrMsg"] = "No example has beed found."
 		return
 	}

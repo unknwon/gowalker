@@ -125,11 +125,9 @@ func (this *HomeRouter) Get() {
 	// Set language version.
 	curLang := globalSetting(this.Ctx, this.Input(), this.Data)
 
-	// Get query field.
-	q := strings.TrimSpace(this.Input().Get("q"))
-
-	// Remove last "/".
-	q = strings.TrimRight(q, "/")
+	// Get argument(s).
+	q := strings.TrimRight(
+		strings.TrimSpace(this.Input().Get("q")), "/")
 
 	if path, ok := utils.IsBrowseURL(q); ok {
 		q = path
@@ -156,44 +154,22 @@ func (this *HomeRouter) Get() {
 	urpts, _ := this.Ctx.Request.Cookie("URPTimestamps")
 
 	this.TplNames = "home_" + curLang.Lang + ".html"
-	// Check show home page or documentation page.
+	// Check to show home page or documentation page.
 	if len(reqUrl) == 0 && len(q) == 0 {
-		// Home page.
-		this.Data["IsHome"] = true
-
-		// Global Recent projects.
-		this.Data["GlobalRecentPros"] = recentViewedPros
-		// User Recent projects.
-		if urpids != nil && urpts != nil {
-			upros := models.GetGroupPkgInfoById(strings.Split(urpids.Value, "|"))
-			pts := strings.Split(urpts.Value, "|")
-			for i, p := range upros {
-				ts, _ := strconv.Atoi(pts[i])
-				p.ViewedTime = int64(ts)
-			}
-			this.Data["UserRecentPros"] = upros
-		}
-
-		// Get popular projects and examples.
-		this.Data["TopRankPros"] = topRankPros
-		this.Data["TopViewedPros"] = topViewedPros
-		this.Data["RockPros"] = RockPros
-		this.Data["RecentExams"] = recentUpdatedExs
-		// Set standard library keyword type-ahead.
-		this.Data["DataSrc"] = utils.GoRepoSet
+		serveHome(this, urpids, urpts)
 	} else {
-		// Documentation page.
+		// Documentation.
 		this.TplNames = "docs_" + curLang.Lang + ".html"
 		broPath := reqUrl // Browse path.
 
-		// Check if it is standard library.
+		// Check if it's the standard library.
 		if utils.IsGoRepoPath(broPath) {
 			broPath = "code.google.com/p/go/source/browse/src/pkg/" + broPath
 		}
 
-		// Check if it is a remote path that can be used for 'gopm get', if not means it's a keyword.
+		// Check if it's a remote path that can be used for 'go get', if not means it's a keyword.
 		if !utils.IsValidRemotePath(broPath) {
-			// Show search page
+			// Search.
 			this.Redirect("/search?q="+reqUrl, 302)
 			return
 		}
@@ -222,14 +198,42 @@ func (this *HomeRouter) Get() {
 			this.Data["ErrMsg"] = strings.Replace(err.Error(),
 				doc.GetGithubCredentials(), "<githubCred>", 1)
 			beego.Error("HomeRouter.Get ->", err)
+			this.TplNames = "home_" + curLang.Lang + ".html"
+			serveHome(this, urpids, urpts)
+			return
 		}
 
-		// Show search page
 		this.Redirect("/search?q="+reqUrl, 302)
 		return
 	}
 }
 
+func serveHome(this *HomeRouter, urpids, urpts *http.Cookie) {
+	this.Data["IsHome"] = true
+
+	// Global Recent projects.
+	this.Data["GlobalRecentPros"] = recentViewedPros
+	// User Recent projects.
+	if urpids != nil && urpts != nil {
+		upros := models.GetGroupPkgInfoById(strings.Split(urpids.Value, "|"))
+		pts := strings.Split(urpts.Value, "|")
+		for i, p := range upros {
+			ts, _ := strconv.ParseInt(pts[i], 10, 64)
+			p.ViewedTime = ts
+		}
+		this.Data["UserRecentPros"] = upros
+	}
+
+	// Popular projects and examples.
+	this.Data["TopRankPros"] = topRankPros
+	this.Data["TopViewedPros"] = topViewedPros
+	this.Data["RockPros"] = RockPros
+	this.Data["RecentExams"] = recentUpdatedExs
+	// Standard library type-ahead.
+	this.Data["DataSrc"] = utils.GoRepoSet
+}
+
+// getUserExamples returns user examples of given import path.
 func getUserExamples(path string) []*doc.Example {
 	gists, _ := models.GetPkgExams(path)
 	// Doesn't have Gists.
@@ -246,9 +250,8 @@ func getUserExamples(path string) []*doc.Example {
 }
 
 // generatePage genarates documentation page for project.
-// it returns false when its a invaild(empty) project.
+// it returns false when it's a invaild(empty) project.
 func generatePage(this *HomeRouter, pdoc *doc.Package, q, tag, lang string) bool {
-	// Load project data from database.
 	pdecl, err := models.LoadProject(pdoc.Id, tag)
 	if err != nil {
 		beego.Error("HomeController.generatePage ->", err)
@@ -261,7 +264,7 @@ func generatePage(this *HomeRouter, pdoc *doc.Package, q, tag, lang string) bool
 	// Refresh (within 10 seconds).
 	this.Data["IsRefresh"] = pdoc.Created.UTC().Add(10 * time.Second).After(time.Now().UTC())
 
-	// Get VCS name, project name, project home page, and Upper level project URL.
+	// Get VCS name, project name, project home page, Upper level project URL, and project tag.
 	this.Data["VCS"], this.Data["ProName"], this.Data["ProPath"], this.Data["ProDocPath"], this.Data["PkgTag"] =
 		getVCSInfo(q, tag, pdoc)
 
@@ -269,11 +272,6 @@ func generatePage(this *HomeRouter, pdoc *doc.Package, q, tag, lang string) bool
 		strings.Index(pdoc.ImportPath, ".") == -1 {
 		this.Data["IsGoRepo"] = true
 	}
-
-	this.Data["Views"] = pdoc.Views + 1
-
-	// Labels.
-	this.Data["Labels"] = getLabels(pdoc.Labels)
 
 	// Introduction.
 	this.Data["ImportPath"] = pdoc.ImportPath
@@ -287,7 +285,6 @@ func generatePage(this *HomeRouter, pdoc *doc.Package, q, tag, lang string) bool
 	this.Data["PkgFullIntro"] = string(byts)
 
 	var buf bytes.Buffer
-	// Convert data format.
 	err = ConvertDataFormat(pdoc, pdecl)
 	if err != nil {
 		beego.Error("HomeController.generatePage -> ConvertDataFormat:", err)
@@ -326,6 +323,7 @@ func generatePage(this *HomeRouter, pdoc *doc.Package, q, tag, lang string) bool
 		}
 	}
 
+	// Ignore C.
 	for _, v := range pdoc.Imports {
 		if v != "C" {
 			links = append(links, &utils.Link{
@@ -335,11 +333,11 @@ func generatePage(this *HomeRouter, pdoc *doc.Package, q, tag, lang string) bool
 		}
 	}
 
+	// Set exported objects type-ahead.
 	exportDataSrc := buf.String()
 	if len(exportDataSrc) > 0 {
 		this.Data["IsHasExports"] = true
 		exportDataSrc = exportDataSrc[:len(exportDataSrc)-1]
-		// Set export keyword type-ahead.
 		this.Data["ExportDataSrc"] = exportDataSrc
 	}
 
@@ -477,21 +475,21 @@ func generatePage(this *HomeRouter, pdoc *doc.Package, q, tag, lang string) bool
 	}
 
 	// Dirs.
-	this.Data["IsHasSubdirs"] = len(pdoc.Dirs) > 0
 	pinfos := make([]*models.PkgInfo, 0, len(pdoc.Dirs))
 	for _, v := range pdoc.Dirs {
 		v = pdoc.ImportPath + "/" + v
+		// TODO: Can be reduce to once database connection.
+		// Note: This step will be deleted after served static pages.
 		if pinfo, err := models.GetPkgInfo(v, tag); err == nil {
 			pinfos = append(pinfos, pinfo)
 		} else {
 			pinfos = append(pinfos, &models.PkgInfo{Path: v})
 		}
 	}
+	this.Data["IsHasSubdirs"] = len(pinfos) > 0
 	this.Data["Subdirs"] = pinfos
 
-	// Labels.
-	this.Data["LabelDataSrc"] = labelSet
-
+	// Files.
 	if len(pdoc.Files) > 0 {
 		this.Data["IsHasFiles"] = pdoc.Files
 		this.Data["Files"] = pdoc.Files
@@ -513,8 +511,11 @@ func generatePage(this *HomeRouter, pdoc *doc.Package, q, tag, lang string) bool
 		e.Code = buf.String()
 	}
 
-	this.Data["Rank"] = pdoc.Rank
 	this.Data["Pid"] = pdecl.Id
+	this.Data["Rank"] = pdoc.Rank
+	this.Data["Views"] = pdoc.Views + 1
+	this.Data["Labels"] = getLabels(pdoc.Labels)
+	this.Data["LabelDataSrc"] = labelSet
 	this.Data["ImportPkgs"] = pdecl.Imports
 	this.Data["ImportPkgNum"] = len(pdoc.Imports)
 	this.Data["IsHasImports"] = len(pdoc.Imports) > 0
@@ -526,7 +527,8 @@ func generatePage(this *HomeRouter, pdoc *doc.Package, q, tag, lang string) bool
 	return true
 }
 
-// calTimeSince returns documentation generated time to now with friendly format.
+// calTimeSince returns time interval from documentation generated to now with friendly format.
+// TODO: Chinese.
 func calTimeSince(created time.Time) string {
 	mins := int(time.Since(created).Minutes())
 
@@ -681,8 +683,8 @@ func getVCSInfo(q, tag string, pdoc *doc.Package) (vcs, proName, proPath, pkgDoc
 	return vcs, proName, proPath, pkgDocPath, pkgTag
 }
 
+// getLabels retuens corresponding label name.
 func getLabels(rawLabel string) []string {
-	// Get labels.
 	rawLabels := strings.Split(rawLabel, "|")
 	rawLabels = rawLabels[:len(rawLabels)-1] // The last element is always empty.
 	// Remove first character '$' in every label.
@@ -874,13 +876,24 @@ func ConvertDataFormat(pdoc *doc.Package, pdecl *models.PkgDecl) error {
 
 	// Dirs.
 	pdoc.Dirs = strings.Split(pdecl.Dirs, "|")
-	pdoc.Dirs = pdoc.Dirs[:len(pdoc.Dirs)-1]
+	if len(pdoc.Dirs) == 1 && len(pdoc.Dirs[0]) == 0 {
+		// No directory.
+		pdoc.Dirs = nil
+	}
 
 	// Imports.
 	pdoc.Imports = strings.Split(pdecl.Imports, "|")
+	if len(pdoc.Imports) == 1 && len(pdoc.Imports[0]) == 0 {
+		// No import.
+		pdoc.Imports = nil
+	}
 
 	// Files.
 	pdoc.Files = strings.Split(pdecl.Files, "|")
+	if len(pdoc.Files) == 1 && len(pdoc.Files[0]) == 0 {
+		// No file.
+		pdoc.Files = nil
+	}
 	return nil
 }
 
@@ -1005,6 +1018,7 @@ func updateProInfos(pdoc *doc.Package) {
 	recentViewedPros = s
 }
 
+// updateUrPros returns strings of user recent viewd projects and timestamps.
 func updateUrPros(pdoc *doc.Package, urpids, urpts *http.Cookie) (string, string) {
 	if pdoc.Id == 0 {
 		return urpids.Value, urpts.Value

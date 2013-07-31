@@ -3,8 +3,6 @@ Go 步行者
 
 Go 步行者是一个用于在线生成并浏览 <a target="_blank" href="http://docs.studygolang.com/">Go</a> 项目 API 文档及源码 的 Web 服务器，目前支持包括 <b><a target="_blank" href="https://bitbucket.org/">Bitbucket</a></b>，<b><a target="_blank" href="https://github.com/">Github</a></b>，<b><a target="_blank" href="http://code.google.com/">Google Code</a></b>，<b><a target="_blank" href="https://launchpad.net/">Launchpad</a></b> 和 <b><a target="_blank" href="http://git.oschina.net/">Git @ OSC</a></b> 五大版本控制平台。
 
-![](https://github.com/Unknwon/gowalker/blob/master/docs/images/whatisthis_ZH.png?raw=true)
-
 ## 主要特性
 
 - 在超过 7000 个海量项目中 **搜索** 并 **查看** 文档。
@@ -21,6 +19,7 @@ Go 步行者是一个用于在线生成并浏览 <a target="_blank" href="http:/
 - [完整文档](https://github.com/Unknwon/gowalker/blob/master/docs/Features_ZH.md).
 
 ## 发展路线
+
 请到 [Trello](https://trello.com/b/wS7CzdcI/go-walker) 的面板上查看有关 Todo，Bugs 以及路线图的说明。
 
 ## 第三方包

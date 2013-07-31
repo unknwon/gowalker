@@ -4,133 +4,138 @@
 
 	<body id="body" style="font-family: Microsoft Yahei; font-size: 13px;">
 		<span id="pid" class="hide">{{.Pid}}</span>
-		{{template "navbar_zh"}}
+		{{template "navbar_en" .}}
 		<div class="container" style="width: 1000px;">
 			<div id="main_content" class="row">
 				<div style="margin-left: 20px;">
-	                {{template "alert_zh" .}}
+	                {{template "alert_en" .}}
 					{{if .IsRefresh}}
 					<div class="alert alert-success">
 						<button type="button" class="close" data-dismiss="alert">&times;</button>
-						<strong>  恭喜您！</strong> 
-						您已经成功于 <i>{{.UtcTime}}</i> 刷新本项目文档！
+						<strong>Congratulations!</strong>
+						You successfully refreshed this project documentation at <i>{{.UtcTime}}</i>!
 					</div>
 					{{end}}
 
 					{{if .IsGoRepo}}
 					<div class="alert alert-info">
-						<button type="button" class="close" data-dismiss="alert">&times;</button>
-						<strong>友情提示：</strong> 
-						Asta谢 在 github 上发起了 <strong>Go </strong> 标准库函数 <span class="label label-info">示例</span> 项目，每个函数都有相应操作示例，您绝对不容错过！点击这里访问：<a target="_blank" href="https://github.com/astaxie/gopkg/tree/master/{{.ImportPath}}" class="label label-success">gopkg</a>.
+						<button type="button" class="close" data-dismiss="alert">&times;
+						</button>
+						<strong>Information!</strong>
+						AstaXie launched an open source program that provides <span class="label label-info">examples</span> for every function of <strong>Go Standard Library</strong>, you shouldn't miss this great project: <a target="_blank" href="https://github.com/astaxie/gopkg/tree/master/{{.ImportPath}}" class="label label-success">gopkg</a>.
 					</div>
 					{{else}}
-					{{template "labelmodal_zh" .}}
+					{{template "labelmodal_en" .}}
 					{{end}}
 
-					{{template "exammodal_zh" .}}
+					{{template "exammodal_en" .}}
 
 					<div id="sidebar" class="span3 hide" style="margin-left: -220px; margin-top: 20px;">
 						<ul class="nav nav-tabs nav-stacked affix bs-docs-sidenav">
 							<li>
-								<a href="#"><i class="icon-chevron-right"></i>回到顶部</a>
+								<a href="#"><i class="icon-chevron-right"></i>Top</a>
 							</li>
 							
 							{{if .IsHasExports}}
 							<li>
-								<a href="#_index"><i class="icon-chevron-right"></i>索引</a>
+								<a href="#_index"><i class="icon-chevron-right"></i>Index</a>
 							</li>
 							{{end}}
 							
 							{{if .IsHasConst}}
 							<li>
-								<a href="#_constants"><i class="icon-chevron-right"></i>常量</a>
+								<a href="#_constants"><i class="icon-chevron-right"></i>Constants</a>
 							</li>
 							{{end}}
 
 							{{if .IsHasVar}}
 							<li>
-								<a href="#_variables"><i class="icon-chevron-right"></i>变量</a>
+								<a href="#_variables"><i class="icon-chevron-right"></i>Variables</a>
 							</li>
 							{{end}}
 							
 							{{if .IsHasExams}}
 							<li>
-								<a href="#_exams"><i class="icon-chevron-right"></i>示例</a>
+								<a href="#_exams"><i class="icon-chevron-right"></i>Examples</a>
 							</li>
 							{{end}}
 
 							{{if .IsCmd}}
 							{{else}}
 							<li>
-								<a href="#example_modal" data-toggle="modal"><i class="icon-chevron-right"></i>增加示例</a>
+								<a href="#example_modal" data-toggle="modal"><i class="icon-chevron-right"></i>Add examples</a>
 							</li>
 							{{end}}
 							
 							{{if .IsHasSubdirs}}
 							<li>
-								<a href="#_subdirs"><i class="icon-chevron-right"></i>目录</a>
+								<a href="#_subdirs"><i class="icon-chevron-right"></i>Directories</a>
 							</li>
 							{{end}}
 							
 							<li>
-								<a href="#_bottom"><i class="icon-chevron-right"></i>底部</a>
+								<a href="#_bottom"><i class="icon-chevron-right"></i>Bottom</a>
 							</li>
 							
 							{{if .IsHasExports}}
 							<li>
-								<a href="#search_exports" data-toggle="modal"><i class="icon-chevron-right"></i>搜索导出对象</a>
+								<a href="#search_exports" data-toggle="modal"><i class="icon-chevron-right"></i>Search Exports</a>
 							</li>
 							{{end}}
 							
 							{{if .IsGoRepo}}
 							{{else}}
 							<li>
-								<a href="#label_modal" data-toggle="modal"><i class="icon-chevron-right"></i>项目标签</a>
+								<a href="#label_modal" data-toggle="modal"><i class="icon-chevron-right"></i>Labels</a>
 							</li>
 							{{end}}
 						</ul>
 					</div>
 
-					{{if .HasExports}}
-					{{template "exportmodal_zh" .}}
+					{{if .IsHasExports}}
+					{{template "exportmodal_en" .}}
 					{{end}}
 
 					<div>
 						<div class="flat-well well-small" style="background-color: #f5f5f5">
-							<a title="在 {{.VCS}} 上查看该项目" target="_blank" href="http://{{.ProPath}}" class="label label-info">{{.VCS}}</a> 
-
+							<a title="View this project on {{.VCS}}" target="_blank" href="http://{{.ProPath}}" class="label label-info">{{.VCS}}</a> 
+							
 							<a target="_blank" href="http://{{.ProPath}}">
 								<strong>{{.ProName}}:</strong>
 							</a> 
 
 							<a href="/{{.ProDocPath}}">{{.ProDocPath}}</a><span class="muted">/{{.ProName}}</span>
 							<span class="pull-right">
-								<span><span >您是本页面的第 <b>{{.Views}}</b> 位访问者。</span>
+								<span>You are No.<b>{{.Views}}</b> visitor of this page.</span>
 								<span class="muted"> | </span>
-								<a href="#_index">索引</a>
-
+								<a href="#_index">Index</a>
+								
 								{{if .IsHasFiles}}
 								<span class="muted"> | </span>
-								<a href="#_files">文件</a>
+								<a href="#_files">Files</a>
 								{{end}}
-
+								
 								{{if .IsHasSubdirs}}
 								<span class="muted"> | </span>
-								<a href="#_subdirs">目录</a>
+								<a href="#_subdirs">Directories</a>
 								{{end}}
 							</span>
 						</div>
 
 						<h2>
 							{{if .IsCmd}}
-							命令行
+							Command
 							{{else}}
-							项目
-							{{end}} 
+							{{if .IsHasFiles}}
+							Package
+							{{else}}
+							Project
+							{{end}}
+							{{end}}
 
 							{{.ProName}} 
 
-							<span class="label label-inverse">排名值：{{.Rank}}</span> 
+							<span class="label label-inverse">Rank: {{.Rank}}</span> 
 
 							{{range .Labels}}
 							<a target="_blank" href="/labels#{{.}}" class="label label-inverse">{{.}}</a> 
@@ -139,11 +144,12 @@
 
 						{{if .IsCmd}}
 						{{else}}
+						{{if .IsHasFiles}}
 						<div style="min-height: 25px;">
 							<code>import "{{.ImportPath}}"</code>
-
+							
 							{{if .IsHasTags}}
-							<strong>项目 Tags：</strong>
+							<strong>Documentation Tag: </strong>
 							<div class="btn-group">
 							    <button class="btn dropdown-toggle" data-toggle="dropdown">{{.CurTag}} <span class="caret"></span></button>
 							    <ul class="dropdown-menu">
@@ -156,6 +162,7 @@
 							{{end}}
 					    </div>
 					    {{end}}
+					    {{end}}
 
 						{{if .IsHasReadme}}
 						<div id="readme" style='display:none; padding: 3px; border:1px solid #4F4F4F;'>{{str2html .PkgDoc}}</div>
@@ -166,11 +173,11 @@
 						<!-- START: Index -->
 						{{if .IsHasExports}}
 						<h3 id="_index">
-							索引 
+							Index 
 							{{if .IsCmd}}
 							{{else}}
 							<span class="label label-{{.DocCPLabel}}">
-								文档完成率：{{.DocCP}}
+								Documentation complete {{.DocCP}}
 							</span>
 							{{end}}
 						</h3>
@@ -178,13 +185,13 @@
 						<ul class="unstyled">
 							{{if .IsHasConst}}
 							<li>
-								<a href="#_constants">常量</a>
+								<a href="#_constants">Constants</a>
 							</li>
 							{{end}}
 							
 							{{if .IsHasVar}}
 							<li>
-								<a href="#_variables">变量</a>
+								<a href="#_variables">Variables</a>
 							</li>
 							{{end}}
 							
@@ -219,13 +226,13 @@
 						</ul>
 
 						{{if .IsHasExams}}
-						<h3 id="_exams">示例</h3>
+						<h3 id="_exams">Examples</h3>
 						<ul class="unstyled">
 							{{range .Exams}}
 							{{if .IsUsed}}
 							<li><a href="#_ex_btn_{{.Name}}" onclick="showExample({{.Name}})">{{.Name}}</a></li>
 							{{else}}
-							{{template "example_zh" .}}
+							{{template "example_en" .}}
 							{{end}}
 							{{end}}
 						</ul>
@@ -235,7 +242,7 @@
 
 						<!-- START: Constants -->
 						{{if .IsHasConst}}
-							<h3 id="_constants">常量</h3>
+							<h3 id="_constants">Constants</h3>
 							{{with .Consts}}
 								{{range .}}
 									<pre class="pre-x-scrollable">{{str2html .FmtDecl}}</pre>
@@ -247,7 +254,7 @@
 
 						<!-- START: Variables -->
 						{{if .IsHasVar}}
-							<h3 id="_variables">变量</h3>
+							<h3 id="_variables">Variables</h3>
 							{{with .Vars}}
 								{{range .}}
 									<pre class="pre-x-scrollable">{{str2html .FmtDecl}}</pre>
@@ -260,10 +267,10 @@
 						<!-- START: Functions -->
 						{{range .Funcs}}
 						<h3 id="{{.Name}}">
-							函数 
+							func 
 							<a target="_blank" href="{{.URL}}">{{.Name}}</a> 
 							<small>
-								<a class="accordion-toggle" data-toggle="collapse" href="#collapse_{{.Name}}">查看代码</a>
+								<a class="accordion-toggle" data-toggle="collapse" href="#collapse_{{.Name}}">View Code</a>
 							</small>
 						</h3>
 						
@@ -277,7 +284,7 @@
 
 						{{if .IsHasExam}}
 						{{range .Exams}}
-						{{template "example_zh" .}}
+						{{template "example_en" .}}
 						{{end}}
 						{{end}}
 						{{end}}
@@ -373,7 +380,7 @@
 
 						{{if .IsHasFiles}}
 						<h3 id="_files">
-							<a target="_blank" href="http://{{.ProPath}}">文件</a>
+							<a target="_blank" href="http://{{.ProPath}}">Files</a>
 						</h3>
 						{{end}}
 
@@ -387,14 +394,14 @@
 
 						{{if .IsHasSubdirs}}
 						<h3 id="_subdirs">
-							<a target="_blank" href="http://{{.ProPath}}">目录</a>
+							<a target="_blank" href="http://{{.ProPath}}">Directories</a>
 						</h3>
 						
 						<table class="table table-hover table-striped table-condensed">
 							<thead>
 								<tr>
-									<th>项目路径</th>
-									<th>简介</th>
+									<th>Import Path</th>
+									<th>Synopsis</th>
 								</tr>
 							</thead>
 
@@ -410,39 +417,41 @@
 						{{end}}
 
 						<p>
-							项目 <b>{{.ProName}}</b> 共计导入 
+							{{if .IsHasFiles}}
+							Package <b>{{.ProName}}</b> imports 
 							{{if .IsHasImports}}
-							<a href="/search?q=imports&pkgs={{.ImportPkgs}}">{{.ImportPkgNum}} 个外部包</a>
+							<a href="/search?q=imports&pkgs={{.ImportPkgs}}">{{.ImportPkgNum}} packages</a>
 							{{else}}
-							0 个外部包
+							0 packages
 							{{end}}
 
-							{{if .IsImported}}
-							，并且有 <a href="/search?q=imported&pkgs={{.ImportPid}}">{{.ImportedNum}} 引用了该项目</a>
-							{{end}}。 
+							{{if .IsImported}} 
+							and imported by <a href="/search?q=imported&pkgs={{.ImportPid}}">{{.ImportedNum}} packages</a>
+							{{end}}.
+							{{end}}
 
-							Go 步行者在 <i>{{.TimeSince}}</i> 生成了此页面。 <a class="btn" href="/refresh?q={{.ImportPath}}">刷新文档</a>
+							Go Walker generated this page <i>{{.TimeSince}}</i>. <a class="btn" href="/refresh?q={{.ImportPath}}">Refresh</a>
 						</p>
 					</div>
 				</div>
 			</div>
 		</div>
-		{{template "footer_zh" .}}
+		{{template "footer_en" .}}
 	</body>
 </html>
 
-{{define "example_zh"}}
+{{define "example_en"}}
 <div class="accordion">
 	<div class="accordion-group">
 		<div class="accordion-heading">
-			<a id="_ex_btn_{{.Name}}" class="accordion-toggle collapsed" data-toggle="collapse" href="#_ex_{{.Name}}">示例({{.Name}})</a>
+			<a id="_ex_btn_{{.Name}}" class="accordion-toggle collapsed" data-toggle="collapse" href="#_ex_{{.Name}}">Example({{.Name}})</a>
 		</div>
 
 		<div id="_ex_{{.Name}}" class="accordion-body collapse">
 			<div class="accordion-inner">
-			<p>代码：</p>
+			<p>Code:</p>
 			<pre class="pre-x-scrollable">{{str2html .Code}}</pre>
-			{{if .IsHasOutput}}<p>输出：</p><pre class="pre-x-scrollable">{{.Output}}</pre>{{end}}
+			{{if .IsHasOutput}}<p>Output:</p><pre class="pre-x-scrollable">{{.Output}}</pre>{{end}}
 			</div>
 		</div>
 	</div>

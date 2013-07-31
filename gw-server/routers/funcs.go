@@ -31,7 +31,7 @@ func (this *FuncsRouter) Get() {
 	// Set language version.
 	curLang := globalSetting(this.Ctx, this.Input(), this.Data)
 
-	// Get arguments.
+	// Get argument(s).
 	q := strings.TrimSpace(this.Input().Get("q"))
 
 	// Set properties.

@@ -41,7 +41,7 @@ type Func struct {
 	Exams          []*Example
 }
 
-// Type represents structs and interfaces
+// Type represents structs and interfaces.
 type Type struct {
 	Name          string // Type name.
 	Doc           string
@@ -125,7 +125,7 @@ type Package struct {
 	Note string
 }
 
-// source is source code file.
+// A source describles a source code file.
 type source struct {
 	name      string
 	browseURL string
@@ -140,7 +140,7 @@ func (s *source) ModTime() time.Time { return time.Time{} }
 func (s *source) IsDir() bool        { return false }
 func (s *source) Sys() interface{}   { return nil }
 
-// walker holds the state used when building the documentation.
+// A walker holds the state used when building the documentation.
 type walker struct {
 	lineFmt  string
 	pdoc     *Package

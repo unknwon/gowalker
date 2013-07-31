@@ -32,16 +32,16 @@ func (this *RefreshRouter) Get() {
 	// Set language version.
 	curLang := globalSetting(this.Ctx, this.Input(), this.Data)
 
-	// Get query field
+	// Get argument(s).
 	q := this.Input().Get("q")
 
-	// Empty query string shows home page
+	// Empty query string shows home page.
 	if len(q) == 0 {
 		this.Redirect("/", 302)
 		return
 	}
 
-	// Set properties
+	// Set properties.
 	this.TplNames = "refresh_" + curLang.Lang + ".html"
 
 	pdoc, err := doc.CheckDoc(q, "", doc.REFRESH_REQUEST)
@@ -63,12 +63,11 @@ func (this *RefreshRouter) Get() {
 			Note:        pdoc.Note,
 		}
 		models.SaveProject(pinfo, nil, nil, nil)
-		// Show search page
+
 		this.Redirect("/"+q, 302)
 		return
 	}
 
-	// Set data
 	this.Data["Path"] = q
 	this.Data["LimitTime"] = err.Error()
 }

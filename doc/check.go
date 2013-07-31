@@ -112,8 +112,7 @@ func CheckDoc(path, tag string, requestType int) (*Package, error) {
 				assginPkgInfo(pdoc, pinfo)
 				return pdoc, nil
 			case pdoc != nil && len(pdoc.ImportPath) > 0:
-				beego.Error("Serving(", path, ")with error:", err)
-				return pdoc, nil
+				return pdoc, err
 			case err == errUpdateTimeout:
 				// Handle timeout on packages never seen before as not found.
 				beego.Error("Serving(", path, ")as not found after timeout")
