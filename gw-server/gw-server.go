@@ -12,7 +12,7 @@
 // License for the specific language governing permissions and limitations
 // under the License.
 
-// Go Walker is a web server that generates Go projects API documentation with source code on the fly.
+// Go Walker Server is a web server that generates Go projects API documentation with source code on the fly.
 package main
 
 import (

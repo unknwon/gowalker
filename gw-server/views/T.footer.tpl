@@ -37,7 +37,9 @@
 			<script type="text/javascript">
 				var converter = new Showdown.converter({});
 				var readme = document.getElementById("readme");
-				readme.innerHTML = converter.makeHtml(document.getElementById("readme").innerHTML);
+				var content = converter.makeHtml(document.getElementById("readme").innerHTML);
+				content = content.replace(/&amp;/g, "&");
+				readme.innerHTML = content;
 				readme.style.display = "block";
 			</script>
 			{{end}}
@@ -100,7 +102,9 @@
 			<script type="text/javascript">
 				var converter = new Showdown.converter({});
 				var readme = document.getElementById("readme");
-				readme.innerHTML = converter.makeHtml(document.getElementById("readme").innerHTML);
+				var content = converter.makeHtml(document.getElementById("readme").innerHTML);
+				content = content.replace(/&amp;/g, "&");
+				readme.innerHTML = content;
 				readme.style.display = "block";
 			</script>
 			{{end}}
