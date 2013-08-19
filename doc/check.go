@@ -70,6 +70,7 @@ func CheckDoc(path, tag string, requestType int) (*Package, error) {
 			} else {
 				// Check if the documentation is too old (2 days ago).
 				needsCrawl = pinfo.Created.Add(_TIME_DAY).UTC().Before(time.Now().UTC())
+				needsCrawl = false
 			}
 		case REFRESH_REQUEST:
 			if len(tag) > 0 {

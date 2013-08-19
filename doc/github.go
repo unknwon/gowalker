@@ -32,7 +32,12 @@ var (
 	githubCred      string
 )
 
-func SetGithubCredentials(id, secret string) {
+func init() {
+	setGithubCredentials(utils.Cfg.MustValue("github", "client_id"),
+		utils.Cfg.MustValue("github", "client_secret"))
+}
+
+func setGithubCredentials(id, secret string) {
 	githubCred = "client_id=" + id + "&client_secret=" + secret
 }
 

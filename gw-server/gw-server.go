@@ -19,14 +19,13 @@ import (
 	"os"
 	"runtime"
 
-	"github.com/Unknwon/gowalker/doc"
 	"github.com/Unknwon/gowalker/gw-server/routers"
-	"github.com/Unknwon/gowalker/utils"
 	"github.com/astaxie/beego"
+	"github.com/beego/beewatch"
 )
 
 const (
-	APP_VER = "0.8.6.0731"
+	APP_VER = "0.8.6.0808"
 )
 
 func init() {
@@ -37,25 +36,23 @@ func init() {
 
 	if beego.AppConfig.String("runmode") == "pro" {
 		beego.SetLevel(beego.LevelInfo)
-
+		beego.Info("Product mode enabled")
 		beego.Info("Go Walker Server", APP_VER)
 
 		os.Mkdir("../log", os.ModePerm)
-		fw := beego.NewFileWriter("../log/log", true)
+		fw := beego.NewFileWriter("../log/server", true)
 		err := fw.StartLogger()
 		if err != nil {
-			beego.Critical("NewFileWriter ->", err)
+			panic("NewFileWriter -> " + err.Error())
 		}
 	}
-
-	doc.SetGithubCredentials(utils.Cfg.MustValue("github", "client_id"),
-		utils.Cfg.MustValue("github", "client_secret"))
 }
 
 func main() {
 	beego.AppName = "Go Walker Server"
 	beego.Info("Go Walker Server", APP_VER)
 
+	beewatch.Start()
 	// Register routers.
 	beego.Router("/", &routers.HomeRouter{})
 	beego.Router("/refresh", &routers.RefreshRouter{})

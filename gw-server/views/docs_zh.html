@@ -288,7 +288,7 @@
 						<!-- START: Types -->
 						{{range .Types}}
 						<h3 id="{{.Name}}">
-							type 
+							类型 
 							<a target="_blank" href="{{.URL}}">{{.Name}}</a>
 						</h3>
 						
@@ -322,7 +322,7 @@
 						<!-- START: Types.Functions -->
 						{{range .Funcs}}
 						<h4 id="{{.Name}}">
-							func 
+							函数 
 							<a target="_blank" href="{{.URL}}">{{.Name}}</a>
 							<small>
 								<a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion" href="#collapse_{{.Name}}">View Code</a>
@@ -348,7 +348,7 @@
 						<!-- START: Types.Methods -->
 						{{range .Methods}}
 						<h4 id="{{.FullName}}">
-							func 
+							方法 
 							<a target="_blank" href="{{.URL}}">{{.Name}}</a> 
 							<small>
 								<a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion" href="#collapse_{{.FullName}}">View Code</a>
