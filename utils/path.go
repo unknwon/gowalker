@@ -21,8 +21,6 @@ import (
 	"regexp"
 	"sort"
 	"strings"
-
-	"github.com/astaxie/beego"
 )
 
 func importPathFromGoogleBrowse(m []string) string {
@@ -261,7 +259,6 @@ func init() {
 		GoRepoSet += s
 	}
 	GoRepoSet = GoRepoSet[:len(GoRepoSet)-1]
-	beego.Debug("Initialized 'GoRepoSet'")
 }
 
 // IsGoRepoPath returns true if package is from standard library
