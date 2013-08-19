@@ -12,7 +12,7 @@
 // License for the specific language governing permissions and limitations
 // under the License.
 
-// Go Walker is a web server that generates Go projects API documentation with source code on the fly.
+// Go Walker Server is a web server that generates Go projects API documentation with source code on the fly.
 package main
 
 import (
@@ -41,7 +41,7 @@ func init() {
 		beego.Info("Go Walker Server", APP_VER)
 
 		os.Mkdir("../log", os.ModePerm)
-		fw := beego.NewFileWriter("../log/log", true)
+		fw := beego.NewFileWriter("../log/server", true)
 		err := fw.StartLogger()
 		if err != nil {
 			beego.Critical("NewFileWriter ->", err)
