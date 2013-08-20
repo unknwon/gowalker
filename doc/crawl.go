@@ -39,7 +39,8 @@ type crawlResult struct {
 	err  error
 }
 
-// crawlDoc fetchs package from VCS.
+// crawlDoc fetchs package from VCS and returns 'Package' by given import path and tag.
+// It returns error when error occurs in the underlying functions.
 func crawlDoc(path, tag string, pinfo *models.PkgInfo) (pdoc *Package, err error) {
 	var pdocNew *Package
 	pdocNew, err = getRepo(httpClient, path, tag, pinfo.Etag)
@@ -68,8 +69,9 @@ func crawlDoc(path, tag string, pinfo *models.PkgInfo) (pdoc *Package, err error
 	return pdoc, err
 }
 
-// getRepo downloads package data.
-func getRepo(client *http.Client, importPath, tag, etag string) (pdoc *Package, err error) {
+// getRepo downloads package data and returns 'Package' by given import path and tag.
+// It returns error when error occurs in the underlying functions.
+func getRepo(client *http.Client, path, tag, etag string) (pdoc *Package, err error) {
 	const VER_PREFIX = PACKAGE_VER + "-"
 
 	// Check version prefix.
@@ -80,15 +82,15 @@ func getRepo(client *http.Client, importPath, tag, etag string) (pdoc *Package, 
 	}
 
 	switch {
-	case utils.IsGoRepoPath(importPath):
-		pdoc, err = getStandardDoc(client, importPath, tag, etag)
-	case utils.IsValidRemotePath(importPath):
-		pdoc, err = getStatic(client, importPath, tag, etag)
+	case utils.IsGoRepoPath(path):
+		pdoc, err = getStandardDoc(client, path, tag, etag)
+	case utils.IsValidRemotePath(path):
+		pdoc, err = getStatic(client, path, tag, etag)
 		if err == errNoMatch {
-			pdoc, err = getDynamic(client, importPath, tag, etag)
+			pdoc, err = getDynamic(client, path, tag, etag)
 		}
 	default:
-		return nil, errors.New("doc.getRepo -> No match(" + importPath + ")")
+		return nil, errors.New("doc.getRepo -> No match(" + path + ")")
 	}
 
 	// Save revision tag.

@@ -35,14 +35,14 @@ func SearchPkg(key string) []*PkgInfo {
 	return pinfos
 }
 
-// GetPkgInfo returns package information.
+// GetPkgInfo returns 'PkgInfo' by given import path and tag.
+// It returns error when the package does not exist.
 func GetPkgInfo(path, tag string) (*PkgInfo, error) {
 	// Check path length to reduce connect times.
 	if len(path) == 0 {
 		return nil, errors.New("models.GetPkgInfo -> Empty path as not found.")
 	}
 
-	// Connect to database.
 	q := connDb()
 	defer q.Close()
 

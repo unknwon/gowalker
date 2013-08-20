@@ -21,6 +21,7 @@ import (
 	godoc "go/doc"
 	"html/template"
 	"net/http"
+	"os"
 	"path"
 	"strconv"
 	"strings"
@@ -524,6 +525,41 @@ func generatePage(this *HomeRouter, pdoc *doc.Package, q, tag, lang string) bool
 	this.Data["ImportedNum"] = pdoc.ImportedNum
 	this.Data["UtcTime"] = pdoc.Created
 	this.Data["TimeSince"] = calTimeSince(pdoc.Created)
+
+	this.TplNames = "T.docs.tpl"
+	data, err := this.RenderBytes()
+	if err != nil {
+		beego.Error("generatePage(", pdoc.ImportPath, ") -> RenderBytes:", err)
+		return false
+	}
+
+	saveDocPage(pdoc.ImportPath+"-"+tag, utils.Html2JS(data))
+	this.TplNames = "docs_" + lang + ".html"
+	this.Data["DocJS"] = "/static/docs/" + pdoc.ImportPath + "-" + tag + ".js"
+	return true
+}
+
+func saveDocPage(docPath string, data []byte) bool {
+	os.MkdirAll(path.Dir("./static/docs/"+docPath), os.ModePerm)
+
+	buf := new(bytes.Buffer)
+	buf.WriteString("document.write(\"")
+	buf.Write(data)
+	buf.WriteString("\")")
+
+	fw, err := os.Create("./static/docs/" + docPath + ".js")
+	if err != nil {
+		beego.Error("saveDocPage(", docPath, ") -> Create:", err)
+		return false
+	}
+	defer fw.Close()
+
+	_, err = fw.Write(buf.Bytes())
+	if err != nil {
+		beego.Error("saveDocPage(", docPath, ") -> Write:", err)
+		return false
+	}
+
 	return true
 }
 

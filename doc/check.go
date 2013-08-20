@@ -37,13 +37,14 @@ const (
 	_REFRESH_LIMIT = 5 * time.Minute  // Package fresh time limitation.
 )
 
-// CheckDoc checks the project documentation from the database or from the version
-// control system as needed.
+// CheckDoc returns 'Package' by given import path and tag,
+// or fetch from the VCS as needed.
+// It returns error when error occurs in the underlying functions.
 func CheckDoc(path, tag string, requestType int) (*Package, error) {
 	// Package documentation and crawl sign.
 	pdoc, needsCrawl := &Package{}, false
 
-	// Reduce standard library path.
+	// Trim prefix of standard library path.
 	if i := strings.Index(path, "/src/pkg/"); i > -1 {
 		path = path[i+len("/src/pkg/"):]
 	}
@@ -51,36 +52,29 @@ func CheckDoc(path, tag string, requestType int) (*Package, error) {
 	// For code.google.com.
 	path = strings.Replace(path, "source/browse/", "", 1)
 
-	// Get the package documentation from database.
+	// Get the package info.
 	pinfo, err := models.GetPkgInfo(path, tag)
-	// If PACKAGE_VER does not match, refresh anyway.
-	if err != nil || !strings.HasPrefix(pinfo.Etag, PACKAGE_VER) {
-		if err != nil {
-			beego.Trace("doc.CheckDoc -> ", err)
-		}
-		// No package information in database.
+	switch {
+	case err != nil:
+		// Error means it does not exist.
+		beego.Trace("doc.CheckDoc -> ", err)
+		fallthrough
+	case err != nil || !strings.HasPrefix(pinfo.Etag, PACKAGE_VER):
+		// If PACKAGE_VER does not match, refresh anyway.
 		needsCrawl = true
-	} else {
+	default:
 		// Check request type.
 		switch requestType {
 		case HUMAN_REQUEST:
-			// Error means it does not exist.
-			if err != nil {
-				needsCrawl = true
-			} else {
-				// Check if the documentation is too old (2 days ago).
-				needsCrawl = pinfo.Created.Add(_TIME_DAY).UTC().Before(time.Now().UTC())
-				needsCrawl = false
-			}
 		case REFRESH_REQUEST:
 			if len(tag) > 0 {
 				break // Things of Tag will not be changed.
 			}
 
-			// Check if the documentation is too frequently (within 5 minutes).
+			// Check if the refresh operation is too frequently (within 5 minutes).
 			needsCrawl = pinfo.Created.Add(_REFRESH_LIMIT).UTC().Before(time.Now().UTC())
 			if !needsCrawl {
-				// Return error messages as limit time information.
+				// Return limit time information as error message.
 				return nil, errors.New(pinfo.Created.Add(_REFRESH_LIMIT).UTC().String())
 			}
 		}
