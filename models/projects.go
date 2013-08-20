@@ -235,7 +235,7 @@ func LoadProject(pid int64, tag string) (*PkgDecl, error) {
 }
 
 // DeleteProject deletes everything about the path in database, and update import information.
-func DeleteProject(path string) error {
+func DeleteProject(path, tag string) error {
 	// Check path length to reduce connect times. (except launchpad.net)
 	if path[0] != 'l' && len(strings.Split(path, "/")) <= 2 {
 		beego.Error("models.DeleteProject(", path, ") -> Short path as not needed")
@@ -249,7 +249,9 @@ func DeleteProject(path string) error {
 	// Delete package information.
 	info := new(PkgInfo)
 	err := q.WhereEqual("path", path).Find(info)
-	if err == nil {
+	if err == nil && len(tag) == 0 {
+		// Only delete when server cannot find master branch
+		// because sub-package(s) may not exist in old tag(s).
 		i1, err = q.WhereEqual("path", path).Delete(info)
 		if err != nil {
 			beego.Error("models.DeleteProject(", path, ") -> Information:", err)
