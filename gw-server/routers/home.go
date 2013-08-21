@@ -316,7 +316,11 @@ func generatePage(this *HomeRouter, pdoc *doc.Package, q, tag, lang string) bool
 
 		pdoc.IsHasConst = len(pdoc.Consts) > 0
 		pdoc.IsHasVar = len(pdoc.Vars) > 0
-		pdoc.IsHasExample = len(pdoc.Examples)+len(pdoc.UserExamples) > 0
+		if len(pdoc.Examples)+len(pdoc.UserExamples) > 0 {
+			pdoc.IsHasExample = true
+			this.Data["IsHasExams"] = pdoc.IsHasExample
+			this.Data["Exams"] = append(pdoc.Examples, pdoc.UserExamples...)
+		}
 
 		// Commented and total objects number.
 		var comNum, totalNum int
@@ -368,6 +372,7 @@ func generatePage(this *HomeRouter, pdoc *doc.Package, q, tag, lang string) bool
 			this.Data["Files"] = pdoc.Files
 		}
 
+		fmt.Println(pdoc.IsHasExample)
 		var err error
 		pdoc.Id, err = doc.SaveProject(pdoc)
 		if err != nil {
@@ -466,9 +471,6 @@ func generatePage(this *HomeRouter, pdoc *doc.Package, q, tag, lang string) bool
 		if !pdoc.IsCmd {
 			// Calculate documentation complete %.
 			this.Data["DocCPLabel"], this.Data["DocCP"] = calDocCP(comNum, totalNum)
-
-			// Examples.
-			this.Data["Exams"] = append(pdoc.Examples, pdoc.UserExamples...)
 		} else {
 			this.Data["IsCmd"] = true
 		}

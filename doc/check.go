@@ -71,12 +71,13 @@ func CheckDoc(path, tag string, requestType int) (*Package, error) {
 				break // Things of Tag will not be changed.
 			}
 
+			needsCrawl = true
 			// Check if the refresh operation is too frequently (within 5 minutes).
-			needsCrawl = pinfo.Created.Add(_REFRESH_LIMIT).UTC().Before(time.Now().UTC())
-			if !needsCrawl {
-				// Return limit time information as error message.
-				return nil, errors.New(pinfo.Created.Add(_REFRESH_LIMIT).UTC().String())
-			}
+			// needsCrawl = pinfo.Created.Add(_REFRESH_LIMIT).UTC().Before(time.Now().UTC())
+			// if !needsCrawl {
+			// 	// Return limit time information as error message.
+			// 	return nil, errors.New(pinfo.Created.Add(_REFRESH_LIMIT).UTC().String())
+			// }
 		}
 	}
 

@@ -126,12 +126,13 @@ func SaveProject(pdoc *Package) (int64, error) {
 
 	// Save package declaration and functions.
 	pdecl := &models.PkgDecl{
-		Tag:         pdoc.Tag,
-		IsHasExport: pdoc.IsHasExport,
-		IsHasConst:  pdoc.IsHasConst,
-		IsHasVar:    pdoc.IsHasVar,
-		IsHasFile:   pdoc.IsHasFile,
-		IsHasSubdir: pdoc.IsHasSubdir,
+		Tag:          pdoc.Tag,
+		IsHasExport:  pdoc.IsHasExport,
+		IsHasConst:   pdoc.IsHasConst,
+		IsHasVar:     pdoc.IsHasVar,
+		IsHasExample: pdoc.IsHasExample,
+		IsHasFile:    pdoc.IsHasFile,
+		IsHasSubdir:  pdoc.IsHasSubdir,
 	}
 	pfuncs := make([]*models.PkgFunc, 0, len(pdoc.Funcs)+len(pdoc.Types)*3)
 

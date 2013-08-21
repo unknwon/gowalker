@@ -17,6 +17,7 @@ package models
 
 import (
 	"encoding/base32"
+	"errors"
 	"fmt"
 	"regexp"
 	"strings"
@@ -335,24 +336,43 @@ func UpdateLabelInfo(path string, label string, add bool) bool {
 
 var buildPicPattern = regexp.MustCompile(`\[+!+\[+([a-zA-Z ]*)+\]+\(+[a-zA-z]+://[^\s]*`)
 
-// SavePkgExam saves user examples to database.
-func SavePkgExam(gist *PkgExam) {
-	// Connect to database.
+// SavePkgExam saves user examples.
+func SavePkgExam(gist *PkgExam) error {
 	q := connDb()
 	defer q.Close()
 
+	// Check if corresponding package exists.
+	pinfo := new(PkgInfo)
+	err := q.WhereEqual("path", gist.Path).Find(pinfo)
+	if err != nil {
+		return errors.New(
+			fmt.Sprintf("models.SavePkgExam( %s ) -> Package does not exist", gist.Path))
+	}
+
 	pexam := new(PkgExam)
 	cond := qbs.NewCondition("path = ?", gist.Path).And("gist = ?", gist.Gist)
-	err := q.Condition(cond).Find(pexam)
+	err = q.Condition(cond).Find(pexam)
 	if err == nil {
+		// Check if refresh too frequently(within in 5 minutes).
+		// if pexam.Created.Add(5 * time.Minute).UTC().After(time.Now().UTC()) {
+		// 	return errors.New(
+		// 		fmt.Sprintf("models.SavePkgExam( %s ) -> Refresh too frequently(within in 5 minutes)", gist.Path))
+		// }
 		gist.Id = pexam.Id
 	}
 	gist.Created = time.Now().UTC()
 
 	_, err = q.Save(gist)
 	if err != nil {
-		beego.Error("models.SavePkgExam -> ", gist.Path, err)
+		return errors.New(
+			fmt.Sprintf("models.SavePkgExam( %s ) -> %s", gist.Path, err))
 	}
+
+	// Delete 'PkgDecl' in order to generate new page.
+	cond = qbs.NewCondition("pid = ?", pinfo.Id).And("tag = ?", "")
+	q.Condition(cond).Delete(new(PkgDecl))
+
+	return nil
 }
 
 // SavePkgDoc saves readered readme.md file data.
@@ -369,21 +389,6 @@ func SavePkgDoc(path, lang string, docBys []byte) {
 	if doc[0] == '\n' {
 		doc = doc[1:]
 	}
-	// Remove title and `==========`.
-	// doc = doc[strings.Index(doc, "\n")+1:]
-	// if len(doc) == 0 {
-	// 	return
-	// }
-
-	// if doc[0] == '=' {
-	// 	doc = doc[strings.Index(doc, "\n")+1:]
-	// }
-
-	// doc = strings.Replace(doc, "h3>", "h5>", -1)
-	// doc = strings.Replace(doc, "h2>", "h4>", -1)
-	// doc = strings.Replace(doc, "h1>", "h3>", -1)
-	// doc = strings.Replace(doc, "<center>", "", -1)
-	// doc = strings.Replace(doc, "</center>", "", -1)
 
 	pdoc := new(PkgDoc)
 	cond := qbs.NewCondition("path = ?", path).And("lang = ?", lang).And("type = ?", "rm")

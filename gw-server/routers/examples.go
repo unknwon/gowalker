@@ -109,11 +109,17 @@ func (this *ExamplesRouter) Get() {
 		return
 	}
 
-	saveExamples(g)
+	err = saveExamples(g)
+	if err != nil {
+		this.Data["IsHasError"] = true
+		this.Data["ErrMsg"] = err.Error()
+		return
+	}
+
 	this.Redirect("/"+q, 302)
 }
 
-func saveExamples(gist *doc.Gist) {
+func saveExamples(gist *doc.Gist) error {
 	var buf bytes.Buffer
 	// Examples.
 	for _, e := range gist.Examples {
@@ -135,7 +141,7 @@ func saveExamples(gist *doc.Gist) {
 		Examples: buf.String(),
 	}
 
-	models.SavePkgExam(pkgExam)
+	return models.SavePkgExam(pkgExam)
 }
 
 func parseExamples(html []byte, gist, path string) (*doc.Gist, error) {
