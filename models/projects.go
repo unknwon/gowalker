@@ -93,6 +93,42 @@ func SaveProject(pinfo *PkgInfo, pdecl *PkgDecl, pfuncs []*PkgFunc, imports []st
 		pinfo.Id = info.Id
 	}
 
+	// ------------------------------
+	// Update imported information.
+	// ------------------------------
+
+	if info.Id > 0 {
+		// Current package.
+		importeds := strings.Split(
+			strings.Replace(info.ImportPid, "$", "", -1), "|")
+		importPids := make([]string, 0, len(importeds))
+		for _, v := range importeds {
+			pid, _ := strconv.ParseInt(v, 10, 64)
+			if checkImport(q, info.Path, pid) {
+				importPids = append(importPids, "$"+v)
+			}
+		}
+		pinfo.ImportPid = strings.Join(importPids, "|")
+		pinfo.ImportedNum = len(importPids)
+	}
+
+	_, err = q.Save(pinfo)
+	if err != nil {
+		beego.Error("models.SaveProject(", pinfo.Path, ") -> Information2:", err)
+	}
+
+	// Don't need to check standard library.
+	if imports != nil && !utils.IsGoRepoPath(pinfo.Path) {
+		// Other packages.
+		for _, v := range imports {
+			if !utils.IsGoRepoPath(v) {
+				// Only count non-standard library.
+				updateImportInfo(q, v, int(pinfo.Id), true)
+			}
+		}
+	}
+	// ------------- END ------------
+
 	// Save package declaration.
 	decl := new(PkgDecl)
 	if pdecl != nil {
@@ -155,42 +191,6 @@ func SaveProject(pinfo *PkgInfo, pdecl *PkgDecl, pfuncs []*PkgFunc, imports []st
 
 	// ------------- END ------------
 
-	// ------------------------------
-	// Update imported information.
-	// ------------------------------
-
-	if info.Id > 0 {
-		// Current package.
-		importeds := strings.Split(
-			strings.Replace(info.ImportPid, "$", "", -1), "|")
-		importPids := make([]string, 0, len(importeds))
-		for _, v := range importeds {
-			pid, _ := strconv.ParseInt(v, 10, 64)
-			if checkImport(q, info.Path, pid) {
-				importPids = append(importPids, "$"+v)
-			}
-		}
-		pinfo.ImportPid = strings.Join(importPids, "|")
-		pinfo.ImportedNum = len(importPids)
-	}
-
-	_, err = q.Save(pinfo)
-	if err != nil {
-		beego.Error("models.SaveProject(", pinfo.Path, ") -> Information:", err)
-	}
-
-	// Don't need to check standard library.
-	if imports != nil && !utils.IsGoRepoPath(pinfo.Path) {
-		// Other packages.
-		for _, v := range imports {
-			if !utils.IsGoRepoPath(v) {
-				// Only count non-standard library.
-				updateImportInfo(q, v, int(pinfo.Id), true)
-			}
-		}
-	}
-	// ------------- END ------------
-
 	return nil
 }
 
@@ -234,12 +234,13 @@ func LoadProject(pid int64, tag string) (*PkgDecl, error) {
 	return pdecl, err
 }
 
-// DeleteProject deletes everything about the path in database, and update import information.
-func DeleteProject(path, tag string) error {
-	// Check path length to reduce connect times. (except launchpad.net)
+// DeleteProject deletes everything of the package,
+// and update import information.
+func DeleteProject(path string) {
+	// Check path length to reduce connect times(except launchpad.net).
 	if path[0] != 'l' && len(strings.Split(path, "/")) <= 2 {
 		beego.Error("models.DeleteProject(", path, ") -> Short path as not needed")
-		return nil
+		return
 	}
 
 	q := connDb()
@@ -249,9 +250,7 @@ func DeleteProject(path, tag string) error {
 	// Delete package information.
 	info := new(PkgInfo)
 	err := q.WhereEqual("path", path).Find(info)
-	if err == nil && len(tag) == 0 {
-		// Only delete when server cannot find master branch
-		// because sub-package(s) may not exist in old tag(s).
+	if err == nil {
 		i1, err = q.WhereEqual("path", path).Delete(info)
 		if err != nil {
 			beego.Error("models.DeleteProject(", path, ") -> Information:", err)
@@ -314,7 +313,7 @@ func DeleteProject(path, tag string) error {
 		beego.Info("models.DeleteProject(", path, i1, i2, i3, i4, i5, ")")
 	}
 
-	return nil
+	return
 }
 
 func updateImportInfo(q *qbs.Qbs, path string, pid int, add bool) {

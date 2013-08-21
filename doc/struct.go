@@ -91,7 +91,13 @@ type Package struct {
 	Synopsis string
 	Doc      string
 
-	IsCmd bool
+	IsCmd                bool
+	IsNeedRender         bool
+	IsHasExport          bool
+	IsHasConst, IsHasVar bool
+	IsHasExample         bool
+	IsHasFile            bool
+	IsHasSubdir          bool
 
 	Created           time.Time
 	Views, ViewedTime int64

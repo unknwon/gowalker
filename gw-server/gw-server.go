@@ -25,7 +25,7 @@ import (
 )
 
 const (
-	APP_VER = "0.8.6.0820"
+	APP_VER = "0.8.6.0821"
 )
 
 func init() {
@@ -45,6 +45,8 @@ func init() {
 		if err != nil {
 			panic("NewFileWriter -> " + err.Error())
 		}
+	} else {
+		beewatch.Start()
 	}
 }
 
@@ -52,7 +54,6 @@ func main() {
 	beego.AppName = "Go Walker Server"
 	beego.Info("Go Walker Server", APP_VER)
 
-	beewatch.Start()
 	// Register routers.
 	beego.Router("/", &routers.HomeRouter{})
 	beego.Router("/refresh", &routers.RefreshRouter{})

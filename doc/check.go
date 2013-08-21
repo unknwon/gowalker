@@ -38,7 +38,7 @@ const (
 )
 
 // CheckDoc returns 'Package' by given import path and tag,
-// or fetch from the VCS as needed.
+// or fetch from the VCS and render as needed.
 // It returns error when error occurs in the underlying functions.
 func CheckDoc(path, tag string, requestType int) (*Package, error) {
 	// Package documentation and crawl sign.
@@ -98,7 +98,9 @@ func CheckDoc(path, tag string, requestType int) (*Package, error) {
 			err = errUpdateTimeout
 		}
 
-		if err != nil {
+		if err == nil {
+			pdoc.IsNeedRender = true
+		} else {
 			switch {
 			case err == errNotModified:
 				beego.Info("Serving(", path, ")without modified")

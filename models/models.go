@@ -111,20 +111,21 @@ type PkgDecl struct {
 	Id  int64
 	Pid int64  `qbs:"index"`
 	Tag string // Project tag.
-	Doc string // Package documentation.
+
+	IsHasExport bool
 
 	// Top-level declarations.
-	Consts, Funcs, Types, Vars string
+	IsHasConst, IsHasVar bool
 
 	// Internal declarations.
-	Iconsts, Ifuncs, Itypes, Ivars string
+	//Iconsts, Ifuncs, Itypes, Ivars string
 
-	Examples         string // Examples.
-	Notes            string // Source code notes.
-	Files, TestFiles string // Source files.
-	Dirs             string // Subdirectories.
+	IsHasExample bool
 
 	Imports, TestImports string // Imports.
+
+	IsHasFile   bool
+	IsHasSubdir bool
 }
 
 func (*PkgDecl) Indexes(indexes *qbs.Indexes) {
@@ -431,7 +432,7 @@ func SearchFunc(key string) []*PkgFunc {
 	defer q.Close()
 
 	var pfuncs []*PkgFunc
-	cond := qbs.NewCondition("is_master = ?", false).And("name like ?", "%"+key+"%")
+	cond := qbs.NewCondition("is_master = ?", true).And("name like ?", "%"+key+"%")
 	q.OmitFields("Pid", "IsMaster", "IsOld").Limit(200).Condition(cond).FindAll(&pfuncs)
 	return pfuncs
 }

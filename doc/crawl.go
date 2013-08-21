@@ -20,6 +20,7 @@ import (
 	"encoding/base32"
 	"encoding/xml"
 	"errors"
+	"fmt"
 	"html/template"
 	"io"
 	"net/http"
@@ -31,7 +32,6 @@ import (
 
 	"github.com/Unknwon/gowalker/models"
 	"github.com/Unknwon/gowalker/utils"
-	"github.com/astaxie/beego"
 )
 
 type crawlResult struct {
@@ -56,14 +56,16 @@ func crawlDoc(path, tag string, pinfo *models.PkgInfo) (pdoc *Package, err error
 
 	switch {
 	case err == nil:
-		pdoc.Id, err = SaveProject(pdoc, pinfo)
-		if err != nil {
-			beego.Error("doc.SaveProject(", path, ") ->", err)
-		}
+		// Let upper level to render doc. page.
+		return pdoc, nil
 	case isNotFound(err):
-		// We do not need to delete standard library, so here is fine.
-		if err := models.DeleteProject(path, tag); err != nil {
-			beego.Error("doc.DeleteProject(", path, ":", tag, ") ->", err)
+		// We do not need to delete standard library,
+		// so here skip it by not found.
+
+		// Only delete when server cannot find master branch
+		// because sub-package(s) may not exist in old tag(s).
+		if len(tag) == 0 {
+			models.DeleteProject(path)
 		}
 	}
 	return pdoc, err
@@ -90,7 +92,8 @@ func getRepo(client *http.Client, path, tag, etag string) (pdoc *Package, err er
 			pdoc, err = getDynamic(client, path, tag, etag)
 		}
 	default:
-		return nil, errors.New("doc.getRepo -> No match(" + path + ")")
+		return nil, errors.New(
+			fmt.Sprintf("doc.getRepo -> No match( %s:%s )", path, tag))
 	}
 
 	// Save revision tag.
@@ -102,7 +105,7 @@ func getRepo(client *http.Client, path, tag, etag string) (pdoc *Package, err er
 }
 
 // SaveProject saves project information to database.
-func SaveProject(pdoc *Package, info *models.PkgInfo) (int64, error) {
+func SaveProject(pdoc *Package) (int64, error) {
 	// Save package information.
 	pinfo := &models.PkgInfo{
 		Path:        pdoc.ImportPath,
@@ -110,166 +113,56 @@ func SaveProject(pdoc *Package, info *models.PkgInfo) (int64, error) {
 		Synopsis:    pdoc.Synopsis,
 		IsCmd:       pdoc.IsCmd,
 		Tags:        strings.Join(pdoc.Tags, "|||"),
-		Views:       info.Views,
+		Views:       pdoc.Views,
 		ViewedTime:  time.Now().UTC().Unix(),
 		Created:     time.Now().UTC(),
 		Rank:        pdoc.Rank,
 		Etag:        pdoc.Etag,
 		Labels:      pdoc.Labels,
-		ImportedNum: info.ImportedNum,
-		ImportPid:   info.ImportPid,
+		ImportedNum: pdoc.ImportedNum,
+		ImportPid:   pdoc.ImportPid,
 		Note:        pdoc.Note,
 	}
 
 	// Save package declaration and functions.
 	pdecl := &models.PkgDecl{
-		Tag: pdoc.Tag,
-		Doc: pdoc.Doc,
+		Tag:         pdoc.Tag,
+		IsHasExport: pdoc.IsHasExport,
+		IsHasConst:  pdoc.IsHasConst,
+		IsHasVar:    pdoc.IsHasVar,
+		IsHasFile:   pdoc.IsHasFile,
+		IsHasSubdir: pdoc.IsHasSubdir,
 	}
 	pfuncs := make([]*models.PkgFunc, 0, len(pdoc.Funcs)+len(pdoc.Types)*3)
-	var buf bytes.Buffer
-
-	// Consts.
-	addValues(&buf, &pdecl.Consts, pdoc.Consts)
-	addValues(&buf, &pdecl.Iconsts, pdoc.Iconsts)
-
-	// Variables.
-	addValues(&buf, &pdecl.Vars, pdoc.Vars)
-	addValues(&buf, &pdecl.Ivars, pdoc.Ivars)
 
 	links := getLinks(pdoc)
 
 	// Functions.
-	pfuncs = addFuncs(pfuncs, pdoc.Funcs, pinfo.Path, &buf, &pdecl.Funcs, links)
-	pfuncs = addFuncs(pfuncs, pdoc.Ifuncs, pinfo.Path, &buf, &pdecl.Ifuncs, links)
+	pfuncs = addFuncs(pfuncs, pdoc.Funcs, pinfo.Path, links)
+	pfuncs = addFuncs(pfuncs, pdoc.Ifuncs, pinfo.Path, links)
 
 	// Types.
-	buf.Reset()
 	for _, v := range pdoc.Types {
-		buf.WriteString(v.Name)
-		buf.WriteString("&T#")
-		buf.WriteString(v.Doc)
-		buf.WriteString("&T#")
-		buf.WriteString(v.Decl)
-		buf.WriteString("&T#")
-		buf.WriteString(v.URL)
-		buf.WriteString("&$#")
-		// Constats.
-		for _, c := range v.Consts {
-			buf.WriteString(c.Name)
-			buf.WriteString("&V#")
-			buf.WriteString(c.Doc)
-			buf.WriteString("&V#")
-			buf.WriteString(c.Decl)
-			buf.WriteString("&V#")
-			buf.WriteString(c.URL)
-			buf.WriteString("&M#")
-		}
-		buf.WriteString("&$#")
-		// Variables.
-		for _, c := range v.Vars {
-			buf.WriteString(c.Name)
-			buf.WriteString("&V#")
-			buf.WriteString(c.Doc)
-			buf.WriteString("&V#")
-			buf.WriteString(c.Decl)
-			buf.WriteString("&V#")
-			buf.WriteString(c.URL)
-			buf.WriteString("&M#")
-		}
-		buf.WriteString("&$#")
-
 		// Functions.
 		for _, m := range v.Funcs {
-			buf.WriteString(m.Name)
-			buf.WriteString("&F#")
-			buf.WriteString(m.Doc)
-			buf.WriteString("&F#")
-			buf.WriteString(m.Decl)
-			buf.WriteString("&F#")
-			buf.WriteString(m.URL)
-			buf.WriteString("&F#")
 			pfuncs = addFunc(pfuncs, m, pinfo.Path, m.Name, links)
-			buf.WriteString(m.Code)
-			buf.WriteString("&M#")
 		}
-		buf.WriteString("&$#")
 		for _, m := range v.IFuncs {
-			buf.WriteString(m.Name)
-			buf.WriteString("&F#")
-			buf.WriteString(m.Doc)
-			buf.WriteString("&F#")
-			buf.WriteString(m.Decl)
-			buf.WriteString("&F#")
-			buf.WriteString(m.URL)
-			buf.WriteString("&F#")
 			pfuncs = addFunc(pfuncs, m, pinfo.Path, m.Name, links)
-			buf.WriteString(m.Code)
-			buf.WriteString("&M#")
 		}
-		buf.WriteString("&$#")
 
 		// Methods.
 		for _, m := range v.Methods {
-			buf.WriteString(m.Name)
-			buf.WriteString("&F#")
-			buf.WriteString(m.Doc)
-			buf.WriteString("&F#")
-			buf.WriteString(m.Decl)
-			buf.WriteString("&F#")
-			buf.WriteString(m.URL)
-			buf.WriteString("&F#")
 			pfuncs = addFunc(pfuncs, m, pinfo.Path, v.Name+"_"+m.Name, links)
-			buf.WriteString(m.Code)
-			buf.WriteString("&M#")
 		}
-		buf.WriteString("&$#")
 		for _, m := range v.IMethods {
-			buf.WriteString(m.Name)
-			buf.WriteString("&F#")
-			buf.WriteString(m.Doc)
-			buf.WriteString("&F#")
-			buf.WriteString(m.Decl)
-			buf.WriteString("&F#")
-			buf.WriteString(m.URL)
-			buf.WriteString("&F#")
 			pfuncs = addFunc(pfuncs, m, pinfo.Path, v.Name+"_"+m.Name, links)
-			buf.WriteString(m.Code)
-			buf.WriteString("&M#")
 		}
-		buf.WriteString("&##")
 	}
-	pdecl.Types = buf.String()
-
-	// Examples.
-	buf.Reset()
-	for _, e := range pdoc.Examples {
-		buf.WriteString(e.Name)
-		buf.WriteString("&E#")
-		buf.WriteString(e.Doc)
-		buf.WriteString("&E#")
-		buf.WriteString(*CodeEncode(&e.Code))
-		buf.WriteString("&E#")
-		// buf.WriteString(e.Play)
-		// buf.WriteString("&E#")
-		buf.WriteString(e.Output)
-		buf.WriteString("&$#")
-	}
-	pdecl.Examples = buf.String()
-
-	// Notes.
-	pdecl.Notes = strings.Join(pdoc.Notes, "|")
-
-	// Dirs.
-	pdecl.Dirs = strings.Join(pdoc.Dirs, "|")
 
 	// Imports.
 	pdecl.Imports = strings.Join(pdoc.Imports, "|")
 	pdecl.TestImports = strings.Join(pdoc.TestImports, "|")
-
-	// Files.
-	pdecl.Files = strings.Join(pdoc.Files, "|")
-	pdecl.TestFiles = strings.Join(pdoc.TestFiles, "|")
 
 	err := models.SaveProject(pinfo, pdecl, pfuncs, pdoc.Imports)
 	return pinfo.Id, err
@@ -330,32 +223,20 @@ func addValues(buf *bytes.Buffer, pvals *string, vals []*Value) {
 
 // addFuncs appends functions to 'pfuncs'.
 // NOTE: it can be only use for pure functions(not belong to any type), not methods.
-func addFuncs(pfuncs []*models.PkgFunc, fs []*Func, path string, buf *bytes.Buffer, pfs *string, links []*utils.Link) []*models.PkgFunc {
-	buf.Reset()
+func addFuncs(pfuncs []*models.PkgFunc, fs []*Func, path string, links []*utils.Link) []*models.PkgFunc {
 	for _, f := range fs {
-		buf.WriteString(f.Name)
-		buf.WriteString("&F#")
-		buf.WriteString(f.Doc)
-		buf.WriteString("&F#")
-		buf.WriteString(f.Decl)
-		buf.WriteString("&F#")
-		buf.WriteString(f.URL)
-		buf.WriteString("&F#")
 		pfuncs = addFunc(pfuncs, f, path, f.Name, links)
-		buf.WriteString(f.Code)
-		buf.WriteString("&$#")
 	}
-	*pfs = buf.String()
 	return pfuncs
 }
 
 // addFunc appends a function to 'pfuncs'.
 func addFunc(pfuncs []*models.PkgFunc, f *Func, path, name string, links []*utils.Link) []*models.PkgFunc {
 	var buf bytes.Buffer
+	f.FullName = name
 	f.Code = f.Decl + " {\n" + f.Code + "}"
 	utils.FormatCode(&buf, &f.Code, links)
 	f.Code = buf.String()
-	f.Code = *CodeEncode(&f.Code)
 	return append(pfuncs, &models.PkgFunc{
 		Name: name,
 		Path: path,

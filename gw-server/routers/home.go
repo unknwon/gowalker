@@ -160,7 +160,6 @@ func (this *HomeRouter) Get() {
 		serveHome(this, urpids, urpts)
 	} else {
 		// Documentation.
-		this.TplNames = "docs_" + curLang.Lang + ".html"
 		broPath := reqUrl // Browse path.
 
 		// Check if it's the standard library.
@@ -181,11 +180,10 @@ func (this *HomeRouter) Get() {
 			tag = ""
 		}
 
-		// Check documentation of this import path, and update automatically as needed.
+		// Check documentation of current import path, update automatically as needed.
 		pdoc, err := doc.CheckDoc(reqUrl, tag, doc.HUMAN_REQUEST)
 		if err == nil {
 			if pdoc != nil {
-				pdoc.UserExamples = getUserExamples(pdoc.ImportPath)
 				// Generate documentation page.
 				if generatePage(this, pdoc, broPath, tag, curLang.Lang) {
 					ps, ts := updateCacheInfo(pdoc, urpids, urpts)
@@ -253,10 +251,266 @@ func getUserExamples(path string) []*doc.Example {
 // generatePage genarates documentation page for project.
 // it returns false when it's a invaild(empty) project.
 func generatePage(this *HomeRouter, pdoc *doc.Package, q, tag, lang string) bool {
-	pdecl, err := models.LoadProject(pdoc.Id, tag)
-	if err != nil {
-		beego.Error("HomeController.generatePage ->", err)
-		return false
+	docPath := pdoc.ImportPath
+	if len(tag) > 0 {
+		docPath += "-" + tag
+	}
+
+	if pdoc.IsNeedRender {
+		byts, _ := base32.StdEncoding.DecodeString(pdoc.Doc)
+		this.Data["PkgFullIntro"] = string(byts)
+
+		var buf bytes.Buffer
+		links := make([]*utils.Link, 0, len(pdoc.Types)+len(pdoc.Imports)+len(pdoc.Funcs)+10)
+		// Get all types, functions and import packages
+		for _, t := range pdoc.Types {
+			links = append(links, &utils.Link{
+				Name:    t.Name,
+				Comment: template.HTMLEscapeString(t.Doc),
+			})
+			buf.WriteString("&quot;" + t.Name + "&quot;,")
+		}
+
+		for _, f := range pdoc.Funcs {
+			links = append(links, &utils.Link{
+				Name:    f.Name,
+				Comment: template.HTMLEscapeString(f.Doc),
+			})
+			buf.WriteString("&quot;" + f.Name + "&quot;,")
+		}
+
+		for _, t := range pdoc.Types {
+			for _, f := range t.Funcs {
+				links = append(links, &utils.Link{
+					Name:    f.Name,
+					Comment: template.HTMLEscapeString(f.Doc),
+				})
+				buf.WriteString("&quot;" + f.Name + "&quot;,")
+			}
+
+			for _, m := range t.Methods {
+				buf.WriteString("&quot;" + t.Name + "." + m.Name + "&quot;,")
+			}
+		}
+
+		// Ignore C.
+		for _, v := range pdoc.Imports {
+			if v != "C" {
+				links = append(links, &utils.Link{
+					Name: path.Base(v) + ".",
+					Path: v,
+				})
+			}
+		}
+
+		// Set exported objects type-ahead.
+		exportDataSrc := buf.String()
+		if len(exportDataSrc) > 0 {
+			pdoc.IsHasExport = true
+			this.Data["IsHasExports"] = true
+			exportDataSrc = exportDataSrc[:len(exportDataSrc)-1]
+			this.Data["ExportDataSrc"] = exportDataSrc
+		}
+
+		pdoc.UserExamples = getUserExamples(pdoc.ImportPath)
+
+		pdoc.IsHasConst = len(pdoc.Consts) > 0
+		pdoc.IsHasVar = len(pdoc.Vars) > 0
+		pdoc.IsHasExample = len(pdoc.Examples)+len(pdoc.UserExamples) > 0
+
+		// Commented and total objects number.
+		var comNum, totalNum int
+
+		// Constants.
+		this.Data["IsHasConst"] = pdoc.IsHasConst
+		this.Data["Consts"] = pdoc.Consts
+		for i, v := range pdoc.Consts {
+			buf.Reset()
+			v.Decl = template.HTMLEscapeString(v.Decl)
+			v.Decl = strings.Replace(v.Decl, "&#34;", "\"", -1)
+			utils.FormatCode(&buf, &v.Decl, links)
+			v.FmtDecl = buf.String()
+			pdoc.Consts[i] = v
+		}
+
+		// Variables.
+		this.Data["IsHasVar"] = pdoc.IsHasVar
+		this.Data["Vars"] = pdoc.Vars
+		for i, v := range pdoc.Vars {
+			buf.Reset()
+			utils.FormatCode(&buf, &v.Decl, links)
+			v.FmtDecl = buf.String()
+			pdoc.Vars[i] = v
+		}
+
+		// Dirs.
+		pinfos := make([]*models.PkgInfo, 0, len(pdoc.Dirs))
+		for _, v := range pdoc.Dirs {
+			v = pdoc.ImportPath + "/" + v
+			// TODO: Can be reduce to once database connection.
+			// Note: This step will be deleted after served static pages.
+			if pinfo, err := models.GetPkgInfo(v, tag); err == nil {
+				pinfos = append(pinfos, pinfo)
+			} else {
+				pinfos = append(pinfos, &models.PkgInfo{Path: v})
+			}
+		}
+		if len(pinfos) > 0 {
+			pdoc.IsHasSubdir = true
+			this.Data["IsHasSubdirs"] = pdoc.IsHasSubdir
+			this.Data["Subdirs"] = pinfos
+		}
+
+		// Files.
+		if len(pdoc.Files) > 0 {
+			pdoc.IsHasFile = true
+			this.Data["IsHasFiles"] = pdoc.IsHasFile
+			this.Data["Files"] = pdoc.Files
+		}
+
+		var err error
+		pdoc.Id, err = doc.SaveProject(pdoc)
+		if err != nil {
+			beego.Error("generatePage(", pdoc.ImportPath, ") -> SaveProject:", err)
+			return false
+		}
+		this.Data["ImportPkgs"] = strings.Join(pdoc.Imports, "|")
+
+		this.Data["Funcs"] = pdoc.Funcs
+		for i, f := range pdoc.Funcs {
+			if len(f.Doc) > 0 {
+				buf.Reset()
+				godoc.ToHTML(&buf, f.Doc, nil)
+				f.Doc = buf.String()
+				comNum++
+			}
+			buf.Reset()
+			utils.FormatCode(&buf, &f.Decl, links)
+			f.FmtDecl = buf.String()
+			if exs := getExamples(pdoc, "", f.Name); len(exs) > 0 {
+				f.IsHasExam = true
+				f.Exams = exs
+			}
+			totalNum++
+			pdoc.Funcs[i] = f
+		}
+
+		this.Data["Types"] = pdoc.Types
+		for i, t := range pdoc.Types {
+			for j, v := range t.Consts {
+				buf.Reset()
+				v.Decl = template.HTMLEscapeString(v.Decl)
+				v.Decl = strings.Replace(v.Decl, "&#34;", "\"", -1)
+				utils.FormatCode(&buf, &v.Decl, links)
+				v.FmtDecl = buf.String()
+				t.Consts[j] = v
+			}
+			for j, v := range t.Vars {
+				buf.Reset()
+				utils.FormatCode(&buf, &v.Decl, links)
+				v.FmtDecl = buf.String()
+				t.Vars[j] = v
+			}
+
+			for j, f := range t.Funcs {
+				if len(f.Doc) > 0 {
+					buf.Reset()
+					godoc.ToHTML(&buf, f.Doc, nil)
+					f.Doc = buf.String()
+					comNum++
+				}
+				buf.Reset()
+				utils.FormatCode(&buf, &f.Decl, links)
+				f.FmtDecl = buf.String()
+				if exs := getExamples(pdoc, "", f.Name); len(exs) > 0 {
+					f.IsHasExam = true
+					f.Exams = exs
+				}
+				totalNum++
+				t.Funcs[j] = f
+			}
+			for j, m := range t.Methods {
+				if len(m.Doc) > 0 {
+					buf.Reset()
+					godoc.ToHTML(&buf, m.Doc, nil)
+					m.Doc = buf.String()
+					comNum++
+				}
+				buf.Reset()
+				utils.FormatCode(&buf, &m.Decl, links)
+				m.FmtDecl = buf.String()
+				if exs := getExamples(pdoc, t.Name, m.Name); len(exs) > 0 {
+					m.IsHasExam = true
+					m.Exams = exs
+				}
+				totalNum++
+				t.Methods[j] = m
+			}
+			if len(t.Doc) > 0 {
+				buf.Reset()
+				godoc.ToHTML(&buf, t.Doc, nil)
+				t.Doc = buf.String()
+				comNum++
+			}
+			buf.Reset()
+			utils.FormatCode(&buf, &t.Decl, links)
+			t.FmtDecl = buf.String()
+			if exs := getExamples(pdoc, "", t.Name); len(exs) > 0 {
+				t.IsHasExam = true
+				t.Exams = exs
+			}
+			totalNum++
+			pdoc.Types[i] = t
+		}
+
+		if !pdoc.IsCmd {
+			// Calculate documentation complete %.
+			this.Data["DocCPLabel"], this.Data["DocCP"] = calDocCP(comNum, totalNum)
+
+			// Examples.
+			this.Data["Exams"] = append(pdoc.Examples, pdoc.UserExamples...)
+		} else {
+			this.Data["IsCmd"] = true
+		}
+
+		// Examples.
+		links = append(links, &utils.Link{
+			Name: path.Base(pdoc.ImportPath) + ".",
+		})
+
+		for _, e := range pdoc.Examples {
+			buf.Reset()
+			utils.FormatCode(&buf, &e.Code, links)
+			e.Code = buf.String()
+		}
+		for _, e := range pdoc.UserExamples {
+			buf.Reset()
+			utils.FormatCode(&buf, &e.Code, links)
+			e.Code = buf.String()
+		}
+
+		this.TplNames = "T.docs.tpl"
+		data, err := this.RenderBytes()
+		if err != nil {
+			beego.Error("generatePage(", pdoc.ImportPath, ") -> RenderBytes:", err)
+			return false
+		}
+
+		saveDocPage(docPath, utils.Html2JS(data))
+
+	} else {
+		pdecl, err := models.LoadProject(pdoc.Id, tag)
+		if err != nil {
+			beego.Error("HomeController.generatePage ->", err)
+			return false
+		}
+		this.Data["ImportPkgs"] = pdecl.Imports
+
+		err = ConvertDataFormat(pdoc, pdecl)
+		if err != nil {
+			beego.Error("HomeController.generatePage -> ConvertDataFormat:", err)
+			return false
+		}
 	}
 
 	// Set properties.
@@ -282,187 +536,14 @@ func generatePage(this *HomeRouter, pdoc *doc.Package, q, tag, lang string) bool
 		this.Data["IsHasReadme"] = true
 		this.Data["PkgDoc"] = string(byts)
 	}
-	byts, _ = base32.StdEncoding.DecodeString(pdecl.Doc)
-	this.Data["PkgFullIntro"] = string(byts)
-
-	var buf bytes.Buffer
-	err = ConvertDataFormat(pdoc, pdecl)
-	if err != nil {
-		beego.Error("HomeController.generatePage -> ConvertDataFormat:", err)
-		return false
-	}
-
-	links := make([]*utils.Link, 0, len(pdoc.Types)+len(pdoc.Imports)+len(pdoc.Funcs)+10)
-	// Get all types, functions and import packages
-	for _, t := range pdoc.Types {
-		links = append(links, &utils.Link{
-			Name:    t.Name,
-			Comment: template.HTMLEscapeString(t.Doc),
-		})
-		buf.WriteString("&quot;" + t.Name + "&quot;,")
-	}
-
-	for _, f := range pdoc.Funcs {
-		links = append(links, &utils.Link{
-			Name:    f.Name,
-			Comment: template.HTMLEscapeString(f.Doc),
-		})
-		buf.WriteString("&quot;" + f.Name + "&quot;,")
-	}
-
-	for _, t := range pdoc.Types {
-		for _, f := range t.Funcs {
-			links = append(links, &utils.Link{
-				Name:    f.Name,
-				Comment: template.HTMLEscapeString(f.Doc),
-			})
-			buf.WriteString("&quot;" + f.Name + "&quot;,")
-		}
-
-		for _, m := range t.Methods {
-			buf.WriteString("&quot;" + t.Name + "." + m.Name + "&quot;,")
-		}
-	}
-
-	// Ignore C.
-	for _, v := range pdoc.Imports {
-		if v != "C" {
-			links = append(links, &utils.Link{
-				Name: path.Base(v) + ".",
-				Path: v,
-			})
-		}
-	}
-
-	// Set exported objects type-ahead.
-	exportDataSrc := buf.String()
-	if len(exportDataSrc) > 0 {
-		this.Data["IsHasExports"] = true
-		exportDataSrc = exportDataSrc[:len(exportDataSrc)-1]
-		this.Data["ExportDataSrc"] = exportDataSrc
-	}
-
-	// Commented and total objects number.
-	var comNum, totalNum int
 
 	// Index.
-	this.Data["IsHasConst"] = len(pdoc.Consts) > 0
-	this.Data["IsHasVar"] = len(pdoc.Vars) > 0
-
-	// Constants.
-	this.Data["Consts"] = pdoc.Consts
-	for i, v := range pdoc.Consts {
-		buf.Reset()
-		v.Decl = template.HTMLEscapeString(v.Decl)
-		v.Decl = strings.Replace(v.Decl, "&#34;", "\"", -1)
-		utils.FormatCode(&buf, &v.Decl, links)
-		v.FmtDecl = buf.String()
-		pdoc.Consts[i] = v
-	}
-
-	// Variables.
-	this.Data["Vars"] = pdoc.Vars
-	for i, v := range pdoc.Vars {
-		buf.Reset()
-		utils.FormatCode(&buf, &v.Decl, links)
-		v.FmtDecl = buf.String()
-		pdoc.Vars[i] = v
-	}
-
-	this.Data["Funcs"] = pdoc.Funcs
-	for i, f := range pdoc.Funcs {
-		if len(f.Doc) > 0 {
-			buf.Reset()
-			godoc.ToHTML(&buf, f.Doc, nil)
-			f.Doc = buf.String()
-			comNum++
-		}
-		buf.Reset()
-		utils.FormatCode(&buf, &f.Decl, links)
-		f.FmtDecl = buf.String()
-		if exs := getExamples(pdoc, "", f.Name); len(exs) > 0 {
-			f.IsHasExam = true
-			f.Exams = exs
-		}
-		totalNum++
-		pdoc.Funcs[i] = f
-	}
-
-	this.Data["Types"] = pdoc.Types
-	for i, t := range pdoc.Types {
-		for j, v := range t.Consts {
-			buf.Reset()
-			v.Decl = template.HTMLEscapeString(v.Decl)
-			v.Decl = strings.Replace(v.Decl, "&#34;", "\"", -1)
-			utils.FormatCode(&buf, &v.Decl, links)
-			v.FmtDecl = buf.String()
-			t.Consts[j] = v
-		}
-		for j, v := range t.Vars {
-			buf.Reset()
-			utils.FormatCode(&buf, &v.Decl, links)
-			v.FmtDecl = buf.String()
-			t.Vars[j] = v
-		}
-
-		for j, f := range t.Funcs {
-			if len(f.Doc) > 0 {
-				buf.Reset()
-				godoc.ToHTML(&buf, f.Doc, nil)
-				f.Doc = buf.String()
-				comNum++
-			}
-			buf.Reset()
-			utils.FormatCode(&buf, &f.Decl, links)
-			f.FmtDecl = buf.String()
-			if exs := getExamples(pdoc, "", f.Name); len(exs) > 0 {
-				f.IsHasExam = true
-				f.Exams = exs
-			}
-			totalNum++
-			t.Funcs[j] = f
-		}
-		for j, m := range t.Methods {
-			if len(m.Doc) > 0 {
-				buf.Reset()
-				godoc.ToHTML(&buf, m.Doc, nil)
-				m.Doc = buf.String()
-				comNum++
-			}
-			buf.Reset()
-			utils.FormatCode(&buf, &m.Decl, links)
-			m.FmtDecl = buf.String()
-			if exs := getExamples(pdoc, t.Name, m.Name); len(exs) > 0 {
-				m.IsHasExam = true
-				m.Exams = exs
-			}
-			totalNum++
-			t.Methods[j] = m
-		}
-		if len(t.Doc) > 0 {
-			buf.Reset()
-			godoc.ToHTML(&buf, t.Doc, nil)
-			t.Doc = buf.String()
-			comNum++
-		}
-		buf.Reset()
-		utils.FormatCode(&buf, &t.Decl, links)
-		t.FmtDecl = buf.String()
-		if exs := getExamples(pdoc, "", t.Name); len(exs) > 0 {
-			t.IsHasExam = true
-			t.Exams = exs
-		}
-		totalNum++
-		pdoc.Types[i] = t
-	}
+	this.Data["IsHasExports"] = pdoc.IsHasExport
+	this.Data["IsHasConst"] = pdoc.IsHasConst
+	this.Data["IsHasVar"] = pdoc.IsHasVar
 
 	if !pdoc.IsCmd {
-		// Calculate documentation complete %.
-		this.Data["DocCPLabel"], this.Data["DocCP"] = calDocCP(comNum, totalNum)
-
-		// Examples.
-		this.Data["IsHasExams"] = len(pdoc.Examples)+len(pdoc.UserExamples) > 0
-		this.Data["Exams"] = append(pdoc.Examples, pdoc.UserExamples...)
+		this.Data["IsHasExams"] = pdoc.IsHasExample
 
 		// Tags.
 		this.Data["IsHasTags"] = len(pdoc.Tags) > 1
@@ -475,49 +556,13 @@ func generatePage(this *HomeRouter, pdoc *doc.Package, q, tag, lang string) bool
 		this.Data["IsCmd"] = true
 	}
 
-	// Dirs.
-	pinfos := make([]*models.PkgInfo, 0, len(pdoc.Dirs))
-	for _, v := range pdoc.Dirs {
-		v = pdoc.ImportPath + "/" + v
-		// TODO: Can be reduce to once database connection.
-		// Note: This step will be deleted after served static pages.
-		if pinfo, err := models.GetPkgInfo(v, tag); err == nil {
-			pinfos = append(pinfos, pinfo)
-		} else {
-			pinfos = append(pinfos, &models.PkgInfo{Path: v})
-		}
-	}
-	this.Data["IsHasSubdirs"] = len(pinfos) > 0
-	this.Data["Subdirs"] = pinfos
+	this.Data["IsHasSubdirs"] = pdoc.IsHasSubdir
+	this.Data["IsHasFiles"] = pdoc.IsHasFile
 
-	// Files.
-	if len(pdoc.Files) > 0 {
-		this.Data["IsHasFiles"] = pdoc.Files
-		this.Data["Files"] = pdoc.Files
-	}
-
-	// Examples.
-	links = append(links, &utils.Link{
-		Name: path.Base(pdoc.ImportPath) + ".",
-	})
-
-	for _, e := range pdoc.Examples {
-		buf.Reset()
-		utils.FormatCode(&buf, &e.Code, links)
-		e.Code = buf.String()
-	}
-	for _, e := range pdoc.UserExamples {
-		buf.Reset()
-		utils.FormatCode(&buf, &e.Code, links)
-		e.Code = buf.String()
-	}
-
-	this.Data["Pid"] = pdecl.Id
 	this.Data["Rank"] = pdoc.Rank
 	this.Data["Views"] = pdoc.Views + 1
 	this.Data["Labels"] = getLabels(pdoc.Labels)
 	this.Data["LabelDataSrc"] = labelSet
-	this.Data["ImportPkgs"] = pdecl.Imports
 	this.Data["ImportPkgNum"] = len(pdoc.Imports)
 	this.Data["IsHasImports"] = len(pdoc.Imports) > 0
 	this.Data["IsImported"] = pdoc.ImportedNum > 0
@@ -526,16 +571,7 @@ func generatePage(this *HomeRouter, pdoc *doc.Package, q, tag, lang string) bool
 	this.Data["UtcTime"] = pdoc.Created
 	this.Data["TimeSince"] = calTimeSince(pdoc.Created)
 
-	this.TplNames = "T.docs.tpl"
-	data, err := this.RenderBytes()
-	if err != nil {
-		beego.Error("generatePage(", pdoc.ImportPath, ") -> RenderBytes:", err)
-		return false
-	}
-
-	saveDocPage(pdoc.ImportPath+"-"+tag, utils.Html2JS(data))
-	this.TplNames = "docs_" + lang + ".html"
-	this.Data["DocJS"] = "/static/docs/" + pdoc.ImportPath + "-" + tag + ".js"
+	this.Data["DocJS"] = "/static/docs/" + docPath + ".js"
 	return true
 }
 
@@ -739,196 +775,18 @@ func getLabels(rawLabel string) []string {
 
 // ConvertDataFormat converts data from database acceptable format to useable format.
 func ConvertDataFormat(pdoc *doc.Package, pdecl *models.PkgDecl) error {
-	// Consts
-	pdoc.Consts = make([]*doc.Value, 0, 5)
-	for _, v := range strings.Split(pdecl.Consts, "&$#") {
-		val := new(doc.Value)
-		for j, s := range strings.Split(v, "&V#") {
-			switch j {
-			case 0: // Name
-				val.Name = s
-			case 1: // Doc
-				val.Doc = s
-			case 2: // Decl
-				val.Decl = s
-			case 3: // URL
-				val.URL = s
-			}
-		}
-		pdoc.Consts = append(pdoc.Consts, val)
-	}
-	pdoc.Consts = pdoc.Consts[:len(pdoc.Consts)-1]
-
-	// Variables
-	pdoc.Vars = make([]*doc.Value, 0, 5)
-	for _, v := range strings.Split(pdecl.Vars, "&$#") {
-		val := new(doc.Value)
-		for j, s := range strings.Split(v, "&V#") {
-			switch j {
-			case 0: // Name
-				val.Name = s
-			case 1: // Doc
-				val.Doc = s
-			case 2: // Decl
-				val.Decl = s
-			case 3: // URL
-				val.URL = s
-			}
-		}
-		pdoc.Vars = append(pdoc.Vars, val)
-	}
-	pdoc.Vars = pdoc.Vars[:len(pdoc.Vars)-1]
-
-	// Functions
-	pdoc.Funcs = make([]*doc.Func, 0, 10)
-	for _, v := range strings.Split(pdecl.Funcs, "&$#") {
-		val := new(doc.Func)
-		for j, s := range strings.Split(v, "&F#") {
-			switch j {
-			case 0: // Name
-				val.Name = s
-			case 1: // Doc
-				val.Doc = s
-			case 2: // Decl
-				val.Decl = s
-			case 3: // URL
-				val.URL = s
-			case 4: // Code
-				val.Code = *codeDecode(&s)
-			}
-		}
-		pdoc.Funcs = append(pdoc.Funcs, val)
-	}
-	pdoc.Funcs = pdoc.Funcs[:len(pdoc.Funcs)-1]
-
-	// Types
-	pdoc.Types = make([]*doc.Type, 0, 10)
-	for _, v := range strings.Split(pdecl.Types, "&##") {
-		val := new(doc.Type)
-		for j, s := range strings.Split(v, "&$#") {
-			switch j {
-			case 0: // Type
-				for y, s2 := range strings.Split(s, "&T#") {
-					switch y {
-					case 0: // Name
-						val.Name = s2
-					case 1: // Doc
-						val.Doc = s2
-					case 2: // Decl
-						val.Decl = s2
-					case 3: // URL
-						val.URL = s2
-					}
-				}
-			case 1: // Constants.
-				val.Consts = make([]*doc.Value, 0, 1)
-				for _, v2 := range strings.Split(s, "&M#") {
-					val2 := new(doc.Value)
-					for z, s2 := range strings.Split(v2, "&V#") {
-						switch z {
-						case 0: // Name
-							val2.Name = s2
-						case 1: // Doc
-							val2.Doc = s2
-						case 2: // Decl
-							val2.Decl = s2
-						case 3: // URL
-							val2.URL = s2
-						}
-					}
-					val.Consts = append(val.Consts, val2)
-				}
-				val.Consts = val.Consts[:len(val.Consts)-1]
-			case 2: // Variables.
-				val.Vars = make([]*doc.Value, 0, 1)
-				for _, v2 := range strings.Split(s, "&M#") {
-					val2 := new(doc.Value)
-					for z, s2 := range strings.Split(v2, "&V#") {
-						switch z {
-						case 0: // Name
-							val2.Name = s2
-						case 1: // Doc
-							val2.Doc = s2
-						case 2: // Decl
-							val2.Decl = s2
-						case 3: // URL
-							val2.URL = s2
-						}
-					}
-					val.Vars = append(val.Vars, val2)
-				}
-				val.Vars = val.Vars[:len(val.Vars)-1]
-			case 3: // Functions.
-				val.Funcs = make([]*doc.Func, 0, 3)
-				for _, v2 := range strings.Split(s, "&M#") {
-					val2 := new(doc.Func)
-					for y, s2 := range strings.Split(v2, "&F#") {
-						switch y {
-						case 0: // Name
-							val2.Name = s2
-						case 1: // Doc
-							val2.Doc = s2
-						case 2: // Decl
-							val2.Decl = s2
-						case 3: // URL
-							val2.URL = s2
-						case 4: // Code
-							val2.Code = *codeDecode(&s2)
-						}
-					}
-					val.Funcs = append(val.Funcs, val2)
-				}
-				val.Funcs = val.Funcs[:len(val.Funcs)-1]
-			case 5: // Methods.
-				val.Methods = make([]*doc.Func, 0, 5)
-				for _, v2 := range strings.Split(s, "&M#") {
-					val2 := new(doc.Func)
-					for y, s2 := range strings.Split(v2, "&F#") {
-						switch y {
-						case 0: // Name
-							val2.Name = s2
-						case 1: // Doc
-							val2.Doc = s2
-						case 2: // Decl
-							val2.Decl = s2
-						case 3: // URL
-							val2.URL = s2
-						case 4: // Code
-							val2.Code = *codeDecode(&s2)
-						}
-					}
-					val2.FullName = val.Name + "_" + val2.Name
-					val.Methods = append(val.Methods, val2)
-				}
-				val.Methods = val.Methods[:len(val.Methods)-1]
-			}
-		}
-		pdoc.Types = append(pdoc.Types, val)
-	}
-	pdoc.Types = pdoc.Types[:len(pdoc.Types)-1]
-
-	// Examples.
-	pdoc.Examples = convertDataFormatExample(pdecl.Examples, "")
-
-	// Dirs.
-	pdoc.Dirs = strings.Split(pdecl.Dirs, "|")
-	if len(pdoc.Dirs) == 1 && len(pdoc.Dirs[0]) == 0 {
-		// No directory.
-		pdoc.Dirs = nil
-	}
+	pdoc.IsHasExport = pdecl.IsHasExport
+	pdoc.IsHasConst = pdecl.IsHasConst
+	pdoc.IsHasVar = pdecl.IsHasVar
+	pdoc.IsHasExample = pdecl.IsHasExample
+	pdoc.IsHasFile = pdecl.IsHasFile
+	pdoc.IsHasSubdir = pdecl.IsHasSubdir
 
 	// Imports.
 	pdoc.Imports = strings.Split(pdecl.Imports, "|")
 	if len(pdoc.Imports) == 1 && len(pdoc.Imports[0]) == 0 {
 		// No import.
 		pdoc.Imports = nil
-	}
-
-	// Files.
-	pdoc.Files = strings.Split(pdecl.Files, "|")
-	if len(pdoc.Files) == 1 && len(pdoc.Files[0]) == 0 {
-		// No file.
-		pdoc.Files = nil
 	}
 	return nil
 }

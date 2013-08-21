@@ -16,6 +16,7 @@ package models
 
 import (
 	"errors"
+	"fmt"
 	"strconv"
 
 	"github.com/astaxie/beego"
@@ -49,15 +50,22 @@ func GetPkgInfo(path, tag string) (*PkgInfo, error) {
 	pinfo := new(PkgInfo)
 	err := q.WhereEqual("path", path).Find(pinfo)
 	if err != nil {
-		return pinfo, errors.New("models.GetPkgInfo -> " + err.Error())
+		return pinfo, errors.New(
+			fmt.Sprintf("models.GetPkgInfo( %s:%s ) -> 'PkgInfo': %s", path, tag, err))
 	}
+
+	// Only 'PkgInfo' cannot prove that package exists,
+	// we have to check 'PkgDecl' as well in case it was deleted by mistake.
 
 	pdecl := new(PkgDecl)
 	cond := qbs.NewCondition("pid = ?", pinfo.Id).And("tag = ?", tag)
 	err = q.Condition(cond).Find(pdecl)
 	if err != nil {
+		// Basically, error means not found, so we set 'pinfo.Etag' to an empty string
+		// because 'Etag' contains 'PACKAGE_VER' which server uses to decide force update.
 		pinfo.Etag = ""
-		err = errors.New("models.GetPkgInfo -> " + err.Error())
+		err = errors.New(
+			fmt.Sprintf("models.GetPkgInfo( %s:%s ) -> 'PkgDecl': %s", path, tag, err))
 	}
 	return pinfo, err
 }
