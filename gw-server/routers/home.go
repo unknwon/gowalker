@@ -556,14 +556,13 @@ func generatePage(this *HomeRouter, pdoc *doc.Package, q, tag, lang string) bool
 		this.Data["IsCmd"] = true
 	}
 
-	this.Data["IsHasSubdirs"] = pdoc.IsHasSubdir
-	this.Data["IsHasFiles"] = pdoc.IsHasFile
-
 	this.Data["Rank"] = pdoc.Rank
 	this.Data["Views"] = pdoc.Views + 1
 	this.Data["Labels"] = getLabels(pdoc.Labels)
 	this.Data["LabelDataSrc"] = labelSet
 	this.Data["ImportPkgNum"] = len(pdoc.Imports)
+	this.Data["IsHasSubdirs"] = pdoc.IsHasSubdir
+	this.Data["IsHasFiles"] = pdoc.IsHasFile
 	this.Data["IsHasImports"] = len(pdoc.Imports) > 0
 	this.Data["IsImported"] = pdoc.ImportedNum > 0
 	this.Data["ImportPid"] = pdoc.ImportPid
