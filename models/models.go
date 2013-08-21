@@ -354,10 +354,10 @@ func SavePkgExam(gist *PkgExam) error {
 	err = q.Condition(cond).Find(pexam)
 	if err == nil {
 		// Check if refresh too frequently(within in 5 minutes).
-		// if pexam.Created.Add(5 * time.Minute).UTC().After(time.Now().UTC()) {
-		// 	return errors.New(
-		// 		fmt.Sprintf("models.SavePkgExam( %s ) -> Refresh too frequently(within in 5 minutes)", gist.Path))
-		// }
+		if pexam.Created.Add(5 * time.Minute).UTC().After(time.Now().UTC()) {
+			return errors.New(
+				fmt.Sprintf("models.SavePkgExam( %s ) -> Refresh too frequently(within in 5 minutes)", gist.Path))
+		}
 		gist.Id = pexam.Id
 	}
 	gist.Created = time.Now().UTC()
