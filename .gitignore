@@ -10,7 +10,6 @@ _test
 # Log and database folders
 log/
 data/
-docs/
 
 # Architecture specific extensions/prefixes
 *.[568vq]
@@ -27,8 +26,8 @@ _testmain.go
 *.exe
 *.exe~
 .DS_Store
-gw-server
-gw-local
-gw-admin
+gw-server/gw-server
+gw-local/gw-local
+gw-admin/gw-admin
 app.ini
 bee
