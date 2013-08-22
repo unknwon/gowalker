@@ -91,11 +91,7 @@
 						</ul>
 					</div>
 
-					{{if .HasExports}}
-					{{template "exportmodal_zh" .}}
-					{{end}}
-
-					<div>
+					<div id="markdown" class="markdown">
 						<div class="flat-well well-small" style="background-color: #f5f5f5">
 							<a title="在 {{.VCS}} 上查看该项目" target="_blank" href="http://{{.ProPath}}" class="label label-info">{{.VCS}}</a> 
 
@@ -163,7 +159,10 @@
 						<div id="readme" style='display:none; padding: 3px; border:1px solid #4F4F4F;'>{{str2html .PkgDoc}}</div>
 					    {{end}}
 					    
-						<script type="text/javascript" src="{{.DocJS}}"></script>
+						<div id="markdown" class="markdown">
+							<script type="text/javascript" src="{{.DocJS}}"></script>
+						</div>
+						
 						<p>
 							{{if .IsHasFiles}}
 							项目 <b>{{.ProName}}</b> 共计导入 

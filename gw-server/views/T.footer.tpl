@@ -32,18 +32,6 @@
 			<script type="text/javascript" src="/static/js/bootstrap.min.js"></script>
 			<script type='text/javascript' src='/static/js/site.js'></script>
 
-			{{if .IsHasReadme}}
-			<script type="text/javascript" src="/static/js/showdown.js"></script>
-			<script type="text/javascript">
-				var converter = new Showdown.converter({});
-				var readme = document.getElementById("readme");
-				var content = converter.makeHtml(document.getElementById("readme").innerHTML);
-				content = content.replace(/&amp;/g, "&");
-				readme.innerHTML = content;
-				readme.style.display = "block";
-			</script>
-			{{end}}
-
 			<p><strong>Copyright © 2013 Go Walker</strong></p>
 			<p>Website built by <a target="_blank" href="https://github.com/Unknwon"><i class="icon-user"></i> @Unknown</a>. Powered by <a target="_blank" href="https://github.com/astaxie/beego"><i class="icon-bold"></i>eego</a> and <a target="_blank" href="https://github.com/coocood/qbs">Qbs</a>.</p>
 			{{if .IsHome}}<p>Based on <a target="_blank" href="http://twitter.github.io/bootstrap/">Bootstrap</a>. Icons from <a target="_blank" href="http://glyphicons.com/">Glyphicons</a>.</p>{{end}}
@@ -97,18 +85,6 @@
 			<script type="text/javascript" src="/static/js/bootstrap.min.js"></script>
 			<script type='text/javascript' src='/static/js/site.js'></script>
 
-			{{if .IsHasReadme}}
-			<script type="text/javascript" src="/static/js/showdown.js"></script>
-			<script type="text/javascript">
-				var converter = new Showdown.converter({});
-				var readme = document.getElementById("readme");
-				var content = converter.makeHtml(document.getElementById("readme").innerHTML);
-				content = content.replace(/&amp;/g, "&");
-				readme.innerHTML = content;
-				readme.style.display = "block";
-			</script>
-			{{end}}
-
 			<p><strong>版权所有 © 2013 Go 步行者</strong></p>
 			<p>网站建设者 <a target="_blank" href="https://github.com/Unknwon"><i class="icon-user"></i> @Unknown</a>. 项目基于 <a target="_blank" href="https://github.com/astaxie/beego"><i class="icon-bold"></i>eego</a> 和 <a target="_blank" href="https://github.com/coocood/qbs">Qbs</a> 构建。</p>
 			{{if .IsHome}}<p>界面基于 <a target="_blank" href="http://twitter.github.io/bootstrap/">Bootstrap</a>. 图标来自 <a target="_blank" href="http://glyphicons.com/">Glyphicons</a>.</p>{{end}}
@@ -159,6 +135,37 @@
 	$(function () {
 	    $('.feature').popover()
 	})
+</script>
+{{else}}
+{{if .IsHasReadme}}
+<script type="text/javascript" src="/static/js/showdown.js"></script>
+<script type="text/javascript">
+	var converter = new Showdown.converter({});
+	var readme = document.getElementById("readme");
+	var content = converter.makeHtml(document.getElementById("readme").innerHTML);
+	content = content.replace(/&amp;/g, "&");
+	readme.innerHTML = content;
+	readme.style.display = "block";
+</script>
+{{end}}
+
+<script type="text/javascript">
+    (function($){
+
+        var doc = $("#markdown");
+
+        // Set anchor.
+        doc.find("h1, h2, h3, h4, h5, h6").each(function(){
+            var node = $(this);
+            var id = node.attr("id");
+
+            if (id != "undefined") {
+	            node = node.wrap('<div class="anchor-wrap" ></div>');
+	            node.append('<a class="anchor" href="#' + node.attr("id") + '"><span class="octicon octicon-link"></span></a>')
+        	}
+        });
+
+    })(jQuery);
 </script>
 {{end}}
 

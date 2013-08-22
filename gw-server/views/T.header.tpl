@@ -11,6 +11,7 @@
 		 <!-- Stylesheets -->
 		<link href="/static/css/bootstrap.min.css" rel="stylesheet" />
 		<link href="/static/css/todc-bootstrap.css" rel="stylesheet" />
+		<link href="/static/css/link.css" rel="stylesheet" />
 {{end}}
 
 {{define "header_zh"}}
@@ -26,4 +27,5 @@
 		 <!-- Stylesheets -->
 		<link href="/static/css/bootstrap.min.css" rel="stylesheet" />
 		<link href="/static/css/todc-bootstrap.css" rel="stylesheet" />
+		<link href="/static/css/link.css" rel="stylesheet" />
 {{end}}

@@ -91,10 +91,6 @@
 							{{end}}
 						</ul>
 					</div>
-					
-					{{if .IsHasExports}}
-					{{template "exportmodal_en" .}}
-					{{end}}
 
 					<div>
 						<div class="flat-well well-small" style="background-color: #f5f5f5">
@@ -168,7 +164,10 @@
 						<div id="readme" style="display:none; padding: 3px; border:1px solid #4F4F4F;">{{str2html .PkgDoc}}</div>
 						{{end}}
 						
-						<script type="text/javascript" src="{{.DocJS}}"></script>
+						<div id="markdown" class="markdown">
+							<script type="text/javascript" src="{{.DocJS}}"></script>
+						</div>
+						
 						<p>
 							{{if .IsHasFiles}}
 							Package <b>{{.ProName}}</b> imports 
