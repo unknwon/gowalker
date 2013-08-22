@@ -25,7 +25,7 @@ import (
 )
 
 const (
-	APP_VER = "0.8.8.0822"
+	APP_VER = "0.9.0.0822"
 )
 
 func init() {

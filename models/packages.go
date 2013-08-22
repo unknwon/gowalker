@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"strconv"
 
+	"github.com/Unknwon/gowalker/utils"
 	"github.com/astaxie/beego"
 	"github.com/coocood/qbs"
 )
@@ -44,10 +45,11 @@ func GetPkgInfo(path, tag string) (*PkgInfo, error) {
 		return nil, errors.New("models.GetPkgInfo -> Empty path as not found.")
 	}
 
+	pinfo := new(PkgInfo)
+
 	q := connDb()
 	defer q.Close()
 
-	pinfo := new(PkgInfo)
 	err := q.WhereEqual("path", path).Find(pinfo)
 	if err != nil {
 		return pinfo, errors.New(
@@ -67,6 +69,16 @@ func GetPkgInfo(path, tag string) (*PkgInfo, error) {
 		err = errors.New(
 			fmt.Sprintf("models.GetPkgInfo( %s:%s ) -> 'PkgDecl': %s", path, tag, err))
 	}
+
+	docPath := path
+	if len(tag) > 0 {
+		docPath += "-" + tag
+	}
+	if !utils.IsExist("./static/docs/" + docPath + ".js") {
+		return pinfo, errors.New(
+			fmt.Sprintf("models.GetPkgInfo( %s:%s ) -> JS: File not found", path, tag))
+	}
+
 	return pinfo, err
 }
 

@@ -255,3 +255,16 @@ function showExample(name) {
     ex.className = "accordion-body collapse in";
     ex.style.height = "auto";
 }
+
+function TransToChinese(node) {
+    switch (node.attr("id")) {
+        case "_index":
+            node.html(node.html().toString().replace("Index", "索引"));
+            break;
+        case "_exams":
+            node.html("示例");
+            break;
+        default:
+            node.html(node.html().toString().replace("View Code", "查看代码"));
+    }
+}

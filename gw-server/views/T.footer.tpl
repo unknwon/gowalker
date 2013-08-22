@@ -154,6 +154,11 @@
 
         var doc = $("#markdown");
 
+        var trans2zh = false;
+        if (document.getElementById("lang").innerHTML == "zh") {
+        	trans2zh = true;
+        }
+
         // Set anchor.
         doc.find("h1, h2, h3, h4, h5, h6").each(function(){
             var node = $(this);
@@ -162,6 +167,9 @@
             if (id != "undefined") {
 	            node = node.wrap('<div class="anchor-wrap" ></div>');
 	            node.append('<a class="anchor" href="#' + node.attr("id") + '"><span class="octicon octicon-link"></span></a>')
+	            if (trans2zh) {
+	            	TransToChinese(node);
+	            }
         	}
         });
 

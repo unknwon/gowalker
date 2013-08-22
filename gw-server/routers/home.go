@@ -115,6 +115,7 @@ type HomeRouter struct {
 
 // Get implemented Get method for HomeRouter.
 func (this *HomeRouter) Get() {
+	//this.Data["IsBeta"] = true
 	// Filter unusual User-Agent.
 	ua := this.Ctx.Request.Header.Get("User-Agent")
 	if len(ua) < 20 {
@@ -251,6 +252,8 @@ func getUserExamples(path string) []*doc.Example {
 // generatePage genarates documentation page for project.
 // it returns false when it's a invaild(empty) project.
 func generatePage(this *HomeRouter, pdoc *doc.Package, q, tag, lang string) bool {
+	this.Data["Lang"] = lang
+
 	docPath := pdoc.ImportPath
 	if len(tag) > 0 {
 		docPath += "-" + tag
@@ -372,7 +375,6 @@ func generatePage(this *HomeRouter, pdoc *doc.Package, q, tag, lang string) bool
 			this.Data["Files"] = pdoc.Files
 		}
 
-		fmt.Println(pdoc.IsHasExample)
 		var err error
 		pdoc.Id, err = doc.SaveProject(pdoc)
 		if err != nil {
