@@ -1,0 +1,9 @@
+{
+	"app_name": "Bee Watch Demo",
+	"http_port": 23456,
+	"watch_enabled": false,
+	"cmd_mode": false,
+	"skip_suspend": false,
+	"print_stack": true,
+	"print_source": true
+}
