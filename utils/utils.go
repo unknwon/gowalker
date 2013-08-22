@@ -16,10 +16,14 @@ package utils
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"html/template"
 	"io"
 	"os"
+	"os/exec"
+	"path"
+	"path/filepath"
 	"regexp"
 	"runtime"
 	"strings"
@@ -388,4 +392,49 @@ func Html2JS(data []byte) []byte {
 	s = strings.Replace(s, "\r", "", -1)
 	s = strings.Replace(s, "\"", `\"`, -1)
 	return []byte(s)
+}
+
+// GetAppPath returns application execute path for current process.
+func GetAppPath(importPath, subdir string) (string, error) {
+	// Look up executable in PATH variable.
+	appPath, err := exec.LookPath(path.Base(os.Args[0]))
+	if err != nil {
+		return "", err
+	}
+
+	// Check if run under $GOPATH/bin.
+	if !IsExist(appPath + subdir + "/") {
+		paths := GetGOPATH()
+		for _, p := range paths {
+			if IsExist(p + "/src/" + importPath + "/") {
+				appPath = p + "/src/" + importPath + "/"
+				break
+			}
+		}
+	}
+
+	if len(appPath) == 0 {
+		return "", errors.New("Unable to indicate current execute path")
+	}
+
+	appPath = filepath.Dir(appPath) + "/"
+	if runtime.GOOS == "windows" {
+		// Replace all '\' to '/'.
+		appPath = strings.Replace(appPath, "\\", "/", -1)
+	}
+
+	return appPath, nil
+}
+
+// GetGOPATH returns all paths in GOPATH variable.
+func GetGOPATH() []string {
+	gopath := os.Getenv("GOPATH")
+	var paths []string
+	if runtime.GOOS == "windows" {
+		gopath = strings.Replace(gopath, "\\", "/", -1)
+		paths = strings.Split(gopath, ";")
+	} else {
+		paths = strings.Split(gopath, ":")
+	}
+	return paths
 }

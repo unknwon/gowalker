@@ -27,10 +27,13 @@ import (
 )
 
 const (
-	APP_VER = "0.0.1.0819"
+	APP_VER = "0.0.2.0823"
 )
 
-var httpPort = 8082
+var (
+	appPath  string
+	httpPort = 8082
+)
 
 func init() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
@@ -42,6 +45,15 @@ func init() {
 func main() {
 	utils.ColorLog("[INFO] Go Walker Local v%s.\n", APP_VER)
 
+	var err error
+	appPath, err = utils.GetAppPath("github.com/Unknwon/gowalker/gw-local", "conf")
+	if err != nil {
+		utils.ColorLog("[ERRO] Cannot assign 'appPath'[ %s ]\n", err)
+		return
+	}
+
+	utils.ColorLog("[INFO] File server( %s )\n", appPath)
+
 	// Get 'args'.
 	args := os.Args[1:]
 	if len(args) > 0 {
@@ -51,10 +63,26 @@ func main() {
 		}
 	}
 
-	http.HandleFunc("/", hey)
+	http.HandleFunc("/", serverHome)
+	http.HandleFunc("/index", serverIndex)
+	http.HandleFunc("/funcs", serverFuncs)
+	http.HandleFunc("/about", serverAbout)
+
 	http.ListenAndServe(":"+fmt.Sprint(httpPort), nil)
 }
 
-func hey(w http.ResponseWriter, r *http.Request) {
-	io.WriteString(w, r.RequestURI)
+func serverHome(w http.ResponseWriter, r *http.Request) {
+	io.WriteString(w, "Home page")
+}
+
+func serverIndex(w http.ResponseWriter, r *http.Request) {
+	io.WriteString(w, "Index")
+}
+
+func serverFuncs(w http.ResponseWriter, r *http.Request) {
+	io.WriteString(w, "Funcs")
+}
+
+func serverAbout(w http.ResponseWriter, r *http.Request) {
+	io.WriteString(w, "About")
 }
