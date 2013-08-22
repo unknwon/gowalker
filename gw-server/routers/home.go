@@ -375,11 +375,8 @@ func generatePage(this *HomeRouter, pdoc *doc.Package, q, tag, lang string) bool
 		}
 
 		var err error
-		pdoc.Id, err = doc.SaveProject(pdoc)
-		if err != nil {
-			beego.Error("generatePage(", pdoc.ImportPath, ") -> SaveProject:", err)
-			return false
-		}
+		pfuncs := doc.RenderFuncs(pdoc)
+
 		this.Data["ImportPkgs"] = strings.Join(pdoc.Imports, "|")
 
 		this.Data["Funcs"] = pdoc.Funcs
@@ -499,8 +496,16 @@ func generatePage(this *HomeRouter, pdoc *doc.Package, q, tag, lang string) bool
 			return false
 		}
 
-		saveDocPage(docPath, utils.Html2JS(data))
-
+		n := saveDocPage(docPath, utils.Html2JS(data))
+		if n == -1 {
+			return false
+		}
+		pdoc.JsNum = n
+		pdoc.Id, err = doc.SaveProject(pdoc, pfuncs)
+		if err != nil {
+			beego.Error("generatePage(", pdoc.ImportPath, ") -> SaveProject:", err)
+			return false
+		}
 	} else {
 		pdecl, err := models.LoadProject(pdoc.Id, tag)
 		if err != nil {
@@ -573,18 +578,85 @@ func generatePage(this *HomeRouter, pdoc *doc.Package, q, tag, lang string) bool
 	this.Data["UtcTime"] = pdoc.Created
 	this.Data["TimeSince"] = calTimeSince(pdoc.Created)
 
-	this.Data["DocJS"] = "/static/docs/" + docPath + ".js"
+	docJS := make([]string, 0, pdoc.JsNum+1)
+	docJS = append(docJS, "/static/docs/"+docPath+".js")
+
+	for i := 1; i <= pdoc.JsNum; i++ {
+		docJS = append(docJS, fmt.Sprintf(
+			"/static/docs/%s-%d.js", docPath, i))
+	}
+	this.Data["DocJS"] = docJS
 	return true
 }
 
-func saveDocPage(docPath string, data []byte) bool {
+// saveDocPage saves doc. content to JS file(s),
+// it returns max index of JS file(s);
+// it returns -1 when error occurs.
+func saveDocPage(docPath string, data []byte) int {
 	os.MkdirAll(path.Dir("./static/docs/"+docPath), os.ModePerm)
 
 	buf := new(bytes.Buffer)
-	buf.WriteString("document.write(\"")
-	buf.Write(data)
-	buf.WriteString("\")")
 
+	count := 0
+	d := string(data)
+	l := len(d)
+	if l < 60000 {
+		buf.WriteString("document.write(\"")
+		buf.Write(data)
+		buf.WriteString("\")")
+
+		if !saveToFile(docPath, buf.Bytes()) {
+			return -1
+		}
+	} else {
+		// Too large, need to sperate.
+		start := 0
+		end := start + 20480
+		for {
+			if end >= l {
+				end = l
+			} else {
+				// Need to break in space.
+				for {
+					if d[end-3:end] == "/b>" {
+						break
+					}
+					end += 1
+
+					if end >= l {
+						break
+					}
+				}
+			}
+
+			buf.WriteString("document.write(\"")
+			buf.WriteString(d[start:end])
+			buf.WriteString("\")\n")
+
+			p := docPath
+			if count != 0 {
+				p += fmt.Sprintf("-%d", count)
+			}
+
+			if !saveToFile(p, buf.Bytes()) {
+				return -1
+			}
+
+			if end >= l {
+				break
+			}
+
+			buf.Reset()
+			start = end
+			end += 204800
+			count++
+		}
+	}
+
+	return count
+}
+
+func saveToFile(docPath string, data []byte) bool {
 	fw, err := os.Create("./static/docs/" + docPath + ".js")
 	if err != nil {
 		beego.Error("saveDocPage(", docPath, ") -> Create:", err)
@@ -592,7 +664,7 @@ func saveDocPage(docPath string, data []byte) bool {
 	}
 	defer fw.Close()
 
-	_, err = fw.Write(buf.Bytes())
+	_, err = fw.Write(data)
 	if err != nil {
 		beego.Error("saveDocPage(", docPath, ") -> Write:", err)
 		return false
@@ -777,6 +849,7 @@ func getLabels(rawLabel string) []string {
 
 // ConvertDataFormat converts data from database acceptable format to useable format.
 func ConvertDataFormat(pdoc *doc.Package, pdecl *models.PkgDecl) error {
+	pdoc.JsNum = pdecl.JsNum
 	pdoc.IsHasExport = pdecl.IsHasExport
 	pdoc.IsHasConst = pdecl.IsHasConst
 	pdoc.IsHasVar = pdecl.IsHasVar

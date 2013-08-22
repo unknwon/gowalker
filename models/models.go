@@ -113,6 +113,8 @@ type PkgDecl struct {
 	Pid int64  `qbs:"index"`
 	Tag string // Project tag.
 
+	// Indicate how many JS should be downloaded(JsNum=total num - 1)
+	JsNum       int
 	IsHasExport bool
 
 	// Top-level declarations.

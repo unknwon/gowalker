@@ -104,8 +104,39 @@ func getRepo(client *http.Client, path, tag, etag string) (pdoc *Package, err er
 	return pdoc, err
 }
 
+func RenderFuncs(pdoc *Package) []*models.PkgFunc {
+	pfuncs := make([]*models.PkgFunc, 0, len(pdoc.Funcs)+len(pdoc.Types)*3)
+
+	links := getLinks(pdoc)
+
+	// Functions.
+	pfuncs = addFuncs(pfuncs, pdoc.Funcs, pdoc.ImportPath, links)
+	pfuncs = addFuncs(pfuncs, pdoc.Ifuncs, pdoc.ImportPath, links)
+
+	// Types.
+	for _, v := range pdoc.Types {
+		// Functions.
+		for _, m := range v.Funcs {
+			pfuncs = addFunc(pfuncs, m, pdoc.ImportPath, m.Name, links)
+		}
+		for _, m := range v.IFuncs {
+			pfuncs = addFunc(pfuncs, m, pdoc.ImportPath, m.Name, links)
+		}
+
+		// Methods.
+		for _, m := range v.Methods {
+			pfuncs = addFunc(pfuncs, m, pdoc.ImportPath, v.Name+"_"+m.Name, links)
+		}
+		for _, m := range v.IMethods {
+			pfuncs = addFunc(pfuncs, m, pdoc.ImportPath, v.Name+"_"+m.Name, links)
+		}
+	}
+
+	return pfuncs
+}
+
 // SaveProject saves project information to database.
-func SaveProject(pdoc *Package) (int64, error) {
+func SaveProject(pdoc *Package, pfuncs []*models.PkgFunc) (int64, error) {
 	// Save package information.
 	pinfo := &models.PkgInfo{
 		Path:        pdoc.ImportPath,
@@ -127,38 +158,13 @@ func SaveProject(pdoc *Package) (int64, error) {
 	// Save package declaration and functions.
 	pdecl := &models.PkgDecl{
 		Tag:          pdoc.Tag,
+		JsNum:        pdoc.JsNum,
 		IsHasExport:  pdoc.IsHasExport,
 		IsHasConst:   pdoc.IsHasConst,
 		IsHasVar:     pdoc.IsHasVar,
 		IsHasExample: pdoc.IsHasExample,
 		IsHasFile:    pdoc.IsHasFile,
 		IsHasSubdir:  pdoc.IsHasSubdir,
-	}
-	pfuncs := make([]*models.PkgFunc, 0, len(pdoc.Funcs)+len(pdoc.Types)*3)
-
-	links := getLinks(pdoc)
-
-	// Functions.
-	pfuncs = addFuncs(pfuncs, pdoc.Funcs, pinfo.Path, links)
-	pfuncs = addFuncs(pfuncs, pdoc.Ifuncs, pinfo.Path, links)
-
-	// Types.
-	for _, v := range pdoc.Types {
-		// Functions.
-		for _, m := range v.Funcs {
-			pfuncs = addFunc(pfuncs, m, pinfo.Path, m.Name, links)
-		}
-		for _, m := range v.IFuncs {
-			pfuncs = addFunc(pfuncs, m, pinfo.Path, m.Name, links)
-		}
-
-		// Methods.
-		for _, m := range v.Methods {
-			pfuncs = addFunc(pfuncs, m, pinfo.Path, v.Name+"_"+m.Name, links)
-		}
-		for _, m := range v.IMethods {
-			pfuncs = addFunc(pfuncs, m, pinfo.Path, v.Name+"_"+m.Name, links)
-		}
 	}
 
 	// Imports.

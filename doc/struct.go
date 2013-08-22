@@ -91,6 +91,8 @@ type Package struct {
 	Synopsis string
 	Doc      string
 
+	JsNum int
+
 	IsCmd                bool
 	IsNeedRender         bool
 	IsHasExport          bool

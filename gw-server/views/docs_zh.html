@@ -160,7 +160,9 @@
 					    {{end}}
 					    
 						<div id="markdown" class="markdown">
-							<script type="text/javascript" src="{{.DocJS}}"></script>
+							{{range .DocJS}}
+							<script type="text/javascript" src="{{.}}"></script>
+							{{end}}
 						</div>
 						
 						<p>
