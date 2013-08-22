@@ -66,7 +66,7 @@ func GetPkgInfo(path, tag string) (*PkgInfo, error) {
 		// Basically, error means not found, so we set 'pinfo.Etag' to an empty string
 		// because 'Etag' contains 'PACKAGE_VER' which server uses to decide force update.
 		pinfo.Etag = ""
-		err = errors.New(
+		return pinfo, errors.New(
 			fmt.Sprintf("models.GetPkgInfo( %s:%s ) -> 'PkgDecl': %s", path, tag, err))
 	}
 
@@ -75,11 +75,12 @@ func GetPkgInfo(path, tag string) (*PkgInfo, error) {
 		docPath += "-" + tag
 	}
 	if !utils.IsExist("./static/docs/" + docPath + ".js") {
+		pinfo.Etag = ""
 		return pinfo, errors.New(
 			fmt.Sprintf("models.GetPkgInfo( %s:%s ) -> JS: File not found", path, tag))
 	}
 
-	return pinfo, err
+	return pinfo, nil
 }
 
 // GetPkgInfoById returns package information from database by pid.

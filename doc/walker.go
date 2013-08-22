@@ -17,7 +17,6 @@ package doc
 
 import (
 	"bytes"
-	"encoding/base32"
 	"errors"
 	"fmt"
 	"go/ast"
@@ -355,7 +354,6 @@ func (w *walker) build(srcs []*source) (*Package, error) {
 	w.pdoc.Doc = w.pdoc.Doc + "<br />" + buf.String()
 	w.pdoc.Doc = strings.Replace(w.pdoc.Doc, "<p>", "<p><b>", 1)
 	w.pdoc.Doc = strings.Replace(w.pdoc.Doc, "</p>", "</b></p>", 1)
-	w.pdoc.Doc = base32.StdEncoding.EncodeToString([]byte(w.pdoc.Doc))
 
 	w.pdoc.Examples = w.getExamples("")
 	w.pdoc.IsCmd = bpkg.IsCommand()

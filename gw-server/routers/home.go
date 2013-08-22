@@ -260,8 +260,7 @@ func generatePage(this *HomeRouter, pdoc *doc.Package, q, tag, lang string) bool
 	}
 
 	if pdoc.IsNeedRender {
-		byts, _ := base32.StdEncoding.DecodeString(pdoc.Doc)
-		this.Data["PkgFullIntro"] = string(byts)
+		this.Data["PkgFullIntro"] = pdoc.Doc
 
 		var buf bytes.Buffer
 		links := make([]*utils.Link, 0, len(pdoc.Types)+len(pdoc.Imports)+len(pdoc.Funcs)+10)

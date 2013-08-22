@@ -383,8 +383,7 @@ func getColorLevel(level string) string {
 // Html2JS converts []byte type of HTML content into JS format.
 func Html2JS(data []byte) []byte {
 	s := string(data)
-	s = strings.Replace(s, `\n`, `\\n`, -1)
-	s = strings.Replace(s, `\r`, `\\r`, -1)
+	s = strings.Replace(s, `\`, `\\`, -1)
 	s = strings.Replace(s, "\n", `\n`, -1)
 	s = strings.Replace(s, "\r", "", -1)
 	s = strings.Replace(s, "\"", `\"`, -1)
