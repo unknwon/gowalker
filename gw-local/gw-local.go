@@ -39,7 +39,6 @@ func init() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
 
 	// Set App version.
-	// routers.AppVer = "v" + APP_VER
 }
 
 func main() {
@@ -67,6 +66,9 @@ func main() {
 	http.HandleFunc("/index", serverIndex)
 	http.HandleFunc("/funcs", serverFuncs)
 	http.HandleFunc("/about", serverAbout)
+
+	http.Handle("/static/", http.StripPrefix("/static/",
+		http.FileServer(http.Dir(appPath+"static/"))))
 
 	http.ListenAndServe(":"+fmt.Sprint(httpPort), nil)
 }
