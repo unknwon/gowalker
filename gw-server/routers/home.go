@@ -483,6 +483,9 @@ func generatePage(this *HomeRouter, pdoc *doc.Package, q, tag, lang string) bool
 			buf.Reset()
 			utils.FormatCode(&buf, &e.Code, links)
 			e.Code = buf.String()
+			if len(e.Output) > 0 {
+				e.IsHasOutput = true
+			}
 		}
 		for _, e := range pdoc.UserExamples {
 			buf.Reset()
