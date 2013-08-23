@@ -16,27 +16,23 @@ package utils
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
 	"html/template"
 	"io"
 	"os"
-	"os/exec"
-	"path"
-	"path/filepath"
 	"regexp"
-	"runtime"
 	"strings"
 	"unicode"
 	"unicode/utf8"
 
+	"github.com/Unknwon/com"
 	"github.com/Unknwon/goconfig"
 )
 
 var Cfg *goconfig.ConfigFile
 
 func init() {
-	if !IsExist("conf/app.ini") {
+	if !com.IsExist("conf/app.ini") {
 		os.Create("conf/app.ini")
 	}
 
@@ -46,12 +42,6 @@ func init() {
 // SaveConfig saves configuration file.
 func SaveConfig() error {
 	return goconfig.SaveConfigFile(Cfg, "conf/app.ini")
-}
-
-// IsExist returns if a file or directory exists
-func IsExist(path string) bool {
-	_, err := os.Stat(path)
-	return err == nil || os.IsExist(err)
 }
 
 var readmePat = regexp.MustCompile(`^[Rr][Ee][Aa][Dd][Mm][Ee](?:$|\.)`)
@@ -315,126 +305,4 @@ Loop:
 	}
 
 	return s
-}
-
-const (
-	Gray = uint8(iota + 90)
-	Red
-	Green
-	Yellow
-	Blue
-	Magenta
-	//NRed      = uint8(31) // Normal
-	EndColor = "\033[0m"
-)
-
-// ColorLog colors log and print to stdout.
-// Log format: <level> <content [highlight][path]> [ error ].
-// Level: TRAC -> blue; ERRO -> red; WARN -> Magenta; SUCC -> green; others -> default.
-// Content: default; path: yellow; error -> red.
-// Level has to be surrounded by "[" and "]".
-// Highlights have to be surrounded by "# " and " #"(space).
-// Paths have to be surrounded by "( " and " )"(sapce).
-// Errors have to be surrounded by "[ " and " ]"(space).
-func ColorLog(format string, a ...interface{}) {
-	log := fmt.Sprintf(format, a...)
-	if runtime.GOOS != "windows" {
-		var clog string
-
-		// Level.
-		i := strings.Index(log, "]")
-		if log[0] == '[' && i > -1 {
-			clog += "[" + getColorLevel(log[1:i]) + "]"
-		}
-
-		log = log[i+1:]
-
-		// Error.
-		log = strings.Replace(log, "[ ", fmt.Sprintf("[\033[%dm", Red), -1)
-		log = strings.Replace(log, " ]", EndColor+"]", -1)
-
-		// Path.
-		log = strings.Replace(log, "( ", fmt.Sprintf("(\033[%dm", Yellow), -1)
-		log = strings.Replace(log, " )", EndColor+")", -1)
-
-		// Highlights.
-		log = strings.Replace(log, "# ", fmt.Sprintf("\033[%dm", Gray), -1)
-		log = strings.Replace(log, " #", EndColor, -1)
-
-		log = clog + log
-	}
-
-	fmt.Print(log)
-}
-
-// getColorLevel returns colored level string by given level.
-func getColorLevel(level string) string {
-	level = strings.ToUpper(level)
-	switch level {
-	case "TRAC":
-		return fmt.Sprintf("\033[%dm%s\033[0m", Blue, level)
-	case "ERRO":
-		return fmt.Sprintf("\033[%dm%s\033[0m", Red, level)
-	case "WARN":
-		return fmt.Sprintf("\033[%dm%s\033[0m", Magenta, level)
-	case "SUCC":
-		return fmt.Sprintf("\033[%dm%s\033[0m", Green, level)
-	default:
-		return level
-	}
-}
-
-// Html2JS converts []byte type of HTML content into JS format.
-func Html2JS(data []byte) []byte {
-	s := string(data)
-	s = strings.Replace(s, `\`, `\\`, -1)
-	s = strings.Replace(s, "\n", `\n`, -1)
-	s = strings.Replace(s, "\r", "", -1)
-	s = strings.Replace(s, "\"", `\"`, -1)
-	return []byte(s)
-}
-
-// GetAppPath returns application execute path for current process.
-func GetAppPath(importPath, subdir string) (string, error) {
-	// Look up executable in PATH variable.
-	appPath, err := exec.LookPath(path.Base(os.Args[0]))
-	if err != nil {
-		return "", err
-	}
-
-	// Check if run under $GOPATH/bin.
-	if !IsExist(appPath + subdir + "/") {
-		paths := GetGOPATH()
-		for _, p := range paths {
-			if IsExist(p + "/src/" + importPath + "/") {
-				appPath = p + "/src/" + importPath + "/"
-				break
-			}
-		}
-	}
-
-	if len(appPath) == 0 {
-		return "", errors.New("Unable to indicate current execute path")
-	}
-
-	appPath = filepath.Dir(appPath) + "/"
-	if runtime.GOOS == "windows" {
-		// Replace all '\' to '/'.
-		appPath = strings.Replace(appPath, "\\", "/", -1)
-	}
-
-	return appPath, nil
-}
-
-// GetGOPATH returns all paths in GOPATH variable.
-func GetGOPATH() []string {
-	gopath := os.Getenv("GOPATH")
-	var paths []string
-	if runtime.GOOS == "windows" {
-		gopath = strings.Replace(gopath, "\\", "/", -1)
-		paths = strings.Split(gopath, ";")
-	} else {
-		paths = strings.Split(gopath, ":")
-	}
-	return paths
 }

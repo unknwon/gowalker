@@ -22,6 +22,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/Unknwon/com"
 	"github.com/Unknwon/gowalker/models"
 	"github.com/Unknwon/gowalker/utils"
 	"github.com/astaxie/beego"
@@ -203,7 +204,7 @@ func flushCache() {
 
 // shutdownCheck returns true if server detects shutdown signal.
 func shutdownCheck() bool {
-	if utils.IsExist("SHUTDOWN.SIGN") {
+	if com.IsExist("SHUTDOWN.SIGN") {
 		os.Remove("SHUTDOWN.SIGN")
 		beego.Info("Detected SHUTDOWN.SIGN")
 		if beego.Level() == beego.LevelInfo {

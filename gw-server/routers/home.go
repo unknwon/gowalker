@@ -27,6 +27,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/Unknwon/com"
 	"github.com/Unknwon/gowalker/doc"
 	"github.com/Unknwon/gowalker/models"
 	"github.com/Unknwon/gowalker/utils"
@@ -496,7 +497,7 @@ func generatePage(this *HomeRouter, pdoc *doc.Package, q, tag, lang string) bool
 			return false
 		}
 
-		n := saveDocPage(docPath, utils.Html2JS(data))
+		n := saveDocPage(docPath, com.Html2JS(data))
 		if n == -1 {
 			return false
 		}

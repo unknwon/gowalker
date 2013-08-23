@@ -19,7 +19,7 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/Unknwon/gowalker/utils"
+	"github.com/Unknwon/com"
 	"github.com/astaxie/beego"
 	"github.com/coocood/qbs"
 )
@@ -74,7 +74,7 @@ func GetPkgInfo(path, tag string) (*PkgInfo, error) {
 	if len(tag) > 0 {
 		docPath += "-" + tag
 	}
-	if !utils.IsExist("./static/docs/" + docPath + ".js") {
+	if !com.IsExist("./static/docs/" + docPath + ".js") {
 		pinfo.Etag = ""
 		return pinfo, errors.New(
 			fmt.Sprintf("models.GetPkgInfo( %s:%s ) -> JS: File not found", path, tag))

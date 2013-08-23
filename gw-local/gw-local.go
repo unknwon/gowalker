@@ -23,11 +23,12 @@ import (
 	"runtime"
 	"strconv"
 
+	"github.com/Unknwon/com"
 	"github.com/Unknwon/gowalker/utils"
 )
 
 const (
-	APP_VER = "0.0.2.0823"
+	APP_VER = "0.0.2.0824"
 )
 
 var (
@@ -37,21 +38,19 @@ var (
 
 func init() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
-
-	// Set App version.
 }
 
 func main() {
-	utils.ColorLog("[INFO] Go Walker Local v%s.\n", APP_VER)
+	com.ColorLog("[INFO] Go Walker Local v%s.\n", APP_VER)
 
 	var err error
 	appPath, err = utils.GetAppPath("github.com/Unknwon/gowalker/gw-local", "conf")
 	if err != nil {
-		utils.ColorLog("[ERRO] Cannot assign 'appPath'[ %s ]\n", err)
+		com.ColorLog("[ERRO] Cannot assign 'appPath'[ %s ]\n", err)
 		return
 	}
 
-	utils.ColorLog("[INFO] File server( %s )\n", appPath)
+	com.ColorLog("[INFO] File server( %s )\n", appPath)
 
 	// Get 'args'.
 	args := os.Args[1:]
