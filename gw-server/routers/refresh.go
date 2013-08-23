@@ -68,6 +68,12 @@ func (this *RefreshRouter) Get() {
 		return
 	}
 
+	if strings.HasPrefix(err.Error(), "doc.") {
+		this.Data["IsHasError"] = true
+		this.Data["ErrMsg"] = err.Error()
+		return
+	}
+
 	this.Data["Path"] = q
 	this.Data["LimitTime"] = err.Error()
 }

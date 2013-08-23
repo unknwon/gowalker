@@ -490,6 +490,10 @@ func generatePage(this *HomeRouter, pdoc *doc.Package, q, tag, lang string) bool
 			e.Code = buf.String()
 		}
 
+		// Get VCS name, project name, project home page, Upper level project URL, and project tag.
+		this.Data["VCS"], this.Data["ProName"], this.Data["ProPath"], this.Data["ProDocPath"], this.Data["PkgTag"] =
+			getVCSInfo(q, tag, pdoc)
+
 		this.TplNames = "T.docs.tpl"
 		data, err := this.RenderBytes()
 		if err != nil {
