@@ -15,10 +15,10 @@
 package routers
 
 import (
+	"os"
 	"strings"
 
 	"github.com/Unknwon/gowalker/doc"
-	"github.com/Unknwon/gowalker/models"
 	"github.com/astaxie/beego"
 )
 
@@ -46,31 +46,16 @@ func (this *RefreshRouter) Get() {
 
 	pdoc, err := doc.CheckDoc(q, "", doc.REFRESH_REQUEST)
 	if err == nil {
-		pinfo := &models.PkgInfo{
-			Path:        pdoc.ImportPath,
-			ProName:     pdoc.ProjectName,
-			Synopsis:    pdoc.Synopsis,
-			IsCmd:       pdoc.IsCmd,
-			Tags:        strings.Join(pdoc.Tags, "|||"),
-			Views:       pdoc.Views,
-			ViewedTime:  pdoc.ViewedTime,
-			Created:     pdoc.Created,
-			Rank:        pdoc.Rank,
-			Etag:        pdoc.Etag,
-			Labels:      pdoc.Labels,
-			ImportedNum: pdoc.ImportedNum,
-			ImportPid:   pdoc.ImportPid,
-			Note:        pdoc.Note,
-		}
-		models.SaveProject(pinfo, nil, nil, nil)
+		os.Remove("./static/docs/" + pdoc.ImportPath + ".js")
 
 		this.Redirect("/"+q, 302)
 		return
 	}
 
-	if strings.HasPrefix(err.Error(), "doc.") {
+	if strings.HasPrefix(err.Error(), "doc.") || strings.HasSuffix(err.Error(), "EOF") {
 		this.Data["IsHasError"] = true
-		this.Data["ErrMsg"] = err.Error()
+		this.Data["ErrMsg"] = strings.Replace(err.Error(),
+			doc.GetGithubCredentials(), "<githubCred>", 1)
 		return
 	}
 
