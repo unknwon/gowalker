@@ -118,12 +118,12 @@ type HomeRouter struct {
 func (this *HomeRouter) Get() {
 	//this.Data["IsBeta"] = true
 	// Filter unusual User-Agent.
-	ua := this.Ctx.Request.Header.Get("User-Agent")
-	if len(ua) < 20 {
-		beego.Warn("User-Agent:", this.Ctx.Request.Header.Get("User-Agent"))
-		this.Ctx.WriteString("")
-		return
-	}
+	// ua := this.Ctx.Request.Header.Get("User-Agent")
+	// if len(ua) < 20 {
+	// 	beego.Warn("User-Agent:", this.Ctx.Request.Header.Get("User-Agent"))
+	// 	this.Ctx.WriteString("")
+	// 	return
+	// }
 
 	// Set language version.
 	curLang := globalSetting(this.Ctx, this.Input(), this.Data)

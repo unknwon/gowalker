@@ -32,7 +32,7 @@ const (
 )
 
 var (
-	appPath  string
+	srcPath  string
 	httpPort = 8082
 )
 
@@ -44,13 +44,13 @@ func main() {
 	com.ColorLog("[INFO] Go Walker Local v%s.\n", APP_VER)
 
 	var err error
-	appPath, err = utils.GetAppPath("github.com/Unknwon/gowalker/gw-local", "conf")
+	srcPath, err = utils.GetAppPath("github.com/Unknwon/gowalker/gw-local", "conf")
 	if err != nil {
-		com.ColorLog("[ERRO] Cannot assign 'appPath'[ %s ]\n", err)
+		com.ColorLog("[ERRO] Cannot assign 'srcPath'[ %s ]\n", err)
 		return
 	}
 
-	com.ColorLog("[INFO] File server( %s )\n", appPath)
+	com.ColorLog("[INFO] File server( %s )\n", srcPath)
 
 	// Get 'args'.
 	args := os.Args[1:]
@@ -67,7 +67,7 @@ func main() {
 	http.HandleFunc("/about", serverAbout)
 
 	http.Handle("/static/", http.StripPrefix("/static/",
-		http.FileServer(http.Dir(appPath+"static/"))))
+		http.FileServer(http.Dir(srcPath+"static/"))))
 
 	http.ListenAndServe(":"+fmt.Sprint(httpPort), nil)
 }

@@ -147,6 +147,9 @@ func (s *source) Mode() os.FileMode  { return 0 }
 func (s *source) ModTime() time.Time { return time.Time{} }
 func (s *source) IsDir() bool        { return false }
 func (s *source) Sys() interface{}   { return nil }
+func (s *source) RawURL() string     { return s.rawURL }
+func (s *source) Data() []byte       { return s.data }
+func (s *source) SetData(p []byte)   { s.data = p }
 
 // A walker holds the state used when building the documentation.
 type walker struct {

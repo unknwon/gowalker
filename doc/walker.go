@@ -34,6 +34,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/Unknwon/com"
 	"github.com/Unknwon/gowalker/models"
 	"github.com/Unknwon/gowalker/utils"
 	"github.com/astaxie/beego"
@@ -262,23 +263,23 @@ func (w *walker) getExamples(name string) []*Example {
 }
 
 // build generates data from source files.
-func (w *walker) build(srcs []*source) (*Package, error) {
+func (w *walker) build(srcs []com.RawFile) (*Package, error) {
 	// Set created time.
 	w.pdoc.Created = time.Now().UTC()
 
 	// Add source files to walker, I skipped references here.
 	w.srcs = make(map[string]*source)
 	for _, src := range srcs {
-		srcName := strings.ToLower(src.name) // For readme comparation.
+		srcName := strings.ToLower(src.Name()) // For readme comparation.
 		switch {
-		case strings.HasSuffix(src.name, ".go"):
-			w.srcs[src.name] = src
+		case strings.HasSuffix(src.Name(), ".go"):
+			w.srcs[src.Name()] = src.(*source)
 		case len(w.pdoc.Tag) > 0:
 			continue // Only save latest readme.
 		case strings.HasPrefix(srcName, "readme_zh") || strings.HasPrefix(srcName, "readme_cn"):
-			models.SavePkgDoc(w.pdoc.ImportPath, "zh", src.data)
+			models.SavePkgDoc(w.pdoc.ImportPath, "zh", src.Data())
 		case strings.HasPrefix(srcName, "readme"):
-			models.SavePkgDoc(w.pdoc.ImportPath, "en", src.data)
+			models.SavePkgDoc(w.pdoc.ImportPath, "en", src.Data())
 		}
 	}
 

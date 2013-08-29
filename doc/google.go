@@ -21,11 +21,12 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/Unknwon/com"
+	"github.com/Unknwon/ctw/packer"
 	"github.com/Unknwon/gowalker/utils"
 )
 
 var (
-	googleRepoRe     = regexp.MustCompile(`id="checkoutcmd">(hg|git|svn)`)
 	googleRevisionRe = regexp.MustCompile(`<h2>(?:[^ ]+ - )?Revision *([^:]+):`)
 	googleTagRe      = regexp.MustCompile(`<option value="([^"/]+)"`)
 	googleEtagRe     = regexp.MustCompile(`^(hg|git|svn)-`)
@@ -36,10 +37,11 @@ var (
 
 func getStandardDoc(client *http.Client, importPath, tag, savedEtag string) (pdoc *Package, err error) {
 	// hg-higtory: http://go.googlecode.com/hg-history/release/src/pkg/"+importPath+"/"
-	p, err := httpGetBytes(client, "http://go.googlecode.com/hg/src/pkg/"+importPath+"/?r="+tag, nil)
+	stdout, _, err := com.ExecCmd("curl", "http://go.googlecode.com/hg/src/pkg/"+importPath+"/?r="+tag)
 	if err != nil {
 		return nil, errors.New("doc.getStandardDoc(" + importPath + ") -> " + err.Error())
 	}
+	p := []byte(stdout)
 
 	// Check revision tag.
 	var etag string
@@ -52,8 +54,11 @@ func getStandardDoc(client *http.Client, importPath, tag, savedEtag string) (pdo
 		}
 	}
 
+	// Check if source files saved locally.
+	if 
+
 	// Get source file data.
-	files := make([]*source, 0, 5)
+	files := make([]com.RawFile, 0, 5)
 	for _, m := range googleFileRe.FindAllSubmatch(p, -1) {
 		fname := strings.Split(string(m[1]), "?")[0]
 		if utils.IsDocFile(fname) {
@@ -77,11 +82,11 @@ func getStandardDoc(client *http.Client, importPath, tag, savedEtag string) (pdo
 	}
 
 	if len(files) == 0 && len(dirs) == 0 {
-		return nil, NotFoundError{"Directory tree does not contain Go files and subdirs."}
+		return nil, com.NotFoundError{"Directory tree does not contain Go files and subdirs."}
 	}
 
 	// Fetch file from VCS.
-	if err := fetchFiles(client, files, nil); err != nil {
+	if err := com.FetchFiles(client, files, nil); err != nil {
 		return nil, err
 	}
 
@@ -104,7 +109,7 @@ func getStandardDoc(client *http.Client, importPath, tag, savedEtag string) (pdo
 }
 
 func getGoogleTags(client *http.Client, importPath string) []string {
-	p, err := httpGetBytes(client, "http://"+utils.GetProjectPath(importPath)+"/source/browse", nil)
+	p, err := com.HttpGetBytes(client, "http://"+utils.GetProjectPath(importPath)+"/source/browse", nil)
 	if err != nil {
 		return nil
 	}
@@ -127,16 +132,16 @@ func getGoogleTags(client *http.Client, importPath string) []string {
 }
 
 func getGoogleDoc(client *http.Client, match map[string]string, tag, savedEtag string) (*Package, error) {
-	setupGoogleMatch(match)
+	packer.SetupGoogleMatch(match)
 	if m := googleEtagRe.FindStringSubmatch(savedEtag); m != nil {
 		match["vcs"] = m[1]
-	} else if err := getGoogleVCS(client, match); err != nil {
+	} else if err := packer.GetGoogleVCS(client, match); err != nil {
 		return nil, err
 	}
 
 	match["tag"] = tag
 	// Scrape the repo browser to find the project revision and individual Go files.
-	p, err := httpGetBytes(client, expand("http://{subrepo}{dot}{repo}.googlecode.com/{vcs}{dir}/?r={tag}", match), nil)
+	p, err := com.HttpGetBytes(client, com.Expand("http://{subrepo}{dot}{repo}.googlecode.com/{vcs}{dir}/?r={tag}", match), nil)
 	if err != nil {
 		return nil, errors.New("doc.getGoogleDoc(" + match["importPath"] + ") -> " + err.Error())
 	}
@@ -146,21 +151,21 @@ func getGoogleDoc(client *http.Client, match map[string]string, tag, savedEtag s
 	if m := googleRevisionRe.FindSubmatch(p); m == nil {
 		return nil, errors.New("doc.getGoogleDoc(" + match["importPath"] + ") -> Could not find revision")
 	} else {
-		etag = expand("{vcs}-{0}", match, string(m[1]))
+		etag = com.Expand("{vcs}-{0}", match, string(m[1]))
 		if etag == savedEtag {
 			return nil, errNotModified
 		}
 	}
 
 	// Get source file data.
-	files := make([]*source, 0, 5)
+	files := make([]com.RawFile, 0, 5)
 	for _, m := range googleFileRe.FindAllSubmatch(p, -1) {
 		fname := string(m[1])
 		if utils.IsDocFile(fname) {
 			files = append(files, &source{
 				name:      fname,
-				browseURL: expand("http://code.google.com/p/{repo}/source/browse{dir}/{0}{query}?r={tag}", match, fname),
-				rawURL:    expand("http://{subrepo}{dot}{repo}.googlecode.com/{vcs}{dir}/{0}?r={tag}", match, fname),
+				browseURL: com.Expand("http://code.google.com/p/{repo}/source/browse{dir}/{0}{query}?r={tag}", match, fname),
+				rawURL:    com.Expand("http://{subrepo}{dot}{repo}.googlecode.com/{vcs}{dir}/{0}?r={tag}", match, fname),
 			})
 		}
 	}
@@ -177,11 +182,11 @@ func getGoogleDoc(client *http.Client, match map[string]string, tag, savedEtag s
 	}
 
 	if len(files) == 0 && len(dirs) == 0 {
-		return nil, NotFoundError{"Directory tree does not contain Go files and subdirs."}
+		return nil, com.NotFoundError{"Directory tree does not contain Go files and subdirs."}
 	}
 
 	// Fetch file from VCS.
-	if err := fetchFiles(client, files, nil); err != nil {
+	if err := com.FetchFiles(client, files, nil); err != nil {
 		return nil, err
 	}
 
@@ -193,7 +198,7 @@ func getGoogleDoc(client *http.Client, match map[string]string, tag, savedEtag s
 		lineFmt: "#%d",
 		pdoc: &Package{
 			ImportPath:  match["importPath"],
-			ProjectName: expand("{repo}{dot}{subrepo}", match),
+			ProjectName: com.Expand("{repo}{dot}{subrepo}", match),
 			Tags:        tags,
 			Tag:         tag,
 			Etag:        etag,
@@ -201,28 +206,4 @@ func getGoogleDoc(client *http.Client, match map[string]string, tag, savedEtag s
 		},
 	}
 	return w.build(files)
-}
-
-func setupGoogleMatch(match map[string]string) {
-	if s := match["subrepo"]; s != "" {
-		match["dot"] = "."
-		match["query"] = "?repo=" + s
-	} else {
-		match["dot"] = ""
-		match["query"] = ""
-	}
-}
-
-func getGoogleVCS(client *http.Client, match map[string]string) error {
-	// Scrape the HTML project page to find the VCS.
-	p, err := httpGetBytes(client, expand("http://code.google.com/p/{repo}/source/checkout", match), nil)
-	if err != nil {
-		return errors.New("doc.getGoogleVCS(" + match["importPath"] + ") -> " + err.Error())
-	}
-	m := googleRepoRe.FindSubmatch(p)
-	if m == nil {
-		return NotFoundError{"Could not VCS on Google Code project page."}
-	}
-	match["vcs"] = string(m[1])
-	return nil
 }

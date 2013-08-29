@@ -79,14 +79,15 @@ type PkgInfo struct {
 	Rank int64 `qbs:"index"`
 
 	/*
-		- Revision tag with package (structure) version.
+		- Package (structure) version.
 		eg.
-			9-ed5cfa7eb95cfa6787209e7d6bd5d3af0ed3679f
+			9
 		- Project labels.
 		eg.
 			$tool|
 	*/
-	Etag, Labels string // Revision tag and project labels.
+	PkgVer int
+	Labels string
 
 	/*
 		- Number of packages that imports this project.
@@ -105,6 +106,13 @@ type PkgInfo struct {
 			Github: <forks>|<watchers>|
 	*/
 	Note string
+}
+
+// A PkgTag descriables the project revision tag for its sub-packages.
+type PkgTag struct {
+	Id   int64
+	Path string `qbs:"index"`
+	Ptag string
 }
 
 // PkgDecl is package declaration in database acceptable form.

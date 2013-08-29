@@ -21,6 +21,7 @@ import (
 	"path"
 	"regexp"
 
+	"github.com/Unknwon/com"
 	"github.com/Unknwon/gowalker/utils"
 )
 
@@ -37,7 +38,7 @@ func getBitbucketDoc(client *http.Client, match map[string]string, tag, savedEta
 		var repo struct {
 			Scm string
 		}
-		if err := httpGetJSON(client, expand("https://api.bitbucket.org/1.0/repositories/{owner}/{repo}", match), &repo); err != nil {
+		if err := com.HttpGetJSON(client, com.Expand("https://api.bitbucket.org/1.0/repositories/{owner}/{repo}", match), &repo); err != nil {
 			return nil, errors.New("doc.getBitbucketDoc(" + match["importPath"] + ") -> " + err.Error())
 		}
 		match["vcs"] = repo.Scm
@@ -47,7 +48,7 @@ func getBitbucketDoc(client *http.Client, match map[string]string, tag, savedEta
 	var branches map[string]struct {
 		Node string
 	}
-	if err := httpGetJSON(client, expand("https://api.bitbucket.org/1.0/repositories/{owner}/{repo}/branches", match), &branches); err != nil {
+	if err := com.HttpGetJSON(client, com.Expand("https://api.bitbucket.org/1.0/repositories/{owner}/{repo}/branches", match), &branches); err != nil {
 		return nil, errors.New("doc.getBitbucketDoc(" + match["importPath"] + ") -> get branches: " + err.Error())
 	}
 	match["commit"] = branches["default"].Node
@@ -57,7 +58,7 @@ func getBitbucketDoc(client *http.Client, match map[string]string, tag, savedEta
 	var nodes map[string]struct {
 		Node string
 	}
-	if err := httpGetJSON(client, expand("https://api.bitbucket.org/1.0/repositories/{owner}/{repo}/tags", match), &nodes); err != nil {
+	if err := com.HttpGetJSON(client, com.Expand("https://api.bitbucket.org/1.0/repositories/{owner}/{repo}/tags", match), &nodes); err != nil {
 		return nil, errors.New("doc.getBitbucketDoc(" + match["importPath"] + ") -> get nodes: " + err.Error())
 	}
 	for k := range nodes {
@@ -71,7 +72,7 @@ func getBitbucketDoc(client *http.Client, match map[string]string, tag, savedEta
 	var etag string
 	if len(tag) == 0 {
 		// Check revision tag.
-		etag = expand("{vcs}-{commit}", match)
+		etag = com.Expand("{vcs}-{commit}", match)
 		if etag == savedEtag {
 			return nil, errNotModified
 		}
@@ -89,19 +90,19 @@ func getBitbucketDoc(client *http.Client, match map[string]string, tag, savedEta
 		Directories []string
 	}
 
-	if err := httpGetJSON(client, expand("https://api.bitbucket.org/1.0/repositories/{owner}/{repo}/src/{tag}{dir}/", match), &node); err != nil {
+	if err := com.HttpGetJSON(client, com.Expand("https://api.bitbucket.org/1.0/repositories/{owner}/{repo}/src/{tag}{dir}/", match), &node); err != nil {
 		return nil, errors.New("doc.getBitbucketDoc(" + match["importPath"] + ") -> get trees: " + err.Error())
 	}
 
 	// Get source file data.
-	files := make([]*source, 0, 5)
+	files := make([]com.RawFile, 0, 5)
 	for _, f := range node.Files {
 		_, name := path.Split(f.Path)
 		if utils.IsDocFile(name) {
 			files = append(files, &source{
 				name:      name,
-				browseURL: expand("https://bitbucket.org/{owner}/{repo}/src/{tag}/{0}", match, f.Path),
-				rawURL:    expand("https://api.bitbucket.org/1.0/repositories/{owner}/{repo}/raw/{tag}/{0}", match, f.Path),
+				browseURL: com.Expand("https://bitbucket.org/{owner}/{repo}/src/{tag}/{0}", match, f.Path),
+				rawURL:    com.Expand("https://api.bitbucket.org/1.0/repositories/{owner}/{repo}/raw/{tag}/{0}", match, f.Path),
 			})
 		}
 	}
@@ -115,11 +116,11 @@ func getBitbucketDoc(client *http.Client, match map[string]string, tag, savedEta
 	}
 
 	if len(files) == 0 && len(dirs) == 0 {
-		return nil, NotFoundError{"Directory tree does not contain Go files and subdirs."}
+		return nil, com.NotFoundError{"Directory tree does not contain Go files and subdirs."}
 	}
 
 	// Fetch file from VCS.
-	if err := fetchFiles(client, files, nil); err != nil {
+	if err := com.FetchFiles(client, files, nil); err != nil {
 		return nil, err
 	}
 

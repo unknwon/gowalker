@@ -25,11 +25,12 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/Unknwon/com"
 	"github.com/Unknwon/gowalker/utils"
 )
 
 // TODO: specify with command line flag
-const repoRoot = "/tmp/gddo"
+const repoRoot = "/tmp/gw"
 
 var urlTemplates = []struct {
 	re       *regexp.Regexp
@@ -100,7 +101,7 @@ func downloadGit(schemes []string, repo, savedEtag string) (string, string, erro
 	}
 
 	if scheme == "" {
-		return "", "", NotFoundError{"VCS not found"}
+		return "", "", com.NotFoundError{"VCS not found"}
 	}
 
 	tags := make(map[string]string)
@@ -156,7 +157,7 @@ var vcsPattern = regexp.MustCompile(`^(?P<repo>(?:[a-z0-9.\-]+\.)+[a-z0-9.\-]+(?
 func getVCSDoc(client *http.Client, match map[string]string, etagSaved string) (*Package, error) {
 	cmd := vcsCmds[match["vcs"]]
 	if cmd == nil {
-		return nil, NotFoundError{expand("VCS not supported: {vcs}", match)}
+		return nil, com.NotFoundError{com.Expand("VCS not supported: {vcs}", match)}
 	}
 
 	scheme := match["scheme"]
@@ -190,11 +191,11 @@ func getVCSDoc(client *http.Client, match map[string]string, etagSaved string) (
 
 	// Slurp source files.
 
-	d := path.Join(repoRoot, expand("{repo}.{vcs}", match), match["dir"])
+	d := path.Join(repoRoot, com.Expand("{repo}.{vcs}", match), match["dir"])
 	f, err := os.Open(d)
 	if err != nil {
 		if os.IsNotExist(err) {
-			err = NotFoundError{err.Error()}
+			err = com.NotFoundError{err.Error()}
 		}
 		return nil, err
 	}
@@ -204,7 +205,7 @@ func getVCSDoc(client *http.Client, match map[string]string, etagSaved string) (
 	}
 
 	// Get source file data.
-	var files []*source
+	var files []com.RawFile
 	for _, fi := range fis {
 		if fi.IsDir() || !utils.IsDocFile(fi.Name()) {
 			continue
@@ -215,7 +216,7 @@ func getVCSDoc(client *http.Client, match map[string]string, etagSaved string) (
 		}
 		files = append(files, &source{
 			name:      fi.Name(),
-			browseURL: expand(urlTemplate, urlMatch, fi.Name()),
+			browseURL: com.Expand(urlTemplate, urlMatch, fi.Name()),
 			data:      b,
 		})
 	}
@@ -240,5 +241,5 @@ func bestTag(tags map[string]string, defaultTag string) (string, string, error) 
 	if commit, ok := tags[defaultTag]; ok {
 		return defaultTag, commit, nil
 	}
-	return "", "", NotFoundError{"Tag or branch not found."}
+	return "", "", com.NotFoundError{"Tag or branch not found."}
 }

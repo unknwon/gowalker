@@ -28,6 +28,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/Unknwon/com"
 	"github.com/Unknwon/gowalker/utils"
 )
 
@@ -49,7 +50,7 @@ var launchpadPattern = regexp.MustCompile(`^launchpad\.net/(?P<repo>(?P<project>
 func getLaunchpadDoc(client *http.Client, match map[string]string, tag, savedEtag string) (*Package, error) {
 
 	if match["project"] != "" && match["series"] != "" {
-		rc, err := httpGet(client, expand("https://code.launchpad.net/{project}{series}/.bzr/branch-format", match), nil)
+		rc, err := com.HttpGet(client, com.Expand("https://code.launchpad.net/{project}{series}/.bzr/branch-format", match), nil)
 		switch {
 		case err == nil:
 			rc.Close()
@@ -57,14 +58,14 @@ func getLaunchpadDoc(client *http.Client, match map[string]string, tag, savedEta
 		case isNotFound(err):
 			// The structure of the import path is is launchpad.net/{project}/{dir}.
 			match["repo"] = match["project"]
-			match["dir"] = expand("{series}{dir}", match)
+			match["dir"] = com.Expand("{series}{dir}", match)
 		default:
 			return nil, err
 		}
 	}
 
 	// Scrape the repo browser to find the project revision and individual Go files.
-	p, err := httpGetBytes(client, expand("https://bazaar.launchpad.net/+branch/{repo}/tarball", match), nil)
+	p, err := com.HttpGetBytes(client, com.Expand("https://bazaar.launchpad.net/+branch/{repo}/tarball", match), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -79,13 +80,13 @@ func getLaunchpadDoc(client *http.Client, match map[string]string, tag, savedEta
 	tr := tar.NewReader(gzr)
 
 	var hash []byte
-	dirPrefix := expand("+branch/{repo}{dir}/", match)
+	dirPrefix := com.Expand("+branch/{repo}{dir}/", match)
 	preLen := len(dirPrefix)
 
 	isGoPro := false // Indicates whether it's a Go project.
 	isRootPath := match["importPath"] == utils.GetProjectPath(match["importPath"])
 	dirs := make([]string, 0, 3)
-	files := make([]*source, 0, 5)
+	files := make([]com.RawFile, 0, 5)
 	for {
 		h, err := tr.Next()
 		if err == io.EOF {
@@ -125,7 +126,7 @@ func getLaunchpadDoc(client *http.Client, match map[string]string, tag, savedEta
 				}
 				files = append(files, &source{
 					name:      f,
-					browseURL: expand("http://bazaar.launchpad.net/+branch/{repo}/view/head:{dir}/{0}", match, f),
+					browseURL: com.Expand("http://bazaar.launchpad.net/+branch/{repo}/view/head:{dir}/{0}", match, f),
 					data:      b})
 			} else {
 				sd, _ := path.Split(d[preLen:])
@@ -138,11 +139,11 @@ func getLaunchpadDoc(client *http.Client, match map[string]string, tag, savedEta
 	}
 
 	if !isGoPro {
-		return nil, NotFoundError{"Cannot find Go files, it's not a Go project."}
+		return nil, com.NotFoundError{"Cannot find Go files, it's not a Go project."}
 	}
 
 	if len(files) == 0 && len(dirs) == 0 {
-		return nil, NotFoundError{"Directory tree does not contain Go files and subdirs."}
+		return nil, com.NotFoundError{"Directory tree does not contain Go files and subdirs."}
 	}
 
 	sort.Sort(byHash(hash))

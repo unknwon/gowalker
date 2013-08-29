@@ -60,10 +60,6 @@ type Link struct {
 	Path, Name, Comment string // package path, identifier name, and comments.
 }
 
-func isLetter(l uint8) bool {
-	return (l >= 'A' && l <= 'Z') || (l >= 'a' && l <= 'z')
-}
-
 // FormatCode highlights keywords and adds HTML links to them.
 func FormatCode(w io.Writer, code *string, links []*Link) {
 	length := len(*code) // Length of whole code.
@@ -83,7 +79,7 @@ func FormatCode(w io.Writer, code *string, links []*Link) {
 	CutWords:
 		for {
 			curChar := (*code)[pos] // Current check character.
-			if !isLetter(curChar) {
+			if !com.IsLetter(curChar) {
 				if !isComment {
 					switch {
 					case curChar == '\'' || curChar == '"' || curChar == '`': // String.
@@ -146,7 +142,7 @@ func FormatCode(w io.Writer, code *string, links []*Link) {
 			// Check if the last word of the paragraphy.
 			l := len(seg)
 			keyword := seg
-			if !isLetter(seg[l-1]) {
+			if !com.IsLetter(seg[l-1]) {
 				keyword = seg[:l-1]
 			} else {
 				l++

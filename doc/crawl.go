@@ -26,10 +26,11 @@ import (
 	"net/http"
 	"path"
 	"regexp"
-	"strconv"
 	"strings"
 	"time"
 
+	"github.com/Unknwon/com"
+	"github.com/Unknwon/ctw/packer"
 	"github.com/Unknwon/gowalker/models"
 	"github.com/Unknwon/gowalker/utils"
 )
@@ -43,7 +44,7 @@ type crawlResult struct {
 // It returns error when error occurs in the underlying functions.
 func crawlDoc(path, tag string, pinfo *models.PkgInfo) (pdoc *Package, err error) {
 	var pdocNew *Package
-	pdocNew, err = getRepo(httpClient, path, tag, pinfo.Etag)
+	pdocNew, err = getRepo(packer.HttpClient, path, tag, pinfo.Etag)
 
 	if err != errNotModified && pdocNew != nil {
 		pdoc = pdocNew
@@ -264,7 +265,7 @@ type service struct {
 	get     func(*http.Client, map[string]string, string, string) (*Package, error)
 }
 
-// services is the list of source code control services handled by gopkgdoc.
+// services is the list of source code control services handled by gowalker.
 var services = []*service{
 	{googlePattern, "code.google.com/", getGoogleDoc},
 	{githubPattern, "github.com/", getGithubDoc},
@@ -284,7 +285,7 @@ func getStatic(client *http.Client, importPath, tag, etag string) (pdoc *Package
 		m := s.pattern.FindStringSubmatch(importPath)
 		if m == nil {
 			if s.prefix != "" {
-				return nil, NotFoundError{"Import path prefix matches known service, but regexp does not."}
+				return nil, com.NotFoundError{"Import path prefix matches known service, but regexp does not."}
 			}
 			continue
 		}
@@ -311,11 +312,11 @@ func getDynamic(client *http.Client, importPath, tag, etag string) (pdoc *Packag
 			return nil, err
 		}
 		if rootMatch["projectRoot"] != match["projectRoot"] {
-			return nil, NotFoundError{"Project root mismatch."}
+			return nil, com.NotFoundError{"Project root mismatch."}
 		}
 	}
 
-	pdoc, err = getStatic(client, expand("{repo}{dir}", match), tag, etag)
+	pdoc, err = getStatic(client, com.Expand("{repo}{dir}", match), tag, etag)
 	if err == errNoMatch {
 		//pdoc, err = getVCSDoc(client, match, etag)
 	}
@@ -348,7 +349,7 @@ func fetchMeta(client *http.Client, importPath string) (map[string]string, error
 		scheme = "http"
 		resp, err = client.Get(scheme + "://" + uri)
 		if err != nil {
-			return nil, &RemoteError{strings.SplitN(importPath, "/", 2)[0], err}
+			return nil, &com.RemoteError{strings.SplitN(importPath, "/", 2)[0], err}
 		}
 	}
 	defer resp.Body.Close()
@@ -395,7 +396,7 @@ metaScan:
 				continue metaScan
 			}
 			if match != nil {
-				return nil, NotFoundError{"More than one <meta> found at " + scheme + "://" + importPath}
+				return nil, com.NotFoundError{"More than one <meta> found at " + scheme + "://" + importPath}
 			}
 
 			projectRoot, vcs, repo := f[0], f[1], f[2]
@@ -403,7 +404,7 @@ metaScan:
 			repo = strings.TrimSuffix(repo, "."+vcs)
 			i := strings.Index(repo, "://")
 			if i < 0 {
-				return nil, NotFoundError{"Bad repo URL in <meta>."}
+				return nil, com.NotFoundError{"Bad repo URL in <meta>."}
 			}
 			proto := repo[:i]
 			repo = repo[i+len("://"):]
@@ -426,31 +427,7 @@ metaScan:
 		}
 	}
 	if match == nil {
-		return nil, NotFoundError{"<meta> not found."}
+		return nil, com.NotFoundError{"<meta> not found."}
 	}
 	return match, nil
-}
-
-// expand replaces {k} in template with match[k] or subs[atoi(k)] if k is not in match.
-func expand(template string, match map[string]string, subs ...string) string {
-	var p []byte
-	var i int
-	for {
-		i = strings.Index(template, "{")
-		if i < 0 {
-			break
-		}
-		p = append(p, template[:i]...)
-		template = template[i+1:]
-		i = strings.Index(template, "}")
-		if s, ok := match[template[:i]]; ok {
-			p = append(p, s...)
-		} else {
-			j, _ := strconv.Atoi(template[:i])
-			p = append(p, subs[j]...)
-		}
-		template = template[i+1:]
-	}
-	p = append(p, template...)
-	return string(p)
 }

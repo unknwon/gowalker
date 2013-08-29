@@ -23,6 +23,7 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/Unknwon/com"
 	"github.com/Unknwon/gowalker/utils"
 )
 
@@ -43,7 +44,7 @@ func getOSCDoc(client *http.Client, match map[string]string, tag, savedEtag stri
 
 	match["projectRoot"] = utils.GetProjectPath(match["importPath"])
 	// Download zip.
-	p, err := httpGetBytes(client, expand("http://{projectRoot}/repository/archive?ref={tag}", match), nil)
+	p, err := com.HttpGetBytes(client, com.Expand("http://{projectRoot}/repository/archive?ref={tag}", match), nil)
 	if err != nil {
 		return nil, errors.New("doc.getOSCDoc(" + match["importPath"] + ") -> " + err.Error())
 	}
@@ -65,7 +66,7 @@ func getOSCDoc(client *http.Client, match map[string]string, tag, savedEtag stri
 	isGoPro := false // Indicates whether it's a Go project.
 	isRootPath := match["importPath"] == utils.GetProjectPath(match["importPath"])
 	dirs := make([]string, 0, 5)
-	files := make([]*source, 0, 5)
+	files := make([]com.RawFile, 0, 5)
 	for _, f := range r.File {
 		fileName := f.FileInfo().Name()[nameLen+1:]
 		// Skip directories and files in wrong directories, get them later.
@@ -101,8 +102,8 @@ func getOSCDoc(client *http.Client, match map[string]string, tag, savedEtag stri
 
 				files = append(files, &source{
 					name:      fn,
-					browseURL: expand("http://git.oschina.net/{owner}/{repo}/blob/{tag}/{0}", match, fileName),
-					rawURL:    expand("http://git.oschina.net/{owner}/{repo}/raw/{tag}/{0}", match, fileName[preLen:]),
+					browseURL: com.Expand("http://git.oschina.net/{owner}/{repo}/blob/{tag}/{0}", match, fileName),
+					rawURL:    com.Expand("http://git.oschina.net/{owner}/{repo}/raw/{tag}/{0}", match, fileName[preLen:]),
 					data:      p,
 				})
 			} else {
@@ -116,11 +117,11 @@ func getOSCDoc(client *http.Client, match map[string]string, tag, savedEtag stri
 	}
 
 	if !isGoPro {
-		return nil, NotFoundError{"Cannot find Go files, it's not a Go project."}
+		return nil, com.NotFoundError{"Cannot find Go files, it's not a Go project."}
 	}
 
 	if len(files) == 0 && len(dirs) == 0 {
-		return nil, NotFoundError{"Directory tree does not contain Go files and subdirs."}
+		return nil, com.NotFoundError{"Directory tree does not contain Go files and subdirs."}
 	}
 
 	// Get all tags.
@@ -142,7 +143,7 @@ func getOSCDoc(client *http.Client, match map[string]string, tag, savedEtag stri
 }
 
 func getOSCTags(client *http.Client, importPath string) []string {
-	p, err := httpGetBytes(client, "http://"+utils.GetProjectPath(importPath)+"/repository/tags", nil)
+	p, err := com.HttpGetBytes(client, "http://"+utils.GetProjectPath(importPath)+"/repository/tags", nil)
 	if err != nil {
 		return nil
 	}

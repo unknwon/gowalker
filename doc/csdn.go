@@ -22,6 +22,7 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/Unknwon/com"
 	"github.com/Unknwon/gowalker/utils"
 )
 
@@ -39,7 +40,7 @@ func getCSDNDoc(client *http.Client, match map[string]string, tag, savedEtag str
 
 	match["projectRoot"] = utils.GetProjectPath(match["importPath"])
 	// Download zip.
-	p, err := httpGetBytes(client, expand("https://{projectRoot}/repository/archive?ref={tag}", match), nil)
+	p, err := com.HttpGetBytes(client, com.Expand("https://{projectRoot}/repository/archive?ref={tag}", match), nil)
 	if err != nil {
 		return nil, errors.New("doc.getCSDNDoc(" + match["importPath"] + ") -> " + err.Error())
 	}
@@ -54,7 +55,7 @@ func getCSDNDoc(client *http.Client, match map[string]string, tag, savedEtag str
 	nameLen := len(match["importPath"][13:])
 	dirLen := nameLen + len(match["dir"])
 	dirs := make([]string, 0, 5)
-	files := make([]*source, 0, 5)
+	files := make([]com.RawFile, 0, 5)
 	for _, f := range r.File {
 		fileName := f.FileInfo().Name()
 		if len(fileName) < dirLen {
@@ -77,8 +78,8 @@ func getCSDNDoc(client *http.Client, match map[string]string, tag, savedEtag str
 
 			files = append(files, &source{
 				name:      fileName[dirLen+1:],
-				browseURL: expand("http://code.csdn.net/{owner}/{repo}/blob/{tag}/{0}", match, fileName[nameLen+1:]),
-				rawURL:    expand("http://code.csdn.net/{owner}/{repo}/raw/{tag}/{0}", match, fileName[dirLen+1:]),
+				browseURL: com.Expand("http://code.csdn.net/{owner}/{repo}/blob/{tag}/{0}", match, fileName[nameLen+1:]),
+				rawURL:    com.Expand("http://code.csdn.net/{owner}/{repo}/raw/{tag}/{0}", match, fileName[dirLen+1:]),
 				data:      p,
 			})
 			continue
@@ -91,7 +92,7 @@ func getCSDNDoc(client *http.Client, match map[string]string, tag, savedEtag str
 	}
 
 	if len(files) == 0 && len(dirs) == 0 {
-		return nil, NotFoundError{"Directory tree does not contain Go files and subdirs."}
+		return nil, com.NotFoundError{"Directory tree does not contain Go files and subdirs."}
 	}
 
 	// Get all tags.
@@ -113,7 +114,7 @@ func getCSDNDoc(client *http.Client, match map[string]string, tag, savedEtag str
 }
 
 func getCSDNTags(client *http.Client, importPath string) []string {
-	p, err := httpGetBytes(client, "https://"+utils.GetProjectPath(importPath)+"/repository/tags", nil)
+	p, err := com.HttpGetBytes(client, "https://"+utils.GetProjectPath(importPath)+"/repository/tags", nil)
 	if err != nil {
 		return nil
 	}

@@ -20,9 +20,9 @@ import (
 	"net/http"
 	"path"
 	"regexp"
-	//"strconv"
 	"strings"
 
+	"github.com/Unknwon/com"
 	"github.com/Unknwon/gowalker/utils"
 )
 
@@ -59,10 +59,10 @@ func getGithubDoc(client *http.Client, match map[string]string, tag, savedEtag s
 		}
 	}
 
-	err := httpGetJSON(client, expand("https://api.github.com/repos/{owner}/{repo}/git/refs?{cred}", match), &refs)
+	err := com.HttpGetJSON(client, com.Expand("https://api.github.com/repos/{owner}/{repo}/git/refs?{cred}", match), &refs)
 	if err != nil {
 		if strings.HasPrefix(err.Error(), "Resource not found") {
-			return nil, NotFoundError{"doc.getGithubDoc(" + match["importPath"] + ") -> " + err.Error()}
+			return nil, com.NotFoundError{"doc.getGithubDoc(" + match["importPath"] + ") -> " + err.Error()}
 		}
 		return nil, errors.New("doc.getGithubDoc(" + match["importPath"] + ") -> " + err.Error())
 	}
@@ -105,14 +105,14 @@ func getGithubDoc(client *http.Client, match map[string]string, tag, savedEtag s
 		Url string
 	}
 
-	err = httpGetJSON(client, expand("https://api.github.com/repos/{owner}/{repo}/git/trees/{tag}?recursive=1&{cred}", match), &tree)
+	err = com.HttpGetJSON(client, com.Expand("https://api.github.com/repos/{owner}/{repo}/git/trees/{tag}?recursive=1&{cred}", match), &tree)
 	if err != nil {
 		return nil, errors.New("doc.getGithubDoc(" + match["importPath"] + ") -> get trees: " + err.Error())
 	}
 
 	// Because Github API URLs are case-insensitive, we need to check that the
 	// userRepo returned from Github matches the one that we are requesting.
-	if !strings.HasPrefix(tree.Url, expand("https://api.github.com/repos/{owner}/{repo}/", match)) {
+	if !strings.HasPrefix(tree.Url, com.Expand("https://api.github.com/repos/{owner}/{repo}/", match)) {
 		return nil, errors.New("Github import path has incorrect case.")
 	}
 
@@ -126,7 +126,7 @@ func getGithubDoc(client *http.Client, match map[string]string, tag, savedEtag s
 	isGoPro := false // Indicates whether it's a Go project.
 	isRootPath := match["importPath"] == utils.GetProjectPath(match["importPath"])
 	dirs := make([]string, 0, 5)
-	files := make([]*source, 0, 5)
+	files := make([]com.RawFile, 0, 5)
 	for _, node := range tree.Tree {
 		// Skip directories and files in wrong directories, get them later.
 		if node.Type != "blob" || !strings.HasPrefix(node.Path, dirPrefix) {
@@ -149,7 +149,7 @@ func getGithubDoc(client *http.Client, match map[string]string, tag, savedEtag s
 				}
 				files = append(files, &source{
 					name:      f,
-					browseURL: expand("https://github.com/{owner}/{repo}/blob/{tag}/{0}", match, node.Path),
+					browseURL: com.Expand("https://github.com/{owner}/{repo}/blob/{tag}/{0}", match, node.Path),
 					rawURL:    node.Url + "?" + githubCred,
 				})
 			} else {
@@ -163,15 +163,15 @@ func getGithubDoc(client *http.Client, match map[string]string, tag, savedEtag s
 	}
 
 	if !isGoPro {
-		return nil, NotFoundError{"Cannot find Go files, it's not a Go project."}
+		return nil, com.NotFoundError{"Cannot find Go files, it's not a Go project."}
 	}
 
 	if len(files) == 0 && len(dirs) == 0 {
-		return nil, NotFoundError{"Directory tree does not contain Go files and subdirs."}
+		return nil, com.NotFoundError{"Directory tree does not contain Go files and subdirs."}
 	}
 
 	// Fetch file from VCS.
-	if err := fetchFiles(client, files, githubRawHeader); err != nil {
+	if err := com.FetchFiles(client, files, githubRawHeader); err != nil {
 		return nil, err
 	}
 

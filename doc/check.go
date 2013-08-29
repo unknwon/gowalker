@@ -56,8 +56,16 @@ func CheckDoc(path, tag string, requestType int) (*Package, error) {
 	pinfo, err := models.GetPkgInfo(path, tag)
 	switch {
 	case err != nil:
+		// Check if it's "Error 1040: Too many connections"
+		if strings.Contains(err.Error(), "Error 1040:") {
+			break
+		}
+
 		// Error means it does not exist.
 		beego.Trace("doc.CheckDoc -> ", err)
+		// Indicates this package does not exist,
+		// do not need to crawl again if 'etag' of the project does not change.
+		pinfo.Etag = "-"
 		fallthrough
 	case err != nil || !strings.HasPrefix(pinfo.Etag, PACKAGE_VER):
 		// If PACKAGE_VER does not match, refresh anyway.
