@@ -161,7 +161,7 @@ func getLaunchpadDoc(client *http.Client, match map[string]string, tag, savedEta
 		pdoc: &Package{
 			ImportPath:  match["importPath"],
 			ProjectName: match["repo"],
-			Etag:        etag,
+			Ptag:        etag,
 			Dirs:        dirs,
 		},
 	}

@@ -75,7 +75,7 @@ type Gist struct {
 }
 
 // PACKAGE_VER is modified when previously stored packages are invalid.
-const PACKAGE_VER = "1"
+const PACKAGE_VER = 1
 
 // Package represents full information and documentation for a package.
 type Package struct {
@@ -106,7 +106,8 @@ type Package struct {
 
 	Rank int64
 
-	Etag, Labels string
+	PkgVer       int
+	Ptag, Labels string
 
 	// Top-level declarations.
 	Consts []*Value

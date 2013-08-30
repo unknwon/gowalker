@@ -11,6 +11,8 @@ _test
 log/
 data/
 gw-server/static/docs/
+gw-server/packer
+gw-server/repos
 
 # Architecture specific extensions/prefixes
 *.[568vq]

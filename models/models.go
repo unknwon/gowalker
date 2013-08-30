@@ -82,12 +82,15 @@ type PkgInfo struct {
 		- Package (structure) version.
 		eg.
 			9
+		- Project revision.
+		eg.
+			8976ce8b2848
 		- Project labels.
 		eg.
 			$tool|
 	*/
-	PkgVer int
-	Labels string
+	PkgVer       int
+	Ptag, Labels string
 
 	/*
 		- Number of packages that imports this project.
@@ -219,6 +222,7 @@ func init() {
 
 	// Create data tables.
 	mg.CreateTableIfNotExists(new(PkgInfo))
+	mg.CreateTableIfNotExists(new(PkgTag))
 	mg.CreateTableIfNotExists(new(PkgDecl))
 	mg.CreateTableIfNotExists(new(PkgDoc))
 	mg.CreateTableIfNotExists(new(PkgExam))

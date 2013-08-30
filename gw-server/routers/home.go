@@ -928,7 +928,7 @@ func updateCachePros(pdoc *doc.Package) {
 			p.ViewedTime = pdoc.ViewedTime
 			p.Created = pdoc.Created
 			p.Rank = int64(pdoc.ImportedNum*30) + p.Views
-			p.Etag = pdoc.Etag
+			p.Ptag = pdoc.Ptag
 			p.Labels = pdoc.Labels
 			p.ImportedNum = pdoc.ImportedNum
 			p.ImportPid = pdoc.ImportPid
@@ -949,7 +949,7 @@ func updateCachePros(pdoc *doc.Package) {
 		ViewedTime:  pdoc.ViewedTime,
 		Created:     pdoc.Created,
 		Rank:        int64(pdoc.ImportedNum*30) + pdoc.Views,
-		Etag:        pdoc.Etag,
+		Ptag:        pdoc.Ptag,
 		Labels:      pdoc.Labels,
 		ImportedNum: pdoc.ImportedNum,
 		ImportPid:   pdoc.ImportPid,

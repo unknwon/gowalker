@@ -32,9 +32,9 @@ const (
 )
 
 const (
-	_TIME_DAY      = 24 * time.Hour   // Time duration of one day.
-	_FETCH_TIMEOUT = 10 * time.Second // Fetch package timeout duration.
-	_REFRESH_LIMIT = 5 * time.Minute  // Package fresh time limitation.
+	_TIME_DAY      = 24 * time.Hour    // Time duration of one day.
+	_FETCH_TIMEOUT = 300 * time.Second // Fetch package timeout duration.
+	_REFRESH_LIMIT = 5 * time.Minute   // Package fresh time limitation.
 )
 
 // CheckDoc returns 'Package' by given import path and tag,
@@ -63,12 +63,10 @@ func CheckDoc(path, tag string, requestType int) (*Package, error) {
 
 		// Error means it does not exist.
 		beego.Trace("doc.CheckDoc -> ", err)
-		// Indicates this package does not exist,
-		// do not need to crawl again if 'etag' of the project does not change.
-		pinfo.Etag = "-"
 		fallthrough
-	case err != nil || !strings.HasPrefix(pinfo.Etag, PACKAGE_VER):
+	case err != nil || pinfo.PkgVer != PACKAGE_VER:
 		// If PACKAGE_VER does not match, refresh anyway.
+		pinfo.Ptag = ""
 		needsCrawl = true
 	default:
 		// Check request type.
@@ -142,7 +140,8 @@ func assginPkgInfo(pdoc *Package, pinfo *models.PkgInfo) {
 	pdoc.Views = pinfo.Views
 	pdoc.Created = pinfo.Created
 	pdoc.Rank = pinfo.Rank
-	pdoc.Etag = pinfo.Etag
+	pdoc.PkgVer = pinfo.PkgVer
+	pdoc.Ptag = pinfo.Ptag
 	pdoc.Labels = pinfo.Labels
 	pdoc.ImportedNum = pinfo.ImportedNum
 	pdoc.ImportPid = pinfo.ImportPid

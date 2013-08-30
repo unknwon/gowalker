@@ -18,12 +18,15 @@ package doc
 import (
 	"errors"
 	"net/http"
+	"os"
+	"path"
 	"regexp"
 	"strings"
 
 	"github.com/Unknwon/com"
 	"github.com/Unknwon/ctw/packer"
 	"github.com/Unknwon/gowalker/utils"
+	"github.com/beego/beewatch"
 )
 
 var (
@@ -35,9 +38,12 @@ var (
 	googlePattern    = regexp.MustCompile(`^code\.google\.com/p/(?P<repo>[a-z0-9\-]+)(:?\.(?P<subrepo>[a-z0-9\-]+))?(?P<dir>/[a-z0-9A-Z_.\-/]+)?$`)
 )
 
-func getStandardDoc(client *http.Client, importPath, tag, savedEtag string) (pdoc *Package, err error) {
+func getStandardDoc(client *http.Client, importPath, tag, ptag string) (pdoc *Package, err error) {
+	beewatch.Trace().Display("importPath", importPath, "tag", tag, "ptag", ptag)
+
 	// hg-higtory: http://go.googlecode.com/hg-history/release/src/pkg/"+importPath+"/"
-	stdout, _, err := com.ExecCmd("curl", "http://go.googlecode.com/hg/src/pkg/"+importPath+"/?r="+tag)
+	stdout, _, err := com.ExecCmd("curl", "http://go.googlecode.com/hg/"+
+		packer.TagSuffix("?r=", tag))
 	if err != nil {
 		return nil, errors.New("doc.getStandardDoc(" + importPath + ") -> " + err.Error())
 	}
@@ -49,13 +55,38 @@ func getStandardDoc(client *http.Client, importPath, tag, savedEtag string) (pdo
 		return nil, errors.New("doc.getStandardDoc(" + importPath + ") -> Could not find revision")
 	} else {
 		etag = string(m[1])
-		if etag == savedEtag {
+		if etag == ptag {
 			return nil, errNotModified
 		}
 	}
 
+	installPath := "repos/code.google.com/p/go" + packer.TagSuffix(".", tag)
+	beewatch.Trace().Display("installPath", installPath, "etag", etag)
+
 	// Check if source files saved locally.
-	if 
+	if !com.IsExist(installPath) {
+		match := make(map[string]string)
+		match["vcs"] = "hg"
+		match["tag"] = tag
+		err = packer.PackToFile("code.google.com/p/go", installPath+".zip", match)
+		if err != nil {
+			return nil, errors.New("doc.getStandardDoc(" + importPath + ") -> PackToFile -> " + err.Error())
+		}
+
+		dirs, err := com.Unzip(installPath+".zip", path.Dir(installPath))
+		if err != nil {
+			return nil, errors.New("doc.getStandardDoc(" + importPath + ") -> Unzip -> " + err.Error())
+		}
+
+		if len(dirs) == 0 {
+			return nil, com.NotFoundError{"doc.getStandardDoc(" + importPath + ") -> No file in repository"}
+		}
+
+		os.Remove(installPath + ".zip")
+		os.Rename(path.Dir(installPath)+"/"+dirs[0], installPath)
+	}
+
+	// TODO:
 
 	// Get source file data.
 	files := make([]com.RawFile, 0, 5)
@@ -101,7 +132,7 @@ func getStandardDoc(client *http.Client, importPath, tag, savedEtag string) (pdo
 			ProjectName: "Go",
 			Tags:        tags,
 			Tag:         tag,
-			Etag:        etag,
+			Ptag:        etag,
 			Dirs:        dirs,
 		},
 	}
@@ -131,9 +162,9 @@ func getGoogleTags(client *http.Client, importPath string) []string {
 	return tags
 }
 
-func getGoogleDoc(client *http.Client, match map[string]string, tag, savedEtag string) (*Package, error) {
+func getGoogleDoc(client *http.Client, match map[string]string, tag, ptag string) (*Package, error) {
 	packer.SetupGoogleMatch(match)
-	if m := googleEtagRe.FindStringSubmatch(savedEtag); m != nil {
+	if m := googleEtagRe.FindStringSubmatch(ptag); m != nil {
 		match["vcs"] = m[1]
 	} else if err := packer.GetGoogleVCS(client, match); err != nil {
 		return nil, err
@@ -152,7 +183,7 @@ func getGoogleDoc(client *http.Client, match map[string]string, tag, savedEtag s
 		return nil, errors.New("doc.getGoogleDoc(" + match["importPath"] + ") -> Could not find revision")
 	} else {
 		etag = com.Expand("{vcs}-{0}", match, string(m[1]))
-		if etag == savedEtag {
+		if etag == ptag {
 			return nil, errNotModified
 		}
 	}
@@ -201,7 +232,7 @@ func getGoogleDoc(client *http.Client, match map[string]string, tag, savedEtag s
 			ProjectName: com.Expand("{repo}{dot}{subrepo}", match),
 			Tags:        tags,
 			Tag:         tag,
-			Etag:        etag,
+			Ptag:        etag,
 			Dirs:        dirs,
 		},
 	}

@@ -135,7 +135,7 @@ func getOSCDoc(client *http.Client, match map[string]string, tag, savedEtag stri
 			ProjectName: match["repo"],
 			Tags:        tags,
 			Tag:         tag,
-			Etag:        commit,
+			Ptag:        commit,
 			Dirs:        dirs,
 		},
 	}

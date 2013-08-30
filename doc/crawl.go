@@ -1,4 +1,3 @@
-// Copyright 2011 Gary Burd
 // Copyright 2013 Unknown
 //
 // Licensed under the Apache License, Version 2.0 (the "License"): you may
@@ -44,7 +43,7 @@ type crawlResult struct {
 // It returns error when error occurs in the underlying functions.
 func crawlDoc(path, tag string, pinfo *models.PkgInfo) (pdoc *Package, err error) {
 	var pdocNew *Package
-	pdocNew, err = getRepo(packer.HttpClient, path, tag, pinfo.Etag)
+	pdocNew, err = getRepo(packer.HttpClient, path, tag, pinfo.Ptag)
 
 	if err != errNotModified && pdocNew != nil {
 		pdoc = pdocNew
@@ -74,32 +73,22 @@ func crawlDoc(path, tag string, pinfo *models.PkgInfo) (pdoc *Package, err error
 
 // getRepo downloads package data and returns 'Package' by given import path and tag.
 // It returns error when error occurs in the underlying functions.
-func getRepo(client *http.Client, path, tag, etag string) (pdoc *Package, err error) {
-	const VER_PREFIX = PACKAGE_VER + "-"
-
-	// Check version prefix.
-	if strings.HasPrefix(etag, VER_PREFIX) {
-		etag = etag[len(VER_PREFIX):]
-	} else {
-		etag = ""
-	}
-
+func getRepo(client *http.Client, path, tag, ptag string) (pdoc *Package, err error) {
 	switch {
 	case utils.IsGoRepoPath(path):
-		pdoc, err = getStandardDoc(client, path, tag, etag)
+		pdoc, err = getStandardDoc(client, path, tag, ptag)
 	case utils.IsValidRemotePath(path):
-		pdoc, err = getStatic(client, path, tag, etag)
+		pdoc, err = getStatic(client, path, tag, ptag)
 		if err == errNoMatch {
-			pdoc, err = getDynamic(client, path, tag, etag)
+			pdoc, err = getDynamic(client, path, tag, ptag)
 		}
 	default:
 		return nil, errors.New(
 			fmt.Sprintf("doc.getRepo -> No match( %s:%s )", path, tag))
 	}
 
-	// Save revision tag.
 	if pdoc != nil {
-		pdoc.Etag = VER_PREFIX + pdoc.Etag
+		pdoc.PkgVer = PACKAGE_VER
 	}
 
 	return pdoc, err
@@ -149,7 +138,8 @@ func SaveProject(pdoc *Package, pfuncs []*models.PkgFunc) (int64, error) {
 		ViewedTime:  time.Now().UTC().Unix(),
 		Created:     time.Now().UTC(),
 		Rank:        pdoc.Rank,
-		Etag:        pdoc.Etag,
+		PkgVer:      pdoc.PkgVer,
+		Ptag:        pdoc.Ptag,
 		Labels:      pdoc.Labels,
 		ImportedNum: pdoc.ImportedNum,
 		ImportPid:   pdoc.ImportPid,

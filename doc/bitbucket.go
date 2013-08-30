@@ -132,7 +132,7 @@ func getBitbucketDoc(client *http.Client, match map[string]string, tag, savedEta
 			ProjectName: match["repo"],
 			Tags:        tags,
 			Tag:         tag,
-			Etag:        etag,
+			Ptag:        etag,
 			Dirs:        dirs,
 		},
 	}

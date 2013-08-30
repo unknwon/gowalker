@@ -1,4 +1,9 @@
 {{define "alert_en"}}
+<div class="alert">
+    <button type="button" class="close" data-dismiss="alert">&times;</button>
+    <strong>Attention!</strong> 
+    Go Walker Server will be updated during <span class="label label-important">2013.9.3 - 2013.9.4</span> and you may NOT able to visit, thanks for your visiting!
+</div>
 {{if .IsBeta}}
 <div class="alert">
     <button type="button" class="close" data-dismiss="alert">&times;</button>
@@ -17,6 +22,11 @@
 {{end}}
 
 {{define "alert_zh"}}
+<div class="alert">
+    <button type="button" class="close" data-dismiss="alert">&times;</button>
+    <strong>特别通知</strong> 
+    Go 步行者服务器将于 <span class="label label-important">2013.9.3 - 2013.9.4</span> 期间进行升级，届时您将无法访问，感谢您的支持！
+</div>
 {{if .IsBeta}}
  <div class="alert">
     <button type="button" class="close" data-dismiss="alert">&times;</button>

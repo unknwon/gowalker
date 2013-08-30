@@ -20,6 +20,7 @@ import (
 	"strconv"
 
 	"github.com/Unknwon/com"
+	"github.com/Unknwon/ctw/packer"
 	"github.com/astaxie/beego"
 	"github.com/coocood/qbs"
 )
@@ -45,16 +46,23 @@ func GetPkgInfo(path, tag string) (*PkgInfo, error) {
 		return nil, errors.New("models.GetPkgInfo -> Empty path as not found.")
 	}
 
-	pinfo := new(PkgInfo)
-
 	q := connDb()
 	defer q.Close()
 
+	pinfo := new(PkgInfo)
 	err := q.WhereEqual("path", path).Find(pinfo)
 	if err != nil {
 		return pinfo, errors.New(
 			fmt.Sprintf("models.GetPkgInfo( %s:%s ) -> 'PkgInfo': %s", path, tag, err))
 	}
+
+	ptag := new(PkgTag)
+	err = q.WhereEqual("path", packer.GetProjectPath(path)).Find(ptag)
+	if err != nil {
+		return pinfo, errors.New(
+			fmt.Sprintf("models.GetPkgInfo( %s:%s ) -> 'PkgTag': %s", path, tag, err))
+	}
+	pinfo.Ptag = ptag.Ptag
 
 	// Only 'PkgInfo' cannot prove that package exists,
 	// we have to check 'PkgDecl' as well in case it was deleted by mistake.
@@ -63,9 +71,9 @@ func GetPkgInfo(path, tag string) (*PkgInfo, error) {
 	cond := qbs.NewCondition("pid = ?", pinfo.Id).And("tag = ?", tag)
 	err = q.Condition(cond).Find(pdecl)
 	if err != nil {
-		// Basically, error means not found, so we set 'pinfo.Etag' to an empty string
-		// because 'Etag' contains 'PACKAGE_VER' which server uses to decide force update.
-		pinfo.Etag = ""
+		// Basically, error means not found, so we set 'pinfo.PkgVer' to 0
+		// because server uses it to decide whether force update.
+		pinfo.PkgVer = 0
 		return pinfo, errors.New(
 			fmt.Sprintf("models.GetPkgInfo( %s:%s ) -> 'PkgDecl': %s", path, tag, err))
 	}
@@ -75,7 +83,7 @@ func GetPkgInfo(path, tag string) (*PkgInfo, error) {
 		docPath += "-" + tag
 	}
 	if !com.IsExist("./static/docs/" + docPath + ".js") {
-		pinfo.Etag = ""
+		pinfo.PkgVer = 0
 		return pinfo, errors.New(
 			fmt.Sprintf("models.GetPkgInfo( %s:%s ) -> JS: File not found", path, tag))
 	}
