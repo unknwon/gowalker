@@ -1,8 +1,7 @@
 # 目录
 
 1. [概述](Overview.md)
-
-## 2. 网站规划
+2. [网站规划](Architecture.md)
 
 ## 3. 技术架构
 
