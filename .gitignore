@@ -13,6 +13,7 @@ data/
 gw-server/static/docs/
 gw-server/packer
 gw-server/repos
+.idea/
 
 # Architecture specific extensions/prefixes
 *.[568vq]
