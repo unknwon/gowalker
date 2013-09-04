@@ -14,7 +14,9 @@
 
 package routers
 
-import ()
+import (
+	"github.com/Unknwon/gowalker/utils"
+)
 
 // HomeRouter serves home page.
 type HomeRouter struct {
@@ -26,6 +28,6 @@ func (this *HomeRouter) Get() {
 	this.Data["IsHome"] = true
 
 	// Get language.
-	curLang, _ := this.Data["LangVer"].(langType)
+	curLang, _ := this.Data["LangVer"].(utils.LangType)
 	this.TplNames = "home_" + curLang.Lang + ".html"
 }
