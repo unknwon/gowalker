@@ -1,40 +1,40 @@
-Go Walker
-========
-[中文文档](README_ZH.md)
+# Go Walker
 
-Go Walker is a web server that generates <a target="_blank" href="http://golang.org/">Go</a> projects API documentation with source code on the fly from projects on <b><a target="_blank" href="https://bitbucket.org/">Bitbucket</a></b>, <b><a target="_blank" href="https://github.com/">Github</a></b>, <b><a target="_blank" href="http://code.google.com/">Google Code</a></b>, <b><a target="_blank" href="https://launchpad.net/">Launchpad</a></b> and <b><a target="_blank" href="http://git.oschina.net/">Git @ OSC</a></b>.
+Go Walker 是一个针对 Go 语言的综合性站点，主要业务为 Go 项目 API 文档及源码的在线生成与浏览功能，目前已支持包括 [Bitbucket](https://bitbucket.org)、[GitHub](https://github.com)、[Google Code](http://code.google.com)、[Launchpad](https://launchpad.net)、[Git @ OSC](http://git.oschina.net) 和 [GitCafe](https://gitcafe.com/) 在内的六大代码托管平台。
 
-## Features
+## 项目分类
 
-- **Search** and **view** huge amounts documentation of projects: over 8000 projects involved.
-- Type package **import path** or **keywords** in search boxes to find or create documentation.
-- Generate Go project documentation **on the fly** : no more installation required for using.
-- **View documentation by tags** of projects: don't worry for using old version.
-- **Code view** for functions and methods code in current package in the same page with nice highlight: reduce rake up space and do more work at the same time.
-- **Mouse hover tip** and **jump link** for functions, methods and types in current package: reduce time to find.
-- **Code highlight** and **jump link** for functions, methods and types from imported packages: reduce time to find.
-- **Control panel** for keyboard shortcuts and more function: compatible with godoc.org.
-- Use **Tag** to label your project: list by categories.
-- **Multiple language** support for readme(.md): [About](http://gowalker.org/about).
-- Add **third-party examples** for your favorite projects: through Github Gist.
-- [Full documentation](https://github.com/Unknwon/gowalker/blob/master/docs/Features.md).
+### Go Walker 服务器版（Go Walker Server）
 
-## Develop route
+- 网址：[http://gowalker.org](http://gowalker.org)
+- 仓库：[说明文档](gwserver/README_ZH.md)
 
-See board on [Trello](https://trello.com/b/wS7CzdcI/go-walker) about to do, bugs and road map.
+### Go Walker 管理端（Go Walker Admin）
 
-## Third-party packages
+- 网址：[http://admin.gowalker.org](http://admin.gowalker.org)
+- 仓库：[说明文档](gwadmin/README_ZH.md)
 
-- [Beego](http://gowalker.org/github.com/astaxie/beego): a **lightweight** web framework for web application **quick** development.
-- [Qbs](http://gowalker.org/github.com/coocood/qbs): **Query by Struct** is an excellent ORM, it supports MySQL, SQLite3 and PosgreSQL.
-- [goconfig](https://github.com/Unknwon/goconfig): a easy-use **comments-support** configuration file(.ini) parser for the Go Programming Language.
+### Go Walker 本地版（Go Walker Local）
 
-## Credits
+- 网址：[http://local.gowalker.org](http://local.gowalker.org)
+- 仓库：[说明文档](gwlocal/README_ZH.md)
 
-- [chenwenli](http://www.lavachen.cn) Thanks for adding feature of [Control Panel](http://gowalker.org/about#control_panel).
-- [atotto](https://github.com/atotto) Thanks for translating site user interface to Japanese.
-- Source files that contain code that is from [gddo](https://github.com/garyburd/gddo) is honored in specific.
+### Go Walker API 服务（Go Walker API）
 
-## License
+- 网址：[http://api.gowalker.org](http://api.gowalker.org)
+- 仓库：[说明文档](gwapi/README_ZH.md)
 
-[Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.html).
+### 在线视频服务（Go Walker Video）
+
+- 网址：[http://video.gowalker.org](http://video.gowalker.org)
+- 仓库：[说明文档](gwvideo/README_ZH.md)
+
+### 国外 VCS 仓库下载（Cross the Wall）
+
+- 网址：[http://ctw.gowalker.org](http://ctw.gowalker.org)
+- 仓库：[说明文档](ctw/README_ZH.md)
+
+### 文档资源服务（Go Walker Res）
+
+- 网址：[http://res.gowalker.org](http://res.gowalker.org)
+- 仓库：[说明文档](gwres/README_ZH.md)
