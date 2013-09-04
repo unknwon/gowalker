@@ -40,3 +40,5 @@ Go Walker 是一个针对 Go 语言的综合性站点，主要业务为 Go 项�
 - 仓库：[说明文档](ctw/README_ZH.md)
 
 ## 授权许可
+
+所有项目均遵循 [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.html) 授权许可。
