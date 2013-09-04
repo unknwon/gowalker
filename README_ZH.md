@@ -29,12 +29,14 @@ Go Walker 是一个针对 Go 语言的综合性站点，主要业务为 Go 项�
 - 网址：[http://video.gowalker.org](http://video.gowalker.org)
 - 仓库：[说明文档](gwvideo/README_ZH.md)
 
+### 文档资源服务（Go Walker Res）
+
+- 网址：[http://res.gowalker.org](http://res.gowalker.org)
+- 仓库：[说明文档](gwres/README_ZH.md)
+
 ### 国外 VCS 仓库下载（Cross the Wall）
 
 - 网址：[http://ctw.gowalker.org](http://ctw.gowalker.org)
 - 仓库：[说明文档](ctw/README_ZH.md)
 
-### 文档资源服务（Go Walker Res）
-
-- 网址：[http://res.gowalker.org](http://res.gowalker.org)
-- 仓库：[说明文档](gwres/README_ZH.md)
+## 授权许可
