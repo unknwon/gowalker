@@ -31,12 +31,14 @@ import (
 
 var Cfg *goconfig.ConfigFile
 
-func init() {
-	if !com.IsExist("conf/app.ini") {
-		os.Create("conf/app.ini")
+// LoadConfig loads configuration file.
+func LoadConfig(cfgPath string) (err error) {
+	if !com.IsExist(cfgPath) {
+		os.Create(cfgPath)
 	}
 
-	Cfg, _ = goconfig.LoadConfigFile("conf/app.ini")
+	Cfg, err = goconfig.LoadConfigFile(cfgPath)
+	return err
 }
 
 // SaveConfig saves configuration file.

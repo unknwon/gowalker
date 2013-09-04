@@ -1,0 +1,22 @@
+{
+	"go_install": true,
+	"watch_ext": [
+		".ini"
+	],
+	"dir_structure":{
+		"controllers": "routers",
+		"models": "../models",
+		"others": [
+			"../doc", "../utils", "conf"
+		]
+	},
+	"bale": {
+		"import": "github.com/Unknwon/gowalker/gwserver/bale",
+		"dirs": [
+			"views", "static"
+		],
+		"ignore_ext": [
+			".go", ".DS_Store"
+		]
+	}
+}
