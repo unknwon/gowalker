@@ -1,7 +1,7 @@
-Go 步行者
+Go Walker
 ========
 
-Go 步行者是一个用于在线生成并浏览 <a target="_blank" href="http://docs.studygolang.com/">Go</a> 项目 API 文档及源码 的 Web 服务器，目前支持包括 <b><a target="_blank" href="https://bitbucket.org/">Bitbucket</a></b>，<b><a target="_blank" href="https://github.com/">Github</a></b>，<b><a target="_blank" href="http://code.google.com/">Google Code</a></b>，<b><a target="_blank" href="https://launchpad.net/">Launchpad</a></b> 和 <b><a target="_blank" href="http://git.oschina.net/">Git @ OSC</a></b> 五大版本控制平台。
+Go Walker 是一个用于在线生成并浏览 <a target="_blank" href="http://docs.studygolang.com/">Go</a> 项目 API 文档及源码 的 Web 服务器，目前支持包括 <b><a target="_blank" href="https://bitbucket.org/">Bitbucket</a></b>，<b><a target="_blank" href="https://github.com/">Github</a></b>，<b><a target="_blank" href="http://code.google.com/">Google Code</a></b>，<b><a target="_blank" href="https://launchpad.net/">Launchpad</a></b> 和 <b><a target="_blank" href="http://git.oschina.net/">Git @ OSC</a></b> 五大版本控制平台。
 
 ## 主要特性
 
@@ -16,7 +16,7 @@ Go 步行者是一个用于在线生成并浏览 <a target="_blank" href="http:/
 - 使用 **标签** 标记项目：更好地分类显示。
 - **多语言** 支持：[关于](http://gowalker.org/about)。
 - 通过 Github Gist 为您喜爱的项目增加 **第三方示例**。
-- [完整文档](https://github.com/Unknwon/gowalker/blob/master/docs/Features_ZH.md).
+- [完整文档](http://git.oschina.net/Unknown/gowalker/wikis/Features).
 
 ## 发展路线
 
