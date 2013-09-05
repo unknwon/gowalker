@@ -34,6 +34,5 @@ _testmain.go
 gw-server/gw-server
 gw-local/gw-local
 gw-admin/gw-admin
-app.ini
 bee
 bale.go
