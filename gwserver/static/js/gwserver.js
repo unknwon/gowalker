@@ -13,7 +13,7 @@
 
     function Responsive() {
         var navbarFrame = document.getElementById("navbar_frame");
-        var searchForm = document.getElementById("top_search_form");
+        var topRightBox = document.getElementById("top_right_box");
         var searchBox = document.getElementById("navbar_search_box");
         var body = document.getElementById("body");
         var mainBody = document.getElementById("main_content");
@@ -29,7 +29,7 @@
                 body.style.paddingTop = "0px";
             }
 
-            searchForm.className = "navbar-search pull-right";
+            topRightBox.className = "pull-right";
             searchBox.style.width = "";
 
             // Home page.
@@ -40,7 +40,7 @@
         } else {
             navbarFrame.style.width = "1000px";
             navbarFrame.className = "navbar";
-            searchForm.className = "navbar-search";
+            topRightBox.className = "";
             searchBox.style.width = "150px";
             body.style.paddingTop = "0px";
 

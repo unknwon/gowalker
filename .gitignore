@@ -14,6 +14,7 @@ gw-server/static/docs/
 gw-server/packer
 gw-server/repos
 .idea/
+bale/
 
 # Architecture specific extensions/prefixes
 *.[568vq]
@@ -35,3 +36,4 @@ gw-local/gw-local
 gw-admin/gw-admin
 app.ini
 bee
+bale.go

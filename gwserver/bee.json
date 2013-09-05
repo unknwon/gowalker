@@ -13,7 +13,7 @@
 	"bale": {
 		"import": "github.com/Unknwon/gowalker/gwserver/bale",
 		"dirs": [
-			"views", "static"
+			"views", "static", "conf"
 		],
 		"ignore_ext": [
 			".go", ".DS_Store"

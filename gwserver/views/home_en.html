@@ -1,5 +1,9 @@
-{{.Lang}}
-{{.CurLang}}
-{{range .RestLangs}}
-{{.}}
-{{end}}
+	{{template "header_en"}}
+		<title>Go Walker - Go API documentation and project view</title>
+	</head>
+
+	<body id="body">
+		{{template "navbar_en" .}}
+        {{template "footer_en" .}}
+	</body>
+</html>

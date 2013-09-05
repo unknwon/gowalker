@@ -1,6 +1,6 @@
 # Go Walker
 
-Go Walker 是一个针对 Go 语言的综合性站点，主要业务为 Go 项目 API 文档及源码的在线生成与浏览功能，目前已支持包括 [Bitbucket](https://bitbucket.org)、[GitHub](https://github.com)、[Google Code](http://code.google.com)、[Launchpad](https://launchpad.net)、[Git @ OSC](http://git.oschina.net) 和 [GitCafe](https://gitcafe.com/) 在内的六大代码托管平台。
+Go Walker 是一个针对 Go 语言的综合性站点，主要业务为 Go 项目 API 文档及源码的在线生成与浏览功能。
 
 ## 项目分类
 

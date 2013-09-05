@@ -24,7 +24,7 @@ import (
 )
 
 const (
-	APP_VER = "1.0.0.0904"
+	APP_VER = "1.0.0.0905"
 )
 
 // We have to call a initialize function manully
@@ -41,7 +41,10 @@ func initialize() {
 	routers.AppVer = strings.Join(strings.Split(APP_VER, ".")[:3], ".")
 
 	beego.AppName = utils.Cfg.MustValue("beego", "app_name")
-	routers.IsProMode = utils.Cfg.MustValue("server", "run_mode") == "pro"
+	beego.RunMode = utils.Cfg.MustValue("beego", "run_mode")
+	beego.HttpPort = utils.Cfg.MustInt("beego", "http_port_"+beego.RunMode)
+
+	routers.IsProMode = beego.RunMode == "pro"
 	if routers.IsProMode {
 		beego.SetLevel(beego.LevelInfo)
 		beego.Info("Product mode enabled")

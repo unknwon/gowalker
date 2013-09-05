@@ -30,7 +30,7 @@
 		<div id="footer" class="span6" style="width: {{if .IsHome}}440{{else}}600{{end}}px;">
 			<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
 			<script type="text/javascript" src="/static/js/bootstrap.min.js"></script>
-			<script type='text/javascript' src='/static/js/site.js'></script>
+			<script type='text/javascript' src='/static/js/gwserver.js'></script>
 
 			<p><strong>Copyright © 2013 Go Walker</strong></p>
 			<p>Website built by <a target="_blank" href="https://github.com/Unknwon"><i class="icon-user"></i> @Unknown</a>. Powered by <a target="_blank" href="https://github.com/astaxie/beego"><i class="icon-bold"></i>eego</a> and <a target="_blank" href="https://github.com/coocood/qbs">Qbs</a>.</p>
@@ -46,7 +46,8 @@
 			    	{{end}}
 			    </ul>
 		    </div>
-		   {{template "static_file" .}}
+		</div>
+		{{template "static_file" .}}
 	</div>
 </footer>
 {{end}}
@@ -83,9 +84,9 @@
 		<div id="footer" class="span6" style="width: {{if .IsHome}}440{{else}}600{{end}}px;">
 			<script type="text/javascript" src="http://cdn.staticfile.org/jquery/1.10.1/jquery.min.js"></script>
 			<script type="text/javascript" src="/static/js/bootstrap.min.js"></script>
-			<script type='text/javascript' src='/static/js/site.js'></script>
+			<script type='text/javascript' src='/static/js/gwserver.js'></script>
 
-			<p><strong>版权所有 © 2013 Go 步行者</strong></p>
+			<p><strong>版权所有 © 2013 Go Walker</strong></p>
 			<p>网站建设者 <a target="_blank" href="https://github.com/Unknwon"><i class="icon-user"></i> @Unknown</a>. 项目基于 <a target="_blank" href="https://github.com/astaxie/beego"><i class="icon-bold"></i>eego</a> 和 <a target="_blank" href="https://github.com/coocood/qbs">Qbs</a> 构建。</p>
 			{{if .IsHome}}<p>界面基于 <a target="_blank" href="http://twitter.github.io/bootstrap/">Bootstrap</a>. 图标来自 <a target="_blank" href="http://glyphicons.com/">Glyphicons</a>.</p>{{end}}
 			{{if .IsHome}}<p>{{end}}发送 <a href="mailto:joe2010xtmf#163.com"><i class="icon-envelope"></i> 反馈</a> 或者提交 <a target="_blank" href="https://github.com/Unknwon/gowalker/issues"><i class="icon-tasks"></i> 网站问题</a>. {{if .IsHome}}</p>{{end}}<strong>语言选项：</strong>
@@ -98,25 +99,13 @@
 			    {{end}}
 			    </ul>
 		    </div>
-		   {{template "static_file" .}}
+		</div>
+		{{template "static_file" .}}
 	</div>
 </footer>
 {{end}}
 
 {{define "static_file"}}
-	<!-- <span class="muted">|</span>
-	<span>
-		<script type="text/javascript">
-			var _bdhmProtocol = (("https:" == document.location.protocol) ? " https://" : " http://");
-			document.write(unescape("%3Cscript src='" + _bdhmProtocol +"hm.baidu.com/h.js%3Fd2d5278d61e466bcb3f9ea29a18d40dc' type='text/javascript'%3E%3C/script%3E"));
-		</script>
-	</span>
-	<span class="muted">|</span>
-	<span>
-		<script type="text/javascript" src="http://tajs.qq.com/stats?sId=24262957" charset="UTF-8"></script>
-	</span> -->
-</div>
-
 {{if .IsHome}}
 <div class="span6" style="margin-top: 25px;">
 	<div style="text-align: center;">
@@ -177,13 +166,15 @@
 </script>
 {{end}}
 
+{{if .IsProMode}}
 <script>
-	// (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-	// (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-	// m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-	// })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
 
-	// ga('create', 'UA-40109089-2', 'gowalker.org');
-	// ga('send', 'pageview');
+	ga('create', 'UA-40109089-2', 'gowalker.org');
+	ga('send', 'pageview');
 </script>
+{{end}}
 {{end}}

@@ -1,7 +1,7 @@
-Go Walker
+Go Walker Server
 ========
 
-Go Walker 是一个用于在线生成并浏览 <a target="_blank" href="http://docs.studygolang.com/">Go</a> 项目 API 文档及源码 的 Web 服务器，目前支持包括 <b><a target="_blank" href="https://bitbucket.org/">Bitbucket</a></b>，<b><a target="_blank" href="https://github.com/">Github</a></b>，<b><a target="_blank" href="http://code.google.com/">Google Code</a></b>，<b><a target="_blank" href="https://launchpad.net/">Launchpad</a></b> 和 <b><a target="_blank" href="http://git.oschina.net/">Git @ OSC</a></b> 五大版本控制平台。
+Go Walker Server 是一个用于在线生成并浏览 <a target="_blank" href="http://docs.studygolang.com/">Go</a> 项目 API 文档及源码的 Web 服务器，目前已支持包括 [Bitbucket](https://bitbucket.org)、[GitHub](https://github.com)、[Google Code](http://code.google.com)、[Launchpad](https://launchpad.net)、[Git @ OSC](http://git.oschina.net) 和 [GitCafe](https://gitcafe.com/) 在内的六大代码托管平台。
 
 ## 主要特性
 
@@ -23,12 +23,6 @@ Go Walker 是一个用于在线生成并浏览 <a target="_blank" href="http://d
 [建站手记](http://git.oschina.net/Unknown/gowalker/wikis/home)
 
 请到 [Trello](https://trello.com/b/wS7CzdcI/go-walker) 的面板上查看有关 Todo，Bugs 以及路线图的说明。
-
-## 第三方包
-
-- [Beego](http://gowalker.org/github.com/astaxie/beego)：轻量级 Web 框架，适用于 Web 应用快速开发。
-- [Qbs](http://gowalker.org/github.com/coocood/qbs)： **结构化查询（Query by Struct）** 是一个非常给力的 ORM，目前支持 MySQL、SQLite3 和 PosgreSQL.
-- [goconfig](https://github.com/Unknwon/goconfig)：一款使用 Go 语言编写的 INI 配置文件解析器。
 
 ## 授权许可
 
