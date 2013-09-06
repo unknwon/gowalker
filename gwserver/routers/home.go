@@ -30,4 +30,7 @@ func (this *HomeRouter) Get() {
 	// Get language.
 	curLang, _ := this.Data["LangVer"].(utils.LangType)
 	this.TplNames = "home_" + curLang.Lang + ".html"
+
+	// Standard library type-ahead.
+	this.Data["GoReposSrc"] = utils.GoRepoSet
 }

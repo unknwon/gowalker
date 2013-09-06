@@ -2,8 +2,60 @@
 		<title>Go Walker - Go 项目 API 文档与源码浏览</title>
 	</head>
 
-	<body id="body">
+	<body id="body" style="font-family: Microsoft Yahei; font-size: 13px;">
 		{{template "navbar_zh" .}}
+		<div class="container" style="width: 1000px;">
+			<div id="main_content" class="row">
+				<div style="margin-left: 20px;">
+					{{template "alert_zh" .}}
+                    <div class="page-header">
+                        <h2 style="margin-top: 0">
+                            搜索 Go 项目.
+                            <small>开源，让世界更和谐.</small>
+                        </h2>
+
+                        <form action="/">
+                            <div class="input-append">
+                                <input autocomplete="off" class="span6" type="text"
+                                       placeholder="请输入项目路径来添加并浏览文档或使用关键字进行搜索" name="q"
+                                       data-source="[{{str2html .GoReposSrc}}]" data-items="10" data-provide="typeahead"></input>
+                                <button class="btn" type="submit"><i class="icon-search"></i> 手气不错！</button>
+                            </div>
+                        </form>
+                    </div>
+				</div>
+
+				<div id="homeleft" class="span6 homeleft">
+					<div>
+						<h4>超凡体验，您值得拥有.</h4>
+						<p>
+							Go Walker 服务器可以在线生成并浏览 <a target="_blank" href="http://docs.studygolang.com/">Go</a> 项目 API 文档及
+							<button class="btn feature" title=""
+							        data-content="黑客视图允许您不需要进行任何安装操作即可学习研究任何 Go 项目，同时提供 '跳转到定义' 和 '寻找用例' 等超强特性。"
+							        data-placement="top" data-toggle="popover" data-original-title="黑客视图">黑客视图</button>
+							，目前已支持包括 <b><a target="_blank" href="https://bitbucket.org/">Bitbucket</a></b>、<b><a target="_blank" href="https://github.com/">GitHub</a></b>、<b><a target="_blank" href="http://code.google.com/">Google Code</a></b>、<b><a target="_blank" href="https://launchpad.net/">Launchpad</a></b>、<b><a target="_blank" href="https://gitcafe.com/">GitCafe</a></b>  和 <b><a target="_blank" href="http://git.oschina.net/">Git @ OSC</a></b> 在内的六大代码托管平台。
+						</p>
+
+						<p>
+							经典绝伦的特性包括
+							<button class="btn feature" title="" data-content="在相同页面快速查看高亮渲染后的函数或方法的代码，减少页面占用，可以同时做更多的工作。" data-placement="bottom" data-toggle="popover" data-original-title="查看代码">查看代码</button>
+
+							<button class="btn feature" title="" data-content="快速跳转至函数、方法或类型所以在项目的文档页面，节省您的宝贵时间。" data-placement="top" data-toggle="popover" data-original-title="链接跳转">链接跳转</button>
+
+							<button class="btn feature" title="" data-content="通过 Github Gist 来为您喜爱的文档添加示例，更好地展示给更多人。" data-placement="bottom" data-toggle="popover" data-original-title="增加示例">增加示例</button>
+
+							<button class="btn feature" title="" data-content="不必再为使用旧版的库而烦恼，现在您可以查看任意 Tag 版本的项目文档喔！" data-placement="right" data-toggle="popover" data-original-title="文档标签">文档标签</button>
+
+							以及 <a target="_blank" href="https://github.com/Unknwon/gowalker/blob/master/docs/Features_ZH.md">更多</a>。
+						</p>
+						
+						<p class="text-success">
+							如果您想了解如何更好地提升 Go Walker 操作体验及更多，请仔细阅读  <a href="/about">关于</a> 页面。
+						</p>
+					</div>
+				</div>
+			</div>
+		</div>
         {{template "footer_zh" .}}
 	</body>
 </html>

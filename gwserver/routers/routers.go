@@ -25,6 +25,7 @@ import (
 var (
 	AppVer    string
 	IsProMode bool
+	IsBeta    bool
 )
 
 // baseRouter implemented global settings for all other routers.
@@ -37,6 +38,7 @@ func (this *baseRouter) Prepare() {
 	// Setting properties.
 	this.Data["AppVer"] = AppVer
 	this.Data["IsProMode"] = IsProMode
+	this.Data["IsBeta"] = IsBeta
 
 	// Setting language version.
 	if len(utils.LangTypes) == 0 {

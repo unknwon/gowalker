@@ -2,8 +2,68 @@
 		<title>Go Walker - Go API documentation and project view</title>
 	</head>
 
-	<body id="body">
+	<body id="body" style="font-family: Microsoft Yahei; font-size: 13px;">
 		{{template "navbar_en" .}}
+		<div class="container" style="width: 1000px;">
+			<div id="main_content" class="row">
+				<div style="margin-left: 20px;">
+					{{template "alert_en" .}}
+                    <div class="page-header">
+                        <h2 style="margin-top: 0">
+                            Search for Go projects.
+                            <small>Find a cup of source code.</small>
+                        </h2>
+
+                        <form action="/">
+                            <div class="input-append">
+                                <input autocomplete="off" class="span6" type="text"
+                                       placeholder="Type import path to add and view or use keywords to search" name="q"
+                                       data-source="[{{str2html .GoReposSrc}}]" data-items="10" data-provide="typeahead"></input>
+                                <button class="btn" type="submit"><i class="icon-search"></i> Go!</button>
+                            </div>
+                        </form>
+                    </div>
+				</div>
+
+				<div id="homeleft" class="span6 homeleft">
+					<div>
+						<h4>What is this?</h4>
+						<p>
+							Go Walker Server generates <a target="_blank" href="http://golang.org/">Go</a> project API documentation and
+							<button class="btn feature" title=""
+							        data-content="Hacker view allows you study a Go project without any installation, and with awesome features like 'jump to definition' and 'find usage'."
+							        data-placement="top" data-toggle="popover" data-original-title="Hacker View">Hacker View</button>
+							on the fly for the projects on <b><a target="_blank" href="https://bitbucket.org/">Bitbucket</a></b>, <b><a target="_blank" href="https://github.com/">GitHub</a></b>, <b><a target="_blank" href="http://code.google.com/">Google Code</a></b>, <b><a target="_blank" href="https://launchpad.net/">Launchpad</a></b>, <b><a target="_blank" href="https://gitcafe.com/">GitCafe</a></b>  and <b><a target="_blank" href="http://git.oschina.net/">Git @ OSC</a></b>.
+						</p>
+
+						<p>
+							Awesome features
+                            <button class="btn feature" title=""
+                                    data-content="View function and method code with nice highlight in the same page, reduce rake up space and do more work at the same time."
+                                    data-placement="bottom" data-toggle="popover" data-original-title="Code View">Code View</button>
+
+                            <button class="btn feature" title=""
+                                    data-content="Quick jump to functions, methods and types from imported packages, reduce time to find."
+                                    data-placement="top" data-toggle="popover" data-original-title="Link Jump">Link Jump</button>
+
+                            <button class="btn feature" title=""
+                                    data-content="Add examples for your favorite projects through Github Gist." data-placement="bottom"
+                                    data-toggle="popover" data-original-title="Add Example">Add Example</button>
+
+                            <button class="btn feature" title=""
+                                    data-content="Don't worry if you use old version of a project, now you can view documentation by its Tags!"
+                                    data-placement="right" data-toggle="popover" data-original-title="View by Tag">Doc Tag</button>
+
+                            and <a target="_blank" href="https://github.com/Unknwon/gowalker/blob/master/docs/Features.md">More</a>.
+						</p>
+
+                        <p class="text-success">
+                            Please read the <a href="/about">About Page</a> for information about hacking with Go Walker and more.
+                        </p>
+					</div>
+				</div>
+			</div>
+		</div>
         {{template "footer_en" .}}
 	</body>
 </html>
