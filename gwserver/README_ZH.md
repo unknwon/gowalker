@@ -1,7 +1,7 @@
 Go Walker Server
 ========
 
-Go Walker Server 是一个用于在线生成并浏览 <a target="_blank" href="http://docs.studygolang.com/">Go</a> 项目 API 文档及源码的 Web 服务器，目前已支持包括 [Bitbucket](https://bitbucket.org)、[GitHub](https://github.com)、[Google Code](http://code.google.com)、[Launchpad](https://launchpad.net)、[Git @ OSC](http://git.oschina.net) 和 [GitCafe](https://gitcafe.com/) 在内的六大代码托管平台。
+Go Walker Server 是一个用于在线生成并浏览 <a target="_blank" href="http://docs.studygolang.com/">Go</a> 项目 API 文档及黑客视图的 Web 服务器，目前已支持包括 [Bitbucket](https://bitbucket.org)、[GitHub](https://github.com)、[Google Code](http://code.google.com)、[Launchpad](https://launchpad.net)、[GitCafe](https://gitcafe.com/) 和 [Git @ OSC](http://git.oschina.net) 在内的六大代码托管平台。
 
 ## 主要特性
 

@@ -1,0 +1,12 @@
+{
+	"go_install": true,
+	"dir_structure":{
+		"controllers": "routers",
+		"models": "",
+		"others": []
+	},
+	"main_files":{
+		"main.go": "",
+		"others": []
+	}
+}
