@@ -1,4 +1,5 @@
 {{define "navbar_en"}}
+<noscript>Please enable JavaScript in your browser!</noscript>
 <div id="navbar_frame" class="navbar navbar-fixed-top">
 	<div class="navbar-inner">
 		<div id="navbar" class="container">
@@ -66,6 +67,7 @@
 {{end}}
 
 {{define "navbar_zh"}}
+<noscript>请启用您浏览器的 JavaScript 选项！</noscript>
 <div id="navbar_frame" class="navbar navbar-fixed-top">
 	<div class="navbar-inner">
 		<div id="navbar" class="container">

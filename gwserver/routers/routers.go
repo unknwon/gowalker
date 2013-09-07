@@ -56,10 +56,9 @@ func (this *baseRouter) Prepare() {
 
 	var isNeedRedir bool
 	isNeedRedir, this.Data["LangVer"] = utils.SetLangVer(this.Ctx, this.Input(), this.Data)
-	// Redirect to make URL clean.
 	if isNeedRedir {
+		// Redirect to make URL clean.
 		i := strings.Index(this.Ctx.Request.RequestURI, "?")
-		this.Redirect(this.Ctx.Request.RequestURI[:i], 301)
-		return
+		this.Redirect(this.Ctx.Request.RequestURI[:i], 302)
 	}
 }

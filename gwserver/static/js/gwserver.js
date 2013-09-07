@@ -17,9 +17,10 @@
         var searchBox = document.getElementById("navbar_search_box");
         var body = document.getElementById("body");
         var mainBody = document.getElementById("main_content");
-        var delta = document.body.clientWidth - 1100;
+        var delta = document.body.clientWidth - 1050;
 
         if (delta > 0) {
+            navbarFrame.style.marginLeft = "0px";
             navbarFrame.style.width = "";
             if (document.getElementById("sidebar") == null) {
                 navbarFrame.className = "navbar navbar-fixed-top";
@@ -38,7 +39,8 @@
             }
 
         } else {
-            navbarFrame.style.width = "1000px";
+            navbarFrame.style.marginLeft = "-5px";
+            navbarFrame.style.width = "1050px";
             navbarFrame.className = "navbar";
             topRightBox.className = "";
             searchBox.style.width = "150px";

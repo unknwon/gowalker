@@ -12,7 +12,6 @@
                         <h2 style="margin-top: 0">
                             Search for Go projects.
                             <small>Find a cup of source code.</small>
-                            <script type="text/javascript" src="https://apis.google.com/js/plusone.js"></script>
                             <g:plusone></g:plusone>
                         </h2>
 
@@ -31,7 +30,7 @@
 					<div>
 						<h4>What is this?</h4>
 						<p>
-							Go Walker Server generates <a target="_blank" href="http://golang.org/">Go</a> project API documentation and
+							Go Walker Server generates <a target="_blank" href="http://golang.org/">Go</a> projects API documentation and
 							<button class="btn feature" title=""
 							        data-content="Hacker view allows you study a Go project without any installation, and with awesome features like 'jump to definition' and 'find usage'."
 							        data-placement="top" data-toggle="popover" data-original-title="Hacker View">Hacker View</button>
@@ -63,9 +62,96 @@
                             Please read the <a href="/about">About Page</a> for information about hacking with Go Walker and more.
                         </p>
 					</div>
+
+					<div class="tab-content">
+					    <div id="global_history" class="tab-pane fade active in">
+					        <h4>
+					            What all the people are looking at.
+					            <a href="#user_history" class="btn btn-inverse" data-toggle="tab">Local history</a>
+					            <small class="text-info">Hover link to see more.</small>
+					        </h4>
+
+					        <table name="recent_table" class="table table-bordered table-hover">
+					            <thead>
+					                <tr>
+					                    <th>Import Path</th>
+					                    <th>Viewd Time(Local)</th>
+					                </tr>
+					            </thead>
+
+					            <tbody>
+						            {{range .GlobalHistory}}
+						            {{template "history_table" .}}
+						            {{end}}
+					            </tbody>
+					        </table>
+					    </div>
+
+					    <div id="user_history" class="tab-pane fade">
+					        <h4>
+					            What you have been looking at.
+					            <a href="#global_history" class="btn btn-inverse" data-toggle="tab">Global history</a>
+					            <small class="text-info">Hover link to see more.</small>
+					        </h4>
+
+					        <table name="recent_table" class="table table-bordered table-hover">
+					            <thead>
+					                <tr>
+					                    <th>Import Path</th>
+					                    <th>Viewd Time(Local)</th>
+					                </tr>
+					            </thead>
+
+					            <tbody>
+						            {{range .UserHistory}}
+						            {{template "history_table" .}}
+						            {{end}}
+					            </tbody>
+					        </table>
+					    </div>
+					    {{template "convert_js"}}
+					</div>
 				</div>
 			</div>
 		</div>
         {{template "footer_en" .}}
 	</body>
 </html>
+
+{{define "history_table"}}
+<tr>
+    <td>
+        <a title="{{.Synopsis}}" href="/{{.Path}}">{{.Path}}</a>
+
+        {{if .IsGoRepo}}
+        <span class="label label-info">Standard</span>
+        {{end}}
+    </td>
+
+    <td>{{.ViewedTime}}</td>
+</tr>
+{{end}}
+
+{{define "convert_js"}}
+<script>
+    (function () {
+        var tables = document.getElementsByName("recent_table");
+        var now = new Date();
+        for (var n = 0; n < tables.length; n++) {
+            var table = tables[n];
+            var items = table.getElementsByTagName("tr");
+            for (var i = 1; i < items.length; i++) {
+                // Limit length.
+                var s = table.rows[i].cells[0].getElementsByTagName("a")[0];
+                if (s.innerHTML.length > 45) {
+                    s.innerHTML = "..." + s.innerHTML.substr(s.innerHTML.length - 42);
+                }
+                // Convert timestamp to local time.
+                var t = parseInt(table.rows[i].cells[1].innerHTML);
+                var d = new Date(t * 1000);
+                table.rows[i].cells[1].innerHTML = d.toLocaleString();
+            }
+        }
+    })();
+</script>
+{{end}}

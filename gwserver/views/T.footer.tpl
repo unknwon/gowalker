@@ -125,6 +125,7 @@
 	    $('.feature').popover()
 	})
 </script>
+<script type="text/javascript" src="https://apis.google.com/js/plusone.js"></script>
 {{else}}
 {{if .IsHasReadme}}
 <script type="text/javascript" src="/static/js/showdown.js"></script>

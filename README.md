@@ -2,7 +2,7 @@
 
 [中文说明](README_ZH.md)
 
-Go Walker is a comprehensive site for the Go programming language, the primary service is generating Go project API documentaion and hacker view on the fly for the projects that are hosted on [Bitbucket](https://bitbucket.org), [GitHub](https://github.com), [Google Code](http://code.google.com), [Launchpad](https://launchpad.net), [GitCafe](https://gitcafe.com/) and [Git @ OSC](http://git.oschina.net).
+Go Walker is a comprehensive site for the Go programming language, the primary service is generating Go projects API documentaion and hacker view on the fly for the projects that are hosted on [Bitbucket](https://bitbucket.org), [GitHub](https://github.com), [Google Code](http://code.google.com), [Launchpad](https://launchpad.net), [GitCafe](https://gitcafe.com/) and [Git @ OSC](http://git.oschina.net).
 
 ## Projects
 

@@ -20,6 +20,7 @@ import (
 	"errors"
 	"fmt"
 	"regexp"
+	"runtime"
 	"strings"
 	"time"
 
@@ -28,13 +29,12 @@ import (
 	"github.com/coocood/qbs"
 )
 
-// PkgInfo is package information.
+// A PkgInfo describles a project information.
 type PkgInfo struct {
-	// Primary key.
 	Id int64
 
 	/*
-		- Import path of package.
+		- Import path.
 		eg.
 			github.com/Unknwon/gowalker
 		- Name of the project.
@@ -42,14 +42,14 @@ type PkgInfo struct {
 			gowalker
 		- Project synopsis.
 		eg.
-			Go Walker is a web server that generates Go projects API documentation with source code on the fly.
+			Go Walker Server generates Go projects API documentation and Hacker View on the fly.
 		- Indicates whether it's a command line tool or package.
 		eg.
 			True
 	*/
-	Path     string `qbs:"size:100,index"`
-	ProName  string
-	Synopsis string
+	Path     string `qbs:"size:150,index"`
+	ProName  string `qbs:"size:50"`
+	Synopsis string `qbs:"size:300"`
 	IsCmd    bool
 
 	/*
@@ -66,8 +66,8 @@ type PkgInfo struct {
 		eg.
 			2013-07-16 21:09:27.48932087
 	*/
-	Tags       string
-	Views      int64 `qbs:"index"`
+	Tags       string `qbs:"size:150"`
+	Views      int64  `qbs:"index"`
 	ViewedTime int64
 	Created    time.Time `qbs:"index"`
 
@@ -89,33 +89,45 @@ type PkgInfo struct {
 		eg.
 			$tool|
 	*/
-	PkgVer       int
-	Ptag, Labels string
+	PkgVer int
+	Ptag   string `qbs:"size:50"`
+	Labels string
 
 	/*
-		- Number of packages that imports this project.
+		- Number of projects that import this project.
 		eg.
 			11
-		- Ids of packages that imports this project.
+		- Number of projects that import this project and do not belong to same project,
+			which means import own sub-projects does not count and rank.
+		eg.
+			3
+		- Ids of projects that import this project.
 		eg.
 			$47|$89|$5464|$8586|$8595|$8787|$8789|$8790|$8918|$9134|$9139|
 	*/
-	ImportedNum int
-	ImportPid   string
+	RefNum    int
+	RefProNum int
+	RefPids   string
 
 	/*
 		- Addtional information.
-		eg.
-			Github: <forks>|<watchers>|
 	*/
-	Note string
+	Vcs        string `qbs:"size:50"`
+	LastUpdate time.Time
+	Homepage   string `qbs:"size:100"`
+	Issues     int
+	Stars      int
+	Forks      int
+	Note       string
 }
 
-// A PkgTag descriables the project revision tag for its sub-packages.
+// A PkgTag descriables the project revision tag for its sub-projects,
+// any project that has this record means it's passed check of Go project,
+// and do not need to download whole project archive when refresh.
 type PkgTag struct {
 	Id   int64
-	Path string `qbs:"index"`
-	Ptag string
+	Path string `qbs:"size:150,index"`
+	Ptag string `qbs:"size:50"`
 }
 
 // PkgDecl is package declaration in database acceptable form.
@@ -203,12 +215,16 @@ func setMg() (*qbs.Migration, error) {
 	return mg, err
 }
 
-func init() {
-	// Initialize database. &loc=Local
+// InitDb initializes the database.
+func InitDb() {
+	dbName := utils.Cfg.MustValue("db", "name")
+	dbPwd := utils.Cfg.MustValue("db", "pwd_"+runtime.GOOS)
+
+	// Register database.
 	qbs.Register("mysql", fmt.Sprintf("%v:%v@%v/%v?charset=utf8&parseTime=true",
-		utils.Cfg.MustValue("db", "user"), utils.Cfg.MustValue("db", "passwd"),
-		utils.Cfg.MustValue("db", "host"), utils.Cfg.MustValue("db", "name")),
-		utils.Cfg.MustValue("db", "name"), qbs.NewMysql())
+		utils.Cfg.MustValue("db", "user"), dbPwd,
+		utils.Cfg.MustValue("db", "host"), dbName),
+		dbName, qbs.NewMysql())
 
 	// Connect to database.
 	q := connDb()
@@ -216,20 +232,23 @@ func init() {
 
 	mg, err := setMg()
 	if err != nil {
-		beego.Error("models.init ->", err)
+		panic("models.init -> " + err.Error())
 	}
 	defer mg.Close()
 
 	// Create data tables.
 	mg.CreateTableIfNotExists(new(PkgInfo))
 	mg.CreateTableIfNotExists(new(PkgTag))
-	mg.CreateTableIfNotExists(new(PkgDecl))
-	mg.CreateTableIfNotExists(new(PkgDoc))
-	mg.CreateTableIfNotExists(new(PkgExam))
-	mg.CreateTableIfNotExists(new(PkgFunc))
-	mg.CreateTableIfNotExists(new(PkgRock))
 
-	beego.Trace("Initialized database ->", utils.Cfg.MustValue("db", "name"))
+	beego.Trace("Initialized database ->", dbName)
+}
+
+func initOld() {
+	// mg.CreateTableIfNotExists(new(PkgDecl))
+	// mg.CreateTableIfNotExists(new(PkgDoc))
+	// mg.CreateTableIfNotExists(new(PkgExam))
+	// mg.CreateTableIfNotExists(new(PkgFunc))
+	// mg.CreateTableIfNotExists(new(PkgRock))
 }
 
 // GetGoRepo returns packages in go standard library.

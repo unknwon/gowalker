@@ -12,19 +12,20 @@
 // License for the specific language governing permissions and limitations
 // under the License.
 
-// Go Walker Server is a web server that generates Go projects API documentation and source code on the fly.
+// Go Walker Server generates Go projects API documentation and Hacker View on the fly.
 package main
 
 import (
 	"strings"
 
 	"github.com/Unknwon/gowalker/gwserver/routers"
+	"github.com/Unknwon/gowalker/models"
 	"github.com/Unknwon/gowalker/utils"
 	"github.com/astaxie/beego"
 )
 
 const (
-	APP_VER = "1.0.0.0906"
+	APP_VER = "1.0.0.0907"
 )
 
 // We have to call a initialize function manully
@@ -36,6 +37,9 @@ func initialize() {
 	if err != nil {
 		panic("Fail to load configuration file: " + err.Error())
 	}
+
+	// Initialize database.
+	models.InitDb()
 
 	// Trim 4th part.
 	routers.AppVer = strings.Join(strings.Split(APP_VER, ".")[:3], ".")

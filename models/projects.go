@@ -100,7 +100,7 @@ func SaveProject(pinfo *PkgInfo, pdecl *PkgDecl, pfuncs []*PkgFunc, imports []st
 	if info.Id > 0 {
 		// Current package.
 		importeds := strings.Split(
-			strings.Replace(info.ImportPid, "$", "", -1), "|")
+			strings.Replace(info.RefPids, "$", "", -1), "|")
 		importPids := make([]string, 0, len(importeds))
 		for _, v := range importeds {
 			pid, _ := strconv.ParseInt(v, 10, 64)
@@ -108,8 +108,8 @@ func SaveProject(pinfo *PkgInfo, pdecl *PkgDecl, pfuncs []*PkgFunc, imports []st
 				importPids = append(importPids, "$"+v)
 			}
 		}
-		pinfo.ImportPid = strings.Join(importPids, "|")
-		pinfo.ImportedNum = len(importPids)
+		pinfo.RefPids = strings.Join(importPids, "|")
+		pinfo.RefNum = len(importPids)
 	}
 
 	_, err = q.Save(pinfo)
@@ -322,18 +322,18 @@ func updateImportInfo(q *qbs.Qbs, path string, pid int, add bool) {
 	err := q.WhereEqual("path", path).Find(info)
 	if err == nil {
 		// Check if pid exists in this project.
-		i := strings.Index(info.ImportPid, "$"+strconv.Itoa(pid)+"|")
+		i := strings.Index(info.RefPids, "$"+strconv.Itoa(pid)+"|")
 		switch {
 		case i == -1 && add: // Add operation and does not contain.
-			info.ImportPid += "$" + strconv.Itoa(pid) + "|"
-			info.ImportedNum = len(strings.Split(info.ImportPid, "|")) - 1
+			info.RefPids += "$" + strconv.Itoa(pid) + "|"
+			info.RefNum = len(strings.Split(info.RefPids, "|")) - 1
 			_, err = q.Save(info)
 			if err != nil {
 				beego.Error("models.updateImportInfo -> add:", path, err)
 			}
 		case i > -1 && !add: // Delete operation and contains.
-			info.ImportPid = strings.Replace(info.ImportPid, "$"+strconv.Itoa(pid)+"|", "", 1)
-			info.ImportedNum = len(strings.Split(info.ImportPid, "|")) - 1
+			info.RefPids = strings.Replace(info.RefPids, "$"+strconv.Itoa(pid)+"|", "", 1)
+			info.RefNum = len(strings.Split(info.RefPids, "|")) - 1
 			_, err = q.Save(info)
 			if err != nil {
 				beego.Error("models.updateImportInfo -> delete:", path, err)

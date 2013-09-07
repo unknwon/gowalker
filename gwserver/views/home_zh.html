@@ -12,7 +12,6 @@
                         <h2 style="margin-top: 0">
                             搜索 Go 项目.
                             <small>开源，让世界更和谐.</small>
-                            <script type="text/javascript" src="https://apis.google.com/js/plusone.js"></script>
                             <g:plusone></g:plusone>
                         </h2>
 
@@ -54,6 +53,55 @@
 						<p class="text-success">
 							如果您想了解如何更好地提升 Go Walker 操作体验及更多，请仔细阅读  <a href="/about">关于</a> 页面。
 						</p>
+					</div>
+
+					<div class="tab-content">
+					    <div id="global_history" class="tab-pane fade active in">
+					        <h4>
+					            所有人正在关注的项目.
+					            <a href="#user_history" class="btn btn-inverse" data-toggle="tab">本地历史</a>
+					            <small class="text-info">鼠标悬浮链接以查看更多.</small>
+					        </h4>
+
+					        <table name="recent_table" class="table table-bordered table-hover">
+					            <thead>
+					                <tr>
+					                    <th>项目路径</th>
+										<th>浏览时间（本地）</th>
+					                </tr>
+					            </thead>
+
+					            <tbody>
+						            {{range .GlobalHistory}}
+						            {{template "history_table" .}}
+						            {{end}}
+					            </tbody>
+					        </table>
+					    </div>
+
+					    <div id="user_history" class="tab-pane fade">
+					        <h4>
+					            您最近关注的项目.
+					            <a href="#global_history" class="btn btn-inverse" data-toggle="tab">全局历史</a>
+					            <small class="text-info">鼠标悬浮链接以查看更多.</small>
+					        </h4>
+
+					        <table name="recent_table" class="table table-bordered table-hover">
+					            <thead>
+					                <tr>
+					                    <th>项目路径</th>
+										<th>浏览时间（本地）</th>
+					                </tr>
+					            </thead>
+
+					            <tbody>
+						            {{range .UserHistory}}
+						            {{template "history_table" .}}
+						            {{end}}
+					            </tbody>
+					        </table>
+					    </div>
+					    {{template "convert_js"}}
 					</div>
 				</div>
 			</div>
