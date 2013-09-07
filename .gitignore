@@ -10,9 +10,6 @@ _test
 # Log and database folders
 log/
 data/
-gw-server/static/docs/
-gw-server/packer
-gw-server/repos
 .idea/
 bale/
 
@@ -31,7 +28,7 @@ _testmain.go
 *.exe
 *.exe~
 .DS_Store
-gw-server/gw-server
+gw-server/gwserver
 gw-local/gw-local
 gw-admin/gw-admin
 bee
