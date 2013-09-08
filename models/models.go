@@ -130,6 +130,28 @@ type PkgTag struct {
 	Ptag string `qbs:"size:50"`
 }
 
+// A PkgRock descriables the trending rank of the project.
+type PkgRock struct {
+	Id    int64
+	Pid   int64  `qbs:"index"`
+	Path  string `qbs:"size:150"`
+	Rank  int64
+	Delta int64 `qbs:"index"`
+}
+
+func (*PkgRock) Indexes(indexes *qbs.Indexes) {
+	indexes.AddUnique("pid", "path")
+}
+
+// A PkgExam descriables the user example of the project.
+type PkgExam struct {
+	Id       int64
+	Path     string    `qbs:"size:150,index"`
+	Gist     string    `qbs:"size:150"` // Gist path.
+	Examples string    // Examples.
+	Created  time.Time `qbs:"index"`
+}
+
 // PkgDecl is package declaration in database acceptable form.
 type PkgDecl struct {
 	Id  int64
@@ -171,15 +193,6 @@ func (*PkgDoc) Indexes(indexes *qbs.Indexes) {
 	indexes.AddUnique("path", "lang", "Type")
 }
 
-// PkgExam represents a package example.
-type PkgExam struct {
-	Id       int64
-	Path     string    `qbs:"size:100,index"`
-	Gist     string    // Gist path.
-	Examples string    // Examples.
-	Created  time.Time `qbs:"index"`
-}
-
 // PkgFunc represents a package function.
 type PkgFunc struct {
 	Id       int64
@@ -189,19 +202,6 @@ type PkgFunc struct {
 	Doc      string
 	IsMaster bool
 	IsOld    bool // Indicates if the function no longer exists.
-}
-
-// PkgRock represents a package rock information.
-type PkgRock struct {
-	Id    int64
-	Pid   int64 `qbs:"index"`
-	Path  string
-	Rank  int64
-	Delta int64 `qbs:"index"`
-}
-
-func (*PkgRock) Indexes(indexes *qbs.Indexes) {
-	indexes.AddUnique("pid", "path")
 }
 
 func connDb() *qbs.Qbs {
@@ -239,6 +239,8 @@ func InitDb() {
 	// Create data tables.
 	mg.CreateTableIfNotExists(new(PkgInfo))
 	mg.CreateTableIfNotExists(new(PkgTag))
+	mg.CreateTableIfNotExists(new(PkgRock))
+	mg.CreateTableIfNotExists(new(PkgExam))
 
 	beego.Trace("Initialized database ->", dbName)
 }
@@ -246,9 +248,7 @@ func InitDb() {
 func initOld() {
 	// mg.CreateTableIfNotExists(new(PkgDecl))
 	// mg.CreateTableIfNotExists(new(PkgDoc))
-	// mg.CreateTableIfNotExists(new(PkgExam))
 	// mg.CreateTableIfNotExists(new(PkgFunc))
-	// mg.CreateTableIfNotExists(new(PkgRock))
 }
 
 // GetGoRepo returns packages in go standard library.

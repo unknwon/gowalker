@@ -60,5 +60,6 @@ func (this *baseRouter) Prepare() {
 		// Redirect to make URL clean.
 		i := strings.Index(this.Ctx.Request.RequestURI, "?")
 		this.Redirect(this.Ctx.Request.RequestURI[:i], 302)
+		return
 	}
 }

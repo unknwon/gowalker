@@ -10,7 +10,8 @@
 
 		 <!-- Stylesheets -->
 		<link href="/static/css/bootstrap.min.css" rel="stylesheet" />
-		<link href="/static/css/todc-bootstrap.css" rel="stylesheet" />
+		<link href="/static/css/todc-bootstrap1.css" rel="stylesheet" />
+		<link href="//netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css" rel="stylesheet">
 		<link href="/static/css/link.css" rel="stylesheet" />
 {{end}}
 
@@ -26,6 +27,7 @@
 
 		 <!-- Stylesheets -->
 		<link href="/static/css/bootstrap.min.css" rel="stylesheet" />
-		<link href="/static/css/todc-bootstrap.css" rel="stylesheet" />
+		<link href="/static/css/todc-bootstrap1.css" rel="stylesheet" />
+		<link href="http://cdn.staticfile.org/font-awesome/3.2.1/css/font-awesome.min.css" rel="stylesheet">
 		<link href="/static/css/link.css" rel="stylesheet" />
 {{end}}

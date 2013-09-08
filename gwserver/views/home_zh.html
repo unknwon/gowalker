@@ -2,33 +2,31 @@
 		<title>Go Walker - Go 项目 API 文档与源码浏览</title>
 	</head>
 
-	<body id="body" style="font-family: Microsoft Yahei; font-size: 13px;">
+	<body id="body">
 		{{template "navbar_zh" .}}
-		<div class="container" style="width: 1000px;">
-			<div id="main_content" class="row">
-				<div style="margin-left: 20px;">
-					{{template "alert_zh" .}}
-                    <div class="page-header">
-                        <h2 style="margin-top: 0">
-                            搜索 Go 项目.
-                            <small>开源，让世界更和谐.</small>
-                            <g:plusone></g:plusone>
-                        </h2>
+		<div class="container">
+			<div>
+				{{template "alert_zh" .}}
+                <div class="page-header">
+                    <h2 style="margin-top: 0">
+                        搜索 Go 项目.
+                        <small>开源，让世界更和谐.</small>
+                        <g:plusone></g:plusone>
+                    </h2>
 
-                        <form action="/">
-                            <div class="input-append">
-                                <input autocomplete="off" class="span6" type="text"
-                                       placeholder="请输入项目路径来添加并浏览文档或使用关键字进行搜索" name="q"
-                                       data-source="[{{str2html .GoReposSrc}}]" data-items="10" data-provide="typeahead"></input>
-                                <button class="btn" type="submit"><i class="icon-search"></i> 手气不错！</button>
-                            </div>
-                        </form>
-                    </div>
-				</div>
+               		<form class="form-inline" action="/">
+                		<div class="form-group col-md-6">
+                        	<input autocomplete="off" class="form-control" type="text" placeholder="请输入项目路径来添加并浏览文档或使用关键字进行搜索" name="q" data-source="[{{str2html .GoReposSrc}}]" data-items="10" data-provide="typeahead">
+                        </div>
+                        <button class="btn btn-success btn-lg" style="border-radius: 0px;" type="submit"><i class="icon-search"></i> 手气不错</button>
+                    </form>
+                </div>
+            </div>
 
-				<div id="homeleft" class="span6 homeleft">
+			<div class="row">
+				<div class="col-md-8">
 					<div>
-						<h4>超凡体验，您值得拥有.</h4>
+						<h4><b>超凡体验，您值得拥有.</b></h4>
 						<p>
 							Go Walker 服务器可以在线生成并浏览 <a target="_blank" href="http://docs.studygolang.com/">Go</a> 项目 API 文档及
 							<button class="btn feature" title=""
@@ -58,7 +56,7 @@
 					<div class="tab-content">
 					    <div id="global_history" class="tab-pane fade active in">
 					        <h4>
-					            所有人正在关注的项目.
+					            <b>所有人正在关注的项目.</b>
 					            <a href="#user_history" class="btn btn-inverse" data-toggle="tab">本地历史</a>
 					            <small class="text-info">鼠标悬浮链接以查看更多.</small>
 					        </h4>
@@ -81,7 +79,7 @@
 
 					    <div id="user_history" class="tab-pane fade">
 					        <h4>
-					            您最近关注的项目.
+					            <b>您最近关注的项目.</b>
 					            <a href="#global_history" class="btn btn-inverse" data-toggle="tab">全局历史</a>
 					            <small class="text-info">鼠标悬浮链接以查看更多.</small>
 					        </h4>
@@ -101,11 +99,149 @@
 					            </tbody>
 					        </table>
 					    </div>
-					    {{template "convert_js"}}
+					</div>
+                </div>
+
+				<div class="col-md-4" style="padding-left: 5px;">
+					<div>
+						<h4><b>最新公告</b></h4>
+						<p>
+							您是否仍在为查看某个 Go 项目的函数或方法而不得不将其下载并安装到本地？我知道您一直在承受这种痛苦，直到今天您发现 <b>黑客视图</b> 为止！
+						</p>
+						<a class="btn btn-primary" target="_blank" href="https://github.com/Unknwon/gowalker/wiki/Features">了解更多</a>
+					</div>
+
+					<div>
+						<h4><b>热门项目</b></h4>
+                        <ul class="nav nav-tabs nav-tabs-google">
+                            <li class="active">
+                                <a href="#weekly_stars" data-toggle="tab">本周之星</a>
+                            </li>
+
+                            <li>
+                                <a href="#top_rank" data-toggle="tab">总排名值</a>
+                            </li>
+
+                            <li>
+                                <a href="#top_views" data-toggle="tab">总浏览量</a>
+                            </li>
+                        </ul>
+
+                        <div class="tab-content" style="padding-top: 10px;">
+                            <div id="weekly_stars" class="tab-pane fade active in">
+                                <ul name="pop_list" class="unstyled">
+                                    {{range .WeeklyStarPros}}
+                                    <li>
+                                        <span class="badge badge-success">{{.Rank}}</span>
+                                        <a title="{{.Synopsis}}" href="/{{.Path}}">{{.Path}}</a>
+                                    </li>
+                                    {{end}}
+                                </ul>
+                            </div>
+
+                            <div id="top_rank" class="tab-pane fade">
+                                <ul name="pop_list" class="unstyled">
+                                    {{range .TopRankPros}}
+                                    <li>
+                                        <span class="badge badge-inverse">{{.Rank}}</span>
+                                        <a title="{{.Synopsis}}" href="/{{.Path}}">{{.Path}}</a>
+                                    </li>
+                                    {{end}}
+                                </ul>
+                            </div>
+
+                            <div id="top_views" class="tab-pane fade">
+                                <ul name="pop_list" class="unstyled">
+                                    {{range .TopViewsPros}}
+                                    <li>
+                                        <span class="badge">{{.Views}}</span>
+                                        <a title="{{.Synopsis}}" href="/{{.Path}}">{{.Path}}</a>
+                                    </li>
+                                    {{end}}
+                                </ul>
+                            </div>
+                        </div>
+					</div>
+
+					<div>
+						<h4><b>最近更新示例</b></h4>
+                        <ul name="pop_list" class="unstyled">
+                            {{range .RecentExams}}
+                            <li>
+                                <a href="/{{.Path}}">{{.Path}}</a>
+                            </li>
+                            {{end}}
+                        </ul>
+					</div>
+
+				    {{template "home_js"}}
+					
+					<div>
+						<h4><b>探索更多.</b></h4>
+                        <ul class="nav nav-tabs nav-tabs-google">
+                            <li class="active">
+                                <a href="#more_projects" data-toggle="tab">项目</a>
+                            </li>
+
+                            <li>
+                                <a href="#more_sites" data-toggle="tab">站点</a>
+                            </li>
+                        </ul>
+
+                        <div class="tab-content" style="padding-top: 10px;">
+                            <div id="more_projects" class="tab-pane fade active in">
+                                <ul class="unstyled">
+                                    <li>
+                                    	<a href="/index">Index</a>
+                                    	- 涵盖所有内容
+                                    </li>
+
+                                    <li>
+                                    	<a href="/index/gorepos">Go 标准库</a>
+                                    </li>
+
+                                    <li>
+                                    	<a href="/index/gosubrepos">Go 官方维护库</a>
+                                    	- 由 Go 团队开发
+                                    </li>
+
+                                    <li>
+                                    	<a target="_blank" href="https://code.google.com/p/go-wiki/wiki/Projects">Projects @ go-wiki</a>
+                                    </li>
+
+                                    <li>
+                                    	<a target="_blank" href="http://go-search.org">Go Search</a>
+                                    	- 寻找更多的项目
+                                    </li>
+                                </ul>
+                            </div>
+
+                            <div id="more_sites" class="tab-pane fade">
+                                <ul class="unstyled">
+                                    <li>
+                                    	<a target="_blank" href="http://bbs.beego.me">Beego Community</a>
+                                    </li>
+
+                                    <li>
+                                    	<a target="_blank" href="https://gobyexample.com/">Go by Example</a>
+                                    </li>
+
+                                    <li>
+                                    	<a target="_blank" href="http://golangtc.com">Golang 中国</a>
+                                    	－ Go 语言交流学习论坛
+                                    </li>
+
+                                    <li>
+                                    	<a target="_blank" href="http://sudochina.com">速动中国</a>
+                                    	- Go 语言技术分享博客站
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
 					</div>
 				</div>
-			</div>
-		</div>
+            </div>
+        </div>
         {{template "footer_zh" .}}
 	</body>
 </html>

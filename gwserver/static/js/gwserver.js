@@ -13,43 +13,21 @@
 
     function Responsive() {
         var navbarFrame = document.getElementById("navbar_frame");
-        var topRightBox = document.getElementById("top_right_box");
-        var searchBox = document.getElementById("navbar_search_box");
         var body = document.getElementById("body");
-        var mainBody = document.getElementById("main_content");
         var delta = document.body.clientWidth - 1050;
 
-        if (delta > 0) {
-            navbarFrame.style.marginLeft = "0px";
-            navbarFrame.style.width = "";
+        if (delta >= 0) {
             if (document.getElementById("sidebar") == null) {
-                navbarFrame.className = "navbar navbar-fixed-top";
+                navbarFrame.className = "navbar navbar-default navbar-fixed-top";
                 body.style.paddingTop = "60px";
             } else {
-                navbarFrame.className = "navbar";
+                navbarFrame.className = "navbar navbar-default";
                 body.style.paddingTop = "0px";
             }
 
-            topRightBox.className = "pull-right";
-            searchBox.style.width = "";
-
-            // Home page.
-            if (mainBody != null) {
-                mainBody.style.marginLeft = "-20px";
-            }
-
         } else {
-            navbarFrame.style.marginLeft = "-5px";
-            navbarFrame.style.width = "1050px";
-            navbarFrame.className = "navbar";
-            topRightBox.className = "";
-            searchBox.style.width = "150px";
+            navbarFrame.className = "navbar navbar-default";
             body.style.paddingTop = "0px";
-
-            // Home page.
-            if (mainBody != null) {
-                mainBody.style.marginLeft = "0px";
-            }
         }
     }
 

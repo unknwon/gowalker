@@ -28,8 +28,6 @@ _testmain.go
 *.exe
 *.exe~
 .DS_Store
-gw-server/gwserver
-gw-local/gw-local
+gwserver/gwserver
 gw-admin/gw-admin
-bee
 bale.go
