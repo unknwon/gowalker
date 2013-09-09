@@ -26,6 +26,7 @@ import (
 
 	"github.com/Unknwon/gowalker/utils"
 	"github.com/astaxie/beego"
+	_ "github.com/coocood/mysql"
 	"github.com/coocood/qbs"
 )
 
@@ -43,14 +44,25 @@ type PkgInfo struct {
 		- Project synopsis.
 		eg.
 			Go Walker Server generates Go projects API documentation and Hacker View on the fly.
-		- Indicates whether it's a command line tool or package.
-		eg.
-			True
 	*/
 	Path     string `qbs:"size:150,index"`
 	ProName  string `qbs:"size:50"`
 	Synopsis string `qbs:"size:300"`
-	IsCmd    bool
+
+	/*
+		- Indicates whether it's a command line tool or package.
+		eg.
+			True
+		- Indicates whether it belongs to Go standard library.
+		eg.
+			True
+		- Indicates whether it's developed by Go team.
+		eg.
+			True
+	*/
+	IsCmd       bool
+	IsGoRepo    bool
+	IsGoSubrepo bool
 
 	/*
 		- All tags of project.

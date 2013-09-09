@@ -24,7 +24,7 @@
             </div>
 
 			<div class="row">
-				<div class="col-md-8">
+				<div class="col-xs-8 col-md-8">
 					<div>
 						<h4><b>超凡体验，您值得拥有.</b></h4>
 						<p>
@@ -45,7 +45,7 @@
 
 							<button class="btn feature" title="" data-content="不必再为使用旧版的库而烦恼，现在您可以查看任意 Tag 版本的项目文档喔！" data-placement="right" data-toggle="popover" data-original-title="文档标签">文档标签</button>
 
-							以及 <a target="_blank" href="https://github.com/Unknwon/gowalker/blob/master/docs/Features_ZH.md">更多</a>。
+							以及 <a target="_blank" href="http://git.oschina.net/Unknown/gowalker/wikis/Features">更多</a>。
 						</p>
 						
 						<p class="text-success">
@@ -71,7 +71,7 @@
 
 					            <tbody>
 						            {{range .GlobalHistory}}
-						            {{template "history_table" .}}
+						            {{template "history_table_zh" .}}
 						            {{end}}
 					            </tbody>
 					        </table>
@@ -94,7 +94,7 @@
 
 					            <tbody>
 						            {{range .UserHistory}}
-						            {{template "history_table" .}}
+						            {{template "history_table_zh" .}}
 						            {{end}}
 					            </tbody>
 					        </table>
@@ -102,13 +102,13 @@
 					</div>
                 </div>
 
-				<div class="col-md-4" style="padding-left: 5px;">
+				<div class="col-xs-4 col-md-4" style="padding-left: 5px;">
 					<div>
 						<h4><b>最新公告</b></h4>
 						<p>
 							您是否仍在为查看某个 Go 项目的函数或方法而不得不将其下载并安装到本地？我知道您一直在承受这种痛苦，直到今天您发现 <b>黑客视图</b> 为止！
 						</p>
-						<a class="btn btn-primary" target="_blank" href="https://github.com/Unknwon/gowalker/wiki/Features">了解更多</a>
+						<a class="btn btn-primary" target="_blank" href="http://git.oschina.net/Unknown/gowalker/wikis/Features">了解更多</a>
 					</div>
 
 					<div>
@@ -130,10 +130,11 @@
                         <div class="tab-content" style="padding-top: 10px;">
                             <div id="weekly_stars" class="tab-pane fade active in">
                                 <ul name="pop_list" class="unstyled">
+                                    {{$newLine := str2html "\n"}}
                                     {{range .WeeklyStarPros}}
                                     <li>
                                         <span class="badge badge-success">{{.Rank}}</span>
-                                        <a title="{{.Synopsis}}" href="/{{.Path}}">{{.Path}}</a>
+                                        <a title="被引用：{{.RefProNum}}/{{.RefNum}}  排名值：{{.Rank}}  浏览数：{{.Views}}{{$newLine}}问题：{{.Issues}}  称赞：{{.Stars}}  派生{{.Forks}}{{$newLine}}简介：{{.Synopsis}}" href="/{{.Path}}">{{.Path}}</a>
                                     </li>
                                     {{end}}
                                 </ul>
@@ -144,7 +145,7 @@
                                     {{range .TopRankPros}}
                                     <li>
                                         <span class="badge badge-inverse">{{.Rank}}</span>
-                                        <a title="{{.Synopsis}}" href="/{{.Path}}">{{.Path}}</a>
+                                        <a title="被引用：{{.RefProNum}}/{{.RefNum}}  排名值：{{.Rank}}  浏览数：{{.Views}}{{$newLine}}问题：{{.Issues}}  称赞：{{.Stars}}  派生{{.Forks}}{{$newLine}}简介：{{.Synopsis}}" href="/{{.Path}}">{{.Path}}</a>
                                     </li>
                                     {{end}}
                                 </ul>
@@ -155,7 +156,7 @@
                                     {{range .TopViewsPros}}
                                     <li>
                                         <span class="badge">{{.Views}}</span>
-                                        <a title="{{.Synopsis}}" href="/{{.Path}}">{{.Path}}</a>
+                                        <a title="被引用：{{.RefProNum}}/{{.RefNum}}  排名值：{{.Rank}}  浏览数：{{.Views}}{{$newLine}}问题：{{.Issues}}  称赞：{{.Stars}}  派生{{.Forks}}{{$newLine}}简介：{{.Synopsis}}" href="/{{.Path}}">{{.Path}}</a>
                                     </li>
                                     {{end}}
                                 </ul>
@@ -245,3 +246,21 @@
         {{template "footer_zh" .}}
 	</body>
 </html>
+
+{{define "history_table_zh"}}
+{{$newLine := str2html "\n"}}
+<tr>
+    <td>
+        <a title="被引用：{{.RefProNum}}/{{.RefNum}}  排名值：{{.Rank}}  浏览数：{{.Views}}{{$newLine}}问题：{{.Issues}}  称赞：{{.Stars}}  派生{{.Forks}}{{$newLine}}简介：{{.Synopsis}}" href="/{{.Path}}">{{.Path}}</a>
+
+        {{if .IsGoRepo}}
+        <span class="label label-info">标准库</span>
+        {{end}}        
+        {{if .IsGoSubrepo}}
+        <span class="label label-info">官方</span>
+        {{end}}
+    </td>
+
+    <td>{{.ViewedTime}}</td>
+</tr>
+{{end}}

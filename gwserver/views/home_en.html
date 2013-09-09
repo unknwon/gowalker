@@ -24,7 +24,7 @@
 			</div>
 
 			<div class="row">
-				<div class="col-md-8">
+				<div class="col-xs-8 col-md-8">
 					<div>
 						<h4>What is this?</h4>
 						<p>
@@ -53,7 +53,7 @@
                                     data-content="Don't worry if you use old version of a project, now you can view documentation by its Tags!"
                                     data-placement="right" data-toggle="popover" data-original-title="View by Tag">Doc Tag</button>
 
-                            and <a target="_blank" href="https://github.com/Unknwon/gowalker/blob/master/docs/Features.md">More</a>.
+                            and <a target="_blank" href="https://github.com/Unknwon/gowalker/wiki/Features">More</a>.
 						</p>
 
                         <p class="text-success">
@@ -76,10 +76,10 @@
 					                    <th>Viewd Time(Local)</th>
 					                </tr>
 					            </thead>
-
+                                
 					            <tbody>
 						            {{range .GlobalHistory}}
-						            {{template "history_table" .}}
+						            {{template "history_table_en" .}}
 						            {{end}}
 					            </tbody>
 					        </table>
@@ -102,7 +102,7 @@
 
 					            <tbody>
 						            {{range .UserHistory}}
-						            {{template "history_table" .}}
+						            {{template "history_table_en" .}}
 						            {{end}}
 					            </tbody>
 					        </table>
@@ -110,7 +110,7 @@
 					</div>
 				</div>
 
-				<div class="col-md-4" style="padding-left: 5px;">
+				<div class="col-xs-4 col-md-4" style="padding-left: 5px;">
 					<div>
 						<h4>Announcement</h4>
 						<p>
@@ -138,10 +138,11 @@
                         <div class="tab-content" style="padding-top: 10px;">
                             <div id="weekly_stars" class="tab-pane fade active in">
                                 <ul name="pop_list" class="unstyled">
+                                    {{$newLine := str2html "\n"}}
                                     {{range .WeeklyStarPros}}
                                     <li>
                                         <span class="badge badge-success">{{.Rank}}</span>
-                                        <a title="{{.Synopsis}}" href="/{{.Path}}">{{.Path}}</a>
+                                        <a title="Refs: {{.RefProNum}}/{{.RefNum}}  Rank: {{.Rank}}  Views: {{.Views}}{{$newLine}}Issues: {{.Issues}}  Stars: {{.Stars}}  Forks: {{.Forks}}{{$newLine}}Intro: {{.Synopsis}}" href="/{{.Path}}">{{.Path}}</a>
                                     </li>
                                     {{end}}
                                 </ul>
@@ -152,7 +153,7 @@
                                     {{range .TopRankPros}}
                                     <li>
                                         <span class="badge badge-inverse">{{.Rank}}</span>
-                                        <a title="{{.Synopsis}}" href="/{{.Path}}">{{.Path}}</a>
+                                        <a title="Refs: {{.RefProNum}}/{{.RefNum}}  Rank: {{.Rank}}  Views: {{.Views}}{{$newLine}}Issues: {{.Issues}}  Stars: {{.Stars}}  Forks: {{.Forks}}{{$newLine}}Intro: {{.Synopsis}}" href="/{{.Path}}">{{.Path}}</a>
                                     </li>
                                     {{end}}
                                 </ul>
@@ -163,7 +164,7 @@
                                     {{range .TopViewsPros}}
                                     <li>
                                         <span class="badge">{{.Views}}</span>
-                                        <a title="{{.Synopsis}}" href="/{{.Path}}">{{.Path}}</a>
+                                        <a title="Refs: {{.RefProNum}}/{{.RefNum}}  Rank: {{.Rank}}  Views: {{.Views}}{{$newLine}}Issues: {{.Issues}}  Stars: {{.Stars}}  Forks: {{.Forks}}{{$newLine}}Intro: {{.Synopsis}}" href="/{{.Path}}">{{.Path}}</a>
                                     </li>
                                     {{end}}
                                 </ul>
@@ -174,6 +175,7 @@
 					<div>
 						<h4>Recent Updated Examples</h4>
                         <ul name="pop_list" class="unstyled">
+                            {{$newLine := str2html "\n"}}
                             {{range .RecentExams}}
                             <li>
                                 <a href="/{{.Path}}">{{.Path}}</a>
@@ -254,13 +256,17 @@
 	</body>
 </html>
 
-{{define "history_table"}}
+{{define "history_table_en"}}
+{{$newLine := str2html "\n"}}
 <tr>
     <td>
-        <a title="{{.Synopsis}}" href="/{{.Path}}">{{.Path}}</a>
+        <a title="Refs: {{.RefProNum}}/{{.RefNum}}  Rank: {{.Rank}}  Views: {{.Views}}{{$newLine}}Issues: {{.Issues}}  Stars: {{.Stars}}  Forks: {{.Forks}}{{$newLine}}Intro: {{.Synopsis}}" href="/{{.Path}}">{{.Path}}</a>
 
         {{if .IsGoRepo}}
         <span class="label label-info">Standard</span>
+        {{end}}        
+        {{if .IsGoSubrepo}}
+        <span class="label label-info">Official</span>
         {{end}}
     </td>
 

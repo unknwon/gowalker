@@ -1,6 +1,6 @@
 {{define "navbar_en"}}
 <noscript>Please enable JavaScript in your browser!</noscript>
-<div id="navbar_frame" class="navbar navbar-default navbar-fixed-top">
+<div id="navbar_frame" class="navbar navbar-default navbar-fixed-top" style="background-image: linear-gradient(to bottom, rgb(255, 255, 255), rgb(242, 242, 242)); border: 1px solid rgb(212, 212, 212); box-shadow: 0px 1px 10px rgba(0, 0, 0, 0.1);">
 	<div class="container" style="padding-left: 30px;">
 		<a class="navbar-brand" href="/">
 			Go Walker
@@ -66,7 +66,7 @@
 
 {{define "navbar_zh"}}
 <noscript>请启用您浏览器的 JavaScript 选项！</noscript>
-<div id="navbar_frame" class="navbar navbar-default navbar-fixed-top">
+<div id="navbar_frame" class="navbar navbar-default navbar-fixed-top" style="background-image: linear-gradient(to bottom, rgb(255, 255, 255), rgb(242, 242, 242)); border: 1px solid rgb(212, 212, 212); box-shadow: 0px 1px 10px rgba(0, 0, 0, 0.1);">
 	<div class="container" style="padding-left: 30px;">
 		<a class="navbar-brand" href="/">
 			Go Walker

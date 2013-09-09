@@ -25,10 +25,10 @@ import (
 
 var robotTxt string
 
-const robotTpl = `{{$disallow := .Disallow}}{{range .Uas}}User-Agent: {{.}}
+const robotTpl = `{{$disallow := .Disallow}}{{range .Uas}}User-agent: {{.}}
 Disallow: {{$disallow}}
 
-{{end}}User-Agent: *
+{{end}}User-agent: *
 Disallow: /
 `
 

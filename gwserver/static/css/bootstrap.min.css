@@ -45,6 +45,15 @@ body {
 	padding-left: 0px;
 	padding-right: 0px;
 }
+.col-md-4 {
+	width: 333px;
+}
+.col-md-6 {
+	width: 485px;
+}
+.col-md-8 {
+	width: 667px;
+}
 .btn-lg {
 	line-height: 1.85;
 }
@@ -53,10 +62,6 @@ ul, ol {
 	list-style: none outside none;
 	padding: 0px;
 }
-footer {
-	background: none repeat scroll 0% 0% rgb(248, 248, 248);
-}
-
 .bs-docs-sidenav .icon-chevron-right {
 	opacity: 0.25;
 	float: right;

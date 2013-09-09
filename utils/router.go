@@ -17,7 +17,7 @@ package utils
 import (
 	"net/url"
 
-	"github.com/astaxie/beego"
+	"github.com/astaxie/beego/context"
 )
 
 var LangTypes []*LangType // Languages are supported.
@@ -29,7 +29,7 @@ type LangType struct {
 
 // SetLangVer sets site language version.
 // It returns true when language is changed by URL parameters.
-func SetLangVer(ctx *beego.Context, input url.Values, data map[interface{}]interface{}) (bool, LangType) {
+func SetLangVer(ctx *context.Context, input url.Values, data map[interface{}]interface{}) (bool, LangType) {
 	isNeedRedir := false
 
 	// 1. Check URL arguments.

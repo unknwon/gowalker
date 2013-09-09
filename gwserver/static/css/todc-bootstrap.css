@@ -1518,12 +1518,8 @@ select:focus:required:invalid:focus {
 .navbar .divider-vertical {
   height: 30px;
 }
-.navbar .btn,
 .navbar .btn-group {
   margin-top: 2px;
-}
-.navbar .btn {
-  padding: 2px 10px;
 }
 .navbar-form input,
 .navbar-form select,

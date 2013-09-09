@@ -25,7 +25,7 @@ import (
 )
 
 const (
-	APP_VER = "1.0.0.0907"
+	APP_VER = "1.0.0.0909"
 )
 
 // We have to call a initialize function manully
@@ -38,8 +38,9 @@ func initialize() {
 		panic("Fail to load configuration file: " + err.Error())
 	}
 
-	// Initialize database.
+	// Initialize data.
 	models.InitDb()
+	routers.InitRouter()
 
 	// Trim 4th part.
 	routers.AppVer = strings.Join(strings.Split(APP_VER, ".")[:3], ".")
@@ -64,6 +65,8 @@ func main() {
 
 	// Register routers.
 	beego.Router("/", &routers.HomeRouter{})
+	beego.Router("/search", &routers.SearchRouter{})
+	beego.Router("/:all", &routers.HomeRouter{})
 
 	// Register template functions.
 

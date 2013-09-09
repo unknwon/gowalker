@@ -11,11 +11,6 @@ Go Walker is a comprehensive site for the Go programming language, the primary s
 - URL: [http://gowalker.org](http://gowalker.org)
 - Code: [README](gwserver/README.md)
 
-### Go Walker Admin
-
-- URL: [http://admin.gowalker.org](http://admin.gowalker.org)
-- Code: [README](gwadmin/README.md)
-
 ### Go Walker Local
 
 - URL: [http://local.gowalker.org](http://local.gowalker.org)

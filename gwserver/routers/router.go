@@ -16,8 +16,12 @@
 package routers
 
 import (
+	"fmt"
+	"os"
 	"strings"
+	"time"
 
+	"github.com/Unknwon/gowalker/models"
 	"github.com/Unknwon/gowalker/utils"
 	"github.com/astaxie/beego"
 )
@@ -62,4 +66,78 @@ func (this *baseRouter) Prepare() {
 		this.Redirect(this.Ctx.Request.RequestURI[:i], 302)
 		return
 	}
+}
+
+var (
+	refreshCount int
+	cacheTicker  *time.Ticker
+	cachePros    []*models.PkgInfo
+)
+
+func InitRouter() {
+	// Load max element numbers.
+	num := utils.Cfg.MustInt("setting", "max_pro_info_num")
+	if num > 0 {
+		maxProInfoNum = num
+	}
+
+	num = utils.Cfg.MustInt("setting", "max_exam_num")
+	if num > 0 {
+		maxExamNum = num
+	}
+	beego.Trace(fmt.Sprintf("maxProInfoNum: %d; maxExamNum: %d",
+		maxProInfoNum, maxExamNum))
+
+	// Start cache ticker.
+	cacheTicker = time.NewTicker(time.Minute)
+	go cacheTickerCheck(cacheTicker.C)
+
+	initPopPros()
+	//initIndexStats()
+}
+
+func cacheTickerCheck(cacheChan <-chan time.Time) {
+	for {
+		<-cacheChan
+		refreshCount++
+
+		// Check if reach the maximum limit of skip.
+		if refreshCount >= utils.Cfg.MustInt("task", "max_skip_time") {
+			// Yes.
+			refreshCount = 0
+		}
+
+		isShutdown := false //shutdownCheck()
+		// Check if need to flush cache.
+		if isShutdown || refreshCount == 0 || len(cachePros) >= utils.Cfg.MustInt("task", "min_pro_num") {
+			flushCache()
+
+			if !isShutdown {
+				initPopPros()
+				refreshCount = 0
+			}
+		}
+
+		if isShutdown {
+			os.Exit(0)
+		}
+
+		//initIndexStats()
+	}
+}
+
+func flushCache() {
+	// Flush cache projects.
+	num := len(cachePros)
+	rtwPros := make([]*models.PkgRock, 0, num)
+	for _, p := range cachePros {
+		rtwPros = append(rtwPros, &models.PkgRock{
+			Pid:  p.Id,
+			Path: p.Path,
+			Rank: p.Rank,
+		})
+	}
+	models.FlushCacheProjects(cachePros, rtwPros)
+
+	cachePros = make([]*models.PkgInfo, 0, num)
 }

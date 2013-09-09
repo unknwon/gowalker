@@ -27,14 +27,14 @@
 
 <footer id="_bottom">
 	<div class="container" style="padding-left: 0px; padding-top: 10px; padding-bottom: 10px;">
-		<div class="col-md-8" style="width: {{if .IsHome}}440{{else}}600{{end}}px;">
+		<div class="col-xs-8 col-md-8" style="width: {{if .IsHome}}440{{else}}600{{end}}px;">
 			<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
 			<script type="text/javascript" src="/static/js/bootstrap.min.js"></script>
 			<script type='text/javascript' src='/static/js/gwserver.js'></script>
 
 			<p><strong>Copyright © 2013 Go Walker</strong></p>
 			<p>Website built by <i class="icon-user"></i> <a target="_blank" href="https://github.com/Unknwon">@Unknown</a>. Powered by <a target="_blank" href="https://github.com/astaxie/beego"><i class="icon-bold"></i>eego</a> and <a target="_blank" href="https://github.com/coocood/qbs">Qbs</a>.</p>
-			{{if .IsHome}}<p>Based on <a target="_blank" href="http://twitter.github.io/bootstrap/">Bootstrap</a>. Icons from <a target="_blank" href="http://fortawesome.github.io/Font-Awesome/">Font Awesome</a>.</p>{{end}}
+			{{if .IsHome}}<p>Based on <a target="_blank" href="http://getbootstrap.com/">Bootstrap</a>. Icons from <a target="_blank" href="http://fortawesome.github.io/Font-Awesome/">Font Awesome</a>.</p>{{end}}
 			{{if .IsHome}}<p>{{end}}Send us <i class="icon-envelope"></i> <a href="mailto:joe2010xtmf#163.com">Feedback</a> or submit <i class="icon-tasks"></i> <a target="_blank" href="https://github.com/Unknwon/gowalker/issues">Website Issues</a>. {{if .IsHome}}</p>{{end}}<strong>Language:</strong>
 
 		    <div class="btn-group dropup">
@@ -81,14 +81,14 @@
 
 <footer id="_bottom">
 	<div class="container" style="padding-left: 0px; padding-top: 10px; padding-bottom: 10px;">
-		<div class="col-md-8" style="width: {{if .IsHome}}440{{else}}600{{end}}px;">
+		<div class="col-xs-8 col-md-8" style="width: {{if .IsHome}}440{{else}}600{{end}}px;">
 			<script type="text/javascript" src="http://cdn.staticfile.org/jquery/1.10.1/jquery.min.js"></script>
 			<script type="text/javascript" src="/static/js/bootstrap.min.js"></script>
 			<script type='text/javascript' src='/static/js/gwserver.js'></script>
 
 			<p><strong>版权所有 © 2013 Go Walker</strong></p>
 			<p>网站建设者 <i class="icon-user"></i> <a target="_blank" href="https://github.com/Unknwon">@Unknown</a>. 项目基于 <a target="_blank" href="https://github.com/astaxie/beego"><i class="icon-bold"></i>eego</a> 和 <a target="_blank" href="https://github.com/coocood/qbs">Qbs</a> 构建。</p>
-			{{if .IsHome}}<p>界面基于 <a target="_blank" href="http://twitter.github.io/bootstrap/">Bootstrap</a>. 图标来自 <a target="_blank" href="http://fortawesome.github.io/Font-Awesome/">Font Awesome</a>.</p>{{end}}
+			{{if .IsHome}}<p>界面基于 <a target="_blank" href="http://v3.bootcss.com/">Bootstrap</a>. 图标来自 <a target="_blank" href="http://fortawesome.github.io/Font-Awesome/">Font Awesome</a>.</p>{{end}}
 			{{if .IsHome}}<p>{{end}}给我们发送 <i class="icon-envelope"></i> <a href="mailto:joe2010xtmf#163.com">反馈</a> 或者提交 <i class="icon-tasks"></i> <a target="_blank" href="https://github.com/Unknwon/gowalker/issues">网站问题</a>. {{if .IsHome}}</p>{{end}}<strong>语言选项：</strong>
 		    <div class="btn-group dropup">
 			    <button class="btn dropdown-toggle" data-toggle="dropdown">{{.CurLang}} <span class="caret"></span></button>
@@ -107,7 +107,7 @@
 
 {{define "static_file"}}
 {{if .IsHome}}
-<div class="col-md-6" style="margin-top: 25px;">
+<div class="col-xs-6 col-md-6" style="margin-top: 25px;">
 	<div style="text-align: center;">
 		<img src="/static/img/qiniu.png">
 	</div>

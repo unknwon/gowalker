@@ -9,11 +9,6 @@ Go Walker 是一个针对 Go 语言的综合性站点，主要业务为 Go 项�
 - 网址：[http://gowalker.org](http://gowalker.org)
 - 仓库：[说明文档](gwserver/README_ZH.md)
 
-### Go Walker 管理端（Go Walker Admin）
-
-- 网址：[http://admin.gowalker.org](http://admin.gowalker.org)
-- 仓库：[说明文档](gwadmin/README_ZH.md)
-
 ### Go Walker 本地版（Go Walker Local）
 
 - 网址：[http://local.gowalker.org](http://local.gowalker.org)
