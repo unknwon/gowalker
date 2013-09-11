@@ -25,113 +25,11 @@ import (
 	"time"
 
 	"github.com/Unknwon/gowalker/utils"
+	"github.com/Unknwon/hv"
 	"github.com/astaxie/beego"
 	_ "github.com/coocood/mysql"
 	"github.com/coocood/qbs"
 )
-
-// A PkgInfo describles a project information.
-type PkgInfo struct {
-	Id int64
-
-	/*
-		- Import path.
-		eg.
-			github.com/Unknwon/gowalker
-		- Name of the project.
-		eg.
-			gowalker
-		- Project synopsis.
-		eg.
-			Go Walker Server generates Go projects API documentation and Hacker View on the fly.
-	*/
-	Path     string `qbs:"size:150,index"`
-	ProName  string `qbs:"size:50"`
-	Synopsis string `qbs:"size:300"`
-
-	/*
-		- Indicates whether it's a command line tool or package.
-		eg.
-			True
-		- Indicates whether it belongs to Go standard library.
-		eg.
-			True
-		- Indicates whether it's developed by Go team.
-		eg.
-			True
-	*/
-	IsCmd       bool
-	IsGoRepo    bool
-	IsGoSubrepo bool
-
-	/*
-		- All tags of project.
-		eg.
-			master|||v0.6.2.0718
-		- Views of projects.
-		eg.
-			1342
-		- User viewed time(Unix-timestamp).
-		eg.
-			1374127619
-		- Time when information last updated(UTC).
-		eg.
-			2013-07-16 21:09:27.48932087
-	*/
-	Tags       string `qbs:"size:150"`
-	Views      int64  `qbs:"index"`
-	ViewedTime int64
-	Created    time.Time `qbs:"index"`
-
-	/*
-		- Rank is the benchmark of projects, it's based on BaseRank and views.
-		eg.
-			826
-	*/
-	Rank int64 `qbs:"index"`
-
-	/*
-		- Package (structure) version.
-		eg.
-			9
-		- Project revision.
-		eg.
-			8976ce8b2848
-		- Project labels.
-		eg.
-			$tool|
-	*/
-	PkgVer int
-	Ptag   string `qbs:"size:50"`
-	Labels string
-
-	/*
-		- Number of projects that import this project.
-		eg.
-			11
-		- Number of projects that import this project and do not belong to same project,
-			which means import own sub-projects does not count and rank.
-		eg.
-			3
-		- Ids of projects that import this project.
-		eg.
-			$47|$89|$5464|$8586|$8595|$8787|$8789|$8790|$8918|$9134|$9139|
-	*/
-	RefNum    int
-	RefProNum int
-	RefPids   string
-
-	/*
-		- Addtional information.
-	*/
-	Vcs        string `qbs:"size:50"`
-	LastUpdate time.Time
-	Homepage   string `qbs:"size:100"`
-	Issues     int
-	Stars      int
-	Forks      int
-	Note       string
-}
 
 // A PkgTag descriables the project revision tag for its sub-projects,
 // any project that has this record means it's passed check of Go project,
@@ -249,7 +147,7 @@ func InitDb() {
 	defer mg.Close()
 
 	// Create data tables.
-	mg.CreateTableIfNotExists(new(PkgInfo))
+	mg.CreateTableIfNotExists(new(hv.PkgInfo))
 	mg.CreateTableIfNotExists(new(PkgTag))
 	mg.CreateTableIfNotExists(new(PkgRock))
 	mg.CreateTableIfNotExists(new(PkgExam))
@@ -264,19 +162,19 @@ func initOld() {
 }
 
 // GetGoRepo returns packages in go standard library.
-func GetGoRepo() ([]*PkgInfo, error) {
+func GetGoRepo() ([]*hv.PkgInfo, error) {
 	// Connect to database.
 	q := connDb()
 	defer q.Close()
 
-	var pkgInfos []*PkgInfo
+	var pkgInfos []*hv.PkgInfo
 	condition := qbs.NewCondition("pro_name = ?", "Go")
 	err := q.OmitFields("ProName", "IsCmd", "Tags", "Views", "ViewedTime", "Created",
 		"Etag", "Labels", "ImportedNum", "ImportPid", "Note").
 		Condition(condition).OrderBy("path").FindAll(&pkgInfos)
-	infos := make([]*PkgInfo, 0, 30)
+	infos := make([]*hv.PkgInfo, 0, 30)
 	for _, v := range pkgInfos {
-		if strings.Index(v.Path, ".") == -1 {
+		if strings.Index(v.ImportPath, ".") == -1 {
 			infos = append(infos, v)
 		}
 	}
@@ -285,7 +183,7 @@ func GetGoRepo() ([]*PkgInfo, error) {
 
 // SearchRawDoc returns results for raw page,
 // which are package that import path and synopsis contains keyword.
-func SearchRawDoc(key string, isMatchSub bool) (pkgInfos []*PkgInfo, err error) {
+func SearchRawDoc(key string, isMatchSub bool) (pkgInfos []*hv.PkgInfo, err error) {
 	// Connect to database.
 	q := connDb()
 	defer q.Close()
@@ -328,7 +226,7 @@ func GetAllExams() ([]*PkgExam, error) {
 
 // GetLabelsPageInfo returns all data that used for labels page.
 // One function is for reducing database connect times.
-func GetLabelsPageInfo() (WFPros, ORMPros, DBDPros, GUIPros, NETPros, TOOLPros []*PkgInfo, err error) {
+func GetLabelsPageInfo() (WFPros, ORMPros, DBDPros, GUIPros, NETPros, TOOLPros []*hv.PkgInfo, err error) {
 	// Connect to database.
 	q := connDb()
 	defer q.Close()
@@ -354,7 +252,7 @@ func UpdateLabelInfo(path string, label string, add bool) bool {
 	q := connDb()
 	defer q.Close()
 
-	info := new(PkgInfo)
+	info := new(hv.PkgInfo)
 	err := q.WhereEqual("path", path).Find(info)
 	if err != nil {
 		return false
@@ -387,7 +285,7 @@ func SavePkgExam(gist *PkgExam) error {
 	defer q.Close()
 
 	// Check if corresponding package exists.
-	pinfo := new(PkgInfo)
+	pinfo := new(hv.PkgInfo)
 	err := q.WhereEqual("path", gist.Path).Find(pinfo)
 	if err != nil {
 		return errors.New(
@@ -473,7 +371,7 @@ func GetIndexStats() (int64, int64, int64) {
 	q := connDb()
 	defer q.Close()
 
-	return q.Count(new(PkgInfo)), q.Count(new(PkgDecl)), q.Count(new(PkgFunc))
+	return q.Count(new(hv.PkgInfo)), q.Count(new(PkgDecl)), q.Count(new(PkgFunc))
 }
 
 // SearchFunc returns functions that name contains keyword.

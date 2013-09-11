@@ -21,16 +21,17 @@ import (
 
 	"github.com/Unknwon/com"
 	"github.com/Unknwon/ctw/packer"
+	"github.com/Unknwon/hv"
 	"github.com/astaxie/beego"
 	"github.com/coocood/qbs"
 )
 
 // SearchPkg returns packages that import path and synopsis contains keyword.
-func SearchPkg(key string) []*PkgInfo {
+func SearchPkg(key string) []*hv.PkgInfo {
 	q := connDb()
 	defer q.Close()
 
-	var pinfos []*PkgInfo
+	var pinfos []*hv.PkgInfo
 	cond := qbs.NewCondition("path like ?", "%"+key+"%").Or("synopsis like ?", "%"+key+"%")
 	q.OmitFields("ProName", "IsCmd", "Tags", "Views", "ViewedTime", "Created",
 		"Etag", "Labels", "ImportedNum", "ImportPid", "Note").
@@ -40,7 +41,7 @@ func SearchPkg(key string) []*PkgInfo {
 
 // GetPkgInfo returns 'PkgInfo' by given import path and tag.
 // It returns error when the package does not exist.
-func GetPkgInfo(path, tag string) (*PkgInfo, error) {
+func GetPkgInfo(path, tag string) (*hv.PkgInfo, error) {
 	// Check path length to reduce connect times.
 	if len(path) == 0 {
 		return nil, errors.New("models.GetPkgInfo -> Empty path as not found.")
@@ -49,7 +50,7 @@ func GetPkgInfo(path, tag string) (*PkgInfo, error) {
 	q := connDb()
 	defer q.Close()
 
-	pinfo := new(PkgInfo)
+	pinfo := new(hv.PkgInfo)
 	err := q.WhereEqual("path", path).Find(pinfo)
 	if err != nil {
 		return pinfo, errors.New(
@@ -92,32 +93,32 @@ func GetPkgInfo(path, tag string) (*PkgInfo, error) {
 }
 
 // GetPkgInfoById returns package information from database by pid.
-func GetPkgInfoById(pid int) (*PkgInfo, error) {
+func GetPkgInfoById(pid int) (*hv.PkgInfo, error) {
 	// Connect to database.
 	q := connDb()
 	defer q.Close()
 
-	pinfo := new(PkgInfo)
+	pinfo := new(hv.PkgInfo)
 	err := q.WhereEqual("id", pid).Find(pinfo)
 
 	return pinfo, err
 }
 
 // GetGroupPkgInfo returns group of package infomration in order to reduce database connect times.
-func GetGroupPkgInfo(paths []string) ([]*PkgInfo, error) {
+func GetGroupPkgInfo(paths []string) ([]*hv.PkgInfo, error) {
 	// Connect to database.
 	q := connDb()
 	defer q.Close()
 
-	pinfos := make([]*PkgInfo, 0, len(paths))
+	pinfos := make([]*hv.PkgInfo, 0, len(paths))
 	for _, v := range paths {
 		if len(v) > 0 {
-			pinfo := new(PkgInfo)
+			pinfo := new(hv.PkgInfo)
 			err := q.WhereEqual("path", v).Find(pinfo)
 			if err == nil {
 				pinfos = append(pinfos, pinfo)
 			} else {
-				pinfos = append(pinfos, &PkgInfo{Path: v})
+				pinfos = append(pinfos, &hv.PkgInfo{ImportPath: v})
 			}
 		}
 	}
@@ -125,15 +126,15 @@ func GetGroupPkgInfo(paths []string) ([]*PkgInfo, error) {
 }
 
 // GetGroupPkgInfoById returns group of package infomration by pid.
-func GetGroupPkgInfoById(pids []string) []*PkgInfo {
+func GetGroupPkgInfoById(pids []string) []*hv.PkgInfo {
 	q := connDb()
 	defer q.Close()
 
-	pinfos := make([]*PkgInfo, 0, len(pids))
+	pinfos := make([]*hv.PkgInfo, 0, len(pids))
 	for _, v := range pids {
 		pid, _ := strconv.ParseInt(v, 10, 64)
 		if pid > 0 {
-			pinfo := new(PkgInfo)
+			pinfo := new(hv.PkgInfo)
 			err := q.WhereEqual("id", pid).Find(pinfo)
 			if err == nil {
 				pinfos = append(pinfos, pinfo)
@@ -146,7 +147,7 @@ func GetGroupPkgInfoById(pids []string) []*PkgInfo {
 }
 
 // GetIndexPkgs returns package information in given page.
-func GetIndexPkgs(page int) (pkgs []*PkgInfo) {
+func GetIndexPkgs(page int) (pkgs []*hv.PkgInfo) {
 	q := connDb()
 	defer q.Close()
 

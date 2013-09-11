@@ -40,26 +40,6 @@ import (
 	"github.com/astaxie/beego"
 )
 
-func (w *walker) readDir(dir string) ([]os.FileInfo, error) {
-	if dir != w.pdoc.ImportPath {
-		panic("unexpected")
-	}
-	fis := make([]os.FileInfo, 0, len(w.srcs))
-	for _, src := range w.srcs {
-		fis = append(fis, src)
-	}
-	return fis, nil
-}
-
-func (w *walker) openFile(path string) (io.ReadCloser, error) {
-	if strings.HasPrefix(path, w.pdoc.ImportPath+"/") {
-		if src, ok := w.srcs[path[len(w.pdoc.ImportPath)+1:]]; ok {
-			return ioutil.NopCloser(bytes.NewReader(src.data)), nil
-		}
-	}
-	panic("unexpected")
-}
-
 func simpleImporter(imports map[string]*ast.Object, path string) (*ast.Object, error) {
 	pkg := imports[path]
 	if pkg == nil {

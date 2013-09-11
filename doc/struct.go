@@ -79,35 +79,14 @@ const PACKAGE_VER = 1
 
 // Package represents full information and documentation for a package.
 type Package struct {
-	Id          int64
-	ImportPath  string
-	ProjectName string
-
-	// Tags of project.
-	Tag  string
-	Tags []string
-
-	// Synopsis and full documentation for package.
-	Synopsis string
-	Doc      string
-
 	JsNum int
 
-	IsCmd                bool
 	IsNeedRender         bool
 	IsHasExport          bool
 	IsHasConst, IsHasVar bool
 	IsHasExample         bool
 	IsHasFile            bool
 	IsHasSubdir          bool
-
-	Created           time.Time
-	Views, ViewedTime int64
-
-	Rank int64
-
-	PkgVer       int
-	Ptag, Labels string
 
 	// Top-level declarations.
 	Consts []*Value
@@ -126,39 +105,12 @@ type Package struct {
 	Files, TestFiles       []string   // Source files.
 	Dirs                   []string   // Subdirectories
 
-	Imports, TestImports []string // Imports.
-
-	ImportedNum int
-	ImportPid   string
-
 	Note string
 }
 
-// A source describles a source code file.
-type source struct {
-	name      string
-	browseURL string
-	rawURL    string
-	data      []byte
-}
-
-func (s *source) Name() string       { return s.name }
-func (s *source) Size() int64        { return int64(len(s.data)) }
-func (s *source) Mode() os.FileMode  { return 0 }
-func (s *source) ModTime() time.Time { return time.Time{} }
-func (s *source) IsDir() bool        { return false }
-func (s *source) Sys() interface{}   { return nil }
-func (s *source) RawURL() string     { return s.rawURL }
-func (s *source) Data() []byte       { return s.data }
-func (s *source) SetData(p []byte)   { s.data = p }
-
 // A walker holds the state used when building the documentation.
 type walker struct {
-	lineFmt  string
-	pdoc     *Package
-	examples []*doc.Example      // Function or method example.
-	srcLines map[string][]string // Source files with line arrays.
-	srcs     map[string]*source  // Source files.
+	examples []*doc.Example // Function or method example.
 	fset     *token.FileSet
 	buf      []byte // scratch space for printNode method.
 }

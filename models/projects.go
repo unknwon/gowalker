@@ -21,6 +21,7 @@ import (
 	"time"
 
 	"github.com/Unknwon/gowalker/utils"
+	"github.com/Unknwon/hv"
 	"github.com/astaxie/beego"
 	"github.com/coocood/qbs"
 )
@@ -33,7 +34,7 @@ import (
 		4. Rock this week
 	projects and recent updated examples.
 */
-func GetPopulars(proNum, exNum int) (error, []*PkgExam, []*PkgInfo, []*PkgInfo, []*PkgInfo, []*PkgInfo) {
+func GetPopulars(proNum, exNum int) (error, []*PkgExam, []*hv.PkgInfo, []*hv.PkgInfo, []*hv.PkgInfo, []*hv.PkgInfo) {
 	q := connDb()
 	defer q.Close()
 
@@ -44,7 +45,7 @@ func GetPopulars(proNum, exNum int) (error, []*PkgExam, []*PkgInfo, []*PkgInfo, 
 		return err, nil, nil, nil, nil, nil
 	}
 
-	var rvPros, trPros, tvPros, rtwPros []*PkgInfo
+	var rvPros, trPros, tvPros, rtwPros []*hv.PkgInfo
 	var procks []*PkgRock
 	err = q.OmitFields("ProName", "IsCmd", "Tags", "Views", "Created",
 		"Etag", "Labels", "ImportedNum", "ImportPid", "Note").
@@ -71,10 +72,10 @@ func GetPopulars(proNum, exNum int) (error, []*PkgExam, []*PkgInfo, []*PkgInfo, 
 		return err, nil, nil, nil, nil, nil
 	}
 	for _, pr := range procks {
-		rtwPros = append(rtwPros, &PkgInfo{
-			Id:   pr.Pid,
-			Path: pr.Path,
-			Rank: pr.Rank,
+		rtwPros = append(rtwPros, &hv.PkgInfo{
+			Id:         pr.Pid,
+			ImportPath: pr.Path,
+			Rank:       pr.Rank,
 		})
 	}
 	return nil, ruExs, rvPros, trPros, tvPros, rtwPros
@@ -82,13 +83,13 @@ func GetPopulars(proNum, exNum int) (error, []*PkgExam, []*PkgInfo, []*PkgInfo, 
 
 // SaveProject saves package information, declaration and functions;
 // update import information.
-func SaveProject(pinfo *PkgInfo, pdecl *PkgDecl, pfuncs []*PkgFunc, imports []string) error {
+func SaveProject(pinfo *hv.PkgInfo, pdecl *PkgDecl, pfuncs []*PkgFunc, imports []string) error {
 	q := connDb()
 	defer q.Close()
 
 	// Load package information(save after checked import information).
-	info := new(PkgInfo)
-	err := q.WhereEqual("path", pinfo.Path).Find(info)
+	info := new(hv.PkgInfo)
+	err := q.WhereEqual("import_path", pinfo.ImportPath).Find(info)
 	if err == nil {
 		pinfo.Id = info.Id
 	}
@@ -104,7 +105,7 @@ func SaveProject(pinfo *PkgInfo, pdecl *PkgDecl, pfuncs []*PkgFunc, imports []st
 		importPids := make([]string, 0, len(importeds))
 		for _, v := range importeds {
 			pid, _ := strconv.ParseInt(v, 10, 64)
-			if checkImport(q, info.Path, pid) {
+			if checkImport(q, info.ImportPath, pid) {
 				importPids = append(importPids, "$"+v)
 			}
 		}
@@ -114,11 +115,11 @@ func SaveProject(pinfo *PkgInfo, pdecl *PkgDecl, pfuncs []*PkgFunc, imports []st
 
 	_, err = q.Save(pinfo)
 	if err != nil {
-		beego.Error("models.SaveProject(", pinfo.Path, ") -> Information2:", err)
+		beego.Error("models.SaveProject(", pinfo.ImportPath, ") -> Information2:", err)
 	}
 
 	// Don't need to check standard library.
-	if imports != nil && !utils.IsGoRepoPath(pinfo.Path) {
+	if imports != nil && !utils.IsGoRepoPath(pinfo.ImportPath) {
 		// Other packages.
 		for _, v := range imports {
 			if !utils.IsGoRepoPath(v) {
@@ -141,7 +142,7 @@ func SaveProject(pinfo *PkgInfo, pdecl *PkgDecl, pfuncs []*PkgFunc, imports []st
 		pdecl.Pid = pinfo.Id
 		_, err = q.Save(pdecl)
 		if err != nil {
-			beego.Error("models.SaveProject(", pinfo.Path, ") -> Declaration:", err)
+			beego.Error("models.SaveProject(", pinfo.ImportPath, ") -> Declaration:", err)
 		}
 	}
 
@@ -175,7 +176,7 @@ func SaveProject(pinfo *PkgInfo, pdecl *PkgDecl, pfuncs []*PkgFunc, imports []st
 			pf.IsMaster = isMaster
 			_, err = q.Save(pf)
 			if err != nil {
-				beego.Error("models.SaveProject(", pinfo.Path, ") -> Update function(", pf.Name, "):", err)
+				beego.Error("models.SaveProject(", pinfo.ImportPath, ") -> Update function(", pf.Name, "):", err)
 			}
 		}
 
@@ -184,7 +185,7 @@ func SaveProject(pinfo *PkgInfo, pdecl *PkgDecl, pfuncs []*PkgFunc, imports []st
 			cond := qbs.NewCondition("pid = ?", pdecl.Id).And("is_old = ?", true)
 			_, err = q.Condition(cond).Delete(new(PkgFunc))
 			if err != nil {
-				beego.Error("models.SaveProject(", pinfo.Path, ") -> Delete functions:", err)
+				beego.Error("models.SaveProject(", pinfo.ImportPath, ") -> Delete functions:", err)
 			}
 		}
 	}
@@ -196,7 +197,7 @@ func SaveProject(pinfo *PkgInfo, pdecl *PkgDecl, pfuncs []*PkgFunc, imports []st
 
 // checkImport returns true if the package(id) imports given package(path).
 func checkImport(q *qbs.Qbs, path string, id int64) bool {
-	pinfo := &PkgInfo{
+	pinfo := &hv.PkgInfo{
 		Id: id,
 	}
 	err := q.Find(pinfo)
@@ -248,7 +249,7 @@ func DeleteProject(path string) {
 
 	var i1, i2, i3, i4, i5 int64
 	// Delete package information.
-	info := new(PkgInfo)
+	info := new(hv.PkgInfo)
 	err := q.WhereEqual("path", path).Find(info)
 	if err == nil {
 		i1, err = q.WhereEqual("path", path).Delete(info)
@@ -318,7 +319,7 @@ func DeleteProject(path string) {
 
 func updateImportInfo(q *qbs.Qbs, path string, pid int, add bool) {
 	// Save package information.
-	info := new(PkgInfo)
+	info := new(hv.PkgInfo)
 	err := q.WhereEqual("path", path).Find(info)
 	if err == nil {
 		// Check if pid exists in this project.
@@ -345,14 +346,14 @@ func updateImportInfo(q *qbs.Qbs, path string, pid int, add bool) {
 }
 
 // FlushCacheProjects saves cache data to database.
-func FlushCacheProjects(pinfos []*PkgInfo, procks []*PkgRock) {
+func FlushCacheProjects(pinfos []*hv.PkgInfo, procks []*PkgRock) {
 	q := connDb()
 	defer q.Close()
 
 	// Update project data.
 	for _, p := range pinfos {
-		info := new(PkgInfo)
-		err := q.WhereEqual("path", p.Path).Find(info)
+		info := new(hv.PkgInfo)
+		err := q.WhereEqual("import_path", p.ImportPath).Find(info)
 		if err == nil {
 			// Shoule always be nil, just in case not exist.
 			p.Id = info.Id
@@ -363,7 +364,7 @@ func FlushCacheProjects(pinfos []*PkgInfo, procks []*PkgRock) {
 		}
 		_, err = q.Save(p)
 		if err != nil {
-			beego.Error("models.FlushCacheProjects(", p.Path, ") ->", err)
+			beego.Error("models.FlushCacheProjects(", p.ImportPath, ") ->", err)
 		}
 	}
 
