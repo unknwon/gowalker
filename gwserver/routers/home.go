@@ -21,6 +21,7 @@ import (
 
 	"github.com/Unknwon/gowalker/models"
 	"github.com/Unknwon/gowalker/utils"
+	"github.com/Unknwon/hv"
 )
 
 var (
@@ -28,7 +29,7 @@ var (
 	maxExamNum    = 15
 
 	recentUpdatedExs                                       []*models.PkgExam
-	recentViewedPros, topRankPros, topViewedPros, RockPros []*models.PkgInfo
+	recentViewedPros, topRankPros, topViewedPros, RockPros []*hv.PkgInfo
 )
 
 // initPopPros initializes popular projects.

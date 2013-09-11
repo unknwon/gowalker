@@ -18,7 +18,7 @@ body {
 	width: 1000px;
 }
 .navbar-nav > li > a {
-    padding-bottom: 17px;
+    padding-bottom: 13px;
 }
 .navbar-brand {
 	padding-left: 0px;
@@ -29,6 +29,12 @@ body {
 }
 .navbar-nav > li {
   float: left;
+}
+.navbar-fixed-top {
+	max-height: 50px;
+}
+.navbar-form {
+	margin-top: 6px;
 }
 /* Redeclare since we override the float above */
 .navbar-nav.navbar-right {

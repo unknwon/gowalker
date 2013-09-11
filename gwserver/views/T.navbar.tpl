@@ -48,16 +48,25 @@
 			</li>
 		</ul>
 		<div class="navbar-right">
+			<ul class="nav navbar-nav">
+				<li>
+					<a href="">
+						{{if .IsLogin}}
+						<button class="btn" style="margin-top: -5px;" onclick="return redirToLogin('?op=exit');">Log out</button>
+						{{else}}
+						<button class="btn" style="margin-top: -5px;" onclick="return redirToLogin('');">Log in</button>
+						{{end}}
+						{{template "navbar_js"}}
+					</a>
+				</li>
+			</ul>
+		</div>
+
+		<div class="navbar-right">
 			<form  class="navbar-form form-inline" action="/">
 				<div class="form-group">
 					<input type="text" class="form-control" placeholder="Search" name="q">
 				</div>
-				{{if .IsLogin}}
-				<button class="btn" onclick="return redirToLogin('?op=exit');">Log out</button>
-				{{else}}
-				<button class="btn" onclick="return redirToLogin('');">Log in</button>
-				{{end}}
-				{{template "navbar_js"}}
 			</form>
 		</div>
 	</div>
@@ -114,16 +123,25 @@
 			</li>
 		</ul>
 		<div class="navbar-right">
+			<ul class="nav navbar-nav">
+				<li>
+					<a href="">
+						{{if .IsLogin}}
+						<button class="btn btn-default btn-sm" style="margin-top: -5px;" onclick="return redirToLogin('?op=exit');">退出</button>
+						{{else}}
+						<button class="btn btn-default btn-sm" style="margin-top: -5px;" onclick="return redirToLogin('');">登录</button>
+						{{end}}
+						{{template "navbar_js"}}
+					</a>
+				</li>
+			</ul>
+		</div>
+
+		<div class="navbar-right">
 			<form  class="navbar-form form-inline" action="/">
 				<div class="form-group">
 					<input type="text" class="form-control" placeholder="搜索" name="q">
 				</div>
-				{{if .IsLogin}}
-				<button class="btn btn-default btn-sm" onclick="return redirToLogin('?op=exit');">退出</button>
-				{{else}}
-				<button class="btn btn-default btn-sm" onclick="return redirToLogin('');">登录</button>
-				{{end}}
-				{{template "navbar_js"}}
 			</form>
 		</div>
 	</div>

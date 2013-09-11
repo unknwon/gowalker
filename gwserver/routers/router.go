@@ -23,6 +23,7 @@ import (
 
 	"github.com/Unknwon/gowalker/models"
 	"github.com/Unknwon/gowalker/utils"
+	"github.com/Unknwon/hv"
 	"github.com/astaxie/beego"
 )
 
@@ -71,7 +72,7 @@ func (this *baseRouter) Prepare() {
 var (
 	refreshCount int
 	cacheTicker  *time.Ticker
-	cachePros    []*models.PkgInfo
+	cachePros    []*hv.PkgInfo
 )
 
 func InitRouter() {
@@ -133,11 +134,11 @@ func flushCache() {
 	for _, p := range cachePros {
 		rtwPros = append(rtwPros, &models.PkgRock{
 			Pid:  p.Id,
-			Path: p.Path,
+			Path: p.ImportPath,
 			Rank: p.Rank,
 		})
 	}
 	models.FlushCacheProjects(cachePros, rtwPros)
 
-	cachePros = make([]*models.PkgInfo, 0, num)
+	cachePros = make([]*hv.PkgInfo, 0, num)
 }
