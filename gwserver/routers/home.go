@@ -75,10 +75,6 @@ func (this *HomeRouter) Get() {
 		return
 	}
 
-	// Get language.
-	curLang, _ := this.Data["LangVer"].(utils.LangType)
-	this.TplNames = "home_" + curLang.Lang + ".html"
-
 	// User History.
 	urpids, _ := this.Ctx.Request.Cookie("UserHistory")
 	urpts, _ := this.Ctx.Request.Cookie("UHTimestamps")
@@ -93,6 +89,7 @@ func (this *HomeRouter) Get() {
 
 func serveHome(this *HomeRouter, urpids, urpts *http.Cookie) {
 	this.Data["IsHome"] = true
+	this.TplNames = "home.html"
 
 	// Global Recent projects.
 	this.Data["GlobalHistory"] = recentViewedPros

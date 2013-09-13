@@ -74,7 +74,7 @@ func SetLangVer(ctx *context.Context, input url.Values, data map[interface{}]int
 
 	// 4. DefaucurLang language is English.
 	if len(lang) == 0 {
-		lang = "en"
+		lang = "en-US"
 		isNeedRedir = false
 	}
 

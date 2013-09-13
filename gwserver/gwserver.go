@@ -16,16 +16,19 @@
 package main
 
 import (
+	"os"
 	"strings"
 
+	c "github.com/Unknwon/com"
 	"github.com/Unknwon/gowalker/gwserver/routers"
 	"github.com/Unknwon/gowalker/models"
 	"github.com/Unknwon/gowalker/utils"
 	"github.com/astaxie/beego"
+	"github.com/beego/i18n"
 )
 
 const (
-	APP_VER = "1.0.0.0911"
+	APP_VER = "1.0.0.0912"
 )
 
 // We have to call a initialize function manully
@@ -36,6 +39,10 @@ func initialize() {
 	err := utils.LoadConfig("conf/app.ini")
 	if err != nil {
 		panic("Fail to load configuration file: " + err.Error())
+	}
+	err = i18n.SetMessage("conf/message.ini")
+	if err != nil {
+		panic("Fail to set message file: " + err.Error())
 	}
 
 	// Initialize data.
@@ -55,6 +62,10 @@ func initialize() {
 		beego.SetLevel(beego.LevelInfo)
 		beego.Info("Product mode enabled")
 		beego.Info(beego.AppName, APP_VER)
+
+		os.Mkdir("../log", os.ModePerm)
+		beego.BeeLogger.SetLogger("file", "../log/server")
+		c.ColorLog("ok")
 	}
 }
 
@@ -65,14 +76,26 @@ func main() {
 
 	// Register routers.
 	beego.Router("/", &routers.HomeRouter{})
+	// beego.Router("/refresh", &routers.RefreshRouter{})
 	beego.Router("/search", &routers.SearchRouter{})
-	beego.Router("/:all", &routers.HomeRouter{})
+	// beego.Router("/index", &routers.IndexRouter{})
+	// beego.Router("/label", &routers.LabelsRouter{})
+	// beego.Router("/function", &routers.FuncsRouter{})
+	// beego.Router("/example", &routers.ExamplesRouter{})
+	// beego.Router("/about", &routers.AboutRouter{})
 
 	// Register template functions.
+	beego.AddFuncMap("i18n", i18n.Tr)
+	beego.AddFuncMap("isEqualS", isEqualS)
 
 	// "robot.txt"
 	beego.Router("/robot.txt", &routers.RobotRouter{})
 
 	// For all unknown pages.
+	beego.Router("/:all", &routers.HomeRouter{})
 	beego.Run()
+}
+
+func isEqualS(s1, s2 string) bool {
+	return s1 == s2
 }
