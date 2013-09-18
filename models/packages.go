@@ -51,19 +51,21 @@ func GetPkgInfo(path, tag string) (*hv.PkgInfo, error) {
 	defer q.Close()
 
 	pinfo := new(hv.PkgInfo)
-	err := q.WhereEqual("path", path).Find(pinfo)
+	err := q.WhereEqual("import_path", path).Find(pinfo)
 	if err != nil {
 		return pinfo, errors.New(
 			fmt.Sprintf("models.GetPkgInfo( %s:%s ) -> 'PkgInfo': %s", path, tag, err))
 	}
 
 	ptag := new(PkgTag)
-	err = q.WhereEqual("path", packer.GetProjectPath(path)).Find(ptag)
+	err = q.WhereEqual("import_path", packer.GetProjectPath(path)).Find(ptag)
 	if err != nil {
 		return pinfo, errors.New(
 			fmt.Sprintf("models.GetPkgInfo( %s:%s ) -> 'PkgTag': %s", path, tag, err))
 	}
+	pinfo.Vcs = ptag.Vcs
 	pinfo.Ptag = ptag.Ptag
+	pinfo.Tags = ptag.Tags
 
 	// Only 'PkgInfo' cannot prove that package exists,
 	// we have to check 'PkgDecl' as well in case it was deleted by mistake.

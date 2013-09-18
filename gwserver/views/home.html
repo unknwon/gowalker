@@ -12,7 +12,7 @@
 
    		<form class="form-inline" action="/">
     		<div class="form-group col-md-6">
-            	<input autocomplete="off" class="form-control" type="text" placeholder="{{i18n .Lang "Type import path to add and view or use keywords to search"}}" name="q" data-source="[{{str2html .GoReposSrc}}]" data-items="10" data-provide="typeahead">
+            	<input autocomplete="off" class="typeahead form-control" type="text" placeholder="{{i18n .Lang "Type import path to add and view or use keywords to search"}}" name="q" style="position: relative; display: inline-block; direction: ltr;">
             </div>
             <button class="btn btn-success btn-lg" style="border-radius: 0px;" type="submit"><i class="icon-search"></i> {{i18n .Lang "I'm feeling lucky"}}</button>
     	</form>
@@ -27,7 +27,7 @@
 			<p>
 				Go Walker Server generates <a target="_blank" href="http://golang.org/">Go</a> projects API documentation and
 				<button class="btn feature" title=""
-				        data-content="Hacker view allows you study a Go project without any installation, and with awesome features like 'jump to definition' and 'find usage'."
+				        data-content="Hacker view allows you study a Go project without any installation, and with awesome features like 'jump to definition'."
 				        data-placement="top" data-toggle="popover" data-original-title="Hacker View">Hacker View</button>
 				on the fly for the projects on <b><a target="_blank" href="https://bitbucket.org/">Bitbucket</a></b>, <b><a target="_blank" href="https://github.com/">GitHub</a></b>, <b><a target="_blank" href="http://code.google.com/">Google Code</a></b>, <b><a target="_blank" href="https://launchpad.net/">Launchpad</a></b>, <b><a target="_blank" href="https://gitcafe.com/">GitCafe</a></b> and <b><a target="_blank" href="http://git.oschina.net/">Git @ OSC</a></b>.
 			</p>
@@ -63,7 +63,7 @@
             <p>
                 Go Walker 服务器可以在线生成并浏览 <a target="_blank" href="http://docs.studygolang.com/">Go</a> 项目 API 文档及
                 <button class="btn feature" title=""
-                        data-content="黑客视图允许您不需要进行任何安装操作即可学习研究任何 Go 项目，同时提供 '跳转到定义' 和 '寻找用例' 等超强特性。"
+                        data-content="黑客视图允许您不需要进行任何安装操作即可学习研究任何 Go 项目，同时提供 '跳转到定义' 等超强特性。"
                         data-placement="top" data-toggle="popover" data-original-title="黑客视图">黑客视图</button>
                 ，目前已支持包括 <b><a target="_blank" href="https://bitbucket.org/">Bitbucket</a></b>、<b><a target="_blank" href="https://github.com/">GitHub</a></b>、<b><a target="_blank" href="http://code.google.com/">Google Code</a></b>、<b><a target="_blank" href="https://launchpad.net/">Launchpad</a></b>、<b><a target="_blank" href="https://gitcafe.com/">GitCafe</a></b>  和 <b><a target="_blank" href="http://git.oschina.net/">Git @ OSC</a></b> 在内的六大代码托管平台。
             </p>
@@ -112,10 +112,10 @@
                                 <a title="{{i18n $lang "Refs"}}: {{.RefProNum}}/{{.RefNum}}  {{i18n $lang "Rank"}}: {{.Rank}}  {{i18n $lang "Views"}}: {{.Views}}{{$newLine}}{{i18n $lang "Issues"}}: {{.Issues}}  {{i18n $lang "Stars"}}: {{.Stars}}  {{i18n $lang "Forks"}}: {{.Forks}}{{$newLine}}{{i18n $lang "Intro"}}: {{.Synopsis}}" href="/{{.ImportPath}}">{{.ImportPath}}</a>
 
                                 {{if .IsGoRepo}}
-                                <span class="label label-info">{{i18n .Lang "Standard"}}</span>
+                                <span class="label label-info">{{i18n $lang "Standard"}}</span>
                                 {{end}}        
                                 {{if .IsGoSubrepo}}
-                                <span class="label label-info">{{i18n .Lang "Official"}}</span>
+                                <span class="label label-info">{{i18n $lang "Official"}}</span>
                                 {{end}}
                             </td>
 
@@ -248,6 +248,10 @@
                 <li>
                     <a href="#more_sites" data-toggle="tab">{{i18n .Lang "Sites"}}</a>
                 </li>
+
+                <li>
+                    <a href="#more_tools" data-toggle="tab">{{i18n .Lang "Tools"}}</a>
+                </li>
             </ul>
 
             <div class="tab-content" style="padding-top: 10px;">
@@ -270,6 +274,11 @@
                         <li>
                         	<a target="_blank" href="https://code.google.com/p/go-wiki/wiki/Projects">Projects @ go-wiki</a>
                         </li>
+
+                        <li>
+                            <a href="/index/gosubrepos">Go Search</a>
+                            - {{i18n .Lang "even more stuff"}}
+                        </li>
                     </ul>
                 </div>
 
@@ -291,6 +300,20 @@
                         <li>
                         	<a target="_blank" href="http://sudochina.com">速动中国</a>
                         	- Go 语言技术分享博客站
+                        </li>
+                    </ul>
+                </div>
+
+                <div id="more_tools" class="tab-pane fade">
+                    <ul class="unstyled">
+                        <li>
+                            <a target="_blank" href="http://regoio.herokuapp.com/">Rego</a>
+                            - {{i18n .Lang "online Go regular expression tester"}}
+                        </li>
+
+                        <li>
+                            <a target="_blank" href="https://github.com/visualfc/liteide">LiteIDE</a>
+                            - {{i18n .Lang "the best IDE for Go development"}}
                         </li>
                     </ul>
                 </div>

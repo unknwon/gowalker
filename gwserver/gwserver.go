@@ -19,7 +19,7 @@ import (
 	"os"
 	"strings"
 
-	c "github.com/Unknwon/com"
+	"github.com/Unknwon/gowalker/doc"
 	"github.com/Unknwon/gowalker/gwserver/routers"
 	"github.com/Unknwon/gowalker/models"
 	"github.com/Unknwon/gowalker/utils"
@@ -28,7 +28,7 @@ import (
 )
 
 const (
-	APP_VER = "1.0.0.0912"
+	APP_VER = "1.0.0.0917"
 )
 
 // We have to call a initialize function manully
@@ -65,8 +65,10 @@ func initialize() {
 
 		os.Mkdir("../log", os.ModePerm)
 		beego.BeeLogger.SetLogger("file", "../log/server")
-		c.ColorLog("ok")
 	}
+
+	doc.SetGithubCredentials(utils.Cfg.MustValue("github", "client_id"),
+		utils.Cfg.MustValue("github", "client_secret"))
 }
 
 func main() {

@@ -25,6 +25,7 @@ import (
 
 	"github.com/Unknwon/com"
 	"github.com/Unknwon/gowalker/utils"
+	"github.com/Unknwon/hv"
 )
 
 var (
@@ -32,7 +33,7 @@ var (
 	oscPattern = regexp.MustCompile(`^git\.oschina\.net/(?P<owner>[a-z0-9A-Z_.\-]+)/(?P<repo>[a-z0-9A-Z_.\-]+)(?P<dir>/[a-z0-9A-Z_.\-/]*)?$`)
 )
 
-func getOSCDoc(client *http.Client, match map[string]string, tag, savedEtag string) (*Package, error) {
+func getOSCDoc(client *http.Client, match map[string]string, tag, savedEtag string) (*hv.Package, error) {
 	if len(tag) == 0 {
 		match["tag"] = "master"
 	} else {
@@ -100,11 +101,11 @@ func getOSCDoc(client *http.Client, match map[string]string, tag, savedEtag stri
 					return nil, errors.New("doc.getOSCDoc(" + match["importPath"] + ") -> read file: " + err.Error())
 				}
 
-				files = append(files, &source{
-					name:      fn,
-					browseURL: com.Expand("http://git.oschina.net/{owner}/{repo}/blob/{tag}/{0}", match, fileName),
-					rawURL:    com.Expand("http://git.oschina.net/{owner}/{repo}/raw/{tag}/{0}", match, fileName[preLen:]),
-					data:      p,
+				files = append(files, &hv.Source{
+					SrcName:   fn,
+					BrowseUrl: com.Expand("http://git.oschina.net/{owner}/{repo}/blob/{tag}/{0}", match, fileName),
+					RawSrcUrl: com.Expand("http://git.oschina.net/{owner}/{repo}/raw/{tag}/{0}", match, fileName[preLen:]),
+					SrcData:   p,
 				})
 			} else {
 				sd, _ := path.Split(d[preLen:])
@@ -128,18 +129,34 @@ func getOSCDoc(client *http.Client, match map[string]string, tag, savedEtag stri
 	tags := getOSCTags(client, match["importPath"])
 
 	// Start generating data.
-	w := &walker{
-		lineFmt: "#L%d",
-		pdoc: &Package{
-			ImportPath:  match["importPath"],
-			ProjectName: match["repo"],
-			Tags:        tags,
-			Tag:         tag,
-			Ptag:        commit,
-			Dirs:        dirs,
+	w := &hv.Walker{
+		LineFmt: "#L%d",
+		Pdoc: &hv.Package{
+			PkgInfo: &hv.PkgInfo{
+				ImportPath:  match["importPath"],
+				ProjectName: match["repo"],
+				Tags:        strings.Join(tags, "|||"),
+				Ptag:        commit,
+			},
+			PkgDecl: &hv.PkgDecl{
+				Tag:  tag,
+				Dirs: dirs,
+			},
 		},
 	}
-	return w.build(files)
+
+	srcs := make([]*hv.Source, 0, len(files))
+	for _, f := range files {
+		s, _ := f.(*hv.Source)
+		srcs = append(srcs, s)
+	}
+
+	return w.Build(&hv.WalkRes{
+		WalkDepth: hv.WD_All,
+		WalkType:  hv.WT_Memory,
+		WalkMode:  hv.WM_All,
+		Srcs:      srcs,
+	})
 }
 
 func getOSCTags(client *http.Client, importPath string) []string {

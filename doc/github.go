@@ -24,6 +24,7 @@ import (
 
 	"github.com/Unknwon/com"
 	"github.com/Unknwon/gowalker/utils"
+	"github.com/Unknwon/hv"
 )
 
 var (
@@ -32,12 +33,7 @@ var (
 	githubCred      string
 )
 
-func init() {
-	setGithubCredentials(utils.Cfg.MustValue("github", "client_id"),
-		utils.Cfg.MustValue("github", "client_secret"))
-}
-
-func setGithubCredentials(id, secret string) {
+func SetGithubCredentials(id, secret string) {
 	githubCred = "client_id=" + id + "&client_secret=" + secret
 }
 
@@ -45,7 +41,7 @@ func GetGithubCredentials() string {
 	return githubCred
 }
 
-func getGithubDoc(client *http.Client, match map[string]string, tag, savedEtag string) (*Package, error) {
+func getGithubDoc(client *http.Client, match map[string]string, tag, savedEtag string) (*hv.Package, error) {
 	match["cred"] = githubCred
 
 	// Get master commit.
@@ -147,10 +143,10 @@ func getGithubDoc(client *http.Client, match map[string]string, tag, savedEtag s
 				if !isRootPath && !isGoPro && strings.HasSuffix(f, ".go") {
 					isGoPro = true
 				}
-				files = append(files, &source{
-					name:      f,
-					browseURL: com.Expand("https://github.com/{owner}/{repo}/blob/{tag}/{0}", match, node.Path),
-					rawURL:    node.Url + "?" + githubCred,
+				files = append(files, &hv.Source{
+					SrcName:   f,
+					BrowseUrl: com.Expand("https://github.com/{owner}/{repo}/blob/{tag}/{0}", match, node.Path),
+					RawSrcUrl: node.Url + "?" + githubCred,
 				})
 			} else {
 				sd, _ := path.Split(d[preLen:])
@@ -187,20 +183,36 @@ func getGithubDoc(client *http.Client, match map[string]string, tag, savedEtag s
 	// }
 
 	// Start generating data.
-	w := &walker{
-		lineFmt: "#L%d",
-		pdoc: &Package{
-			ImportPath:  match["importPath"],
-			ProjectName: match["repo"],
-			Tags:        tags,
-			Tag:         tag,
-			Ptag:        commit,
-			Dirs:        dirs,
+	w := &hv.Walker{
+		LineFmt: "#L%d",
+		Pdoc: &hv.Package{
+			PkgInfo: &hv.PkgInfo{
+				ImportPath:  match["importPath"],
+				ProjectName: match["repo"],
+				Tags:        strings.Join(tags, "|||"),
+				Ptag:        commit,
+			},
+			PkgDecl: &hv.PkgDecl{
+				Tag:  tag,
+				Dirs: dirs,
+			},
 			//Note: strconv.Itoa(note.Forks) + "|" +
 			//	strconv.Itoa(note.Watchers) + "|",
 		},
 	}
-	return w.build(files)
+
+	srcs := make([]*hv.Source, 0, len(files))
+	for _, f := range files {
+		s, _ := f.(*hv.Source)
+		srcs = append(srcs, s)
+	}
+
+	return w.Build(&hv.WalkRes{
+		WalkDepth: hv.WD_All,
+		WalkType:  hv.WT_Memory,
+		WalkMode:  hv.WM_All,
+		Srcs:      srcs,
+	})
 }
 
 // checkDir checks if directory has been appended to slice.

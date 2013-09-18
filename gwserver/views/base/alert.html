@@ -1,4 +1,4 @@
-<div class="alert">
+<!-- <div class="alert">
     <button type="button" class="close" data-dismiss="alert">&times;</button>
     {{if isEqualS .Lang "en-US"}}
     <strong>Attention!</strong> 
@@ -9,19 +9,19 @@
     <strong>特别通知</strong> 
     Go 步行者服务器将于 <span class="label label-important">2013.9.3 - 2013.9.4</span> 期间进行升级，届时您将无法访问，感谢您的支持！
     {{end}}
-</div>
+</div> -->
 
 {{if .IsBeta}}
 <div class="alert">
     <button type="button" class="close" data-dismiss="alert">&times;</button>
     {{if isEqualS .Lang "en-US"}}
     <strong>Warning!</strong> 
-    This is the <span class="label label-important">Beta</span> version of new release of Go Walker, errors may occur at any time(old data will be imported in few days).
+    Go Walker Server is running under <span class="label label-important">Beta</span> version, if errors occur please submit on <a target="_blank" href="https://github.com/Unknwon/gowalker/issues?state=open">GitHub</a> (old data will be imported in few days).
     {{end}}
 
     {{if isEqualS .Lang "zh-CN"}}
     <strong>注意事项</strong> 
-    当前运行的 Go Walker 版本为 <span class="label label-important">测试版</span>，任何错误都有可能发生（旧版本的数据将会在几天内导入）.
+    当前运行的 Go Walker 服务器为 <span class="label label-important">测试版</span>，如果发生错误请提交至 <a target="_blank" href="https://github.com/Unknwon/gowalker/issues?state=open">GitHub</a>（旧版本的数据将会在几天内导入）.
     {{end}}
 </div>
 {{end}}

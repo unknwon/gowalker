@@ -29,6 +29,7 @@
 		<div class="col-xs-8 col-md-8" style="width: {{if .IsHome}}440{{else}}600{{end}}px;">
 			<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
 			<script type="text/javascript" src="/static/js/bootstrap.min.js"></script>
+			<script type="text/javascript" src="/static/js/typeahead.min.js"></script>
 			<script type='text/javascript' src='/static/js/gwserver.js'></script>
 
 			<p><strong>{{i18n .Lang "Copyright"}} © 2013 Go Walker</strong></p>
@@ -100,11 +101,20 @@
 	</div>
 </div>
 
+<link href="/static/css/typeahead.js-bootstrap.css" rel="stylesheet" />
+
 <script >
 	// Call popover for features.
 	$(function () {
 	    $('.feature').popover()
 	})
+	
+    $('.typeahead').typeahead({
+        prefetch: '/static/js/query.json',
+        limit: 10
+    });
+    
+    $('.tt-query').css('background-color','#fff');
 </script>
 <script type="text/javascript" src="https://apis.google.com/js/plusone.js"></script>
 {{else}}

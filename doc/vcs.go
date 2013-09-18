@@ -27,6 +27,7 @@ import (
 
 	"github.com/Unknwon/com"
 	"github.com/Unknwon/gowalker/utils"
+	"github.com/Unknwon/hv"
 )
 
 // TODO: specify with command line flag
@@ -154,7 +155,7 @@ func downloadGit(schemes []string, repo, savedEtag string) (string, string, erro
 
 var vcsPattern = regexp.MustCompile(`^(?P<repo>(?:[a-z0-9.\-]+\.)+[a-z0-9.\-]+(?::[0-9]+)?/[A-Za-z0-9_.\-/]*?)\.(?P<vcs>bzr|git|hg|svn)(?P<dir>/[A-Za-z0-9_.\-/]*)?$`)
 
-func getVCSDoc(client *http.Client, match map[string]string, etagSaved string) (*Package, error) {
+func getVCSDoc(client *http.Client, match map[string]string, etagSaved string) (*hv.Package, error) {
 	cmd := vcsCmds[match["vcs"]]
 	if cmd == nil {
 		return nil, com.NotFoundError{com.Expand("VCS not supported: {vcs}", match)}
@@ -214,25 +215,39 @@ func getVCSDoc(client *http.Client, match map[string]string, etagSaved string) (
 		if err != nil {
 			return nil, err
 		}
-		files = append(files, &source{
-			name:      fi.Name(),
-			browseURL: com.Expand(urlTemplate, urlMatch, fi.Name()),
-			data:      b,
+		files = append(files, &hv.Source{
+			SrcName:   fi.Name(),
+			BrowseUrl: com.Expand(urlTemplate, urlMatch, fi.Name()),
+			SrcData:   b,
 		})
 	}
 
 	// Start generating data.
-	w := &walker{
-		lineFmt: lineFmt,
-		pdoc: &Package{
-			ImportPath:  match["importPath"],
-			ProjectName: path.Base(match["repo"]),
+	w := &hv.Walker{
+		LineFmt: lineFmt,
+		Pdoc: &hv.Package{
+			PkgInfo: &hv.PkgInfo{
+				ImportPath:  match["importPath"],
+				ProjectName: match["repo"],
+			},
 		},
 	}
-	return w.build(files)
+
+	srcs := make([]*hv.Source, 0, len(files))
+	for _, f := range files {
+		s, _ := f.(*hv.Source)
+		srcs = append(srcs, s)
+	}
+
+	return w.Build(&hv.WalkRes{
+		WalkDepth: hv.WD_All,
+		WalkType:  hv.WT_Memory,
+		WalkMode:  hv.WM_All,
+		Srcs:      srcs,
+	})
 }
 
-var defaultTags = map[string]string{"git": "master", "hg": "default"}
+var defaultTags = map[string]string{"git": "master", "hg": "default", "svn": "trunk"}
 
 func bestTag(tags map[string]string, defaultTag string) (string, string, error) {
 	if commit, ok := tags["go1"]; ok {

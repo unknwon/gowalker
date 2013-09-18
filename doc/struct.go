@@ -15,31 +15,12 @@
 
 package doc
 
-import (
-	"go/doc"
-	"go/token"
-	"os"
-	"time"
-)
-
-var (
-	Public  = 1
-	private = 2
-)
-
 // Package represents full information and documentation for a package.
-type Package struct {
-	JsNum int
+// type Package struct {
 
-	IsNeedRender         bool
-	IsHasExport          bool
-	IsHasConst, IsHasVar bool
-	IsHasExample         bool
-	IsHasFile            bool
-	IsHasSubdir          bool
-
-	Notes []string // Source code notes.
-	Dirs  []string // Subdirectories
-
-	Note string
-}
+// 	IsHasExport          bool
+// 	IsHasConst, IsHasVar bool
+// 	IsHasExample         bool
+// 	IsHasFile            bool
+// 	IsHasSubdir          bool
+// }

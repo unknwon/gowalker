@@ -30,6 +30,7 @@ import (
 
 	"github.com/Unknwon/com"
 	"github.com/Unknwon/gowalker/utils"
+	"github.com/Unknwon/hv"
 )
 
 type byHash []byte
@@ -47,7 +48,7 @@ func (p byHash) Swap(i, j int) {
 
 var launchpadPattern = regexp.MustCompile(`^launchpad\.net/(?P<repo>(?P<project>[a-z0-9A-Z_.\-]+)(?P<series>/[a-z0-9A-Z_.\-]+)?|~[a-z0-9A-Z_.\-]+/(\+junk|[a-z0-9A-Z_.\-]+)/[a-z0-9A-Z_.\-]+)(?P<dir>/[a-z0-9A-Z_.\-/]+)*$`)
 
-func getLaunchpadDoc(client *http.Client, match map[string]string, tag, savedEtag string) (*Package, error) {
+func getLaunchpadDoc(client *http.Client, match map[string]string, tag, savedEtag string) (*hv.Package, error) {
 
 	if match["project"] != "" && match["series"] != "" {
 		rc, err := com.HttpGet(client, com.Expand("https://code.launchpad.net/{project}{series}/.bzr/branch-format", match), nil)
@@ -124,10 +125,10 @@ func getLaunchpadDoc(client *http.Client, match map[string]string, tag, savedEta
 				if !isRootPath && !isGoPro && strings.HasSuffix(f, ".go") {
 					isGoPro = true
 				}
-				files = append(files, &source{
-					name:      f,
-					browseURL: com.Expand("http://bazaar.launchpad.net/+branch/{repo}/view/head:{dir}/{0}", match, f),
-					data:      b})
+				files = append(files, &hv.Source{
+					SrcName:   f,
+					BrowseUrl: com.Expand("http://bazaar.launchpad.net/+branch/{repo}/view/head:{dir}/{0}", match, f),
+					SrcData:   b})
 			} else {
 				sd, _ := path.Split(d[preLen:])
 				sd = strings.TrimSuffix(sd, "/")
@@ -156,14 +157,30 @@ func getLaunchpadDoc(client *http.Client, match map[string]string, tag, savedEta
 	}
 
 	// Start generating data.
-	w := &walker{
-		lineFmt: "#L%d",
-		pdoc: &Package{
-			ImportPath:  match["importPath"],
-			ProjectName: match["repo"],
-			Ptag:        etag,
-			Dirs:        dirs,
+	w := &hv.Walker{
+		LineFmt: "#L%d",
+		Pdoc: &hv.Package{
+			PkgInfo: &hv.PkgInfo{
+				ImportPath:  match["importPath"],
+				ProjectName: match["repo"],
+				Ptag:        etag,
+			},
+			PkgDecl: &hv.PkgDecl{
+				Dirs: dirs,
+			},
 		},
 	}
-	return w.build(files)
+
+	srcs := make([]*hv.Source, 0, len(files))
+	for _, f := range files {
+		s, _ := f.(*hv.Source)
+		srcs = append(srcs, s)
+	}
+
+	return w.Build(&hv.WalkRes{
+		WalkDepth: hv.WD_All,
+		WalkType:  hv.WT_Memory,
+		WalkMode:  hv.WM_All,
+		Srcs:      srcs,
+	})
 }

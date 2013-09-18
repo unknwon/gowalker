@@ -32,25 +32,27 @@ import (
 	"github.com/Unknwon/ctw/packer"
 	"github.com/Unknwon/gowalker/models"
 	"github.com/Unknwon/gowalker/utils"
+	"github.com/Unknwon/hv"
+	"github.com/astaxie/beego"
 )
 
 type crawlResult struct {
-	pdoc *Package
+	pdoc *hv.Package
 	err  error
 }
 
 // crawlDoc fetchs package from VCS and returns 'Package' by given import path and tag.
 // It returns error when error occurs in the underlying functions.
-func crawlDoc(path, tag string, pinfo *models.PkgInfo) (pdoc *Package, err error) {
-	var pdocNew *Package
+func crawlDoc(path, tag string, pinfo *hv.PkgInfo) (pdoc *hv.Package, err error) {
+	var pdocNew *hv.Package
 	pdocNew, err = getRepo(packer.HttpClient, path, tag, pinfo.Ptag)
 
 	if err != errNotModified && pdocNew != nil {
 		pdoc = pdocNew
 		pdoc.Views = pinfo.Views
 		pdoc.Labels = pinfo.Labels
-		pdoc.ImportedNum = pinfo.ImportedNum
-		pdoc.ImportPid = pinfo.ImportPid
+		pdoc.RefNum = pinfo.RefNum
+		pdoc.RefPids = pinfo.RefPids
 		pdoc.Rank = pinfo.Rank
 	}
 
@@ -58,6 +60,10 @@ func crawlDoc(path, tag string, pinfo *models.PkgInfo) (pdoc *Package, err error
 	case err == nil:
 		// Let upper level to render doc. page.
 		return pdoc, nil
+	case err == errNoMatch:
+		beego.Error("doc.crawlDoc ->", err)
+		err = nil
+		pdoc = nil
 	case isNotFound(err):
 		// We do not need to delete standard library,
 		// so here skip it by not found.
@@ -73,7 +79,7 @@ func crawlDoc(path, tag string, pinfo *models.PkgInfo) (pdoc *Package, err error
 
 // getRepo downloads package data and returns 'Package' by given import path and tag.
 // It returns error when error occurs in the underlying functions.
-func getRepo(client *http.Client, path, tag, ptag string) (pdoc *Package, err error) {
+func getRepo(client *http.Client, path, tag, ptag string) (pdoc *hv.Package, err error) {
 	switch {
 	case utils.IsGoRepoPath(path):
 		pdoc, err = getStandardDoc(client, path, tag, ptag)
@@ -88,13 +94,13 @@ func getRepo(client *http.Client, path, tag, ptag string) (pdoc *Package, err er
 	}
 
 	if pdoc != nil {
-		pdoc.PkgVer = PACKAGE_VER
+		pdoc.PkgVer = hv.PACKAGE_VER
 	}
 
 	return pdoc, err
 }
 
-func RenderFuncs(pdoc *Package) []*models.PkgFunc {
+func RenderFuncs(pdoc *hv.Package) []*models.PkgFunc {
 	pfuncs := make([]*models.PkgFunc, 0, len(pdoc.Funcs)+len(pdoc.Types)*3)
 
 	links := getLinks(pdoc)
@@ -126,14 +132,14 @@ func RenderFuncs(pdoc *Package) []*models.PkgFunc {
 }
 
 // SaveProject saves project information to database.
-func SaveProject(pdoc *Package, pfuncs []*models.PkgFunc) (int64, error) {
+func SaveProject(pdoc *hv.Package, pfuncs []*models.PkgFunc) (int64, error) {
 	// Save package information.
-	pinfo := &models.PkgInfo{
-		Path:        pdoc.ImportPath,
-		ProName:     pdoc.ProjectName,
+	pinfo := &hv.PkgInfo{
+		ImportPath:  pdoc.ImportPath,
+		ProjectName: pdoc.ProjectName,
 		Synopsis:    pdoc.Synopsis,
 		IsCmd:       pdoc.IsCmd,
-		Tags:        strings.Join(pdoc.Tags, "|||"),
+		Tags:        pdoc.Tags,
 		Views:       pdoc.Views,
 		ViewedTime:  time.Now().UTC().Unix(),
 		Created:     time.Now().UTC(),
@@ -141,33 +147,33 @@ func SaveProject(pdoc *Package, pfuncs []*models.PkgFunc) (int64, error) {
 		PkgVer:      pdoc.PkgVer,
 		Ptag:        pdoc.Ptag,
 		Labels:      pdoc.Labels,
-		ImportedNum: pdoc.ImportedNum,
-		ImportPid:   pdoc.ImportPid,
+		RefNum:      pdoc.RefNum,
+		RefPids:     pdoc.RefPids,
 		Note:        pdoc.Note,
 	}
-
+	_ = pinfo
 	// Save package declaration and functions.
-	pdecl := &models.PkgDecl{
-		Tag:          pdoc.Tag,
-		JsNum:        pdoc.JsNum,
-		IsHasExport:  pdoc.IsHasExport,
-		IsHasConst:   pdoc.IsHasConst,
-		IsHasVar:     pdoc.IsHasVar,
-		IsHasExample: pdoc.IsHasExample,
-		IsHasFile:    pdoc.IsHasFile,
-		IsHasSubdir:  pdoc.IsHasSubdir,
+	pdecl := &hv.PkgDecl{
+		Tag: pdoc.Tag,
+		//JsNum:        pdoc.JsNum,
+		// IsHasExport:  pdoc.IsHasExport,
+		// IsHasConst:   pdoc.IsHasConst,
+		// IsHasVar:     pdoc.IsHasVar,
+		// IsHasExample: pdoc.IsHasExample,
+		// IsHasFile:    pdoc.IsHasFile,
+		// IsHasSubdir:  pdoc.IsHasSubdir,
 	}
 
 	// Imports.
-	pdecl.Imports = strings.Join(pdoc.Imports, "|")
-	pdecl.TestImports = strings.Join(pdoc.TestImports, "|")
+	pdecl.Imports = pdoc.Imports
+	pdecl.TestImports = pdoc.TestImports
 
-	err := models.SaveProject(pinfo, pdecl, pfuncs, pdoc.Imports)
-	return pinfo.Id, err
+	//err := models.SaveProject(pinfo, pdecl, pfuncs, pdoc.Imports)
+	return 0, errors.New("doc.SaveProject -> test error")
 }
 
 // getLinks returns exported objects with its jump link.
-func getLinks(pdoc *Package) []*utils.Link {
+func getLinks(pdoc *hv.Package) []*utils.Link {
 	links := make([]*utils.Link, 0, len(pdoc.Types)+len(pdoc.Imports)+len(pdoc.Funcs)+10)
 	// Get all types, functions and import packages
 	for _, t := range pdoc.Types {
@@ -204,7 +210,7 @@ func getLinks(pdoc *Package) []*utils.Link {
 	return links
 }
 
-func addValues(buf *bytes.Buffer, pvals *string, vals []*Value) {
+func addValues(buf *bytes.Buffer, pvals *string, vals []*hv.Value) {
 	buf.Reset()
 	for _, v := range vals {
 		buf.WriteString(v.Name)
@@ -221,7 +227,7 @@ func addValues(buf *bytes.Buffer, pvals *string, vals []*Value) {
 
 // addFuncs appends functions to 'pfuncs'.
 // NOTE: it can be only use for pure functions(not belong to any type), not methods.
-func addFuncs(pfuncs []*models.PkgFunc, fs []*Func, path string, links []*utils.Link) []*models.PkgFunc {
+func addFuncs(pfuncs []*models.PkgFunc, fs []*hv.Func, path string, links []*utils.Link) []*models.PkgFunc {
 	for _, f := range fs {
 		pfuncs = addFunc(pfuncs, f, path, f.Name, links)
 	}
@@ -229,7 +235,7 @@ func addFuncs(pfuncs []*models.PkgFunc, fs []*Func, path string, links []*utils.
 }
 
 // addFunc appends a function to 'pfuncs'.
-func addFunc(pfuncs []*models.PkgFunc, f *Func, path, name string, links []*utils.Link) []*models.PkgFunc {
+func addFunc(pfuncs []*models.PkgFunc, f *hv.Func, path, name string, links []*utils.Link) []*models.PkgFunc {
 	var buf bytes.Buffer
 	f.FullName = name
 	f.Code = f.Decl + " {\n" + f.Code + "}"
@@ -252,7 +258,7 @@ func CodeEncode(code *string) *string {
 type service struct {
 	pattern *regexp.Regexp
 	prefix  string
-	get     func(*http.Client, map[string]string, string, string) (*Package, error)
+	get     func(*http.Client, map[string]string, string, string) (*hv.Package, error)
 }
 
 // services is the list of source code control services handled by gowalker.
@@ -267,7 +273,7 @@ var services = []*service{
 
 // getStatic gets a document from a statically known service. getStatic
 // returns errNoMatch if the import path is not recognized.
-func getStatic(client *http.Client, importPath, tag, etag string) (pdoc *Package, err error) {
+func getStatic(client *http.Client, importPath, tag, etag string) (pdoc *hv.Package, err error) {
 	for _, s := range services {
 		if s.get == nil || !strings.HasPrefix(importPath, s.prefix) {
 			continue
@@ -290,7 +296,7 @@ func getStatic(client *http.Client, importPath, tag, etag string) (pdoc *Package
 	return nil, errNoMatch
 }
 
-func getDynamic(client *http.Client, importPath, tag, etag string) (pdoc *Package, err error) {
+func getDynamic(client *http.Client, importPath, tag, etag string) (pdoc *hv.Package, err error) {
 	match, err := fetchMeta(client, importPath)
 	if err != nil {
 		return nil, err

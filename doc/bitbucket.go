@@ -20,9 +20,11 @@ import (
 	"net/http"
 	"path"
 	"regexp"
+	"strings"
 
 	"github.com/Unknwon/com"
 	"github.com/Unknwon/gowalker/utils"
+	"github.com/Unknwon/hv"
 )
 
 var (
@@ -30,7 +32,7 @@ var (
 	bitbucketEtagRe  = regexp.MustCompile(`^(hg|git)-`)
 )
 
-func getBitbucketDoc(client *http.Client, match map[string]string, tag, savedEtag string) (*Package, error) {
+func getBitbucketDoc(client *http.Client, match map[string]string, tag, savedEtag string) (*hv.Package, error) {
 
 	if m := bitbucketEtagRe.FindStringSubmatch(savedEtag); m != nil {
 		match["vcs"] = m[1]
@@ -99,10 +101,10 @@ func getBitbucketDoc(client *http.Client, match map[string]string, tag, savedEta
 	for _, f := range node.Files {
 		_, name := path.Split(f.Path)
 		if utils.IsDocFile(name) {
-			files = append(files, &source{
-				name:      name,
-				browseURL: com.Expand("https://bitbucket.org/{owner}/{repo}/src/{tag}/{0}", match, f.Path),
-				rawURL:    com.Expand("https://api.bitbucket.org/1.0/repositories/{owner}/{repo}/raw/{tag}/{0}", match, f.Path),
+			files = append(files, &hv.Source{
+				SrcName:   name,
+				BrowseUrl: com.Expand("https://bitbucket.org/{owner}/{repo}/src/{tag}/{0}", match, f.Path),
+				RawSrcUrl: com.Expand("https://api.bitbucket.org/1.0/repositories/{owner}/{repo}/raw/{tag}/{0}", match, f.Path),
 			})
 		}
 	}
@@ -125,16 +127,32 @@ func getBitbucketDoc(client *http.Client, match map[string]string, tag, savedEta
 	}
 
 	// Start generating data.
-	w := &walker{
-		lineFmt: "#cl-%d",
-		pdoc: &Package{
-			ImportPath:  match["importPath"],
-			ProjectName: match["repo"],
-			Tags:        tags,
-			Tag:         tag,
-			Ptag:        etag,
-			Dirs:        dirs,
+	w := &hv.Walker{
+		LineFmt: "#cl-%d",
+		Pdoc: &hv.Package{
+			PkgInfo: &hv.PkgInfo{
+				ImportPath:  match["importPath"],
+				ProjectName: match["repo"],
+				Tags:        strings.Join(tags, "|||"),
+				Ptag:        etag,
+			},
+			PkgDecl: &hv.PkgDecl{
+				Tag:  tag,
+				Dirs: dirs,
+			},
 		},
 	}
-	return w.build(files)
+
+	srcs := make([]*hv.Source, 0, len(files))
+	for _, f := range files {
+		s, _ := f.(*hv.Source)
+		srcs = append(srcs, s)
+	}
+
+	return w.Build(&hv.WalkRes{
+		WalkDepth: hv.WD_All,
+		WalkType:  hv.WT_Memory,
+		WalkMode:  hv.WM_All,
+		Srcs:      srcs,
+	})
 }

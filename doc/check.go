@@ -22,13 +22,15 @@ import (
 	"time"
 
 	"github.com/Unknwon/gowalker/models"
+	"github.com/Unknwon/hv"
 	"github.com/astaxie/beego"
 )
 
+type requestType int
+
 const (
-	// Request type.
-	HUMAN_REQUEST = iota
-	REFRESH_REQUEST
+	RT_Human requestType = iota
+	RT_Refresh
 )
 
 const (
@@ -40,39 +42,34 @@ const (
 // CheckDoc returns 'Package' by given import path and tag,
 // or fetch from the VCS and render as needed.
 // It returns error when error occurs in the underlying functions.
-func CheckDoc(path, tag string, requestType int) (*Package, error) {
+func CheckDoc(broPath, tag string, rt requestType) (*hv.Package, error) {
 	// Package documentation and crawl sign.
-	pdoc, needsCrawl := &Package{}, false
+	pdoc, needsCrawl := &hv.Package{}, false
 
 	// Trim prefix of standard library path.
-	if i := strings.Index(path, "/src/pkg/"); i > -1 {
-		path = path[i+len("/src/pkg/"):]
-	}
-
-	// For code.google.com.
-	path = strings.Replace(path, "source/browse/", "", 1)
+	broPath = strings.TrimPrefix(broPath, "code.google.com/p/go/source/browse/src/pkg/")
 
 	// Get the package info.
-	pinfo, err := models.GetPkgInfo(path, tag)
+	pinfo, err := models.GetPkgInfo(broPath, tag)
 	switch {
 	case err != nil:
+		// Error means it does not exist.
+		beego.Trace("doc.CheckDoc -> ", err)
+
 		// Check if it's "Error 1040: Too many connections"
 		if strings.Contains(err.Error(), "Error 1040:") {
 			break
 		}
-
-		// Error means it does not exist.
-		beego.Trace("doc.CheckDoc -> ", err)
 		fallthrough
-	case err != nil || pinfo.PkgVer != PACKAGE_VER:
+	case err != nil || pinfo.PkgVer != hv.PACKAGE_VER:
 		// If PACKAGE_VER does not match, refresh anyway.
 		pinfo.Ptag = ""
 		needsCrawl = true
 	default:
 		// Check request type.
-		switch requestType {
-		case HUMAN_REQUEST:
-		case REFRESH_REQUEST:
+		switch rt {
+		case RT_Human:
+		case RT_Refresh:
 			if len(tag) > 0 {
 				break // Things of Tag will not be changed.
 			}
@@ -90,7 +87,8 @@ func CheckDoc(path, tag string, requestType int) (*Package, error) {
 		// Fetch package from VCS.
 		c := make(chan crawlResult, 1)
 		go func() {
-			pdoc, err = crawlDoc(path, tag, pinfo)
+			// TODO
+			pdoc, err = crawlDoc(broPath, tag, pinfo)
 			c <- crawlResult{pdoc, err}
 		}()
 
@@ -104,46 +102,31 @@ func CheckDoc(path, tag string, requestType int) (*Package, error) {
 			err = errUpdateTimeout
 		}
 
+		if pdoc == nil {
+			return nil, err
+		}
+
 		if err == nil {
 			pdoc.IsNeedRender = true
 		} else {
 			switch {
 			case err == errNotModified:
-				beego.Info("Serving(", path, ")without modified")
-				pdoc = &Package{}
+				beego.Info("Serving(", broPath, ")without modified")
+				pdoc = &hv.Package{}
 				pinfo.Created = time.Now().UTC()
-				assginPkgInfo(pdoc, pinfo)
+				pdoc.PkgInfo = pinfo
 				return pdoc, nil
 			case pdoc != nil && len(pdoc.ImportPath) > 0:
 				return pdoc, err
 			case err == errUpdateTimeout:
 				// Handle timeout on packages never seen before as not found.
-				beego.Error("Serving(", path, ")as not found after timeout")
+				beego.Error("Serving(", broPath, ")as not found after timeout")
 				return nil, errors.New("doc.CheckDoc -> " + err.Error())
 			}
 		}
 	} else {
-		assginPkgInfo(pdoc, pinfo)
+		pdoc.PkgInfo = pinfo
 	}
 
 	return pdoc, err
-}
-
-func assginPkgInfo(pdoc *Package, pinfo *models.PkgInfo) {
-	// Assgin package information
-	pdoc.Id = pinfo.Id
-	pdoc.ImportPath = pinfo.Path
-	pdoc.ProjectName = pinfo.ProName
-	pdoc.Synopsis = pinfo.Synopsis
-	pdoc.IsCmd = pinfo.IsCmd
-	pdoc.Tags = strings.Split(pinfo.Tags, "|||")
-	pdoc.Views = pinfo.Views
-	pdoc.Created = pinfo.Created
-	pdoc.Rank = pinfo.Rank
-	pdoc.PkgVer = pinfo.PkgVer
-	pdoc.Ptag = pinfo.Ptag
-	pdoc.Labels = pinfo.Labels
-	pdoc.ImportedNum = pinfo.ImportedNum
-	pdoc.ImportPid = pinfo.ImportPid
-	pdoc.Note = pinfo.Note
 }

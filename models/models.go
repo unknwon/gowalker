@@ -37,7 +37,9 @@ import (
 type PkgTag struct {
 	Id   int64
 	Path string `qbs:"size:150,index"`
+	Vcs  string `qbs:"size:10"`
 	Ptag string `qbs:"size:50"`
+	Tags string
 }
 
 // A PkgRock descriables the trending rank of the project.
@@ -75,12 +77,9 @@ type PkgDecl struct {
 	// Top-level declarations.
 	IsHasConst, IsHasVar bool
 
-	// Internal declarations.
-	//Iconsts, Ifuncs, Itypes, Ivars string
-
 	IsHasExample bool
 
-	Imports, TestImports string // Imports.
+	Imports string // Imports.
 
 	IsHasFile   bool
 	IsHasSubdir bool

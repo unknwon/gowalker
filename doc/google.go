@@ -18,15 +18,13 @@ package doc
 import (
 	"errors"
 	"net/http"
-	"os"
-	"path"
 	"regexp"
 	"strings"
 
 	"github.com/Unknwon/com"
 	"github.com/Unknwon/ctw/packer"
 	"github.com/Unknwon/gowalker/utils"
-	"github.com/beego/beewatch"
+	"github.com/Unknwon/hv"
 )
 
 var (
@@ -38,12 +36,9 @@ var (
 	googlePattern    = regexp.MustCompile(`^code\.google\.com/p/(?P<repo>[a-z0-9\-]+)(:?\.(?P<subrepo>[a-z0-9\-]+))?(?P<dir>/[a-z0-9A-Z_.\-/]+)?$`)
 )
 
-func getStandardDoc(client *http.Client, importPath, tag, ptag string) (pdoc *Package, err error) {
-	beewatch.Trace().Display("importPath", importPath, "tag", tag, "ptag", ptag)
-
+func getStandardDoc(client *http.Client, importPath, tag, ptag string) (pdoc *hv.Package, err error) {
 	// hg-higtory: http://go.googlecode.com/hg-history/release/src/pkg/"+importPath+"/"
-	stdout, _, err := com.ExecCmd("curl", "http://go.googlecode.com/hg/"+
-		packer.TagSuffix("?r=", tag))
+	stdout, _, err := com.ExecCmd("curl", "http://go.googlecode.com/hg/src/pkg/"+importPath+"/?r="+tag)
 	if err != nil {
 		return nil, errors.New("doc.getStandardDoc(" + importPath + ") -> " + err.Error())
 	}
@@ -60,50 +55,24 @@ func getStandardDoc(client *http.Client, importPath, tag, ptag string) (pdoc *Pa
 		}
 	}
 
-	installPath := "repos/code.google.com/p/go" + packer.TagSuffix(".", tag)
-	beewatch.Trace().Display("installPath", installPath, "etag", etag)
-
-	// Check if source files saved locally.
-	if !com.IsExist(installPath) {
-		match := make(map[string]string)
-		match["vcs"] = "hg"
-		match["tag"] = tag
-		err = packer.PackToFile("code.google.com/p/go", installPath+".zip", match)
-		if err != nil {
-			return nil, errors.New("doc.getStandardDoc(" + importPath + ") -> PackToFile -> " + err.Error())
-		}
-
-		dirs, err := com.Unzip(installPath+".zip", path.Dir(installPath))
-		if err != nil {
-			return nil, errors.New("doc.getStandardDoc(" + importPath + ") -> Unzip -> " + err.Error())
-		}
-
-		if len(dirs) == 0 {
-			return nil, com.NotFoundError{"doc.getStandardDoc(" + importPath + ") -> No file in repository"}
-		}
-
-		os.Remove(installPath + ".zip")
-		os.Rename(path.Dir(installPath)+"/"+dirs[0], installPath)
-	}
-
-	// TODO:
-
 	// Get source file data.
-	files := make([]com.RawFile, 0, 5)
-	for _, m := range googleFileRe.FindAllSubmatch(p, -1) {
+	ms := googleFileRe.FindAllSubmatch(p, -1)
+	files := make([]com.RawFile, 0, len(ms))
+	for _, m := range ms {
 		fname := strings.Split(string(m[1]), "?")[0]
 		if utils.IsDocFile(fname) {
-			files = append(files, &source{
-				name:      fname,
-				browseURL: "http://code.google.com/p/go/source/browse/src/pkg/" + importPath + "/" + fname + "?r=" + tag,
-				rawURL:    "http://go.googlecode.com/hg/src/pkg/" + importPath + "/" + fname + "?r=" + tag,
+			files = append(files, &hv.Source{
+				SrcName:   fname,
+				BrowseUrl: "http://code.google.com/p/go/source/browse/src/pkg/" + importPath + "/" + fname + "?r=" + tag,
+				RawSrcUrl: "http://go.googlecode.com/hg/src/pkg/" + importPath + "/" + fname + "?r=" + tag,
 			})
 		}
 	}
 
-	dirs := make([]string, 0, 5)
 	// Get subdirectories.
-	for _, m := range googleDirRe.FindAllSubmatch(p, -1) {
+	ms = googleDirRe.FindAllSubmatch(p, -1)
+	dirs := make([]string, 0, len(ms))
+	for _, m := range ms {
 		dirName := strings.Split(string(m[1]), "?")[0]
 		// Make sure we get directories.
 		if strings.HasSuffix(dirName, "/") &&
@@ -117,52 +86,69 @@ func getStandardDoc(client *http.Client, importPath, tag, ptag string) (pdoc *Pa
 	}
 
 	// Fetch file from VCS.
-	if err := com.FetchFiles(client, files, nil); err != nil {
+	if err := com.FetchFilesCurl(files); err != nil {
 		return nil, err
 	}
 
 	// Get all tags.
-	tags := getGoogleTags(client, "code.google.com/p/go/"+importPath)
+	tags := getGoogleTags("code.google.com/p/go/"+importPath, "hg")
 
 	// Start generating data.
-	w := &walker{
-		lineFmt: "#%d",
-		pdoc: &Package{
-			ImportPath:  importPath,
-			ProjectName: "Go",
-			Tags:        tags,
-			Tag:         tag,
-			Ptag:        etag,
-			Dirs:        dirs,
+	w := &hv.Walker{
+		LineFmt: "#%d",
+		Pdoc: &hv.Package{
+			PkgInfo: &hv.PkgInfo{
+				ImportPath:  importPath,
+				ProjectName: "Go",
+				IsGoRepo:    true,
+				Tags:        strings.Join(tags, "|||"),
+				Ptag:        etag,
+				Vcs:         "hg",
+			},
+			PkgDecl: &hv.PkgDecl{
+				Tag:  tag,
+				Dirs: dirs,
+			},
 		},
 	}
-	return w.build(files)
+
+	srcs := make([]*hv.Source, 0, len(files))
+	for _, f := range files {
+		s, _ := f.(*hv.Source)
+		srcs = append(srcs, s)
+	}
+
+	return w.Build(&hv.WalkRes{
+		WalkDepth: hv.WD_All,
+		WalkType:  hv.WT_Memory,
+		WalkMode:  hv.WM_All,
+		Srcs:      srcs,
+	})
 }
 
-func getGoogleTags(client *http.Client, importPath string) []string {
-	p, err := com.HttpGetBytes(client, "http://"+utils.GetProjectPath(importPath)+"/source/browse", nil)
+func getGoogleTags(importPath string, defaultBranch string) []string {
+	stdout, _, err := com.ExecCmd("curl", "http://"+utils.GetProjectPath(importPath)+"/source/browse")
 	if err != nil {
 		return nil
 	}
-
-	tags := make([]string, 1, 6)
-	tags[0] = "master"
+	p := []byte(stdout)
 
 	page := string(p)
 	start := strings.Index(page, "<strong>Tag:</strong>")
-	if start > -1 {
-		m := googleTagRe.FindAllStringSubmatch(page[start:], -1)
-		for i, v := range m {
-			tags = append(tags, v[1])
-			if i == 4 {
-				break
-			}
-		}
+	if start == -1 {
+		return nil
+	}
+
+	m := googleTagRe.FindAllStringSubmatch(page[start:], -1)
+	tags := make([]string, len(m)+1)
+	tags[0] = defaultBranch
+	for i, v := range m {
+		tags[i+1] = v[1]
 	}
 	return tags
 }
 
-func getGoogleDoc(client *http.Client, match map[string]string, tag, ptag string) (*Package, error) {
+func getGoogleDoc(client *http.Client, match map[string]string, tag, ptag string) (*hv.Package, error) {
 	packer.SetupGoogleMatch(match)
 	if m := googleEtagRe.FindStringSubmatch(ptag); m != nil {
 		match["vcs"] = m[1]
@@ -193,10 +179,10 @@ func getGoogleDoc(client *http.Client, match map[string]string, tag, ptag string
 	for _, m := range googleFileRe.FindAllSubmatch(p, -1) {
 		fname := string(m[1])
 		if utils.IsDocFile(fname) {
-			files = append(files, &source{
-				name:      fname,
-				browseURL: com.Expand("http://code.google.com/p/{repo}/source/browse{dir}/{0}{query}?r={tag}", match, fname),
-				rawURL:    com.Expand("http://{subrepo}{dot}{repo}.googlecode.com/{vcs}{dir}/{0}?r={tag}", match, fname),
+			files = append(files, &hv.Source{
+				SrcName:   fname,
+				BrowseUrl: com.Expand("http://code.google.com/p/{repo}/source/browse{dir}/{0}{query}?r={tag}", match, fname),
+				RawSrcUrl: com.Expand("http://{subrepo}{dot}{repo}.googlecode.com/{vcs}{dir}/{0}?r={tag}", match, fname),
 			})
 		}
 	}
@@ -222,19 +208,35 @@ func getGoogleDoc(client *http.Client, match map[string]string, tag, ptag string
 	}
 
 	// Get all tags.
-	tags := getGoogleTags(client, match["importPath"])
+	tags := getGoogleTags(match["importPath"], defaultTags[match["vcs"]])
 
 	// Start generating data.
-	w := &walker{
-		lineFmt: "#%d",
-		pdoc: &Package{
-			ImportPath:  match["importPath"],
-			ProjectName: com.Expand("{repo}{dot}{subrepo}", match),
-			Tags:        tags,
-			Tag:         tag,
-			Ptag:        etag,
-			Dirs:        dirs,
+	w := &hv.Walker{
+		LineFmt: "#%d",
+		Pdoc: &hv.Package{
+			PkgInfo: &hv.PkgInfo{
+				ImportPath:  match["importPath"],
+				ProjectName: com.Expand("{repo}{dot}{subrepo}", match),
+				Tags:        strings.Join(tags, "|||"),
+				Ptag:        etag,
+			},
+			PkgDecl: &hv.PkgDecl{
+				Tag:  tag,
+				Dirs: dirs,
+			},
 		},
 	}
-	return w.build(files)
+
+	srcs := make([]*hv.Source, 0, len(files))
+	for _, f := range files {
+		s, _ := f.(*hv.Source)
+		srcs = append(srcs, s)
+	}
+
+	return w.Build(&hv.WalkRes{
+		WalkDepth: hv.WD_All,
+		WalkType:  hv.WT_Memory,
+		WalkMode:  hv.WM_All,
+		Srcs:      srcs,
+	})
 }

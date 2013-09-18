@@ -17,6 +17,9 @@ body {
 	max-width: none !important;
 	width: 1000px;
 }
+.navbar {
+    min-height: 49.5px;        
+}
 .navbar-nav > li > a {
     padding-bottom: 13px;
 }
@@ -31,10 +34,18 @@ body {
   float: left;
 }
 .navbar-fixed-top {
-	max-height: 50px;
+	height: 49.5px;
 }
 .navbar-form {
 	margin-top: 6px;
+}
+.twitter-typeahead {
+  width: 100%;
+}
+.dropdown-menu {
+	max-height: 400px;
+	overflow: hidden;
+	overflow-y: auto;
 }
 #navbar_frame {
 	background-image: linear-gradient(to bottom, rgb(255, 255, 255), rgb(242, 242, 242)); 
@@ -91,12 +102,12 @@ ul, ol {
 
 /* Comment, String, Internal, External, Return/Break, Keyword, Boolean/nil, Builtin */
 pre .com {  color: #007500;} 
+pre .boo {  color: #0080FF;} 
 pre .str {  color: #796400;}
 pre .int {  color: #5A5AAD;}
 pre .ext {  color: #6F00D2;}
 pre .ret {  color: #CE0000;}
 pre .key {  color: #F00078;}
-pre .boo {  color: #00CACA;}
 pre .bui {  color: #009393;}
 
 .backToTop {   
