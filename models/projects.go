@@ -144,6 +144,28 @@ func SaveProject(pinfo *hv.PkgInfo, pdecl *PkgDecl, pfuncs []*PkgFunc, imports [
 		if err != nil {
 			beego.Error("models.SaveProject(", pinfo.ImportPath, ") -> Declaration:", err)
 		}
+
+		// ------------------------------
+		// Save package tag.
+		// ------------------------------
+
+		pkgTag := new(PkgTag)
+		cond = qbs.NewCondition("path = ?", pinfo.ImportPath).And("tag = ?", pdecl.Tag)
+		err = q.Condition(cond).Find(pkgTag)
+		if err != nil {
+			pkgTag.Path = pinfo.ImportPath
+			pkgTag.Tag = pdecl.Tag
+		}
+		pkgTag.Vcs = pinfo.Vcs
+		pkgTag.Ptag = pinfo.Ptag
+		pkgTag.Tags = pinfo.Tags
+
+		_, err = q.Save(pkgTag)
+		if err != nil {
+			beego.Error("models.SaveProject(", pinfo.ImportPath, ") -> PkgTag:", err)
+		}
+
+		// ------------- END ------------
 	}
 
 	// ------------------------------
@@ -162,7 +184,6 @@ func SaveProject(pinfo *hv.PkgInfo, pdecl *PkgDecl, pfuncs []*PkgFunc, imports [
 			_, err = q.WhereEqual("pid", pdecl.Id).Update(pfunc)
 		}
 
-		isMaster := pdecl.Tag == ""
 		// Save new ones.
 		for _, pf := range pfuncs {
 			f := new(PkgFunc)
@@ -173,7 +194,6 @@ func SaveProject(pinfo *hv.PkgInfo, pdecl *PkgDecl, pfuncs []*PkgFunc, imports [
 			}
 
 			pf.Pid = pdecl.Id
-			pf.IsMaster = isMaster
 			_, err = q.Save(pf)
 			if err != nil {
 				beego.Error("models.SaveProject(", pinfo.ImportPath, ") -> Update function(", pf.Name, "):", err)

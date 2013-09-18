@@ -23,12 +23,13 @@ import (
 	"github.com/Unknwon/gowalker/gwserver/routers"
 	"github.com/Unknwon/gowalker/models"
 	"github.com/Unknwon/gowalker/utils"
+	"github.com/Unknwon/hv"
 	"github.com/astaxie/beego"
 	"github.com/beego/i18n"
 )
 
 const (
-	APP_VER = "1.0.0.0917"
+	APP_VER = "1.0.0.0918"
 )
 
 // We have to call a initialize function manully
@@ -89,6 +90,8 @@ func main() {
 	// Register template functions.
 	beego.AddFuncMap("i18n", i18n.Tr)
 	beego.AddFuncMap("isEqualS", isEqualS)
+	beego.AddFuncMap("isHasEleS", isHasEleS)
+	beego.AddFuncMap("isHasEleE", isHasEleE)
 
 	// "robot.txt"
 	beego.Router("/robot.txt", &routers.RobotRouter{})
@@ -100,4 +103,12 @@ func main() {
 
 func isEqualS(s1, s2 string) bool {
 	return s1 == s2
+}
+
+func isHasEleS(s []string) bool {
+	return len(s) > 0
+}
+
+func isHasEleE(s []*hv.Example) bool {
+	return len(s) > 0
 }

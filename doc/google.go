@@ -91,7 +91,7 @@ func getStandardDoc(client *http.Client, importPath, tag, ptag string) (pdoc *hv
 	}
 
 	// Get all tags.
-	tags := getGoogleTags("code.google.com/p/go/"+importPath, "hg")
+	tags := getGoogleTags("code.google.com/p/go/"+importPath, "default", true)
 
 	// Start generating data.
 	w := &hv.Walker{
@@ -103,7 +103,7 @@ func getStandardDoc(client *http.Client, importPath, tag, ptag string) (pdoc *hv
 				IsGoRepo:    true,
 				Tags:        strings.Join(tags, "|||"),
 				Ptag:        etag,
-				Vcs:         "hg",
+				Vcs:         "Google Code",
 			},
 			PkgDecl: &hv.PkgDecl{
 				Tag:  tag,
@@ -126,7 +126,7 @@ func getStandardDoc(client *http.Client, importPath, tag, ptag string) (pdoc *hv
 	})
 }
 
-func getGoogleTags(importPath string, defaultBranch string) []string {
+func getGoogleTags(importPath string, defaultBranch string, isGoRepo bool) []string {
 	stdout, _, err := com.ExecCmd("curl", "http://"+utils.GetProjectPath(importPath)+"/source/browse")
 	if err != nil {
 		return nil
@@ -140,9 +140,23 @@ func getGoogleTags(importPath string, defaultBranch string) []string {
 	}
 
 	m := googleTagRe.FindAllStringSubmatch(page[start:], -1)
-	tags := make([]string, len(m)+1)
+
+	var tags []string
+	if isGoRepo {
+		tags = make([]string, 1, 20)
+	} else {
+		tags = make([]string, 1, len(m)+1)
+	}
+
 	tags[0] = defaultBranch
 	for i, v := range m {
+		if isGoRepo {
+			if strings.HasPrefix(v[1], "go") {
+				tags = append(tags, v[1])
+			}
+			continue
+		}
+
 		tags[i+1] = v[1]
 	}
 	return tags
@@ -208,7 +222,7 @@ func getGoogleDoc(client *http.Client, match map[string]string, tag, ptag string
 	}
 
 	// Get all tags.
-	tags := getGoogleTags(match["importPath"], defaultTags[match["vcs"]])
+	tags := getGoogleTags(match["importPath"], defaultTags[match["vcs"]], false)
 
 	// Start generating data.
 	w := &hv.Walker{

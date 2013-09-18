@@ -1,4 +1,3 @@
-{{define "labelmodal_en"}}
 <div id="label_modal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
 	<form id="label_form" class="modal-form">
 		<div class="modal-header">
@@ -44,7 +43,6 @@
 		</div>
 	</form>
 </div>
-{{end}}
 
 {{define "labelmodal_zh"}}
 			<div id="label_modal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">

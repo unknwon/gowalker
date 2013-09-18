@@ -37,9 +37,14 @@ import (
 type PkgTag struct {
 	Id   int64
 	Path string `qbs:"size:150,index"`
-	Vcs  string `qbs:"size:10"`
+	Tag  string `qbs:"size:50"`
+	Vcs  string `qbs:"size:50"`
 	Ptag string `qbs:"size:50"`
 	Tags string
+}
+
+func (*PkgTag) Indexes(indexes *qbs.Indexes) {
+	indexes.AddUnique("path", "tag")
 }
 
 // A PkgRock descriables the trending rank of the project.
@@ -68,7 +73,7 @@ type PkgExam struct {
 type PkgDecl struct {
 	Id  int64
 	Pid int64  `qbs:"index"`
-	Tag string // Project tag.
+	Tag string `qbs:"size:50"`
 
 	// Indicate how many JS should be downloaded(JsNum=total num - 1)
 	JsNum       int
@@ -79,7 +84,7 @@ type PkgDecl struct {
 
 	IsHasExample bool
 
-	Imports string // Imports.
+	Imports, TestImports string
 
 	IsHasFile   bool
 	IsHasSubdir bool
@@ -104,13 +109,12 @@ func (*PkgDoc) Indexes(indexes *qbs.Indexes) {
 
 // PkgFunc represents a package function.
 type PkgFunc struct {
-	Id       int64
-	Pid      int64 `qbs:"index"` // Id of package documentation it belongs to.
-	Path     string
-	Name     string `qbs:"size:100,index"`
-	Doc      string
-	IsMaster bool
-	IsOld    bool // Indicates if the function no longer exists.
+	Id    int64
+	Pid   int64  `qbs:"index"` // Id of package documentation it belongs to.
+	Path  string `qbs:"size:150"`
+	Name  string `qbs:"size:100,index"`
+	Doc   string
+	IsOld bool // Indicates if the function no longer exists.
 }
 
 func connDb() *qbs.Qbs {
@@ -150,14 +154,11 @@ func InitDb() {
 	mg.CreateTableIfNotExists(new(PkgTag))
 	mg.CreateTableIfNotExists(new(PkgRock))
 	mg.CreateTableIfNotExists(new(PkgExam))
+	mg.CreateTableIfNotExists(new(PkgDecl))
+	mg.CreateTableIfNotExists(new(PkgDoc))
+	mg.CreateTableIfNotExists(new(PkgFunc))
 
 	beego.Trace("Initialized database ->", dbName)
-}
-
-func initOld() {
-	// mg.CreateTableIfNotExists(new(PkgDecl))
-	// mg.CreateTableIfNotExists(new(PkgDoc))
-	// mg.CreateTableIfNotExists(new(PkgFunc))
 }
 
 // GetGoRepo returns packages in go standard library.

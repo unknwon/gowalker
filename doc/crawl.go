@@ -134,42 +134,33 @@ func RenderFuncs(pdoc *hv.Package) []*models.PkgFunc {
 // SaveProject saves project information to database.
 func SaveProject(pdoc *hv.Package, pfuncs []*models.PkgFunc) (int64, error) {
 	// Save package information.
-	pinfo := &hv.PkgInfo{
-		ImportPath:  pdoc.ImportPath,
-		ProjectName: pdoc.ProjectName,
-		Synopsis:    pdoc.Synopsis,
-		IsCmd:       pdoc.IsCmd,
-		Tags:        pdoc.Tags,
-		Views:       pdoc.Views,
-		ViewedTime:  time.Now().UTC().Unix(),
-		Created:     time.Now().UTC(),
-		Rank:        pdoc.Rank,
-		PkgVer:      pdoc.PkgVer,
-		Ptag:        pdoc.Ptag,
-		Labels:      pdoc.Labels,
-		RefNum:      pdoc.RefNum,
-		RefPids:     pdoc.RefPids,
-		Note:        pdoc.Note,
-	}
-	_ = pinfo
+	pinfo := pdoc.PkgInfo
+	pinfo.ViewedTime = time.Now().UTC().Unix()
+	pinfo.Created = time.Now().UTC()
+
 	// Save package declaration and functions.
-	pdecl := &hv.PkgDecl{
-		Tag: pdoc.Tag,
-		//JsNum:        pdoc.JsNum,
-		// IsHasExport:  pdoc.IsHasExport,
-		// IsHasConst:   pdoc.IsHasConst,
-		// IsHasVar:     pdoc.IsHasVar,
-		// IsHasExample: pdoc.IsHasExample,
-		// IsHasFile:    pdoc.IsHasFile,
-		// IsHasSubdir:  pdoc.IsHasSubdir,
+	pdecl := &models.PkgDecl{
+		Tag:          pdoc.Tag,
+		JsNum:        pdoc.JsNum,
+		IsHasExport:  pdoc.IsHasExport,
+		IsHasConst:   pdoc.IsHasConst,
+		IsHasVar:     pdoc.IsHasVar,
+		IsHasExample: pdoc.IsHasExample,
+		IsHasFile:    pdoc.IsHasFile,
+		IsHasSubdir:  pdoc.IsHasSubdir,
 	}
 
 	// Imports.
-	pdecl.Imports = pdoc.Imports
-	pdecl.TestImports = pdoc.TestImports
+	pdecl.Imports = strings.Join(pdoc.Imports, "|")
+	pdecl.TestImports = strings.Join(pdoc.TestImports, "|")
 
-	//err := models.SaveProject(pinfo, pdecl, pfuncs, pdoc.Imports)
-	return 0, errors.New("doc.SaveProject -> test error")
+	// Only save the latest functions.
+	if len(pdoc.Tag) > 0 {
+		pfuncs = nil
+	}
+
+	err := models.SaveProject(pinfo, pdecl, pfuncs, pdoc.Imports)
+	return pinfo.Id, err
 }
 
 // getLinks returns exported objects with its jump link.

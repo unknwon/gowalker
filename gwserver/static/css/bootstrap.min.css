@@ -43,7 +43,7 @@ body {
   width: 100%;
 }
 .dropdown-menu {
-	max-height: 400px;
+	max-height: 300px;
 	overflow: hidden;
 	overflow-y: auto;
 }
@@ -84,6 +84,9 @@ ul, ol {
 	list-style: none outside none;
 	padding: 0px;
 }
+#project_nav {
+	padding: 9px;
+}
 .bs-docs-sidenav .icon-chevron-right {
 	opacity: 0.25;
 	float: right;
@@ -99,7 +102,14 @@ ul, ol {
 .docsright {
 	min-width: 740px; 
 }
-
+.panel {
+    border: 0px;
+    border-radius: 0px;
+}
+pre {
+	margin: 0px;
+	border-radius: 0px;
+}
 /* Comment, String, Internal, External, Return/Break, Keyword, Boolean/nil, Builtin */
 pre .com {  color: #007500;} 
 pre .boo {  color: #0080FF;} 

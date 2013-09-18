@@ -652,7 +652,7 @@ select:focus:required:invalid:focus {
   font-size: 12px;
   line-height: 15px;
 }
-.btn-mini {
+.btn-xs {
   padding: 2px 6px;
   font-size: 11px;
   line-height: 13px;
@@ -1367,12 +1367,6 @@ select:focus:required:invalid:focus {
   background-color: #d9edf7;
   border-color: #85c5e5;
   color: #3a87ad;
-}
-.alert-success,
-.alert-danger,
-.alert-error,
-.alert-info {
-  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
 }
 .alert-danger,
 .alert-error {
@@ -2424,6 +2418,9 @@ a.thumbnail:hover {
 .label-inverse[href],
 .badge-inverse[href] {
   background-color: #1a1a1a;
+}
+.label-sm {
+  font-size: 50%;
 }
 .progress {
   border: 1px solid #999;

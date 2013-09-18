@@ -6,7 +6,7 @@
 	Index 
 	{{if .IsCmd}}
 	{{else}}
-	<span class="label label-{{.DocCPLabel}}">
+	<span class="label label-{{.DocCPLabel}} label-sm">
 		Documentation complete {{.DocCP}}
 	</span>
 	{{end}}
@@ -58,17 +58,17 @@
 {{if .IsHasExams}}
 <h3 id="_exams">Examples</h3>
 <ul class="unstyled">
-	{{range .Exams}}
+	{{range .Examples}}
 	{{if .IsUsed}}
 	<li><a href="#_ex_btn_{{.Name}}" onclick="showExample({{.Name}})">{{.Name}}</a></li>
 	{{else}}
-	{{template "example_en" .}}
+	{{template "example" .}}
 	{{end}}
 	{{end}}
 </ul>
 {{end}}
 
-{{template "exportmodal_en" .}}
+{{template "tpl/exportmodal.tpl" .}}
 {{end}}
 <b></b>
 <!-- END: Index -->
@@ -103,22 +103,23 @@
 <h3 id="{{.Name}}">
 	func 
 	<a target="_blank" href="{{.URL}}">{{.Name}}</a> 
-	<small>
-		<a class="accordion-toggle" data-toggle="collapse" href="#collapse_{{.Name}}">View Code</a>
-	</small>
+	<button class="btn btn-info btn-xs" data-toggle="collapse" data-target="#collapse_{{.Name}}">View Code</button>
 </h3>
 
-<pre class="pre-x-scrollable">{{str2html .FmtDecl}}</pre>
-{{str2html .Doc}}
-<div class="accordion">
-		<div id="collapse_{{.Name}}" class="accordion-body collapse">
-		<pre class="accordion-inner">{{str2html .Code}}</pre>
+<div class="panel panel-default">
+	<div class="pre-x-scrollable">
+		<pre>{{str2html .FmtDecl}}</pre>
+	</div>
+	<div id="collapse_{{.Name}}" class="panel-collapse collapse">
+		<pre>{{str2html .Code}}</pre>
 	</div>
 </div>
 
-{{if .IsHasExam}}
-{{range .Exams}}
-{{template "example_en" .}}
+{{str2html .Doc}}
+
+{{if isHasEleE .Examples}}
+{{range .Examples}}
+{{template "example" .}}
 {{end}}
 {{end}}
 {{end}}
@@ -135,9 +136,9 @@
 <pre class="pre-x-scrollable">{{str2html .FmtDecl}}</pre>
 {{str2html .Doc}}
 
-{{if .IsHasExam}}
-{{range .Exams}}
-{{template "example_en" .}}
+{{if isHasEleE .Examples}}
+{{range .Examples}}
+{{template "example" .}}
 {{end}}
 {{end}}
 
@@ -166,7 +167,7 @@
 	func 
 	<a target="_blank" href="{{.URL}}">{{.Name}}</a>
 	<small>
-		<a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion" href="#collapse_{{.Name}}">View Code</a>
+		<a class="accordion-toggle" data-toggle="collapse" href="#collapse_{{.Name}}">View Code</a>
 	</small>
 </h4>
 
@@ -178,9 +179,9 @@
 	</div>
 </div>
 
-{{if .IsHasExam}}
-{{range .Exams}}
-{{template "example_en" .}}
+{{if isHasEleE .Examples}}
+{{range .Examples}}
+{{template "example" .}}
 {{end}}
 {{end}}
 {{end}}
@@ -205,9 +206,9 @@
 	</div>
 	</div>
 
-{{if .IsHasExam}}
-{{range .Exams}}
-{{template "example_en" .}}
+{{if isHasEleE .Examples}}
+{{range .Examples}}
+{{template "example" .}}
 {{end}}
 {{end}}
 {{end}}
@@ -253,4 +254,22 @@
 		{{end}}
 	</tbody>
 </table>
+{{end}}
+
+{{define "example"}}
+<div class="panel panel-default">
+	<div class="panel-heading">
+		<h4 class="panel-title">
+			<a id="_ex_btn_{{.Name}}" class="panel-toggle collapsed" data-toggle="collapse" href="#_ex_{{.Name}}">Example({{.Name}})</a>
+		</h4>
+
+		<div id="_ex_{{.Name}}" class="panel-collapse collapse">
+			<div class="panel-body">
+				<p>Code:</p>
+				<pre class="pre-x-scrollable">{{str2html .Code}}</pre>
+				{{if .IsHasOutput}}<p>Output:</p><pre class="pre-x-scrollable">{{.Output}}</pre>{{end}}
+			</div>
+		</div>
+	</div>
+</div>
 {{end}}

@@ -1,4 +1,3 @@
-{{define "exammodal_en"}}
 <div id="example_modal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
 	<form id="example_form" class="modal-form" action="/examples">
 		<div class="modal-header">
@@ -16,7 +15,6 @@
 		</div>
 	</form>
 </div>
-{{end}}
 
 {{define "exammodal_zh"}}
 <div id="example_modal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">

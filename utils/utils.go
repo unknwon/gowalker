@@ -137,6 +137,8 @@ func FormatCode(w io.Writer, code *string, links []*Link) {
 		case isString:
 			isString = false
 			fmt.Fprintf(w, `<span class="str">%s</span>`, template.HTMLEscapeString(seg))
+		case seg == "\t":
+			fmt.Fprintf(w, `%s`, "    ")
 		case pos-last > 1:
 			// Check if the last word of the paragraphy.
 			l := len(seg)

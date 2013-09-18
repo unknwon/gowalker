@@ -39,16 +39,11 @@ func SearchPkg(key string) []*hv.PkgInfo {
 	return pinfos
 }
 
-// GetPkgInfo returns 'PkgInfo' by given import path and tag.
-// It returns error when the package does not exist.
-func GetPkgInfo(path, tag string) (*hv.PkgInfo, error) {
+func getPkgInfoWithQ(path, tag string, q *qbs.Qbs) (*hv.PkgInfo, error) {
 	// Check path length to reduce connect times.
 	if len(path) == 0 {
 		return nil, errors.New("models.GetPkgInfo -> Empty path as not found.")
 	}
-
-	q := connDb()
-	defer q.Close()
 
 	pinfo := new(hv.PkgInfo)
 	err := q.WhereEqual("import_path", path).Find(pinfo)
@@ -58,7 +53,8 @@ func GetPkgInfo(path, tag string) (*hv.PkgInfo, error) {
 	}
 
 	ptag := new(PkgTag)
-	err = q.WhereEqual("import_path", packer.GetProjectPath(path)).Find(ptag)
+	cond := qbs.NewCondition("path = ?", packer.GetProjectPath(path)).And("tag = ?", tag)
+	err = q.Condition(cond).Find(ptag)
 	if err != nil {
 		return pinfo, errors.New(
 			fmt.Sprintf("models.GetPkgInfo( %s:%s ) -> 'PkgTag': %s", path, tag, err))
@@ -71,7 +67,7 @@ func GetPkgInfo(path, tag string) (*hv.PkgInfo, error) {
 	// we have to check 'PkgDecl' as well in case it was deleted by mistake.
 
 	pdecl := new(PkgDecl)
-	cond := qbs.NewCondition("pid = ?", pinfo.Id).And("tag = ?", tag)
+	cond = qbs.NewCondition("pid = ?", pinfo.Id).And("tag = ?", tag)
 	err = q.Condition(cond).Find(pdecl)
 	if err != nil {
 		// Basically, error means not found, so we set 'pinfo.PkgVer' to 0
@@ -81,10 +77,7 @@ func GetPkgInfo(path, tag string) (*hv.PkgInfo, error) {
 			fmt.Sprintf("models.GetPkgInfo( %s:%s ) -> 'PkgDecl': %s", path, tag, err))
 	}
 
-	docPath := path
-	if len(tag) > 0 {
-		docPath += "-" + tag
-	}
+	docPath := path + packer.TagSuffix("-", tag)
 	if !com.IsExist("./static/docs/" + docPath + ".js") {
 		pinfo.PkgVer = 0
 		return pinfo, errors.New(
@@ -92,6 +85,15 @@ func GetPkgInfo(path, tag string) (*hv.PkgInfo, error) {
 	}
 
 	return pinfo, nil
+}
+
+// GetPkgInfo returns 'PkgInfo' by given import path and tag.
+// It returns error when the package does not exist.
+func GetPkgInfo(path, tag string) (*hv.PkgInfo, error) {
+	q := connDb()
+	defer q.Close()
+
+	return getPkgInfoWithQ(path, tag, q)
 }
 
 // GetPkgInfoById returns package information from database by pid.
@@ -161,4 +163,21 @@ func GetIndexPkgs(page int) (pkgs []*hv.PkgInfo) {
 	}
 
 	return pkgs
+}
+
+// GetSubPkgs returns sub-projects by given sub-directories.
+func GetSubPkgs(importPath, tag string, dirs []string) []*hv.PkgInfo {
+	q := connDb()
+	defer q.Close()
+
+	pinfos := make([]*hv.PkgInfo, 0, len(dirs))
+	for _, v := range dirs {
+		v = importPath + "/" + v
+		if pinfo, err := getPkgInfoWithQ(v, tag, q); err == nil {
+			pinfos = append(pinfos, pinfo)
+		} else {
+			pinfos = append(pinfos, &hv.PkgInfo{ImportPath: v})
+		}
+	}
+	return pinfos
 }

@@ -1,4 +1,3 @@
-{{define "exportmodal_en"}}
 <div id="search_exports" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
 	<form id="search_form" class="modal-form">
 		<div class="modal-header">
@@ -16,7 +15,6 @@
 		</div>
 	</form>
 </div>
-{{end}}
 
 {{define "exportmodal_zh"}}
 <div id="search_exports" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
