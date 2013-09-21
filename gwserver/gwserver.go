@@ -29,7 +29,7 @@ import (
 )
 
 const (
-	APP_VER = "1.0.0.0918"
+	APP_VER = "1.0.0.0921"
 )
 
 // We have to call a initialize function manully
@@ -92,9 +92,10 @@ func main() {
 	beego.AddFuncMap("isEqualS", isEqualS)
 	beego.AddFuncMap("isHasEleS", isHasEleS)
 	beego.AddFuncMap("isHasEleE", isHasEleE)
+	beego.AddFuncMap("isNotEmptyS", isNotEmptyS)
 
 	// "robot.txt"
-	beego.Router("/robot.txt", &routers.RobotRouter{})
+	beego.Router("/robots.txt", &routers.RobotRouter{})
 
 	// For all unknown pages.
 	beego.Router("/:all", &routers.HomeRouter{})
@@ -110,5 +111,9 @@ func isHasEleS(s []string) bool {
 }
 
 func isHasEleE(s []*hv.Example) bool {
+	return len(s) > 0
+}
+
+func isNotEmptyS(s string) bool {
 	return len(s) > 0
 }

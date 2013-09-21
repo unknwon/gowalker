@@ -18,6 +18,7 @@ package doc
 
 import (
 	"errors"
+	"runtime"
 	"strings"
 	"time"
 
@@ -109,6 +110,7 @@ func CheckDoc(broPath, tag string, rt requestType) (*hv.Package, error) {
 
 		if err == nil {
 			pdoc.IsNeedRender = true
+			beego.Info("doc.CheckDoc(", pdoc.ImportPath, tag, "), Goroutine #", runtime.NumGoroutine())
 		} else {
 			switch {
 			case err == errNotModified:

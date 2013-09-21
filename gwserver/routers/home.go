@@ -584,8 +584,8 @@ func renderDoc(this *HomeRouter, pdoc *hv.Package, q, tag, docPath string) bool 
 	pdoc.IsHasVar = len(pdoc.Vars) > 0
 	if len(pdoc.Examples)+len(pdoc.UserExamples) > 0 {
 		pdoc.IsHasExample = true
-		this.Data["IsHasExams"] = pdoc.IsHasExample
-		this.Data["Exams"] = append(pdoc.Examples, pdoc.UserExamples...)
+		this.Data["IsHasExample"] = pdoc.IsHasExample
+		this.Data["Examples"] = append(pdoc.Examples, pdoc.UserExamples...)
 	}
 
 	// Commented and total objects number.
@@ -643,7 +643,7 @@ func renderDoc(this *HomeRouter, pdoc *hv.Package, q, tag, docPath string) bool 
 		}
 		buf.Reset()
 		utils.FormatCode(&buf, &f.Decl, links)
-		f.FmtDecl = buf.String()
+		f.FmtDecl = buf.String() + " {"
 		if exs := getExamples(pdoc, "", f.Name); len(exs) > 0 {
 			f.Examples = exs
 		}
@@ -677,7 +677,7 @@ func renderDoc(this *HomeRouter, pdoc *hv.Package, q, tag, docPath string) bool 
 			}
 			buf.Reset()
 			utils.FormatCode(&buf, &f.Decl, links)
-			f.FmtDecl = buf.String()
+			f.FmtDecl = buf.String() + " {"
 			if exs := getExamples(pdoc, "", f.Name); len(exs) > 0 {
 				f.Examples = exs
 			}
@@ -693,7 +693,7 @@ func renderDoc(this *HomeRouter, pdoc *hv.Package, q, tag, docPath string) bool 
 			}
 			buf.Reset()
 			utils.FormatCode(&buf, &m.Decl, links)
-			m.FmtDecl = buf.String()
+			m.FmtDecl = buf.String() + " {"
 			if exs := getExamples(pdoc, t.Name, m.Name); len(exs) > 0 {
 				m.Examples = exs
 			}

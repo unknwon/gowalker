@@ -18,6 +18,7 @@ body {
 	width: 1000px;
 }
 .navbar {
+	height: 49.5px;
     min-height: 49.5px;        
 }
 .navbar-nav > li > a {
@@ -79,7 +80,7 @@ body {
 .btn-lg {
 	line-height: 1.85;
 }
-ul, ol {
+.unstyled {
 	margin-left: 0px;
 	list-style: none outside none;
 	padding: 0px;
@@ -106,9 +107,17 @@ ul, ol {
     border: 0px;
     border-radius: 0px;
 }
+.panel-ex {
+	border: 1px solid transparent; 
+	border-color: rgb(221, 221, 221);
+}
 pre {
 	margin: 0px;
 	border-radius: 0px;
+}
+.pre-var {
+	margin-top: 13px;
+	margin-bottom: 13px;
 }
 /* Comment, String, Internal, External, Return/Break, Keyword, Boolean/nil, Builtin */
 pre .com {  color: #007500;} 
@@ -121,20 +130,21 @@ pre .key {  color: #F00078;}
 pre .bui {  color: #009393;}
 
 .backToTop {   
-  display: none;   
-    width: 18px; 
-        line-height: 1.2; 
-            padding: 5px 0;    
-             background-color: #000;   
-               color: #fff;    
-                font-size: 12px; 
-                    text-align: center;  
-                       position: fixed;  
-                          _position: absolute;  
-                             right: 10px;    
-                              bottom: 100px;    
-                               _bottom: "auto";  
-                                  cursor: pointer;  }                               
+	display: none;   
+	width: 18px; 
+	line-height: 1.2; 
+	padding: 5px 0;    
+	background-color: #000;   
+	color: #fff;    
+	font-size: 12px; 
+	text-align: center;  
+	position: fixed;  
+	_position: absolute;  
+	right: 10px;    
+	bottom: 100px;    
+	_bottom: "auto";  
+	cursor: pointer;  
+}                               
 .backToTop {
     bottom: 20px;
     right: 20px;

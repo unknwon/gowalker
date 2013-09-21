@@ -115,15 +115,9 @@ func RenderFuncs(pdoc *hv.Package) []*models.PkgFunc {
 		for _, m := range v.Funcs {
 			pfuncs = addFunc(pfuncs, m, pdoc.ImportPath, m.Name, links)
 		}
-		for _, m := range v.IFuncs {
-			pfuncs = addFunc(pfuncs, m, pdoc.ImportPath, m.Name, links)
-		}
 
 		// Methods.
 		for _, m := range v.Methods {
-			pfuncs = addFunc(pfuncs, m, pdoc.ImportPath, v.Name+"_"+m.Name, links)
-		}
-		for _, m := range v.IMethods {
 			pfuncs = addFunc(pfuncs, m, pdoc.ImportPath, v.Name+"_"+m.Name, links)
 		}
 	}
@@ -229,7 +223,7 @@ func addFuncs(pfuncs []*models.PkgFunc, fs []*hv.Func, path string, links []*uti
 func addFunc(pfuncs []*models.PkgFunc, f *hv.Func, path, name string, links []*utils.Link) []*models.PkgFunc {
 	var buf bytes.Buffer
 	f.FullName = name
-	f.Code = f.Decl + " {\n" + f.Code + "}"
+	f.Code += "}"
 	utils.FormatCode(&buf, &f.Code, links)
 	f.Code = buf.String()
 	return append(pfuncs, &models.PkgFunc{
