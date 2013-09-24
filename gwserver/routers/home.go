@@ -465,7 +465,7 @@ func saveDocPage(docPath string, data []byte) int {
 	count := 0
 	d := string(data)
 	l := len(d)
-	if l < 60000 {
+	if l < 80000 {
 		buf.WriteString("document.write(\"")
 		buf.Write(data)
 		buf.WriteString("\")")
@@ -477,7 +477,7 @@ func saveDocPage(docPath string, data []byte) int {
 	} else {
 		// Too large, need to sperate.
 		start := 0
-		end := start + 20480
+		end := start + 40000
 		for {
 			if end >= l {
 				end = l
@@ -527,7 +527,8 @@ func renderDoc(this *HomeRouter, pdoc *hv.Package, q, tag, docPath string) bool 
 	this.Data["PkgFullIntro"] = pdoc.Doc
 
 	var buf bytes.Buffer
-	links := make([]*utils.Link, 0, len(pdoc.Types)+len(pdoc.Imports)+len(pdoc.Funcs)+10)
+	links := make([]*utils.Link, 0, len(pdoc.Types)+len(pdoc.Imports)+len(pdoc.TestImports)+
+		len(pdoc.Funcs)+10)
 	// Get all types, functions and import packages
 	for _, t := range pdoc.Types {
 		links = append(links, &utils.Link{
@@ -560,7 +561,7 @@ func renderDoc(this *HomeRouter, pdoc *hv.Package, q, tag, docPath string) bool 
 	}
 
 	// Ignore C.
-	for _, v := range pdoc.Imports {
+	for _, v := range append(pdoc.Imports, pdoc.TestImports...) {
 		if v != "C" {
 			links = append(links, &utils.Link{
 				Name: path.Base(v) + ".",

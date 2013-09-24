@@ -33,13 +33,11 @@
 			<script type='text/javascript' src='/static/js/gwserver.js'></script>
 
 			<p><strong>{{i18n .Lang "Copyright"}} © 2013 Go Walker</strong></p>
-            {{if isEqualS .Lang "en-US"}}
+            {{if eq .Lang "en-US"}}
 			<p>Website built by <i class="icon-user"></i> <a target="_blank" href="https://github.com/Unknwon">@Unknown</a>. Powered by <a target="_blank" href="https://github.com/astaxie/beego"><i class="icon-bold"></i>eego</a> and <a target="_blank" href="https://github.com/coocood/qbs">Qbs</a>.</p>
 			{{if .IsHome}}<p>Based on <a target="_blank" href="http://getbootstrap.com/">Bootstrap</a>. Icons from <a target="_blank" href="http://fortawesome.github.io/Font-Awesome/">Font Awesome</a>.</p>{{end}}
 			{{if .IsHome}}<p>{{end}}Send us <i class="icon-envelope"></i> <a href="mailto:joe2010xtmf#163.com">Feedback</a> or submit <i class="icon-tasks"></i> <a target="_blank" href="https://github.com/Unknwon/gowalker/issues">Website Issues</a>. {{if .IsHome}}</p>{{end}}<strong>Language:</strong>
-			{{end}}
-
-            {{if isEqualS .Lang "zh-CN"}}
+    		{{else if eq .Lang "zh-CN"}}
 			<p>网站建设者 <i class="icon-user"></i> <a target="_blank" href="https://github.com/Unknwon">@Unknown</a>. 项目基于 <a target="_blank" href="https://github.com/astaxie/beego"><i class="icon-bold"></i>eego</a> 和 <a target="_blank" href="https://github.com/coocood/qbs">Qbs</a> 构建。</p>
 			{{if .IsHome}}<p>界面基于 <a target="_blank" href="http://v3.bootcss.com/">Bootstrap</a>. 图标来自 <a target="_blank" href="http://fortawesome.github.io/Font-Awesome/">Font Awesome</a>.</p>{{end}}
 			{{if .IsHome}}<p>{{end}}给我们发送 <i class="icon-envelope"></i> <a href="mailto:joe2010xtmf#163.com">反馈</a> 或者提交 <i class="icon-tasks"></i> <a target="_blank" href="https://github.com/Unknwon/gowalker/issues">网站问题</a>. {{if .IsHome}}</p>{{end}}<strong>语言选项：</strong>
@@ -136,7 +134,7 @@
         var doc = $("#markdown");
 
         var trans2zh = false;
-        if (document.getElementById("lang").innerHTML == "zh") {
+        if (document.getElementById("lang").innerHTML == "zh-CN") {
         	trans2zh = true;
         }
 
@@ -145,12 +143,12 @@
             var node = $(this);
             var id = node.attr("id");
 
-            if (id != "undefined") {
+            if (typeof(id) != "undefined") {
 	            node = node.wrap('<div class="anchor-wrap" ></div>');
 	            node.append('<a class="anchor" href="#' + node.attr("id") + '"><span class="octicon octicon-link"></span></a>')
-	            if (trans2zh) {
-	            	TransToChinese(node);
-	            }
+	             if (trans2zh) {
+	             	TransToChinese(node);
+	             }
         	}
         });
 

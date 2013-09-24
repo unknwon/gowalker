@@ -22,7 +22,7 @@
 <div class="row">
 	<div class="col-xs-8 col-md-8">
 		<div>
-            {{if isEqualS .Lang "en-US"}}
+            {{if eq .Lang "en-US"}}
 			<h4>What is this?</h4>
 			<p>
 				Go Walker Server generates <a target="_blank" href="http://golang.org/">Go</a> projects API documentation and
@@ -56,9 +56,7 @@
             <p class="text-success">
                 Please read the <a href="/about">About Page</a> for information about hacking with Go Walker and more.
             </p>
-            {{end}}
-
-            {{if isEqualS .Lang "zh-CN"}}
+            {{else if eq .Lang "zh-CN"}}
             <h4><b>超凡体验，您值得拥有.</b></h4>
             <p>
                 Go Walker 服务器可以在线生成并浏览 <a target="_blank" href="http://docs.studygolang.com/">Go</a> 项目 API 文档及

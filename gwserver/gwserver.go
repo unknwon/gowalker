@@ -29,7 +29,7 @@ import (
 )
 
 const (
-	APP_VER = "1.0.0.0921"
+	APP_VER = "1.0.0.0923"
 )
 
 // We have to call a initialize function manully
@@ -89,7 +89,6 @@ func main() {
 
 	// Register template functions.
 	beego.AddFuncMap("i18n", i18n.Tr)
-	beego.AddFuncMap("isEqualS", isEqualS)
 	beego.AddFuncMap("isHasEleS", isHasEleS)
 	beego.AddFuncMap("isHasEleE", isHasEleE)
 	beego.AddFuncMap("isNotEmptyS", isNotEmptyS)
@@ -100,10 +99,6 @@ func main() {
 	// For all unknown pages.
 	beego.Router("/:all", &routers.HomeRouter{})
 	beego.Run()
-}
-
-func isEqualS(s1, s2 string) bool {
-	return s1 == s2
 }
 
 func isHasEleS(s []string) bool {

@@ -8,8 +8,13 @@
 	{{if .IsRefresh}}
 	<div class="alert alert-success">
 		<button type="button" class="close" data-dismiss="alert">&times;</button>
+    	{{if eq .Lang "en-US"}}
 		<strong>Congratulations!</strong>
 		You successfully refreshed this project documentation at <i>{{.UtcTime}}</i>!
+		{{else if eq .Lang "zh-CN"}}
+		<strong>恭喜！</strong>
+		您成功于 <i>{{.UtcTime}}</i> 刷新了本项目文档！
+		{{end}}
 	</div>
 	{{end}}
 
@@ -17,16 +22,27 @@
 	<div class="alert alert-info">
 		<button type="button" class="close" data-dismiss="alert">&times;
 		</button>
+    	{{if eq .Lang "en-US"}}
 		<strong>Information!</strong>
 		AstaXie launched an open source program that provides <span class="label label-info">examples</span> for every function of <strong>Go Standard Library</strong>, you shouldn't miss this great project: <a target="_blank" href="https://github.com/astaxie/gopkg/tree/master/{{.ImportPath}}" class="label label-success">gopkg</a>.
+		{{else if eq .Lang "zh-CN"}}
+		<strong>友情提示：</strong>
+		Asta谢 在 github 上发起了 <strong>Go </strong> 标准库函数 <span class="label label-info">示例</span> 项目，每个函数都有相应操作示例，您绝对不容错过！点击这里访问：<a target="_blank" href="https://github.com/astaxie/gopkg/tree/master/{{.ImportPath}}" class="label label-success">gopkg</a>.
+		{{end}}
 	</div>
 
 	<div class="alert alert-info">
 		<button type="button" class="close" data-dismiss="alert">&times;
 		</button>
+    	{{if eq .Lang "en-US"}}
 		<strong>Prompt!</strong>
 		The following link will redirect to raw search for keyword <strong><a href="/search?q={{.ImportPath}}">{{.ImportPath}}</a></strong>.
+		{{else if eq .Lang "zh-CN"}}
+		<strong>温馨提示</strong>
+		如果您想要使用与标准库重名的关键字进行搜索，请单击此链接：<strong><a href="/search?q={{.ImportPath}}">{{.ImportPath}}</a></strong>.
+		{{end}}
 	</div>
+	
 	{{else}}
 	{{template "tpl/labelmodal.tpl" .}}
 	{{end}}
@@ -99,7 +115,7 @@
 
 			<div>
 				<div id="project_nav" style="background-color: #f5f5f5">
-					<a title="View this project on {{.VCS}}" target="_blank" href="http://{{.ProPath}}" class="label label-info">{{.VCS}}</a> 
+					<a title="{{i18n .Lang "View this project on %s" .VCS}}" target="_blank" href="http://{{.ProPath}}" class="label label-info">{{.VCS}}</a> 
 					
 					<a target="_blank" href="http://{{.ProPath}}">
 						<strong>{{.ProName}}:</strong>
@@ -107,18 +123,18 @@
 
 					<a href="/{{.ProDocPath}}">{{.ProDocPath}}</a><span class="muted">/{{.ProName}}</span>
 					<span class="pull-right">
-						<span>You are No.<b>{{.Views}}</b> visitor of this page.</span>
+						<span>{{i18n .Lang "You are No.<b>%v</b> visitor of this page." .Views| str2html}}</span>
 						<span class="muted"> | </span>
-						<a href="#_index">Index</a>
+						<a href="#_index">{{i18n .Lang "Index"}}</a>
 						
 						{{if .IsHasFiles}}
 						<span class="muted"> | </span>
-						<a href="#_files">Files</a>
+						<a href="#_files">{{i18n .Lang "Files"}}</a>
 						{{end}}
 						
 						{{if .IsHasSubdirs}}
 						<span class="muted"> | </span>
-						<a href="#_subdirs">Directories</a>
+						<a href="#_subdirs">{{i18n .Lang "Directories"}}</a>
 						{{end}}
 					</span>
 				</div>
@@ -126,17 +142,15 @@
 				<h2>
 					{{if .IsCmd}}
 					Command
-					{{else}}
-					{{if .IsHasFiles}}
+					{{else if .IsHasFiles}}
 					Package
 					{{else}}
 					Project
 					{{end}}
-					{{end}}
 
 					{{.ProName}} 
 					
-					<span class="label label-inverse label-sm">Rank: {{.Rank}}</span>
+					<span class="label label-inverse label-sm">{{i18n .Lang "Rank"}}: {{.Rank}}</span>
 
 					{{range .Labels}}
 					<a target="_blank" href="/label#{{.}}" class="label label-inverse label-sm">{{.}}</a>
@@ -150,7 +164,7 @@
 					<code>import "{{.ImportPath}}"</code>
 					
 					{{if isHasEleS .Tags}}
-					<strong>Documentation Tag: </strong>
+					<strong>Documentation Tags: </strong>
 					<div class="btn-group">
 					    <button class="btn dropdown-toggle" data-toggle="dropdown">{{.CurTag}} <span class="caret"></span></button>
 					    <ul class="dropdown-menu">
@@ -176,6 +190,7 @@
 				</div>
 				
 				<p>
+    				{{if eq .Lang "en-US"}}
 					{{if .IsHasFiles}}
 					Package <b>{{.ProName}}</b> imports 
 					{{if .IsHasImports}}
@@ -190,6 +205,22 @@
 					{{end}}
 
 					Go Walker generated this page <i>{{.TimeSince}}</i>. <a class="btn" href="/refresh?q={{.ImportPath}}">Refresh</a>
+					{{else if eq .Lang "zh-CN"}}
+					{{if .IsHasFiles}}
+					项目 <b>{{.ProName}}</b> 共计导入 
+					{{if .IsHasImports}}
+					<a href="/search?q=imports&pkgs={{.ImportPkgs}}">{{.ImportPkgNum}} 个外部包</a>
+					{{else}}
+					0 个外部包
+					{{end}}
+
+					{{if .IsImported}}
+					，并且有 <a href="/search?q=imported&pkgs={{.ImportPid}}">{{.ImportedNum}} 个包</a> 引用了该项目
+					{{end}}。 
+					{{end}}
+
+					Go Walker 在 <i>{{.TimeSince}}</i> 生成了此页面. <a class="btn" href="/refresh?q={{.ImportPath}}">刷新文档</a>
+					{{end}}
 				</p>
 			</div>
 		</div>
