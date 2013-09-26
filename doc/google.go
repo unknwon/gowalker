@@ -166,32 +166,34 @@ func getGoogleDoc(client *http.Client, match map[string]string, tag, ptag string
 	packer.SetupGoogleMatch(match)
 	if m := googleEtagRe.FindStringSubmatch(ptag); m != nil {
 		match["vcs"] = m[1]
-	} else if err := packer.GetGoogleVCS(client, match); err != nil {
+	} else if err := packer.GetGoogleVCS(match); err != nil {
 		return nil, err
 	}
 
 	match["tag"] = tag
 	// Scrape the repo browser to find the project revision and individual Go files.
-	p, err := com.HttpGetBytes(client, com.Expand("http://{subrepo}{dot}{repo}.googlecode.com/{vcs}{dir}/?r={tag}", match), nil)
+	stdout, _, err := com.ExecCmd("curl", com.Expand("http://{subrepo}{dot}{repo}.googlecode.com/{vcs}{dir}/?r={tag}", match))
 	if err != nil {
 		return nil, errors.New("doc.getGoogleDoc(" + match["importPath"] + ") -> " + err.Error())
 	}
+	p := []byte(stdout)
 
 	// Check revision tag.
 	var etag string
 	if m := googleRevisionRe.FindSubmatch(p); m == nil {
 		return nil, errors.New("doc.getGoogleDoc(" + match["importPath"] + ") -> Could not find revision")
 	} else {
-		etag = com.Expand("{vcs}-{0}", match, string(m[1]))
+		etag = string(m[1])
 		if etag == ptag {
 			return nil, errNotModified
 		}
 	}
 
 	// Get source file data.
-	files := make([]com.RawFile, 0, 5)
-	for _, m := range googleFileRe.FindAllSubmatch(p, -1) {
-		fname := string(m[1])
+	ms := googleFileRe.FindAllSubmatch(p, -1)
+	files := make([]com.RawFile, 0, len(ms))
+	for _, m := range ms {
+		fname := strings.Split(string(m[1]), "?")[0]
 		if utils.IsDocFile(fname) {
 			files = append(files, &hv.Source{
 				SrcName:   fname,
@@ -201,9 +203,10 @@ func getGoogleDoc(client *http.Client, match map[string]string, tag, ptag string
 		}
 	}
 
-	dirs := make([]string, 0, 5)
 	// Get subdirectories.
-	for _, m := range googleDirRe.FindAllSubmatch(p, -1) {
+	ms = googleDirRe.FindAllSubmatch(p, -1)
+	dirs := make([]string, 0, len(ms))
+	for _, m := range ms {
 		dirName := strings.Split(string(m[1]), "?")[0]
 		// Make sure we get directories.
 		if strings.HasSuffix(dirName, "/") &&
@@ -217,7 +220,7 @@ func getGoogleDoc(client *http.Client, match map[string]string, tag, ptag string
 	}
 
 	// Fetch file from VCS.
-	if err := com.FetchFiles(client, files, nil); err != nil {
+	if err := com.FetchFilesCurl(files); err != nil {
 		return nil, err
 	}
 
@@ -233,6 +236,7 @@ func getGoogleDoc(client *http.Client, match map[string]string, tag, ptag string
 				ProjectName: com.Expand("{repo}{dot}{subrepo}", match),
 				Tags:        strings.Join(tags, "|||"),
 				Ptag:        etag,
+				Vcs:         "Google Code",
 			},
 			PkgDecl: &hv.PkgDecl{
 				Tag:  tag,
@@ -253,4 +257,8 @@ func getGoogleDoc(client *http.Client, match map[string]string, tag, ptag string
 		WalkMode:  hv.WM_All,
 		Srcs:      srcs,
 	})
+	for k, v := range match {
+		println(k, v)
+	}
+	return nil, nil
 }

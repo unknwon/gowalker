@@ -23,6 +23,7 @@ import (
 	"time"
 
 	"github.com/Unknwon/gowalker/models"
+	"github.com/Unknwon/gowalker/utils"
 	"github.com/Unknwon/hv"
 	"github.com/astaxie/beego"
 )
@@ -49,6 +50,12 @@ func CheckDoc(broPath, tag string, rt requestType) (*hv.Package, error) {
 
 	// Trim prefix of standard library path.
 	broPath = strings.TrimPrefix(broPath, "code.google.com/p/go/source/browse/src/pkg/")
+
+	// Check Block List.
+	if i := strings.Index(utils.Cfg.MustValue("info", "block_list"), broPath); i > -1 {
+		return nil, errors.New("Unable to process the operation bacause " + broPath +
+			" is in the Block List")
+	}
 
 	// Get the package info.
 	pinfo, err := models.GetPkgInfo(broPath, tag)

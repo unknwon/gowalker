@@ -16,9 +16,13 @@
 package main
 
 import (
+	"fmt"
 	"os"
+	"os/signal"
 	"strings"
+	"syscall"
 
+	"github.com/Unknwon/com"
 	"github.com/Unknwon/gowalker/doc"
 	"github.com/Unknwon/gowalker/gwserver/routers"
 	"github.com/Unknwon/gowalker/models"
@@ -29,7 +33,7 @@ import (
 )
 
 const (
-	APP_VER = "1.0.0.0923"
+	APP_VER = "1.0.0.0925"
 )
 
 // We have to call a initialize function manully
@@ -72,8 +76,26 @@ func initialize() {
 		utils.Cfg.MustValue("github", "client_secret"))
 }
 
+func catchExit() {
+	sigTerm := syscall.Signal(15)
+	sig := make(chan os.Signal)
+	signal.Notify(sig, os.Interrupt, sigTerm)
+
+	for {
+		switch <-sig {
+		case os.Interrupt, sigTerm:
+			fmt.Println()
+			com.ColorLog("[WARN] INTERRUPT SIGNAL DETECTED!!!\n")
+			routers.FlushCache()
+			com.ColorLog("[WARN] READY TO EXIT\n")
+			os.Exit(0)
+		}
+	}
+}
+
 func main() {
 	initialize()
+	go catchExit()
 
 	beego.Info(beego.AppName, APP_VER)
 

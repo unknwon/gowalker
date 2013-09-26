@@ -51,7 +51,7 @@
 		<div class="col-xs-12 col-md-12">
 			{{template "tpl/exammodal.tpl" .}}
 
-			<div id="sidebar" class="span3 hide" style="margin-left: -220px; margin-top: 20px;">
+			<div id="sidebar" class="span3 hide" style="position:fixed; margin-left: -220px; top: 70px;">
 				<ul class="nav nav-tabs nav-stacked affix bs-docs-sidenav">
 					<li>
 						<a href="#"><i class="icon-chevron-right"></i>Top</a>
@@ -155,6 +155,7 @@
 					{{range .Labels}}
 					<a target="_blank" href="/label#{{.}}" class="label label-inverse label-sm">{{.}}</a>
 					{{end}}
+            		<g:plusone></g:plusone>
 				</h2>
 
 				{{if .IsCmd}}

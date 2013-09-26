@@ -47,26 +47,26 @@ func GetPopulars(proNum, exNum int) (error, []*PkgExam, []*hv.PkgInfo, []*hv.Pkg
 
 	var rvPros, trPros, tvPros, rtwPros []*hv.PkgInfo
 	var procks []*PkgRock
-	err = q.OmitFields("ProName", "IsCmd", "Tags", "Views", "Created",
-		"Etag", "Labels", "ImportedNum", "ImportPid", "Note").
+	err = q.OmitFields("ProName", "IsCmd", "Tags", "Created",
+		"Etag", "Labels", "RefPids", "Note").
 		Limit(proNum).OrderByDesc("viewed_time").FindAll(&rvPros)
 	if err != nil {
 		return err, nil, nil, nil, nil, nil
 	}
-	err = q.OmitFields("ProName", "IsCmd", "Tags", "Views", "ViewedTime", "Created",
-		"Etag", "Labels", "ImportedNum", "ImportPid", "Note").
+	err = q.OmitFields("ProName", "IsCmd", "Tags", "ViewedTime", "Created",
+		"Etag", "Labels", "RefPids", "Note").
 		Limit(proNum).OrderByDesc("rank").FindAll(&trPros)
 	if err != nil {
 		return err, nil, nil, nil, nil, nil
 	}
 	err = q.OmitFields("ProName", "IsCmd", "Tags", "ViewedTime", "Created",
-		"Etag", "Labels", "ImportedNum", "ImportPid", "Note").
+		"Etag", "Labels", "RefPids", "Note").
 		Limit(proNum).OrderByDesc("views").FindAll(&tvPros)
 	if err != nil {
 		return err, nil, nil, nil, nil, nil
 	}
-	err = q.OmitFields("ProName", "IsCmd", "Tags", "Views", "ViewedTime", "Created",
-		"Etag", "Labels", "ImportedNum", "ImportPid", "Note").
+	err = q.OmitFields("ProName", "IsCmd", "Tags", "ViewedTime", "Created",
+		"Etag", "Labels", "RefPids", "Note").
 		Limit(proNum).OrderByDesc("delta").FindAll(&procks)
 	if err != nil {
 		return err, nil, nil, nil, nil, nil
@@ -79,6 +79,64 @@ func GetPopulars(proNum, exNum int) (error, []*PkgExam, []*hv.PkgInfo, []*hv.Pkg
 		})
 	}
 	return nil, ruExs, rvPros, trPros, tvPros, rtwPros
+}
+
+func getRefIndex(refPids []string, pid string) int {
+	for i := range refPids {
+		if refPids[i] == pid {
+			return i
+		}
+	}
+	return -1
+}
+
+func updateImportInfo(q *qbs.Qbs, path string, pid, rank int, add bool) {
+	// Save package information.
+	info := new(hv.PkgInfo)
+	err := q.WhereEqual("import_path", path).Find(info)
+	if err == nil {
+		// Check if pid exists in this project.
+		refPids := strings.Split(info.RefPids, "|")
+		refRanks := strings.Split(info.RefRanks, "|")
+		spid := strconv.Itoa(pid)
+		srank := strconv.Itoa(rank)
+		i := getRefIndex(refPids, spid)
+
+		if add {
+			// Add operation.
+			if i == -1 {
+				refPids = append(refPids, spid)
+				refRanks = append(refRanks, srank)
+				i = len(refPids) - 1
+			} else {
+				refRanks[i] = srank
+			}
+
+			info.RefPids = strings.Join(refPids, "|")
+			info.RefRanks = strings.Join(refRanks, "|")
+			info.RefNum = len(refPids)
+			_, err = q.Save(info)
+			if err != nil {
+				beego.Error("models.updateImportInfo -> add:", path, err)
+			}
+
+		} else if i > -1 {
+			// Delete operation
+			refPids = append(refPids[:i], refPids[i+1:]...)
+			refRanks = append(refRanks[:i], refRanks[i+1:]...)
+
+			info.RefPids = strings.Join(refPids, "|")
+			info.RefRanks = strings.Join(refRanks, "|")
+			info.RefNum = len(refPids)
+			_, err = q.Save(info)
+			if err != nil {
+				beego.Error("models.updateImportInfo -> delete:", path, err)
+			}
+		}
+	}
+
+	// Error means this project does not exist, simply skip.
+	// TODO
 }
 
 // SaveProject saves package information, declaration and functions;
@@ -100,13 +158,12 @@ func SaveProject(pinfo *hv.PkgInfo, pdecl *PkgDecl, pfuncs []*PkgFunc, imports [
 
 	if info.Id > 0 {
 		// Current package.
-		importeds := strings.Split(
-			strings.Replace(info.RefPids, "$", "", -1), "|")
+		importeds := strings.Split(info.RefPids, "|")
 		importPids := make([]string, 0, len(importeds))
 		for _, v := range importeds {
 			pid, _ := strconv.ParseInt(v, 10, 64)
 			if checkImport(q, info.ImportPath, pid) {
-				importPids = append(importPids, "$"+v)
+				importPids = append(importPids, v)
 			}
 		}
 		pinfo.RefPids = strings.Join(importPids, "|")
@@ -124,7 +181,7 @@ func SaveProject(pinfo *hv.PkgInfo, pdecl *PkgDecl, pfuncs []*PkgFunc, imports [
 		for _, v := range imports {
 			if !utils.IsGoRepoPath(v) {
 				// Only count non-standard library.
-				updateImportInfo(q, v, int(pinfo.Id), true)
+				updateImportInfo(q, v, int(pinfo.Id), int(pinfo.Rank), true)
 			}
 		}
 	}
@@ -297,7 +354,7 @@ func DeleteProject(path string) {
 				for _, v := range imports {
 					if !utils.IsGoRepoPath(v) {
 						// Only count non-standard library.
-						updateImportInfo(q, v, int(info.Id), false)
+						updateImportInfo(q, v, int(info.Id), 0, false)
 					}
 				}
 			}
@@ -335,34 +392,6 @@ func DeleteProject(path string) {
 	}
 
 	return
-}
-
-func updateImportInfo(q *qbs.Qbs, path string, pid int, add bool) {
-	// Save package information.
-	info := new(hv.PkgInfo)
-	err := q.WhereEqual("path", path).Find(info)
-	if err == nil {
-		// Check if pid exists in this project.
-		i := strings.Index(info.RefPids, "$"+strconv.Itoa(pid)+"|")
-		switch {
-		case i == -1 && add: // Add operation and does not contain.
-			info.RefPids += "$" + strconv.Itoa(pid) + "|"
-			info.RefNum = len(strings.Split(info.RefPids, "|")) - 1
-			_, err = q.Save(info)
-			if err != nil {
-				beego.Error("models.updateImportInfo -> add:", path, err)
-			}
-		case i > -1 && !add: // Delete operation and contains.
-			info.RefPids = strings.Replace(info.RefPids, "$"+strconv.Itoa(pid)+"|", "", 1)
-			info.RefNum = len(strings.Split(info.RefPids, "|")) - 1
-			_, err = q.Save(info)
-			if err != nil {
-				beego.Error("models.updateImportInfo -> delete:", path, err)
-			}
-		}
-	}
-
-	// Error means this project does not exist, simply skip.
 }
 
 // FlushCacheProjects saves cache data to database.
@@ -404,7 +433,7 @@ func FlushCacheProjects(pinfos []*hv.PkgInfo, procks []*PkgRock) {
 
 	for _, pr := range procks {
 		r := new(PkgRock)
-		err := q.WhereEqual("pid", pr.Pid).Find(r)
+		err := q.WhereEqual("path", pr.Path).Find(r)
 		if err == nil {
 			pr.Id = r.Id
 			r.Delta += pr.Rank - r.Rank

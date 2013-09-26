@@ -107,7 +107,7 @@
 			            {{range .GlobalHistory}}
                         <tr>
                             <td>
-                                <a title="{{i18n $lang "Refs"}}: {{.RefProNum}}/{{.RefNum}}  {{i18n $lang "Rank"}}: {{.Rank}}  {{i18n $lang "Views"}}: {{.Views}}{{$newLine}}{{i18n $lang "Issues"}}: {{.Issues}}  {{i18n $lang "Stars"}}: {{.Stars}}  {{i18n $lang "Forks"}}: {{.Forks}}{{$newLine}}{{i18n $lang "Intro"}}: {{.Synopsis}}" href="/{{.ImportPath}}">{{.ImportPath}}</a>
+                                <a title="{{i18n $lang "Refs"}}: {{.RefNum}}  {{i18n $lang "Rank"}}: {{.Rank}}  {{i18n $lang "Views"}}: {{.Views}}{{$newLine}}{{i18n $lang "Issues"}}: {{.Issues}}  {{i18n $lang "Stars"}}: {{.Stars}}  {{i18n $lang "Forks"}}: {{.Forks}}{{$newLine}}{{i18n $lang "Intro"}}: {{.Synopsis}}" href="/{{.ImportPath}}">{{.ImportPath}}</a>
 
                                 {{if .IsGoRepo}}
                                 <span class="label label-info">{{i18n $lang "Standard"}}</span>
@@ -140,10 +140,10 @@
 			            {{range .UserHistory}}
                         <tr>
                             <td>
-                                <a title="{{i18n $lang "Refs"}}: {{.RefProNum}}/{{.RefNum}}  {{i18n $lang "Rank"}}: {{.Rank}}  {{i18n $lang "Views"}}: {{.Views}}{{$newLine}}{{i18n $lang "Issues"}}: {{.Issues}}  {{i18n $lang "Stars"}}: {{.Stars}}  {{i18n $lang "Forks"}}: {{.Forks}}{{$newLine}}{{i18n $lang "Intro"}}: {{.Synopsis}}" href="/{{.ImportPath}}">{{.ImportPath}}</a>
+                                <a title="{{i18n $lang "Refs"}}: {{.RefNum}}  {{i18n $lang "Rank"}}: {{.Rank}}  {{i18n $lang "Views"}}: {{.Views}}{{$newLine}}{{i18n $lang "Issues"}}: {{.Issues}}  {{i18n $lang "Stars"}}: {{.Stars}}  {{i18n $lang "Forks"}}: {{.Forks}}{{$newLine}}{{i18n $lang "Intro"}}: {{.Synopsis}}" href="/{{.ImportPath}}">{{.ImportPath}}</a>
 
                                 {{if .IsGoRepo}}
-                                <span class="label label-info">{{i18n .Lang "Standard"}}</span>
+                                <span class="label label-info">{{i18n $lang "Standard"}}</span>
                                 {{end}}
                             </td>
 
@@ -187,7 +187,7 @@
                         {{range .WeeklyStarPros}}
                         <li>
                             <span class="badge badge-success">{{.Rank}}</span>
-                            <a title="{{i18n $lang "Refs"}}: {{.RefProNum}}/{{.RefNum}}  {{i18n $lang "Rank"}}: {{.Rank}}  {{i18n $lang "Views"}}: {{.Views}}{{$newLine}}{{i18n $lang "Issues"}}: {{.Issues}}  {{i18n $lang "Stars"}}: {{.Stars}}  {{i18n $lang "Forks"}}: {{.Forks}}{{$newLine}}{{i18n $lang "Intro"}}: {{.Synopsis}}" href="/{{.ImportPath}}">{{.ImportPath}}</a>
+                            <a title="{{i18n $lang "Refs"}}: {{.RefNum}}  {{i18n $lang "Rank"}}: {{.Rank}}  {{i18n $lang "Views"}}: {{.Views}}{{$newLine}}{{i18n $lang "Issues"}}: {{.Issues}}  {{i18n $lang "Stars"}}: {{.Stars}}  {{i18n $lang "Forks"}}: {{.Forks}}" href="/{{.ImportPath}}">{{.ImportPath}}</a>
                         </li>
                         {{end}}
                     </ul>
@@ -198,7 +198,7 @@
                         {{range .TopRankPros}}
                         <li>
                             <span class="badge badge-inverse">{{.Rank}}</span>
-                            <a title="{{i18n $lang "Refs"}}: {{.RefProNum}}/{{.RefNum}}  {{i18n $lang "Rank"}}: {{.Rank}}  {{i18n $lang "Views"}}: {{.Views}}{{$newLine}}{{i18n $lang "Issues"}}: {{.Issues}}  {{i18n $lang "Stars"}}: {{.Stars}}  {{i18n $lang "Forks"}}: {{.Forks}}{{$newLine}}{{i18n $lang "Intro"}}: {{.Synopsis}}" href="/{{.ImportPath}}" href="/{{.ImportPath}}">{{.ImportPath}}</a>
+                            <a title="{{i18n $lang "Refs"}}: {{.RefNum}}  {{i18n $lang "Rank"}}: {{.Rank}}  {{i18n $lang "Views"}}: {{.Views}}{{$newLine}}{{i18n $lang "Issues"}}: {{.Issues}}  {{i18n $lang "Stars"}}: {{.Stars}}  {{i18n $lang "Forks"}}: {{.Forks}}{{$newLine}}{{i18n $lang "Intro"}}: {{.Synopsis}}" href="/{{.ImportPath}}" href="/{{.ImportPath}}">{{.ImportPath}}</a>
                         </li>
                         {{end}}
                     </ul>
@@ -209,7 +209,7 @@
                         {{range .TopViewsPros}}
                         <li>
                             <span class="badge">{{.Views}}</span>
-                            <a title="{{i18n $lang "Refs"}}: {{.RefProNum}}/{{.RefNum}}  {{i18n $lang "Rank"}}: {{.Rank}}  {{i18n $lang "Views"}}: {{.Views}}{{$newLine}}{{i18n $lang "Issues"}}: {{.Issues}}  {{i18n $lang "Stars"}}: {{.Stars}}  {{i18n $lang "Forks"}}: {{.Forks}}{{$newLine}}{{i18n $lang "Intro"}}: {{.Synopsis}}" href="/{{.ImportPath}}" href="/{{..ImportPath}}">{{..ImportPath}}</a>
+                            <a title="{{i18n $lang "Refs"}}: {{.RefNum}}  {{i18n $lang "Rank"}}: {{.Rank}}  {{i18n $lang "Views"}}: {{.Views}}{{$newLine}}{{i18n $lang "Issues"}}: {{.Issues}}  {{i18n $lang "Stars"}}: {{.Stars}}  {{i18n $lang "Forks"}}: {{.Forks}}{{$newLine}}{{i18n $lang "Intro"}}: {{.Synopsis}}" href="/{{.ImportPath}}" href="/{{..ImportPath}}">{{..ImportPath}}</a>
                         </li>
                         {{end}}
                     </ul>

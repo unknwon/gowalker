@@ -56,10 +56,6 @@ type PkgRock struct {
 	Delta int64 `qbs:"index"`
 }
 
-func (*PkgRock) Indexes(indexes *qbs.Indexes) {
-	indexes.AddUnique("pid", "path")
-}
-
 // A PkgExam descriables the user example of the project.
 type PkgExam struct {
 	Id       int64

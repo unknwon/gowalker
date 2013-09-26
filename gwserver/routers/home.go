@@ -91,19 +91,28 @@ func updateCacheInfo(pdoc *hv.Package, urpids, urpts *http.Cookie) (string, stri
 	return updateUrPros(pdoc, urpids, urpts)
 }
 
+func calRefRanks(refRanks []string) int64 {
+	refRank := 0
+	for _, v := range refRanks {
+		vn, _ := strconv.Atoi(v)
+		refRank += vn * 10 / 100
+	}
+	return int64(refRank)
+}
+
 func updateCachePros(pdoc *hv.Package) {
 	pdoc.Views++
 
 	for _, p := range cachePros {
 		if p.Id == pdoc.Id {
 			p = pdoc.PkgInfo
-			p.Rank = int64(pdoc.RefProNum*30) + pdoc.Views
+			p.Rank = calRefRanks(strings.Split(pdoc.RefRanks, "|")) + pdoc.Views
 			return
 		}
 	}
 
 	pinfo := pdoc.PkgInfo
-	pinfo.Rank = int64(pdoc.RefProNum*30) + pdoc.Views
+	pinfo.Rank = calRefRanks(strings.Split(pdoc.RefRanks, "|")) + pdoc.Views
 	cachePros = append(cachePros, pinfo)
 }
 
@@ -260,17 +269,21 @@ func (this *HomeRouter) Get() {
 			// Generate documentation page.
 			if generatePage(this, pdoc, broPath, tag) {
 				ps, ts := updateCacheInfo(pdoc, urpids, urpts)
-				this.Ctx.SetCookie("UserRecentPros", ps, 9999999999, "/")
-				this.Ctx.SetCookie("URPTimestamps", ts, 9999999999, "/")
+				this.Ctx.SetCookie("UserHistory", ps, 9999999999, "/")
+				this.Ctx.SetCookie("UHTimestamps", ts, 9999999999, "/")
 				return
 			}
 		}
+		this.Redirect("/search?q="+reqUrl, 302)
+		return
 	}
 
-	// TODO
-	beego.Error(err)
-	//this.Redirect("/search?q="+reqUrl, 302)
-	return
+	// Error.
+	this.Data["IsHasError"] = true
+	this.Data["ErrMsg"] = strings.Replace(err.Error(),
+		doc.GetGithubCredentials(), "<githubCred>", 1)
+	beego.Error("HomeRouter.Get ->", err)
+	serveHome(this, urpids, urpts)
 }
 
 func codeDecode(code *string) *string {
@@ -885,12 +898,13 @@ func generatePage(this *HomeRouter, pdoc *hv.Package, q, tag string) bool {
 	if !pdoc.IsCmd {
 		this.Data["IsHasExams"] = pdoc.IsHasExample
 
+		tags := strings.Split(pdoc.Tags, "|||")
 		// Tags.
 		if len(tag) == 0 {
-			tag = "master"
+			tag = tags[0]
 		}
 		this.Data["CurTag"] = tag
-		this.Data["Tags"] = strings.Split(pdoc.Tags, "|||")
+		this.Data["Tags"] = tags
 	} else {
 		this.Data["IsCmd"] = true
 	}

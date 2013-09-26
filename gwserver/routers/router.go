@@ -17,7 +17,6 @@ package routers
 
 import (
 	"fmt"
-	"os"
 	"strings"
 	"time"
 
@@ -108,26 +107,18 @@ func cacheTickerCheck(cacheChan <-chan time.Time) {
 			refreshCount = 0
 		}
 
-		isShutdown := false //shutdownCheck()
 		// Check if need to flush cache.
-		if isShutdown || refreshCount == 0 || len(cachePros) >= utils.Cfg.MustInt("task", "min_pro_num") {
-			flushCache()
-
-			if !isShutdown {
-				initPopPros()
-				refreshCount = 0
-			}
-		}
-
-		if isShutdown {
-			os.Exit(0)
+		if refreshCount == 0 || len(cachePros) >= utils.Cfg.MustInt("task", "min_pro_num") {
+			FlushCache()
+			initPopPros()
+			refreshCount = 0
 		}
 
 		//initIndexStats()
 	}
 }
 
-func flushCache() {
+func FlushCache() {
 	// Flush cache projects.
 	num := len(cachePros)
 	rtwPros := make([]*models.PkgRock, 0, num)
@@ -139,6 +130,7 @@ func flushCache() {
 		})
 	}
 	models.FlushCacheProjects(cachePros, rtwPros)
+	beego.Trace("FlushCacheProjects")
 
 	cachePros = make([]*hv.PkgInfo, 0, num)
 }

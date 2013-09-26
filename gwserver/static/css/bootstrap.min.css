@@ -100,6 +100,9 @@ body {
 .bs-docs-sidenav li {
 	min-width: 200px;
 }
+.nav-stacked > li + li{
+	margin-top: 0px;
+}
 .docsright {
 	min-width: 740px; 
 }
@@ -118,6 +121,9 @@ pre {
 .pre-var {
 	margin-top: 13px;
 	margin-bottom: 13px;
+}
+.nav-tabs.nav-stacked > li > a {
+    border: 1px solid rgb(221, 221, 221);
 }
 /* Comment, String, Internal, External, Return/Break, Keyword, Boolean/nil, Builtin */
 pre .com {  color: #007500;} 
