@@ -206,11 +206,13 @@ func SaveProject(pinfo *hv.PkgInfo, pdecl *PkgDecl, pfuncs []*PkgFunc, imports [
 		// Save package tag.
 		// ------------------------------
 
+		i := strings.Index(pinfo.ImportPath, pinfo.ProjectName)
+		proPath := pinfo.ImportPath[:i+len(pinfo.ProjectName)]
 		pkgTag := new(PkgTag)
-		cond = qbs.NewCondition("path = ?", pinfo.ImportPath).And("tag = ?", pdecl.Tag)
+		cond = qbs.NewCondition("path = ?", proPath).And("tag = ?", pdecl.Tag)
 		err = q.Condition(cond).Find(pkgTag)
 		if err != nil {
-			pkgTag.Path = pinfo.ImportPath
+			pkgTag.Path = proPath
 			pkgTag.Tag = pdecl.Tag
 		}
 		pkgTag.Vcs = pinfo.Vcs
@@ -326,10 +328,11 @@ func DeleteProject(path string) {
 
 	var i1, i2, i3, i4, i5 int64
 	// Delete package information.
+	// TODO: NEED TO DELETE ALL SUB-PEOJECTS.
 	info := new(hv.PkgInfo)
-	err := q.WhereEqual("path", path).Find(info)
+	err := q.WhereEqual("import_path", path).Find(info)
 	if err == nil {
-		i1, err = q.WhereEqual("path", path).Delete(info)
+		i1, err = q.WhereEqual("import_path", path).Delete(info)
 		if err != nil {
 			beego.Error("models.DeleteProject(", path, ") -> Information:", err)
 		}

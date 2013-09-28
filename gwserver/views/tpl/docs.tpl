@@ -100,7 +100,7 @@
 {{range .Funcs}}
 <h3 id="{{.Name}}">
 	func 
-	<a target="_blank" href="{{.URL}}">{{.Name}}</a> 
+	<a target="_blank" href="http://{{.URL}}">{{.Name}}</a> 
 	<button class="btn btn-info btn-xs" data-toggle="collapse" data-target="#collapse_{{.Name}}">View Code</button>
 </h3>
 
@@ -128,7 +128,7 @@
 {{range .Types}}
 <h3 id="{{.Name}}">
 	type 
-	<a target="_blank" href="{{.URL}}">{{.Name}}</a>
+	<a target="_blank" href="http://{{.URL}}">{{.Name}}</a>
 </h3>
 
 <pre class="pre-x-scrollable">{{str2html .FmtDecl}}</pre>
@@ -164,7 +164,7 @@
 {{range .Funcs}}
 <h4 id="{{.Name}}">
 	func 
-	<a target="_blank" href="{{.URL}}">{{.Name}}</a> 
+	<a target="_blank" href="http://{{.URL}}">{{.Name}}</a> 
 	<button class="btn btn-info btn-xs" data-toggle="collapse" data-target="#collapse_{{.Name}}">View Code</button>
 </h4>
 
@@ -192,7 +192,7 @@
 {{range .Methods}}
 <h4 id="{{.FullName}}">
 	func 
-	<a target="_blank" href="{{.URL}}">{{.Name}}</a> 
+	<a target="_blank" href="http://{{.URL}}">{{.Name}}</a> 
 	<button class="btn btn-info btn-xs" data-toggle="collapse" data-target="#collapse_{{.FullName}}">View Code</button>
 </h4>
 
@@ -221,21 +221,19 @@
 
 {{if .IsHasFiles}}
 <h3 id="_files">
-	<a target="_blank" href="http://{{.ProPath}}">Files</a>
+	<a target="_blank" href="http://{{.ViewFilePath}}">Files</a>
 </h3>
 {{end}}
 
 <p>
-	{{$proPath := .ProPath}}
-	{{$pkgTag := .PkgTag}}
 	{{range .Files}}
-	<a target="_blank" href="http://{{$proPath}}/{{.}}{{$pkgTag}}">{{.}}</a>
+	<a target="_blank" href="http://{{.BrowseUrl}}">{{.SrcName}}</a>
 	{{end}}
 </p>
 
 {{if .IsHasSubdirs}}
 <h3 id="_subdirs">
-	<a target="_blank" href="http://{{.ProPath}}">Directories</a>
+	<a target="_blank" href="http://{{.ViewDirPath}}">Directories</a>
 </h3>
 
 <table class="table table-hover table-striped table-condensed">

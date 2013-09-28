@@ -413,16 +413,6 @@ func getVCSInfo(q, tag string, pdoc *hv.Package) (vcs, proName, proPath, pkgDocP
 		}
 		proName := utils.GetProjectPath(pdoc.ImportPath)
 		proPath = strings.Replace(q, proName, proName+"/tree/"+tag, 1)
-	case strings.HasPrefix(q, "code.google.com"): // code.google.com
-		vcs = "Google Code"
-		if strings.Index(q, "source/") == -1 {
-			proPath = strings.Replace(q, "/"+pdoc.ProjectName, "/"+pdoc.ProjectName+"/source/browse", 1)
-		} else {
-			proPath = q
-			q = strings.Replace(q, "source/browse/", "", 1)
-			lastIndex = strings.LastIndex(q, "/")
-		}
-		pkgTag = "?r=" + tag // Set tag.
 	case q[0] == 'b': // bitbucket.org
 		vcs = "BitBucket"
 		if len(tag) == 0 {
@@ -633,6 +623,7 @@ func renderDoc(this *HomeRouter, pdoc *hv.Package, q, tag, docPath string) bool 
 		pdoc.IsHasSubdir = true
 		this.Data["IsHasSubdirs"] = pdoc.IsHasSubdir
 		this.Data["Subdirs"] = pinfos
+		this.Data["ViewDirPath"] = pdoc.ViewDirPath
 	}
 
 	// Files.
@@ -640,6 +631,12 @@ func renderDoc(this *HomeRouter, pdoc *hv.Package, q, tag, docPath string) bool 
 		pdoc.IsHasFile = true
 		this.Data["IsHasFiles"] = pdoc.IsHasFile
 		this.Data["Files"] = pdoc.Files
+
+		var query string
+		if i := strings.Index(pdoc.Files[0].BrowseUrl, "?"); i > -1 {
+			query = pdoc.Files[0].BrowseUrl[i:]
+		}
+		this.Data["ViewFilePath"] = path.Dir(pdoc.Files[0].BrowseUrl) + query
 	}
 
 	var err error
@@ -752,10 +749,6 @@ func renderDoc(this *HomeRouter, pdoc *hv.Package, q, tag, docPath string) bool 
 		utils.FormatCode(&buf, &e.Code, links)
 		e.Code = buf.String()
 	}
-
-	// Get VCS name, project name, project home page, Upper level project URL, and project tag.
-	this.Data["VCS"], this.Data["ProName"], this.Data["ProPath"], this.Data["ProDocPath"], this.Data["PkgTag"] =
-		getVCSInfo(q, tag, pdoc)
 
 	this.TplNames = "tpl/docs.tpl"
 	data, err := this.RenderBytes()
@@ -871,9 +864,15 @@ func generatePage(this *HomeRouter, pdoc *hv.Package, q, tag string) bool {
 	// Refresh (within 10 seconds).
 	this.Data["IsRefresh"] = pdoc.Created.UTC().Add(10 * time.Second).After(time.Now().UTC())
 
-	// Get VCS name, project name, project home page, Upper level project URL, and project tag.
-	this.Data["VCS"], this.Data["ProName"], this.Data["ProPath"], this.Data["ProDocPath"], this.Data["PkgTag"] =
-		getVCSInfo(q, tag, pdoc)
+	this.Data["VCS"] = pdoc.Vcs
+	this.Data["ProPath"] = pdoc.ProjectPath
+
+	proName := path.Base(pdoc.ImportPath)
+	if i := strings.Index(proName, "?"); i > -1 {
+		proName = proName[:i]
+	}
+	this.Data["ProName"] = proName
+	this.Data["ProDocPath"] = path.Dir(pdoc.ImportPath)
 
 	if utils.IsGoRepoPath(pdoc.ImportPath) &&
 		strings.Index(pdoc.ImportPath, ".") == -1 {
@@ -913,6 +912,7 @@ func generatePage(this *HomeRouter, pdoc *hv.Package, q, tag string) bool {
 	this.Data["Views"] = pdoc.Views + 1
 	//this.Data["Labels"] = getLabels(pdoc.Labels)
 	//this.Data["LabelDataSrc"] = labelSet
+	this.Data["LabelDataSrc"] = ""
 	this.Data["ImportPkgNum"] = len(pdoc.Imports)
 	this.Data["IsHasSubdirs"] = pdoc.IsHasSubdir
 	this.Data["IsHasFiles"] = pdoc.IsHasFile

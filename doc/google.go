@@ -145,7 +145,7 @@ func getGoogleTags(importPath string, defaultBranch string, isGoRepo bool) []str
 	if isGoRepo {
 		tags = make([]string, 1, 20)
 	} else {
-		tags = make([]string, 1, len(m)+1)
+		tags = make([]string, len(m)+1)
 	}
 
 	tags[0] = defaultBranch
@@ -156,7 +156,6 @@ func getGoogleTags(importPath string, defaultBranch string, isGoRepo bool) []str
 			}
 			continue
 		}
-
 		tags[i+1] = v[1]
 	}
 	return tags
@@ -184,35 +183,59 @@ func getGoogleDoc(client *http.Client, match map[string]string, tag, ptag string
 		return nil, errors.New("doc.getGoogleDoc(" + match["importPath"] + ") -> Could not find revision")
 	} else {
 		etag = string(m[1])
-		if etag == ptag {
+		if match["pkgVer"] != "0" && etag == ptag {
 			return nil, errNotModified
 		}
 	}
 
-	// Get source file data.
-	ms := googleFileRe.FindAllSubmatch(p, -1)
-	files := make([]com.RawFile, 0, len(ms))
-	for _, m := range ms {
-		fname := strings.Split(string(m[1]), "?")[0]
-		if utils.IsDocFile(fname) {
-			files = append(files, &hv.Source{
-				SrcName:   fname,
-				BrowseUrl: com.Expand("http://code.google.com/p/{repo}/source/browse{dir}/{0}{query}?r={tag}", match, fname),
-				RawSrcUrl: com.Expand("http://{subrepo}{dot}{repo}.googlecode.com/{vcs}{dir}/{0}?r={tag}", match, fname),
-			})
+	match["browserUrlTpl"] = "code.google.com/p/{repo}/source/browse{dir}/{0}?repo={subrepo}&r={tag}"
+	match["rawSrcUrlTpl"] = "{subrepo}{dot}{repo}.googlecode.com/{vcs}{dir}/{0}?r={tag}"
+	var isGoPro bool
+	var files []com.RawFile
+	var dirs []string
+	// Unrecord and non-SVN project can download archive.
+	if len(ptag) == 0 || match["vcs"] == "svn" {
+		tmpTag := match["tag"]
+		if len(tmpTag) == 0 {
+			tmpTag = defaultTags[match["vcs"]]
+		}
+
+		isGoPro, _, files, dirs, err = getRepoByArchive(match,
+			com.Expand("http://{subrepo}{dot}{repo}.googlecode.com/archive/{0}.zip", match, tmpTag))
+		if err != nil {
+			return nil, errors.New("doc.getGoogleDoc(" + match["importPath"] + ") -> Fail to download archive: " + err.Error())
+		}
+	} else {
+		// Get source file data.
+		ms := googleFileRe.FindAllSubmatch(p, -1)
+		files = make([]com.RawFile, 0, len(ms))
+		for _, m := range ms {
+			fname := strings.Split(string(m[1]), "?")[0]
+			if utils.IsDocFile(fname) {
+				isGoPro = true
+				files = append(files, &hv.Source{
+					SrcName:   fname,
+					BrowseUrl: com.Expand(match["browserUrlTpl"], match, fname),
+					RawSrcUrl: com.Expand(match["rawSrcUrlTpl"], match, fname),
+				})
+			}
+		}
+
+		// Get subdirectories.
+		ms = googleDirRe.FindAllSubmatch(p, -1)
+		dirs = make([]string, 0, len(ms))
+		for _, m := range ms {
+			dirName := strings.Split(string(m[1]), "?")[0]
+			// Make sure we get directories.
+			if strings.HasSuffix(dirName, "/") &&
+				utils.FilterDirName(dirName) {
+				dirs = append(dirs, strings.Replace(dirName, "/", "", -1))
+			}
 		}
 	}
 
-	// Get subdirectories.
-	ms = googleDirRe.FindAllSubmatch(p, -1)
-	dirs := make([]string, 0, len(ms))
-	for _, m := range ms {
-		dirName := strings.Split(string(m[1]), "?")[0]
-		// Make sure we get directories.
-		if strings.HasSuffix(dirName, "/") &&
-			utils.FilterDirName(dirName) {
-			dirs = append(dirs, strings.Replace(dirName, "/", "", -1))
-		}
+	if !isGoPro {
+		return nil, com.NotFoundError{"Cannot find Go files, it's not a Go project."}
 	}
 
 	if len(files) == 0 && len(dirs) == 0 {
@@ -234,6 +257,8 @@ func getGoogleDoc(client *http.Client, match map[string]string, tag, ptag string
 			PkgInfo: &hv.PkgInfo{
 				ImportPath:  match["importPath"],
 				ProjectName: com.Expand("{repo}{dot}{subrepo}", match),
+				ProjectPath: com.Expand("code.google.com/p/{repo}/source/browse/?repo={subrepo}&r={tag}", match),
+				ViewDirPath: com.Expand("code.google.com/p/{repo}/source/browse{dir}?repo={subrepo}&r={tag}", match),
 				Tags:        strings.Join(tags, "|||"),
 				Ptag:        etag,
 				Vcs:         "Google Code",
@@ -257,8 +282,5 @@ func getGoogleDoc(client *http.Client, match map[string]string, tag, ptag string
 		WalkMode:  hv.WM_All,
 		Srcs:      srcs,
 	})
-	for k, v := range match {
-		println(k, v)
-	}
 	return nil, nil
 }

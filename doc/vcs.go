@@ -15,7 +15,10 @@
 package doc
 
 import (
+	"archive/zip"
 	"bytes"
+	"errors"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -257,4 +260,101 @@ func bestTag(tags map[string]string, defaultTag string) (string, string, error) 
 		return defaultTag, commit, nil
 	}
 	return "", "", com.NotFoundError{"Tag or branch not found."}
+}
+
+// checkDir checks if directory has been appended to slice.
+func checkDir(dir string, dirs []string) bool {
+	for _, d := range dirs {
+		if dir == d {
+			return true
+		}
+	}
+	return false
+}
+
+// Only support .zip.
+func getRepoByArchive(match map[string]string, downloadPath string) (bool, string, []com.RawFile, []string, error) {
+	stdout, _, err := com.ExecCmd("curl", downloadPath)
+	if err != nil {
+		return false, "", nil, nil, err
+	}
+	p := []byte(stdout)
+
+	r, err := zip.NewReader(bytes.NewReader(p), int64(len(p)))
+	if err != nil {
+		return false, "", nil, nil, errors.New(downloadPath + " -> new zip: " + err.Error())
+	}
+
+	if len(r.File) == 0 {
+		return false, "", nil, nil, nil
+	}
+
+	nameLen := strings.Index(r.File[0].Name, "/")
+	dirPrefix := match["dir"]
+	if len(dirPrefix) != 0 {
+		dirPrefix = dirPrefix[1:] + "/"
+	}
+	preLen := len(dirPrefix)
+	isGoPro := false
+
+	for k, v := range match {
+		println(k, v)
+	}
+	comment := r.Comment
+
+	files := make([]com.RawFile, 0, 5)
+	dirs := make([]string, 0, 5)
+	for _, f := range r.File {
+		fileName := f.Name[nameLen+1:]
+		// Skip directories and files in wrong directories, get them later.
+		if strings.HasSuffix(fileName, "/") || !strings.HasPrefix(fileName, dirPrefix) {
+			continue
+		}
+		fmt.Println(fileName)
+
+		// Get files and check if directories have acceptable files.
+		if d, fn := path.Split(fileName); utils.IsDocFile(fn) &&
+			utils.FilterDirName(d) {
+			// Check if it's a Go file.
+			if !isGoPro && strings.HasSuffix(fn, ".go") {
+				isGoPro = true
+			}
+
+			// Check if file is in the directory that is corresponding to import path.
+			if d == dirPrefix {
+				// Yes.
+				if !isGoPro && strings.HasSuffix(fn, ".go") {
+					isGoPro = true
+				}
+				// Get file from archive.
+				rc, err := f.Open()
+				if err != nil {
+					return isGoPro, comment, files, dirs,
+						errors.New(downloadPath + " -> open file: " + err.Error())
+				}
+
+				p := make([]byte, f.FileInfo().Size())
+				rc.Read(p)
+				if err != nil {
+					return isGoPro, comment, files, dirs,
+						errors.New(downloadPath + " -> read file: " + err.Error())
+				}
+				fmt.Println(com.Expand(match["browserUrlTpl"], match, fn))
+				files = append(files, &hv.Source{
+					SrcName:   fn,
+					BrowseUrl: com.Expand(match["browserUrlTpl"], match, fn),
+					RawSrcUrl: com.Expand(match["rawSrcUrlTpl"], match, fileName[preLen:]),
+					SrcData:   p,
+				})
+
+			} else {
+				sd, _ := path.Split(d[preLen:])
+				sd = strings.TrimSuffix(sd, "/")
+				if !checkDir(sd, dirs) {
+					dirs = append(dirs, sd)
+				}
+			}
+		}
+	}
+	return isGoPro, comment, files, dirs, nil
 }

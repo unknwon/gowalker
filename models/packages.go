@@ -46,15 +46,11 @@ func getPkgInfoWithQ(path, tag string, q *qbs.Qbs) (*hv.PkgInfo, error) {
 	}
 
 	pinfo := new(hv.PkgInfo)
-	err := q.WhereEqual("import_path", path).Find(pinfo)
-	if err != nil {
-		return pinfo, errors.New(
-			fmt.Sprintf("models.GetPkgInfo( %s:%s ) -> 'PkgInfo': %s", path, tag, err))
-	}
+	q.WhereEqual("import_path", path).Find(pinfo)
 
 	ptag := new(PkgTag)
 	cond := qbs.NewCondition("path = ?", packer.GetProjectPath(path)).And("tag = ?", tag)
-	err = q.Condition(cond).Find(ptag)
+	err := q.Condition(cond).Find(ptag)
 	if err != nil {
 		return pinfo, errors.New(
 			fmt.Sprintf("models.GetPkgInfo( %s:%s ) -> 'PkgTag': %s", path, tag, err))

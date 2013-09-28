@@ -71,7 +71,7 @@ func CheckDoc(broPath, tag string, rt requestType) (*hv.Package, error) {
 		fallthrough
 	case err != nil || pinfo.PkgVer != hv.PACKAGE_VER:
 		// If PACKAGE_VER does not match, refresh anyway.
-		pinfo.Ptag = ""
+		pinfo.PkgVer = 0
 		needsCrawl = true
 	default:
 		// Check request type.

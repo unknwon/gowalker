@@ -214,13 +214,3 @@ func getGithubDoc(client *http.Client, match map[string]string, tag, savedEtag s
 		Srcs:      srcs,
 	})
 }
-
-// checkDir checks if directory has been appended to slice.
-func checkDir(dir string, dirs []string) bool {
-	for _, d := range dirs {
-		if dir == d {
-			return true
-		}
-	}
-	return false
-}

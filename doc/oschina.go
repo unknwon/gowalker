@@ -118,7 +118,7 @@ func getOSCDoc(client *http.Client, match map[string]string, tag, savedEtag stri
 	}
 
 	if !isGoPro {
-		return nil, com.NotFoundError{"Cannot find Go files, it's not a Go project."}
+		return nil, com.NotFoundError{"Cannot find Go files, it's not a Go project"}
 	}
 
 	if len(files) == 0 && len(dirs) == 0 {
