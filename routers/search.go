@@ -23,5 +23,6 @@ type SearchRouter struct {
 
 // Get implemented Get method for SearchRouter.
 func (this *SearchRouter) Get() {
+	this.Redirect("http://b.repl.ca/v1/play-here-yellow.png", 302)
 	this.Ctx.WriteString("nothing to show")
 }

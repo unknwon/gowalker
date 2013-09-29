@@ -29,6 +29,5 @@ _testmain.go
 *.exe
 *.exe~
 .DS_Store
-gwserver/gwserver
-gw-admin/gw-admin
+gowalker
 bale.go

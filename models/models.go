@@ -354,6 +354,12 @@ func LoadPkgDoc(path, lang, docType string) (doc string) {
 	q := connDb()
 	defer q.Close()
 
+	if len(lang) < 2 {
+		return ""
+	}
+
+	lang = lang[:2]
+
 	pdoc := new(PkgDoc)
 	cond := qbs.NewCondition("path = ?", path).And("lang = ?", lang).And("type = ?", docType)
 	err := q.Condition(cond).Find(pdoc)

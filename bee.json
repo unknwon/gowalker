@@ -5,9 +5,9 @@
 	],
 	"dir_structure":{
 		"controllers": "routers",
-		"models": "../models",
+		"models": "",
 		"others": [
-			"../doc", "../utils", "conf",
+			"doc", "utils", "conf",
 			"$GOPATH/src/github.com/Unknwon/hv"
 		]
 	},
