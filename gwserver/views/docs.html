@@ -181,9 +181,11 @@
 				{{end}}
 
 				{{if .IsHasReadme}}
-				<div id="readme" style="display:none; padding: 3px; border:1px solid #4F4F4F;">{{str2html .PkgDoc}}</div>
+				<br>
+				<div id="readme" style="display:none; padding-left: 20px; border:3px solid rgb(39, 32, 175);">{{str2html .PkgDoc}}</div>
+				<br>
 				{{end}}
-				
+
 				<div id="markdown" class="markdown">
 					{{range .DocJS}}
 					<script type="text/javascript" src="{{.}}"></script>

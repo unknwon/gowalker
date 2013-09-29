@@ -395,13 +395,6 @@ func getVCSInfo(q, tag string, pdoc *hv.Package) (vcs, proName, proPath, pkgDocP
 
 	// Project VCS home page.
 	switch {
-	case strings.HasPrefix(q, "github.com"): // github.com
-		vcs = "Github"
-		if len(tag) == 0 {
-			tag = "master" // Set tag.
-		}
-		proName := utils.GetProjectPath(pdoc.ImportPath)
-		proPath = strings.Replace(q, proName, proName+"/tree/"+tag, 1)
 	case q[0] == 'b': // bitbucket.org
 		vcs = "BitBucket"
 		if len(tag) == 0 {
@@ -776,6 +769,8 @@ func renderDoc(this *HomeRouter, pdoc *hv.Package, q, tag, docPath string) bool 
 		beego.Error("generatePage(", pdoc.ImportPath, ") -> SaveProject:", err)
 		return false
 	}
+
+	models.SavePkgDoc(pdoc.ImportPath, pdoc.Readme)
 	return true
 }
 

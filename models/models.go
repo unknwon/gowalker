@@ -322,30 +322,30 @@ func SavePkgExam(gist *PkgExam) error {
 }
 
 // SavePkgDoc saves readered readme.md file data.
-func SavePkgDoc(path, lang string, docBys []byte) {
+func SavePkgDoc(path string, readmes map[string][]byte) {
 	q := connDb()
 	defer q.Close()
 
-	// Reader readme.
-	doc := string(docBys)
-	if len(doc) == 0 {
-		return
-	}
+	for lang, data := range readmes {
+		if len(data) == 0 {
+			continue
+		}
 
-	if doc[0] == '\n' {
-		doc = doc[1:]
-	}
+		if data[0] == '\n' {
+			data = data[1:]
+		}
 
-	pdoc := new(PkgDoc)
-	cond := qbs.NewCondition("path = ?", path).And("lang = ?", lang).And("type = ?", "rm")
-	q.Condition(cond).Find(pdoc)
-	pdoc.Path = path
-	pdoc.Lang = lang
-	pdoc.Type = "rm"
-	pdoc.Doc = base32.StdEncoding.EncodeToString([]byte(doc))
-	_, err := q.Save(pdoc)
-	if err != nil {
-		beego.Error("models.SavePkgDoc -> readme:", err)
+		pdoc := new(PkgDoc)
+		cond := qbs.NewCondition("path = ?", path).And("lang = ?", lang).And("type = ?", "rm")
+		q.Condition(cond).Find(pdoc)
+		pdoc.Path = path
+		pdoc.Lang = lang
+		pdoc.Type = "rm"
+		pdoc.Doc = base32.StdEncoding.EncodeToString(data)
+		_, err := q.Save(pdoc)
+		if err != nil {
+			beego.Error("models.SavePkgDoc -> readme:", err)
+		}
 	}
 }
 

@@ -75,10 +75,9 @@ func getGithubDoc(client *http.Client, match map[string]string, tag, savedEtag s
 		}
 	}
 
-	if len(tags) > 5 {
-		tags = tags[len(tags)-5:]
+	if len(tags) > 0 {
+		tags = append([]string{"master"}, tags...)
 	}
-	tags = append([]string{"master"}, tags...)
 
 	if len(tag) == 0 {
 		// Check revision tag.
@@ -120,7 +119,6 @@ func getGithubDoc(client *http.Client, match map[string]string, tag, savedEtag s
 	preLen := len(dirPrefix)
 
 	isGoPro := false // Indicates whether it's a Go project.
-	isRootPath := match["importPath"] == utils.GetProjectPath(match["importPath"])
 	dirs := make([]string, 0, 5)
 	files := make([]com.RawFile, 0, 5)
 	for _, node := range tree.Tree {
@@ -133,20 +131,20 @@ func getGithubDoc(client *http.Client, match map[string]string, tag, savedEtag s
 		if d, f := path.Split(node.Path); utils.IsDocFile(f) &&
 			utils.FilterDirName(d) {
 			// Check if it's a Go file.
-			if isRootPath && !isGoPro && strings.HasSuffix(f, ".go") {
+			if !isGoPro && strings.HasSuffix(f, ".go") {
 				isGoPro = true
 			}
 
 			// Check if file is in the directory that is corresponding to import path.
 			if d == dirPrefix {
 				// Yes.
-				if !isRootPath && !isGoPro && strings.HasSuffix(f, ".go") {
+				if !isGoPro && strings.HasSuffix(f, ".go") {
 					isGoPro = true
 				}
 				files = append(files, &hv.Source{
 					SrcName:   f,
-					BrowseUrl: com.Expand("https://github.com/{owner}/{repo}/blob/{tag}/{0}", match, node.Path),
-					RawSrcUrl: node.Url + "?" + githubCred,
+					BrowseUrl: com.Expand("github.com/{owner}/{repo}/blob/{tag}/{0}", match, node.Path),
+					RawSrcUrl: com.Expand("https://raw.github.com/{owner}/{repo}/{tag}/{0}", match, node.Path) + "?" + githubCred,
 				})
 			} else {
 				sd, _ := path.Split(d[preLen:])
@@ -172,15 +170,21 @@ func getGithubDoc(client *http.Client, match map[string]string, tag, savedEtag s
 	}
 
 	// Get addtional information: forks, watchers.
-	// var note struct {
-	// 	Forks    int
-	// 	Watchers int `json:"watchers_count"`
-	// }
+	var note struct {
+		Homepage string
+		Fork     bool
+		Parent   struct {
+			Html string `json:"html_url"`
+		}
+		Issues int `json:"open_issues_count"`
+		Stars  int `json:"watchers_count"`
+		Forks  int `json:"forks_count"`
+	}
 
-	// err = httpGetJSON(client, expand("https://api.github.com/repos/{owner}/{repo}?{cred}", match), &note)
-	// if err != nil {
-	// 	return nil, errors.New("doc.getGithubDoc(" + match["importPath"] + ") -> get note: " + err.Error())
-	// }
+	err = com.HttpGetJSON(client, com.Expand("https://api.github.com/repos/{owner}/{repo}?{cred}", match), &note)
+	if err != nil {
+		return nil, errors.New("doc.getGithubDoc(" + match["importPath"] + ") -> get note: " + err.Error())
+	}
 
 	// Start generating data.
 	w := &hv.Walker{
@@ -189,16 +193,27 @@ func getGithubDoc(client *http.Client, match map[string]string, tag, savedEtag s
 			PkgInfo: &hv.PkgInfo{
 				ImportPath:  match["importPath"],
 				ProjectName: match["repo"],
+				ProjectPath: com.Expand("github.com/{owner}/{repo}/blob/{tag}", match),
+				ViewDirPath: com.Expand("github.com/{owner}/{repo}/blob/{tag}{dir}", match),
 				Tags:        strings.Join(tags, "|||"),
 				Ptag:        commit,
+				Vcs:         "GitHub",
+				Issues:      note.Issues,
+				Stars:       note.Stars,
+				Forks:       note.Forks,
 			},
 			PkgDecl: &hv.PkgDecl{
 				Tag:  tag,
 				Dirs: dirs,
 			},
-			//Note: strconv.Itoa(note.Forks) + "|" +
-			//	strconv.Itoa(note.Watchers) + "|",
 		},
+	}
+
+	if len(note.Homepage) > 0 {
+		w.Pdoc.Homepage = note.Homepage
+	}
+	if note.Fork {
+		w.Pdoc.ForkUrl = note.Parent.Html
 	}
 
 	srcs := make([]*hv.Source, 0, len(files))

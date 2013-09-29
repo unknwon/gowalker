@@ -241,8 +241,8 @@ func SaveProject(pinfo *hv.PkgInfo, pdecl *PkgDecl, pfuncs []*PkgFunc, imports [
 		// Save package tag.
 		// ------------------------------
 
-		i := strings.Index(pinfo.ImportPath, pinfo.ProjectName)
-		proPath := pinfo.ImportPath[:i+len(pinfo.ProjectName)]
+		i := strings.Index(pinfo.ImportPath, "/"+pinfo.ProjectName)
+		proPath := pinfo.ImportPath[:i+len(pinfo.ProjectName)+1]
 		if utils.IsGoRepoPath(pinfo.ImportPath) {
 			proPath = "code.google.com/p/go"
 		}

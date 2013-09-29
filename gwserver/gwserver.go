@@ -124,6 +124,9 @@ func main() {
 }
 
 func isHasEleS(s []string) bool {
+	if len(s) == 1 && len(s[0]) == 0 {
+		return false
+	}
 	return len(s) > 0
 }
 

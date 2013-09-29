@@ -223,7 +223,7 @@ func addFuncs(pfuncs []*models.PkgFunc, fs []*hv.Func, path string, links []*uti
 func addFunc(pfuncs []*models.PkgFunc, f *hv.Func, path, name string, links []*utils.Link) []*models.PkgFunc {
 	var buf bytes.Buffer
 	f.FullName = name
-	f.Code += "}"
+	f.Code = strings.Replace(f.Code, "<pre>", "&lt;pre&gt;", -1) + "}"
 	utils.FormatCode(&buf, &f.Code, links)
 	f.Code = buf.String()
 	return append(pfuncs, &models.PkgFunc{
