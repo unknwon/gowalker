@@ -32,6 +32,7 @@ See board on [Trello](https://trello.com/b/wS7CzdcI/go-walker) about to do, bugs
 ## Credits
 
 - [chenwenli](http://www.lavachen.cn) Thanks for adding feature of [Control Panel](http://gowalker.org/about#control_panel).
+- [slene](https://github.com/slene) Thanks for README css.
 - [atotto](https://github.com/atotto) Thanks for translating site user interface to Japanese.
 - Source files that contain code that is from [gddo](https://github.com/garyburd/gddo) is honored in specific.
 

@@ -248,3 +248,12 @@ function TransToChinese(node) {
             node.html(node.html().toString().replace("View Code", "查看代码"));
     }
 }
+
+function viewCode(name) {
+    var decl = document.getElementById(name.replace("|||", "_"));
+    if (decl.style.borderBottom == "0") {
+        decl.style.borderBottom = "1px";
+    } else {
+        decl.style.borderBottom = "0px";
+    }
+}

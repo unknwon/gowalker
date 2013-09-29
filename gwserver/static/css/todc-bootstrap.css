@@ -545,7 +545,7 @@ select:focus:required:invalid:focus {
   color: #333;
   text-shadow: 0 1px 0 #fff;
   white-space: nowrap;
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: Microsoft Yahei, Arial, Helvetica, sans-serif;
   font-weight: bold;
   font-size: 13px;
   text-align: center;

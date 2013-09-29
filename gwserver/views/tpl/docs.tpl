@@ -101,15 +101,15 @@
 <h3 id="{{.Name}}">
 	func 
 	<a target="_blank" href="http://{{.URL}}">{{.Name}}</a> 
-	<button class="btn btn-info btn-xs" data-toggle="collapse" data-target="#collapse_{{.Name}}">View Code</button>
+	<button class="btn btn-info btn-xs" data-toggle="collapse" data-target="#collapse_{{.Name}}" onclick="viewCode(decl|||{{.Name}});">View Code</button>
 </h3>
 
 <div class="panel panel-default">
 	<div class="pre-x-scrollable">
-		<pre>{{str2html .FmtDecl}}</pre>
+		<pre id="decl_{{.Name}}">{{str2html .FmtDecl}}</pre>
 	</div>
 	<div id="collapse_{{.Name}}" class="panel-collapse collapse">
-		<pre>{{str2html .Code}}</pre>
+		<pre class="code">{{str2html .Code}}</pre>
 	</div>
 </div>
 
@@ -165,15 +165,15 @@
 <h4 id="{{.Name}}">
 	func 
 	<a target="_blank" href="http://{{.URL}}">{{.Name}}</a> 
-	<button class="btn btn-info btn-xs" data-toggle="collapse" data-target="#collapse_{{.Name}}">View Code</button>
+	<button class="btn btn-info btn-xs" data-toggle="collapse" data-target="#collapse_{{.Name}}" onclick="viewCode(decl|||{{.Name}});">View Code</button>
 </h4>
 
 <div class="panel panel-default">
 	<div class="pre-x-scrollable">
-		<pre>{{str2html .FmtDecl}}</pre>
+		<pre id="decl_{{.Name}}">{{str2html .FmtDecl}}</pre>
 	</div>
 	<div id="collapse_{{.Name}}" class="panel-collapse collapse">
-		<pre>{{str2html .Code}}</pre>
+		<pre class="code">{{str2html .Code}}</pre>
 	</div>
 </div>
 
@@ -193,15 +193,15 @@
 <h4 id="{{.FullName}}">
 	func 
 	<a target="_blank" href="http://{{.URL}}">{{.Name}}</a> 
-	<button class="btn btn-info btn-xs" data-toggle="collapse" data-target="#collapse_{{.FullName}}">View Code</button>
+	<button class="btn btn-info btn-xs" data-toggle="collapse" data-target="#collapse_{{.FullName}}" onclick="viewCode(decl|||{{.Name}});">View Code</button>
 </h4>
 
 <div class="panel panel-default">
 	<div class="pre-x-scrollable">
-		<pre>{{str2html .FmtDecl}}</pre>
+		<pre id="decl_{{.Name}}">{{str2html .FmtDecl}}</pre>
 	</div>
 	<div id="collapse_{{.FullName}}" class="panel-collapse collapse">
-		<pre>{{str2html .Code}}</pre>
+		<pre class="code">{{str2html .Code}}</pre>
 	</div>
 </div>
 

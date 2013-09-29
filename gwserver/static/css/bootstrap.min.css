@@ -106,6 +106,9 @@ body {
 .docsright {
 	min-width: 740px; 
 }
+.label-sm {
+	vertical-align: middle;
+}
 .readme {
     padding: 10px 15px;
     border: 1px solid #d9d9d9;
@@ -113,6 +116,10 @@ body {
     border-radius: 3px;
     -moz-border-radius: 3px;
     -webkit-border-radius: 3px;    
+}
+.code {
+	border-top: 0px;
+	margin-top: -10px;
 }
 .panel {
     border: 0px;
