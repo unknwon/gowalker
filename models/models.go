@@ -39,7 +39,6 @@ type PkgTag struct {
 	Path string `qbs:"size:150,index"`
 	Tag  string `qbs:"size:50"`
 	Vcs  string `qbs:"size:50"`
-	Ptag string `qbs:"size:50"`
 	Tags string
 }
 
@@ -113,6 +112,13 @@ type PkgFunc struct {
 	IsOld bool // Indicates if the function no longer exists.
 }
 
+// PkgImport represents a package imports record.
+type PkgImport struct {
+	Id      int64
+	Path    string `qbs:"size:150,index"`
+	Imports string
+}
+
 func connDb() *qbs.Qbs {
 	// 'sql.Open' only returns error when unknown driver, so it's not necessary to check in other places.
 	q, _ := qbs.GetQbs()
@@ -153,6 +159,7 @@ func InitDb() {
 	mg.CreateTableIfNotExists(new(PkgDecl))
 	mg.CreateTableIfNotExists(new(PkgDoc))
 	mg.CreateTableIfNotExists(new(PkgFunc))
+	mg.CreateTableIfNotExists(new(PkgImport))
 
 	beego.Trace("Initialized database ->", dbName)
 }

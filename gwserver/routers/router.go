@@ -121,15 +121,7 @@ func cacheTickerCheck(cacheChan <-chan time.Time) {
 func FlushCache() {
 	// Flush cache projects.
 	num := len(cachePros)
-	rtwPros := make([]*models.PkgRock, 0, num)
-	for _, p := range cachePros {
-		rtwPros = append(rtwPros, &models.PkgRock{
-			Pid:  p.Id,
-			Path: p.ImportPath,
-			Rank: p.Rank,
-		})
-	}
-	models.FlushCacheProjects(cachePros, rtwPros)
+	models.FlushCacheProjects(cachePros)
 	beego.Trace("FlushCacheProjects")
 
 	cachePros = make([]*hv.PkgInfo, 0, num)

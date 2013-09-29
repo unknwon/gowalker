@@ -45,7 +45,7 @@ type crawlResult struct {
 // It returns error when error occurs in the underlying functions.
 func crawlDoc(path, tag string, pinfo *hv.PkgInfo) (pdoc *hv.Package, err error) {
 	var pdocNew *hv.Package
-	pdocNew, err = getRepo(packer.HttpClient, path, tag, pinfo.Ptag, pinfo.PkgVer)
+	pdocNew, err = getRepo(packer.HttpClient, path, tag, pinfo.Ptag)
 
 	if err != errNotModified && pdocNew != nil {
 		pdoc = pdocNew
@@ -79,14 +79,14 @@ func crawlDoc(path, tag string, pinfo *hv.PkgInfo) (pdoc *hv.Package, err error)
 
 // getRepo downloads package data and returns 'Package' by given import path and tag.
 // It returns error when error occurs in the underlying functions.
-func getRepo(client *http.Client, path, tag, ptag string, pkgVer int) (pdoc *hv.Package, err error) {
+func getRepo(client *http.Client, path, tag, ptag string) (pdoc *hv.Package, err error) {
 	switch {
 	case utils.IsGoRepoPath(path):
 		pdoc, err = getStandardDoc(client, path, tag, ptag)
 	case utils.IsValidRemotePath(path):
-		pdoc, err = getStatic(client, path, tag, ptag, pkgVer)
+		pdoc, err = getStatic(client, path, tag, ptag)
 		if err == errNoMatch {
-			pdoc, err = getDynamic(client, path, tag, ptag, pkgVer)
+			pdoc, err = getDynamic(client, path, tag, ptag)
 		}
 	default:
 		return nil, errors.New(
@@ -258,7 +258,7 @@ var services = []*service{
 
 // getStatic gets a document from a statically known service. getStatic
 // returns errNoMatch if the import path is not recognized.
-func getStatic(client *http.Client, importPath, tag, etag string, pkgVer int) (pdoc *hv.Package, err error) {
+func getStatic(client *http.Client, importPath, tag, etag string) (pdoc *hv.Package, err error) {
 	for _, s := range services {
 		if s.get == nil || !strings.HasPrefix(importPath, s.prefix) {
 			continue
@@ -277,13 +277,12 @@ func getStatic(client *http.Client, importPath, tag, etag string, pkgVer int) (p
 				match[n] = m[i]
 			}
 		}
-		match["pkgVer"] = fmt.Sprint(pkgVer)
 		return s.get(client, match, tag, etag)
 	}
 	return nil, errNoMatch
 }
 
-func getDynamic(client *http.Client, importPath, tag, etag string, pkgVer int) (pdoc *hv.Package, err error) {
+func getDynamic(client *http.Client, importPath, tag, etag string) (pdoc *hv.Package, err error) {
 	match, err := fetchMeta(client, importPath)
 	if err != nil {
 		return nil, err
@@ -299,7 +298,7 @@ func getDynamic(client *http.Client, importPath, tag, etag string, pkgVer int) (
 		}
 	}
 
-	pdoc, err = getStatic(client, com.Expand("{repo}{dir}", match), tag, etag, pkgVer)
+	pdoc, err = getStatic(client, com.Expand("{repo}{dir}", match), tag, etag)
 	if err == errNoMatch {
 		//pdoc, err = getVCSDoc(client, match, etag)
 	}

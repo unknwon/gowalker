@@ -21,6 +21,7 @@ import (
 
 	"github.com/Unknwon/com"
 	"github.com/Unknwon/ctw/packer"
+	"github.com/Unknwon/gowalker/utils"
 	"github.com/Unknwon/hv"
 	"github.com/astaxie/beego"
 	"github.com/coocood/qbs"
@@ -48,16 +49,20 @@ func getPkgInfoWithQ(path, tag string, q *qbs.Qbs) (*hv.PkgInfo, error) {
 	pinfo := new(hv.PkgInfo)
 	q.WhereEqual("import_path", path).Find(pinfo)
 
+	proPath := packer.GetProjectPath(path)
+	if utils.IsGoRepoPath(path) {
+		proPath = "code.google.com/p/go"
+	}
 	ptag := new(PkgTag)
-	cond := qbs.NewCondition("path = ?", packer.GetProjectPath(path)).And("tag = ?", tag)
+	cond := qbs.NewCondition("path = ?", proPath).And("tag = ?", tag)
 	err := q.Condition(cond).Find(ptag)
 	if err != nil {
 		return pinfo, errors.New(
 			fmt.Sprintf("models.GetPkgInfo( %s:%s ) -> 'PkgTag': %s", path, tag, err))
 	}
 	pinfo.Vcs = ptag.Vcs
-	pinfo.Ptag = ptag.Ptag
 	pinfo.Tags = ptag.Tags
+	pinfo.Ptag = "ptag"
 
 	// Only 'PkgInfo' cannot prove that package exists,
 	// we have to check 'PkgDecl' as well in case it was deleted by mistake.

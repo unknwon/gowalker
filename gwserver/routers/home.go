@@ -91,28 +91,17 @@ func updateCacheInfo(pdoc *hv.Package, urpids, urpts *http.Cookie) (string, stri
 	return updateUrPros(pdoc, urpids, urpts)
 }
 
-func calRefRanks(refRanks []string) int64 {
-	refRank := 0
-	for _, v := range refRanks {
-		vn, _ := strconv.Atoi(v)
-		refRank += vn * 10 / 100
-	}
-	return int64(refRank)
-}
-
 func updateCachePros(pdoc *hv.Package) {
 	pdoc.Views++
 
 	for _, p := range cachePros {
 		if p.Id == pdoc.Id {
 			p = pdoc.PkgInfo
-			p.Rank = calRefRanks(strings.Split(pdoc.RefRanks, "|")) + pdoc.Views
 			return
 		}
 	}
 
 	pinfo := pdoc.PkgInfo
-	pinfo.Rank = calRefRanks(strings.Split(pdoc.RefRanks, "|")) + pdoc.Views
 	cachePros = append(cachePros, pinfo)
 }
 
@@ -599,6 +588,11 @@ func renderDoc(this *HomeRouter, pdoc *hv.Package, q, tag, docPath string) bool 
 	this.Data["IsHasConst"] = pdoc.IsHasConst
 	this.Data["Consts"] = pdoc.Consts
 	for i, v := range pdoc.Consts {
+		if len(v.Doc) > 0 {
+			buf.Reset()
+			godoc.ToHTML(&buf, v.Doc, nil)
+			v.Doc = buf.String()
+		}
 		buf.Reset()
 		v.Decl = template.HTMLEscapeString(v.Decl)
 		v.Decl = strings.Replace(v.Decl, "&#34;", "\"", -1)
@@ -611,6 +605,11 @@ func renderDoc(this *HomeRouter, pdoc *hv.Package, q, tag, docPath string) bool 
 	this.Data["IsHasVar"] = pdoc.IsHasVar
 	this.Data["Vars"] = pdoc.Vars
 	for i, v := range pdoc.Vars {
+		if len(v.Doc) > 0 {
+			buf.Reset()
+			godoc.ToHTML(&buf, v.Doc, nil)
+			v.Doc = buf.String()
+		}
 		buf.Reset()
 		utils.FormatCode(&buf, &v.Decl, links)
 		v.FmtDecl = buf.String()
@@ -665,6 +664,11 @@ func renderDoc(this *HomeRouter, pdoc *hv.Package, q, tag, docPath string) bool 
 	this.Data["Types"] = pdoc.Types
 	for i, t := range pdoc.Types {
 		for j, v := range t.Consts {
+			if len(v.Doc) > 0 {
+				buf.Reset()
+				godoc.ToHTML(&buf, v.Doc, nil)
+				v.Doc = buf.String()
+			}
 			buf.Reset()
 			v.Decl = template.HTMLEscapeString(v.Decl)
 			v.Decl = strings.Replace(v.Decl, "&#34;", "\"", -1)
@@ -673,6 +677,11 @@ func renderDoc(this *HomeRouter, pdoc *hv.Package, q, tag, docPath string) bool 
 			t.Consts[j] = v
 		}
 		for j, v := range t.Vars {
+			if len(v.Doc) > 0 {
+				buf.Reset()
+				godoc.ToHTML(&buf, v.Doc, nil)
+				v.Doc = buf.String()
+			}
 			buf.Reset()
 			utils.FormatCode(&buf, &v.Decl, links)
 			v.FmtDecl = buf.String()

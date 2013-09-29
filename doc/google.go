@@ -63,8 +63,8 @@ func getStandardDoc(client *http.Client, importPath, tag, ptag string) (pdoc *hv
 		if utils.IsDocFile(fname) {
 			files = append(files, &hv.Source{
 				SrcName:   fname,
-				BrowseUrl: "http://code.google.com/p/go/source/browse/src/pkg/" + importPath + "/" + fname + "?r=" + tag,
-				RawSrcUrl: "http://go.googlecode.com/hg/src/pkg/" + importPath + "/" + fname + "?r=" + tag,
+				BrowseUrl: "code.google.com/p/go/source/browse/src/pkg/" + importPath + "/" + fname + "?r=" + tag,
+				RawSrcUrl: "go.googlecode.com/hg/src/pkg/" + importPath + "/" + fname + "?r=" + tag,
 			})
 		}
 	}
@@ -100,6 +100,8 @@ func getStandardDoc(client *http.Client, importPath, tag, ptag string) (pdoc *hv
 			PkgInfo: &hv.PkgInfo{
 				ImportPath:  importPath,
 				ProjectName: "Go",
+				ProjectPath: "code.google.com/p/go/source/browse/src/pkg/?r=" + tag,
+				ViewDirPath: "code.google.com/p/go/source/browse/src/pkg/" + importPath + "/?r=" + tag,
 				IsGoRepo:    true,
 				Tags:        strings.Join(tags, "|||"),
 				Ptag:        etag,
@@ -183,7 +185,7 @@ func getGoogleDoc(client *http.Client, match map[string]string, tag, ptag string
 		return nil, errors.New("doc.getGoogleDoc(" + match["importPath"] + ") -> Could not find revision")
 	} else {
 		etag = string(m[1])
-		if match["pkgVer"] != "0" && etag == ptag {
+		if etag == ptag {
 			return nil, errNotModified
 		}
 	}
