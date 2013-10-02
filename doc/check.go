@@ -126,6 +126,10 @@ func CheckDoc(broPath, tag string, rt requestType) (*hv.Package, error) {
 				pinfo.Created = time.Now().UTC()
 				pdoc.PkgInfo = pinfo
 				return pdoc, nil
+			case strings.HasPrefix(err.Error(), "Cannot find Go files"):
+				utils.Cfg.SetValue("info", "block_list",
+					utils.Cfg.MustValue("info", "block_list")+"|")
+				utils.SaveConfig()
 			case pdoc != nil && len(pdoc.ImportPath) > 0:
 				return pdoc, err
 			case err == errUpdateTimeout:

@@ -48,7 +48,7 @@
 			    <ul class="dropdown-menu">
 				{{$keyword := .Keyword}}
 			    	{{range .RestLangs}}
-			    	<li><a href="?lang={{.Lang}}&q={{$keyword}}">{{.Name}}</a></li>
+			    	<li><a rel="nofollow" href="?lang={{.Lang}}&q={{$keyword}}">{{.Name}}</a></li>
 			    	{{end}}
 			    </ul>
 		    </div>
