@@ -179,22 +179,26 @@
             if (_ep) _ep.modal('hide');
             if (_ex) _ex.modal('hide');
             _modal.modal('hide');
-            if (_tf) {
-                _tf.modal('show');
-                _tf.on('shown', function () {
-                    $(this).find('#label_box').focus();
-                })
-            }
+            GkeyCb( function(){
+                    if (_tf) {
+                        _tf.modal('show');
+                        _tf.on('shown', function () {
+                        $(this).find('#label_box').focus();
+                    })
+                }
+            });
         } else if (code == 101) {// for 'g then e'   e 101
             if (_ep) _ep.modal('hide');
             if (_tf) _tf.modal('hide');
             _modal.modal('hide');
-            if (_ex) {
-                _ex.modal('show');
-                _ex.on('shown', function () {
-                    $(this).find('#example_box').focus();
-                })
-            }
+            GkeyCb( function() {
+                if (_ex) {
+                    _ex.modal('show');
+                    _ex.on('shown', function () {
+                        $(this).find('#example_box').focus();
+                    })
+                }
+            });
         }
     })
     //end
