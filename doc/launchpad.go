@@ -127,7 +127,7 @@ func getLaunchpadDoc(client *http.Client, match map[string]string, tag, savedEta
 				}
 				files = append(files, &hv.Source{
 					SrcName:   f,
-					BrowseUrl: com.Expand("http://bazaar.launchpad.net/+branch/{repo}/view/head:{dir}/{0}", match, f),
+					BrowseUrl: com.Expand("bazaar.launchpad.net/+branch/{repo}/view/head:{dir}/{0}", match, f),
 					SrcData:   b})
 			} else {
 				sd, _ := path.Split(d[preLen:])
@@ -163,7 +163,10 @@ func getLaunchpadDoc(client *http.Client, match map[string]string, tag, savedEta
 			PkgInfo: &hv.PkgInfo{
 				ImportPath:  match["importPath"],
 				ProjectName: match["repo"],
+				ProjectPath: com.Expand("bazaar.launchpad.net/+branch/{repo}/files", match),
+				ViewDirPath: com.Expand("bazaar.launchpad.net/+branch/{repo}/files/head:{dir}/", match),
 				Ptag:        etag,
+				Vcs:         "Launchpad",
 			},
 			PkgDecl: &hv.PkgDecl{
 				Dirs: dirs,

@@ -66,15 +66,14 @@ func getBitbucketDoc(client *http.Client, match map[string]string, tag, savedEta
 	for k := range nodes {
 		tags = append(tags, k)
 	}
-	if len(tags) > 5 {
-		tags = tags[len(tags)-5:]
+	if len(tags) > 0 {
+		tags = append([]string{defaultTags[match["vcs"]]}, tags...)
 	}
-	tags = append([]string{defaultTags[match["vcs"]]}, tags...)
 
 	var etag string
 	if len(tag) == 0 {
 		// Check revision tag.
-		etag = com.Expand("{vcs}-{commit}", match)
+		etag = match["commit"]
 		if etag == savedEtag {
 			return nil, errNotModified
 		}
@@ -103,7 +102,7 @@ func getBitbucketDoc(client *http.Client, match map[string]string, tag, savedEta
 		if utils.IsDocFile(name) {
 			files = append(files, &hv.Source{
 				SrcName:   name,
-				BrowseUrl: com.Expand("https://bitbucket.org/{owner}/{repo}/src/{tag}/{0}", match, f.Path),
+				BrowseUrl: com.Expand("bitbucket.org/{owner}/{repo}/src/{tag}/{0}", match, f.Path),
 				RawSrcUrl: com.Expand("https://api.bitbucket.org/1.0/repositories/{owner}/{repo}/raw/{tag}/{0}", match, f.Path),
 			})
 		}
@@ -133,8 +132,11 @@ func getBitbucketDoc(client *http.Client, match map[string]string, tag, savedEta
 			PkgInfo: &hv.PkgInfo{
 				ImportPath:  match["importPath"],
 				ProjectName: match["repo"],
+				ProjectPath: com.Expand("bitbucket.org/{owner}/{repo}/src/{tag}/", match),
+				ViewDirPath: com.Expand("bitbucket.org/{owner}/{repo}/src/{tag}{dir}/", match),
 				Tags:        strings.Join(tags, "|||"),
 				Ptag:        etag,
+				Vcs:         "BitBucket",
 			},
 			PkgDecl: &hv.PkgDecl{
 				Tag:  tag,

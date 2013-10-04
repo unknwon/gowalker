@@ -628,7 +628,7 @@ func renderDoc(this *HomeRouter, pdoc *hv.Package, q, tag, docPath string) bool 
 		if i := strings.Index(pdoc.Files[0].BrowseUrl, "?"); i > -1 {
 			query = pdoc.Files[0].BrowseUrl[i:]
 		}
-		this.Data["ViewFilePath"] = path.Dir(pdoc.Files[0].BrowseUrl) + query
+		this.Data["ViewFilePath"] = path.Dir(pdoc.Files[0].BrowseUrl) + "/" + query
 	}
 
 	var err error

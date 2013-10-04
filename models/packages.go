@@ -62,7 +62,6 @@ func getPkgInfoWithQ(path, tag string, q *qbs.Qbs) (*hv.PkgInfo, error) {
 	}
 	pinfo.Vcs = ptag.Vcs
 	pinfo.Tags = ptag.Tags
-	pinfo.Ptag = "ptag"
 
 	// Only 'PkgInfo' cannot prove that package exists,
 	// we have to check 'PkgDecl' as well in case it was deleted by mistake.

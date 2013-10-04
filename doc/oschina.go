@@ -15,16 +15,12 @@
 package doc
 
 import (
-	"archive/zip"
-	"bytes"
 	"errors"
 	"net/http"
-	"path"
 	"regexp"
 	"strings"
 
 	"github.com/Unknwon/com"
-	"github.com/Unknwon/gowalker/utils"
 	"github.com/Unknwon/hv"
 )
 
@@ -33,7 +29,7 @@ var (
 	oscPattern = regexp.MustCompile(`^git\.oschina\.net/(?P<owner>[a-z0-9A-Z_.\-]+)/(?P<repo>[a-z0-9A-Z_.\-]+)(?P<dir>/[a-z0-9A-Z_.\-/]*)?$`)
 )
 
-func getOSCDoc(client *http.Client, match map[string]string, tag, savedEtag string) (*hv.Package, error) {
+func getOSCDoc(client *http.Client, match map[string]string, tag, ptag string) (*hv.Package, error) {
 	if len(tag) == 0 {
 		match["tag"] = "master"
 	} else {
@@ -43,78 +39,26 @@ func getOSCDoc(client *http.Client, match map[string]string, tag, savedEtag stri
 	// Force to lower case.
 	match["importPath"] = strings.ToLower(match["importPath"])
 
-	match["projectRoot"] = utils.GetProjectPath(match["importPath"])
-	// Download zip.
-	p, err := com.HttpGetBytes(client, com.Expand("http://{projectRoot}/repository/archive?ref={tag}", match), nil)
+	match["browserUrlTpl"] = "git.oschina.net/{owner}/{repo}/blob/{tag}{dir}/{0}"
+	match["rawSrcUrlTpl"] = "git.oschina.net/{owner}/{repo}/raw/{tag}/{dir}{0}"
+	var isGoPro bool
+	var files []com.RawFile
+	var dirs []string
+	var commit string
+	var err error
+
+	// NOTE: in order to have commit, for now can only download whole archive.
+	tmpTag := match["tag"]
+	if len(tmpTag) == 0 {
+		tmpTag = defaultTags[match["vcs"]]
+	}
+	isGoPro, commit, files, dirs, err = getRepoByArchive(match,
+		com.Expand("http://git.oschina.net/{owner}/{repo}/repository/archive?ref={tag}", match, tmpTag))
 	if err != nil {
-		return nil, errors.New("doc.getOSCDoc(" + match["importPath"] + ") -> " + err.Error())
+		return nil, errors.New("doc.getOSCDoc(" + match["importPath"] + ") -> Fail to download archive: " + err.Error())
 	}
-
-	r, err := zip.NewReader(bytes.NewReader(p), int64(len(p)))
-	if err != nil {
-		return nil, errors.New("doc.getOSCDoc(" + match["importPath"] + ") -> create zip: " + err.Error())
-	}
-
-	commit := r.Comment
-	// Get source file data and subdirectories.
-	nameLen := len(match["repo"])
-	dirPrefix := match["dir"]
-	if dirPrefix != "" {
-		dirPrefix = dirPrefix[1:] + "/"
-	}
-	preLen := len(dirPrefix)
-
-	isGoPro := false // Indicates whether it's a Go project.
-	isRootPath := match["importPath"] == utils.GetProjectPath(match["importPath"])
-	dirs := make([]string, 0, 5)
-	files := make([]com.RawFile, 0, 5)
-	for _, f := range r.File {
-		fileName := f.FileInfo().Name()[nameLen+1:]
-		// Skip directories and files in wrong directories, get them later.
-		if strings.HasSuffix(fileName, "/") || !strings.HasPrefix(fileName, dirPrefix) {
-			continue
-		}
-
-		// Get files and check if directories have acceptable files.
-		if d, fn := path.Split(fileName); utils.IsDocFile(fn) &&
-			utils.FilterDirName(d) {
-			// Check if it's a Go file.
-			if isRootPath && !isGoPro && strings.HasSuffix(fn, ".go") {
-				isGoPro = true
-			}
-
-			// Check if file is in the directory that is corresponding to import path.
-			if d == dirPrefix {
-				// Yes.
-				if !isRootPath && !isGoPro && strings.HasSuffix(fn, ".go") {
-					isGoPro = true
-				}
-				// Get file from archive.
-				rc, err := f.Open()
-				if err != nil {
-					return nil, errors.New("doc.getOSCDoc(" + match["importPath"] + ") -> open file: " + err.Error())
-				}
-
-				p := make([]byte, f.FileInfo().Size())
-				rc.Read(p)
-				if err != nil {
-					return nil, errors.New("doc.getOSCDoc(" + match["importPath"] + ") -> read file: " + err.Error())
-				}
-
-				files = append(files, &hv.Source{
-					SrcName:   fn,
-					BrowseUrl: com.Expand("http://git.oschina.net/{owner}/{repo}/blob/{tag}/{0}", match, fileName),
-					RawSrcUrl: com.Expand("http://git.oschina.net/{owner}/{repo}/raw/{tag}/{0}", match, fileName[preLen:]),
-					SrcData:   p,
-				})
-			} else {
-				sd, _ := path.Split(d[preLen:])
-				sd = strings.TrimSuffix(sd, "/")
-				if !checkDir(sd, dirs) {
-					dirs = append(dirs, sd)
-				}
-			}
-		}
+	if commit == ptag {
+		return nil, errNotModified
 	}
 
 	if !isGoPro {
@@ -126,7 +70,7 @@ func getOSCDoc(client *http.Client, match map[string]string, tag, savedEtag stri
 	}
 
 	// Get all tags.
-	tags := getOSCTags(client, match["importPath"])
+	tags := getOSCTags(client, com.Expand("http://git.oschina.net/{owner}/{repo}/repository/tags", match))
 
 	// Start generating data.
 	w := &hv.Walker{
@@ -135,8 +79,11 @@ func getOSCDoc(client *http.Client, match map[string]string, tag, savedEtag stri
 			PkgInfo: &hv.PkgInfo{
 				ImportPath:  match["importPath"],
 				ProjectName: match["repo"],
+				ProjectPath: com.Expand("git.oschina.net/{owner}/{repo}/blob/{tag}/", match),
+				ViewDirPath: com.Expand("git.oschina.net/{owner}/{repo}/blob/{tag}{dir}/", match),
 				Tags:        strings.Join(tags, "|||"),
 				Ptag:        commit,
+				Vcs:         "Git@OSC",
 			},
 			PkgDecl: &hv.PkgDecl{
 				Tag:  tag,
@@ -159,8 +106,8 @@ func getOSCDoc(client *http.Client, match map[string]string, tag, savedEtag stri
 	})
 }
 
-func getOSCTags(client *http.Client, importPath string) []string {
-	p, err := com.HttpGetBytes(client, "http://"+utils.GetProjectPath(importPath)+"/repository/tags", nil)
+func getOSCTags(client *http.Client, tagsPath string) []string {
+	p, err := com.HttpGetBytes(client, tagsPath, nil)
 	if err != nil {
 		return nil
 	}

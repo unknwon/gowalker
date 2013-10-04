@@ -2,7 +2,7 @@ Go Walker
 ========
 [中文文档](README_ZH.md)
 
-Go Walker is a web server that generates <a target="_blank" href="http://golang.org/">Go</a> projects API documentation and hacker view on the fly for the projects that are hosted on <b><a target="_blank" href="https://bitbucket.org/">Bitbucket</a></b>, <b><a target="_blank" href="https://github.com/">GitHub</a></b>, <b><a target="_blank" href="http://code.google.com/">Google Code</a></b>, <b><a target="_blank" href="https://launchpad.net/">Launchpad</a></b>, <b><a target="_blank" href="https://gitcafe.com/">GitCafe</a></b>  and <b><a target="_blank" href="http://git.oschina.net/">Git @ OSC</a></b>.
+Go Walker is a web server that generates <a target="_blank" href="http://golang.org/">Go</a> projects API documentation and hacker view on the fly for the projects that are hosted on <b><a target="_blank" href="https://bitbucket.org/">Bitbucket</a></b>, <b><a target="_blank" href="https://github.com/">GitHub</a></b>, <b><a target="_blank" href="http://code.google.com/">Google Code</a></b>, <b><a target="_blank" href="https://launchpad.net/">Launchpad</a></b> and <b><a target="_blank" href="http://git.oschina.net/">Git @ OSC</a></b>.
 
 ## Features
 
