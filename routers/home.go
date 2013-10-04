@@ -383,62 +383,6 @@ func calDocCP(comNum, totalNum int) (label, perStr string) {
 	return label, perStr
 }
 
-// getVCSInfo returns VCS name, project name, project home page, Upper level project URL and package tag.
-func getVCSInfo(q, tag string, pdoc *hv.Package) (vcs, proName, proPath, pkgDocPath, pkgTag string) {
-	// pkgTag is only for Google Code which needs tag information as GET argument.
-	// Get project name.
-	lastIndex := strings.LastIndex(q, "/")
-	proName = q[lastIndex+1:]
-	if i := strings.Index(proName, "?"); i > -1 {
-		proName = proName[:i]
-	}
-
-	// Project VCS home page.
-	switch {
-	case q[0] == 'b': // bitbucket.org
-		vcs = "BitBucket"
-		if len(tag) == 0 {
-			tag = "default" // Set tag.
-		}
-		if proName != pdoc.ProjectName {
-			// Not root.
-			proPath = strings.Replace(q, "/"+pdoc.ProjectName, "/"+pdoc.ProjectName+"/src/"+tag, 1)
-		} else {
-			proPath = q + "/src/" + tag
-		}
-	case q[0] == 'l': // launchpad.net
-		vcs = "Launchpad"
-		proPath = "bazaar." + strings.Replace(q, "/"+pdoc.ProjectName, "/+branch/"+pdoc.ProjectName+"/view/head:/", 1)
-	case strings.HasPrefix(q, "git.oschina.net"): // git.oschina.net
-		vcs = "Git @ OSC"
-		if len(tag) == 0 {
-			tag = "master" // Set tag.
-		}
-		if proName != pdoc.ProjectName {
-			// Not root.
-			proName := utils.GetProjectPath(pdoc.ImportPath)
-			proPath = strings.Replace(q, proName, proName+"/tree/"+tag, 1)
-		} else {
-			proPath = q + "/tree/" + tag
-		}
-	case strings.HasPrefix(q, "gitcafe.com"): // code.csdn.net
-		vcs = "GitCafe"
-		if len(tag) == 0 {
-			tag = "master" // Set tag.
-		}
-		if proName != pdoc.ProjectName {
-			// Not root.
-			proName := utils.GetProjectPath(pdoc.ImportPath)
-			proPath = strings.Replace(q, proName, proName+"/tree/"+tag, 1)
-		} else {
-			proPath = q + "/tree/" + tag
-		}
-	}
-
-	pkgDocPath = q[:lastIndex]
-	return vcs, proName, proPath, pkgDocPath, pkgTag
-}
-
 // saveDocPage saves doc. content to JS file(s),
 // it returns max index of JS file(s);
 // it returns -1 when error occurs.
@@ -633,8 +577,6 @@ func renderDoc(this *HomeRouter, pdoc *hv.Package, q, tag, docPath string) bool 
 
 	var err error
 	pfuncs := doc.RenderFuncs(pdoc)
-
-	this.Data["ImportPkgs"] = strings.Join(pdoc.Imports, "|")
 
 	this.Data["Funcs"] = pdoc.Funcs
 	for i, f := range pdoc.Funcs {
@@ -853,7 +795,6 @@ func generatePage(this *HomeRouter, pdoc *hv.Package, q, tag string) bool {
 			beego.Error("HomeController.generatePage ->", err)
 			return false
 		}
-		this.Data["ImportPkgs"] = pdecl.Imports
 
 		err = ConvertDataFormat(pdoc, pdecl)
 		if err != nil {
@@ -864,6 +805,8 @@ func generatePage(this *HomeRouter, pdoc *hv.Package, q, tag string) bool {
 
 	// Set properties.
 	this.TplNames = "docs.html"
+
+	this.Data["Pid"] = pdoc.Id
 
 	// Refresh (within 10 seconds).
 	this.Data["IsRefresh"] = pdoc.Created.UTC().Add(10 * time.Second).After(time.Now().UTC())
@@ -922,10 +865,10 @@ func generatePage(this *HomeRouter, pdoc *hv.Package, q, tag string) bool {
 	this.Data["IsHasFiles"] = pdoc.IsHasFile
 	this.Data["IsHasImports"] = len(pdoc.Imports) > 0
 	this.Data["IsImported"] = pdoc.RefNum > 0
-	this.Data["ImportPid"] = pdoc.RefPids
 	this.Data["ImportedNum"] = pdoc.RefNum
 	this.Data["UtcTime"] = pdoc.Created
 	this.Data["TimeSince"] = calTimeSince(pdoc.Created)
+	this.Data["IsDocumentation"] = true
 
 	docJS := make([]string, 0, pdoc.JsNum+1)
 	docJS = append(docJS, "/static/docs/"+docPath+".js")

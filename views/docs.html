@@ -197,13 +197,13 @@
 					{{if .IsHasFiles}}
 					Package <b>{{.ProName}}</b> imports 
 					{{if .IsHasImports}}
-					<a rel="nofollow" href="/search?q=imports&pkgs={{.ImportPkgs}}">{{.ImportPkgNum}} packages</a>
+					<a rel="nofollow" href="/search?q={{.ImportPath}}&t=imports&pid={{.Pid}}&tag={{.CurTag}}">{{.ImportPkgNum}} packages</a>
 					{{else}}
 					0 packages
 					{{end}}
 
 					{{if .IsImported}} 
-					and imported by <a rel="nofollow" href="/search?q=imported&pkgs={{.ImportPid}}">{{.ImportedNum}} packages</a>
+					and imported by <a rel="nofollow" href="/search?q={{.ImportPath}}&t=refs&pid={{.Pid}}">{{.ImportedNum}} packages</a>
 					{{end}}.
 					{{end}}
 
@@ -212,13 +212,13 @@
 					{{if .IsHasFiles}}
 					项目 <b>{{.ProName}}</b> 共计导入 
 					{{if .IsHasImports}}
-					<a rel="nofollow" href="/search?q=imports&pkgs={{.ImportPkgs}}">{{.ImportPkgNum}} 个外部包</a>
+					<a rel="nofollow" href="/search?q={{.ImportPath}}&t=imports&pid={{.Pid}}&tag={{.CurTag}}">{{.ImportPkgNum}} 个外部包</a>
 					{{else}}
 					0 个外部包
 					{{end}}
 
 					{{if .IsImported}}
-					，并且有 <a rel="nofollow" href="/search?q=imported&pkgs={{.ImportPid}}">{{.ImportedNum}} 个包</a> 引用了该项目
+					，并且有 <a rel="nofollow" href="/search?q={{.ImportPath}}&t=refs&pid={{.Pid}}">{{.ImportedNum}} 个包</a> 引用了该项目
 					{{end}}。 
 					{{end}}
 

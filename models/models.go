@@ -165,23 +165,30 @@ func InitDb() {
 }
 
 // GetGoRepo returns packages in go standard library.
-func GetGoRepo() ([]*hv.PkgInfo, error) {
+func GetGoRepo() []*hv.PkgInfo {
 	// Connect to database.
 	q := connDb()
 	defer q.Close()
 
-	var pkgInfos []*hv.PkgInfo
-	condition := qbs.NewCondition("pro_name = ?", "Go")
-	err := q.OmitFields("ProName", "IsCmd", "Tags", "Views", "ViewedTime", "Created",
-		"Etag", "Labels", "ImportedNum", "ImportPid", "Note").
-		Condition(condition).OrderBy("path").FindAll(&pkgInfos)
-	infos := make([]*hv.PkgInfo, 0, 30)
-	for _, v := range pkgInfos {
-		if strings.Index(v.ImportPath, ".") == -1 {
-			infos = append(infos, v)
-		}
+	var pinfos []*hv.PkgInfo
+	err := q.WhereEqual("is_go_repo", true).OrderBy("import_path").FindAll(&pinfos)
+	if err != nil {
+		beego.Trace("models.GetGoRepo ->", err)
 	}
-	return infos, err
+	return pinfos
+}
+
+func GetGoSubrepo() []*hv.PkgInfo {
+	// Connect to database.
+	q := connDb()
+	defer q.Close()
+
+	var pinfos []*hv.PkgInfo
+	err := q.WhereEqual("is_go_subrepo", true).OrderBy("import_path").FindAll(&pinfos)
+	if err != nil {
+		beego.Trace("models.GetGoSubrepo ->", err)
+	}
+	return pinfos
 }
 
 // SearchRawDoc returns results for raw page,

@@ -63,7 +63,12 @@ func (this *baseRouter) Prepare() {
 	if isNeedRedir {
 		// Redirect to make URL clean.
 		i := strings.Index(this.Ctx.Request.RequestURI, "?")
-		this.Redirect(this.Ctx.Request.RequestURI[:i], 302)
+		redirUrl := this.Ctx.Request.RequestURI[:i]
+		q := strings.TrimSpace(this.Input().Get("q"))
+		if len(q) > 0 {
+			redirUrl += "?q=" + q
+		}
+		this.Redirect(redirUrl, 302)
 		return
 	}
 }

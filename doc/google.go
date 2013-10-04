@@ -257,7 +257,9 @@ func getGoogleDoc(client *http.Client, match map[string]string, tag, ptag string
 		LineFmt: "#%d",
 		Pdoc: &hv.Package{
 			PkgInfo: &hv.PkgInfo{
-				ImportPath:  match["importPath"],
+				ImportPath: match["importPath"],
+				IsGoSubrepo: utils.IsGoSubrepoPath(strings.TrimPrefix(
+					match["importPath"], "code.google.com/p/")),
 				ProjectName: com.Expand("{repo}{dot}{subrepo}", match),
 				ProjectPath: com.Expand("code.google.com/p/{repo}/source/browse/?repo={subrepo}&r={tag}", match),
 				ViewDirPath: com.Expand("code.google.com/p/{repo}/source/browse{dir}?repo={subrepo}&r={tag}", match),

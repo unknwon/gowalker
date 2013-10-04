@@ -18,6 +18,7 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/Unknwon/com"
 	"github.com/Unknwon/ctw/packer"
@@ -33,10 +34,8 @@ func SearchPkg(key string) []*hv.PkgInfo {
 	defer q.Close()
 
 	var pinfos []*hv.PkgInfo
-	cond := qbs.NewCondition("path like ?", "%"+key+"%").Or("synopsis like ?", "%"+key+"%")
-	q.OmitFields("ProName", "IsCmd", "Tags", "Views", "ViewedTime", "Created",
-		"Etag", "Labels", "ImportedNum", "ImportPid", "Note").
-		Limit(200).Condition(cond).OrderByDesc("rank").FindAll(&pinfos)
+	cond := qbs.NewCondition("import_path like ?", "%"+key+"%").Or("synopsis like ?", "%"+key+"%")
+	q.Limit(200).Condition(cond).OrderByDesc("rank").FindAll(&pinfos)
 	return pinfos
 }
 
@@ -108,17 +107,12 @@ func GetPkgInfoById(pid int) (*hv.PkgInfo, error) {
 	return pinfo, err
 }
 
-// GetGroupPkgInfo returns group of package infomration in order to reduce database connect times.
-func GetGroupPkgInfo(paths []string) ([]*hv.PkgInfo, error) {
-	// Connect to database.
-	q := connDb()
-	defer q.Close()
-
+func getGroupPkgInfoWithQ(q *qbs.Qbs, paths []string) []*hv.PkgInfo {
 	pinfos := make([]*hv.PkgInfo, 0, len(paths))
 	for _, v := range paths {
 		if len(v) > 0 {
 			pinfo := new(hv.PkgInfo)
-			err := q.WhereEqual("path", v).Find(pinfo)
+			err := q.WhereEqual("import_path", v).Find(pinfo)
 			if err == nil {
 				pinfos = append(pinfos, pinfo)
 			} else {
@@ -126,14 +120,19 @@ func GetGroupPkgInfo(paths []string) ([]*hv.PkgInfo, error) {
 			}
 		}
 	}
-	return pinfos, nil
+	return pinfos
 }
 
-// GetGroupPkgInfoById returns group of package infomration by pid.
-func GetGroupPkgInfoById(pids []string) []*hv.PkgInfo {
+// GetGroupPkgInfo returns group of package infomration in order to reduce database connect times.
+func GetGroupPkgInfo(paths []string) []*hv.PkgInfo {
+	// Connect to database.
 	q := connDb()
 	defer q.Close()
 
+	return getGroupPkgInfoWithQ(q, paths)
+}
+
+func getGroupPkgInfoByIdWithQ(q *qbs.Qbs, pids []string) []*hv.PkgInfo {
 	pinfos := make([]*hv.PkgInfo, 0, len(pids))
 	for _, v := range pids {
 		pid, _ := strconv.ParseInt(v, 10, 64)
@@ -143,11 +142,19 @@ func GetGroupPkgInfoById(pids []string) []*hv.PkgInfo {
 			if err == nil {
 				pinfos = append(pinfos, pinfo)
 			} else {
-				beego.Error("models.GetGroupPkgInfoById ->", err)
+				beego.Trace("models.GetGroupPkgInfoById ->", err)
 			}
 		}
 	}
 	return pinfos
+}
+
+// GetGroupPkgInfoById returns group of package infomration by pid.
+func GetGroupPkgInfoById(pids []string) []*hv.PkgInfo {
+	q := connDb()
+	defer q.Close()
+
+	return getGroupPkgInfoByIdWithQ(q, pids)
 }
 
 // GetIndexPkgs returns package information in given page.
@@ -180,4 +187,31 @@ func GetSubPkgs(importPath, tag string, dirs []string) []*hv.PkgInfo {
 		}
 	}
 	return pinfos
+}
+
+func GetImports(pid, tag string) []*hv.PkgInfo {
+	q := connDb()
+	defer q.Close()
+
+	pdecl := new(PkgDecl)
+	cond := qbs.NewCondition("pid = ?", pid).And("tag = ?", tag)
+	err := q.Condition(cond).Find(pdecl)
+	if err != nil {
+		return nil
+	}
+
+	return getGroupPkgInfoWithQ(q, strings.Split(pdecl.Imports, "|"))
+}
+
+func GetRefs(pid string) []*hv.PkgInfo {
+	q := connDb()
+	defer q.Close()
+
+	pinfo := new(hv.PkgInfo)
+	err := q.WhereEqual("id", pid).Find(pinfo)
+	if err != nil {
+		return nil
+	}
+
+	return getGroupPkgInfoByIdWithQ(q, strings.Split(pinfo.RefPids, "|"))
 }

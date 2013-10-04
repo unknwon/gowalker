@@ -65,9 +65,6 @@ func crawlDoc(path, tag string, pinfo *hv.PkgInfo) (pdoc *hv.Package, err error)
 		err = nil
 		pdoc = nil
 	case isNotFound(err):
-		// We do not need to delete standard library,
-		// so here skip it by not found.
-
 		// Only delete when server cannot find master branch
 		// because sub-package(s) may not exist in old tag(s).
 		if len(tag) == 0 {

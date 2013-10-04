@@ -14,15 +14,71 @@
 
 package routers
 
-import ()
+import (
+	"strings"
+
+	"github.com/Unknwon/gowalker/models"
+	"github.com/Unknwon/hv"
+)
 
 // SearchRouter serves search pages.
 type SearchRouter struct {
 	baseRouter
 }
 
+func checkSpecialUsage(this *SearchRouter, q, t, pid, tag string) bool {
+	var pinfos []*hv.PkgInfo
+
+	switch {
+	case t == "imports":
+		pinfos = models.GetImports(pid, tag)
+	case t == "refs":
+		pinfos = models.GetRefs(pid)
+	case q == "gorepos":
+		pinfos = models.GetGoRepo()
+	case q == "gosubrepos":
+		pinfos = models.GetGoSubrepo()
+	}
+
+	if len(pinfos) > 0 {
+		this.Data["IsFindPro"] = true
+		this.Data["Results"] = pinfos
+		this.Data["ResultCount"] = len(pinfos)
+		return true
+	}
+
+	return false
+}
+
 // Get implemented Get method for SearchRouter.
 func (this *SearchRouter) Get() {
-	this.Redirect("http://b.repl.ca/v1/play-here-yellow.png", 302)
-	this.Ctx.WriteString("nothing to show")
+	this.TplNames = "search.html"
+
+	// Get argument(s).
+	q := strings.TrimSpace(this.Input().Get("q"))
+	t := strings.TrimSpace(this.Input().Get("t"))
+	pid := strings.TrimSpace(this.Input().Get("pid"))
+	tag := strings.TrimSpace(this.Input().Get("tag"))
+	if tag == "master" || tag == "default" {
+		tag = ""
+	}
+
+	if len(q) == 0 {
+		this.Redirect("/", 302)
+		return
+	}
+
+	this.Data["Keyword"] = q
+
+	if checkSpecialUsage(this, q, t, pid, tag) {
+		return
+	}
+
+	pinfos := models.SearchPkg(q)
+	if len(pinfos) > 0 {
+		this.Data["IsFindPro"] = true
+		this.Data["Results"] = pinfos
+		this.Data["ResultCount"] = len(pinfos)
+	}
+	// this.Redirect("http://b.repl.ca/v1/play-here-yellow.png", 302)
 }

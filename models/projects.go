@@ -110,6 +110,11 @@ func updateImportInfo(q *qbs.Qbs, path string, pid, rank int, add bool) {
 
 			info.RefPids = strings.Join(refPids, "|")
 			info.RefNum = len(refPids)
+			if info.RefNum > 0 && strings.HasPrefix(info.RefPids, "|") {
+				info.RefPids = info.RefPids[1:]
+				info.RefNum--
+			}
+
 			_, err = q.Save(info)
 			if err != nil {
 				beego.Error("models.updateImportInfo -> add:", path, err)
@@ -121,6 +126,11 @@ func updateImportInfo(q *qbs.Qbs, path string, pid, rank int, add bool) {
 
 			info.RefPids = strings.Join(refPids, "|")
 			info.RefNum = len(refPids)
+			if info.RefNum > 0 && strings.HasPrefix(info.RefPids, "|") {
+				info.RefPids = info.RefPids[1:]
+				info.RefNum--
+			}
+
 			_, err = q.Save(info)
 			if err != nil {
 				beego.Error("models.updateImportInfo -> delete:", path, err)
@@ -129,18 +139,20 @@ func updateImportInfo(q *qbs.Qbs, path string, pid, rank int, add bool) {
 		return
 	}
 
-	// Record imports.
-	pimp := new(PkgImport)
-	q.WhereEqual("path", path).Find(pimp)
-	pimp.Path = path
-	pimps := strings.Split(pimp.Imports, "|")
-	i := getRefIndex(pimps, spid)
-	if i == -1 {
-		pimps = append(pimps, spid)
-		pimp.Imports = strings.Join(pimps, "|")
-		_, err = q.Save(pimp)
-		if err != nil {
-			beego.Error("models.updateImportInfo -> record import:", path, err)
+	if add {
+		// Record imports.
+		pimp := new(PkgImport)
+		q.WhereEqual("path", path).Find(pimp)
+		pimp.Path = path
+		pimps := strings.Split(pimp.Imports, "|")
+		i := getRefIndex(pimps, spid)
+		if i == -1 {
+			pimps = append(pimps, spid)
+			pimp.Imports = strings.Join(pimps, "|")
+			_, err = q.Save(pimp)
+			if err != nil {
+				beego.Error("models.updateImportInfo -> record import:", path, err)
+			}
 		}
 	}
 }
@@ -188,7 +200,9 @@ func SaveProject(pinfo *hv.PkgInfo, pdecl *PkgDecl, pfuncs []*PkgFunc, imports [
 				if len(v) == 0 {
 					continue
 				}
-				if i := getRefIndex(importPids, v); i == -1 {
+				pid, _ := strconv.ParseInt(v, 10, 64)
+				if i := getRefIndex(importPids, v); i == -1 &&
+					checkImport(q, info.ImportPath, pid) {
 					importPids = append(importPids, v)
 				}
 			}
@@ -356,7 +370,7 @@ func LoadProject(pid int64, tag string) (*PkgDecl, error) {
 func DeleteProject(path string) {
 	// Check path length to reduce connect times(except launchpad.net).
 	if path[0] != 'l' && len(strings.Split(path, "/")) <= 2 {
-		beego.Error("models.DeleteProject(", path, ") -> Short path as not needed")
+		beego.Trace("models.DeleteProject(", path, ") -> Short path as not needed")
 		return
 	}
 
