@@ -115,8 +115,6 @@
     $('.tt-query').css('background-color','#fff');
 </script>
 <script type="text/javascript" src="https://apis.google.com/js/plusone.js"></script>
-{{else if .IsDocumentation}}
-<script type="text/javascript" src="https://apis.google.com/js/plusone.js"></script>
 {{else}}
 {{if .IsHasReadme}}
 <script type="text/javascript" src="/static/js/showdown.js"></script>
@@ -156,6 +154,10 @@
 
     })(jQuery);
 </script>
+{{end}}
+
+{{if .IsDocumentation}}
+<script type="text/javascript" src="https://apis.google.com/js/plusone.js"></script>
 {{end}}
 
 {{if .IsProMode}}

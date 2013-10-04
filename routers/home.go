@@ -713,6 +713,9 @@ func renderDoc(this *HomeRouter, pdoc *hv.Package, q, tag, docPath string) bool 
 	}
 
 	models.SavePkgDoc(pdoc.ImportPath, pdoc.Readme)
+
+	this.Data["UtcTime"] = pdoc.Created
+	this.Data["TimeSince"] = calTimeSince(pdoc.Created)
 	return true
 }
 
@@ -801,6 +804,9 @@ func generatePage(this *HomeRouter, pdoc *hv.Package, q, tag string) bool {
 			beego.Error("HomeController.generatePage -> ConvertDataFormat:", err)
 			return false
 		}
+
+		this.Data["UtcTime"] = pdoc.Created.Add(4 * time.Hour)
+		this.Data["TimeSince"] = calTimeSince(pdoc.Created.Add(4 * time.Hour))
 	}
 
 	// Set properties.
@@ -866,8 +872,6 @@ func generatePage(this *HomeRouter, pdoc *hv.Package, q, tag string) bool {
 	this.Data["IsHasImports"] = len(pdoc.Imports) > 0
 	this.Data["IsImported"] = pdoc.RefNum > 0
 	this.Data["ImportedNum"] = pdoc.RefNum
-	this.Data["UtcTime"] = pdoc.Created
-	this.Data["TimeSince"] = calTimeSince(pdoc.Created)
 	this.Data["IsDocumentation"] = true
 
 	docJS := make([]string, 0, pdoc.JsNum+1)

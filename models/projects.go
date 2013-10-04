@@ -457,7 +457,7 @@ func calRefRanks(q *qbs.Qbs, refPids []string) int64 {
 		if err == nil {
 			refRank += int(info.Rank) * 10 / 100
 		} else {
-			beego.Error("models.calRefRanks ->", err)
+			beego.Trace("models.calRefRanks ->", err)
 		}
 	}
 	return int64(refRank)

@@ -5,7 +5,7 @@
 	{{template "base/alert.html" .}}
     <div class="page-header">
         <h2>
-            {{i18n .Lang "Search Go projects"}}.
+            <b>{{i18n .Lang "Search Go projects"}}</b>.
             <small>{{i18n .Lang "Find a cup of source code"}}.</small>
             <g:plusone></g:plusone>
         </h2>
@@ -23,7 +23,7 @@
 	<div class="col-xs-8 col-md-8">
 		<div>
             {{if eq .Lang "en-US"}}
-			<h4>What is this?</h4>
+			<h4><b>What is this?</b></h4>
 			<p>
 				Go Walker is a web server that generates <a target="_blank" href="http://golang.org/">Go</a> projects API documentation and
 				<button class="btn feature" title=""
@@ -90,7 +90,7 @@
 		<div class="tab-content">
 		    <div id="global_history" class="tab-pane fade active in">
 		        <h4>
-		            {{i18n .Lang "What all the people are looking at"}}.
+		            <b>{{i18n .Lang "What all the people are looking at"}}</b>.
 		            <a href="#user_history" class="btn btn-inverse" data-toggle="tab">{{i18n .Lang "Local history"}}</a>
 		            <small class="text-info">{{i18n .Lang "Hover link to see more"}}.</small>
 		        </h4>
@@ -123,7 +123,7 @@
 
 		    <div id="user_history" class="tab-pane fade">
 		        <h4>
-		            {{i18n .Lang "What you have been looking at"}}.
+		            <b>{{i18n .Lang "What you have been looking at"}}</b>.
 		            <a href="#global_history" class="btn btn-inverse" data-toggle="tab">{{i18n .Lang "Global history"}}</a>
 		            <small class="text-info">{{i18n .Lang "Hover link to see more"}}.</small>
 		        </h4>
@@ -158,7 +158,7 @@
 
 	<div class="col-xs-4 col-md-4" style="padding-left: 5px;">
 		<div>
-			<h4>{{i18n .Lang "Announcement"}}</h4>
+			<h4><b>{{i18n .Lang "Announcement"}}</b></h4>
 			<p>
 				{{i18n .Lang "Are you still downloading and installing Go projects but just for looking up some functions and methods? I know it's hard to do untile you found <b>Hacker View</b> today!" | str2html}}
 			</p>
@@ -166,7 +166,7 @@
 		</div>
 
 		<div>
-			<h4>{{i18n .Lang "Popular Projects"}}</h4>
+			<h4><b>{{i18n .Lang "Popular Projects"}}</b></h4>
             <ul class="nav nav-tabs nav-tabs-google">
                 <li class="active">
                     <a href="#weekly_stars" data-toggle="tab">{{i18n .Lang "Weekly Stars"}}</a>
@@ -218,7 +218,7 @@
 		</div>
 
 		<div>
-			<h4>{{i18n .Lang "Recent Updated Examples"}}</h4>
+			<h4><b>{{i18n .Lang "Recent Updated Examples"}}</b></h4>
             <ul name="pop_list" class="unstyled">
                 {{range .RecentExams}}
                 <li>
@@ -231,7 +231,7 @@
 	    {{template "home_js"}}
 		
 		<div>
-			<h4>{{i18n .Lang "Explore more"}}.</h4>
+			<h4><b>{{i18n .Lang "Explore more"}}</b>.</h4>
             <ul class="nav nav-tabs nav-tabs-google">
                 <li class="active">
                     <a href="#more_projects" data-toggle="tab">{{i18n .Lang "Projects"}}</a>
