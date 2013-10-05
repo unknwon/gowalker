@@ -297,9 +297,9 @@ func getRepoByArchive(match map[string]string, downloadPath string) (bool, strin
 	preLen := len(dirPrefix)
 	isGoPro := false
 
-	for k, v := range match {
-		println(k, v)
-	}
+	// for k, v := range match {
+	// 	println(k, v)
+	// }
 	comment := r.Comment
 
 	files := make([]com.RawFile, 0, 5)

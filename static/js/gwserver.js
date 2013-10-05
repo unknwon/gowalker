@@ -62,6 +62,13 @@
             _ep.find('input[type=text]').val("");
             return false;
         });
+                
+        if (document.getElementById("lang").innerHTML == "zh-CN") {
+            document.getElementById("search_export_title").innerHTML = "搜索导出对象";
+            document.getElementById("search_export_box").placeholder = "输入类型、方法或函数名称";
+            document.getElementById("close_button").innerHTML = "关闭";
+            document.getElementById("search_export_button").innerHTML = "跳转";
+        }
     } else {
         _ep = null;
     }
@@ -101,7 +108,7 @@
         // Mute options in control panel.
         _modal.find('tbody > tr').each(function (i, ele) {
             if (i == 2 || i == 5 || i == 6 || i == 7) {
-                $(ele).addClass("muted");
+                $(ele).addClass("text-muted");
             }
         })
     }
@@ -175,18 +182,18 @@
             GkeyCb(function () {
                 location.hash = "#_index";
             });
-        } else if (code == 116) { // for `g then t`	t 	116
-            if (_ep) _ep.modal('hide');
-            if (_ex) _ex.modal('hide');
-            _modal.modal('hide');
-            GkeyCb( function(){
-                    if (_tf) {
-                        _tf.modal('show');
-                        _tf.on('shown', function () {
-                        $(this).find('#label_box').focus();
-                    })
-                }
-            });
+//        } else if (code == 116) { // for `g then t`	t 	116
+//            if (_ep) _ep.modal('hide');
+//            if (_ex) _ex.modal('hide');
+//            _modal.modal('hide');
+//            GkeyCb( function(){
+//                    if (_tf) {
+//                        _tf.modal('show');
+//                        _tf.on('shown', function () {
+//                        $(this).find('#label_box').focus();
+//                    })
+//                }
+//            });
         } else if (code == 101) {// for 'g then e'   e 101
             if (_ep) _ep.modal('hide');
             if (_tf) _tf.modal('hide');

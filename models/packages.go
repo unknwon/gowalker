@@ -56,6 +56,7 @@ func getPkgInfoWithQ(path, tag string, q *qbs.Qbs) (*hv.PkgInfo, error) {
 	cond := qbs.NewCondition("path = ?", proPath).And("tag = ?", tag)
 	err := q.Condition(cond).Find(ptag)
 	if err != nil {
+		pinfo.Ptag = "ptag"
 		return pinfo, errors.New(
 			fmt.Sprintf("models.GetPkgInfo( %s:%s ) -> 'PkgTag': %s", path, tag, err))
 	}

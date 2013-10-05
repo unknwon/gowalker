@@ -151,15 +151,15 @@ func getGoogleTags(importPath string, defaultBranch string, isGoRepo bool) []str
 	}
 
 	tags[0] = defaultBranch
-	// for i, v := range m {
-	// 	if isGoRepo {
-	// 		if strings.HasPrefix(v[1], "go") {
-	// 			tags = append(tags, v[1])
-	// 		}
-	// 		continue
-	// 	}
-	// 	tags[i+1] = v[1]
-	// }
+	for i, v := range m {
+		if isGoRepo {
+			if strings.HasPrefix(v[1], "go") {
+				tags = append(tags, v[1])
+			}
+			continue
+		}
+		tags[i+1] = v[1]
+	}
 	return tags
 }
 

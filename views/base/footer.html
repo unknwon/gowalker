@@ -1,35 +1,36 @@
-<div id='_keyshortcut' class="modal hide fade" tabindex="-1" role="dialog" aria-hidden="false">
-  <div class="modal-header">
-      <h3>Control panel</h3>
-  </div>
-
-  <div class="modal-body">
-      <table>
-          <tbody>
-	      <tr><td align="right"><b>?</b></td><td> : This menu</td></tr>
-	      <tr><td align="right"><b>/</b></td><td> : Search site</td></tr>
-	      <tr><td align="right"><b>.</b></td><td> : Go to export</td></tr>
-	      <tr><td align="right"><b>g</b> then <b>g</b></td><td> : Go to top of page</td></tr>
-	      <tr><td align="right"><b>g</b> then <b>b</b></td><td> : Go to bottom of page</td></tr>
-	      <tr><td align="right"><b>g</b> then <b>i</b></td><td> : Go to index</td></tr>
-	      <tr><td align="right"><b>g</b> then <b>t</b></td><td> : Add or remove labels</td></tr>
-	      <tr><td align="right"><b>g</b> then <b>e</b></td><td> : Add examples</td></tr>
-          </tbody>
-      </table>
-  </div>
-
-  <div class="modal-footer">
-      <a href="#" class="btn" data-dismiss='modal' aria-hidden="true">Close</a>
-      <!--<a href="#" class="btn btn-primary">Save changes</a>-->
-  </div>
+<div id="_keyshortcut" class="modal fade">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Control panel</h3>
+            </div>
+            
+            <div class="modal-body">
+                <table>
+                    <tbody>
+                        <tr><td align="right"><b>?</b></td><td> : This menu</td></tr>
+                        <tr><td align="right"><b>/</b></td><td> : Search site</td></tr>
+                        <tr><td align="right"><b>.</b></td><td> : Go to export</td></tr>
+                        <tr><td align="right"><b>g</b> then <b>g</b></td><td> : Go to top of page</td></tr>
+                        <tr><td align="right"><b>g</b> then <b>b</b></td><td> : Go to bottom of page</td></tr>
+                        <tr><td align="right"><b>g</b> then <b>i</b></td><td> : Go to index</td></tr>
+<!--                        <tr><td align="right"><b>g</b> then <b>t</b></td><td> : Add or remove labels</td></tr>-->
+                        <tr><td align="right"><b>g</b> then <b>e</b></td><td> : Add examples</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="modal-footer">
+                <a href="#" class="btn" data-dismiss='modal' aria-hidden="true">Close</a>
+            </div>
+        </div>
+    </div>
 </div>
 
 <footer id="_bottom">
 	<div class="container" style="padding-left: 0px; padding-top: 10px; padding-bottom: 10px;">
 		<div class="col-xs-8 col-md-8" style="width: {{if .IsHome}}440{{else}}600{{end}}px;">
-			<script type="text/javascript" src="http://cdn.staticfile.org/jquery/2.0.3/jquery.min.js"></script>
 			<script type="text/javascript" src="/static/js/bootstrap.min.js"></script>
-			<script type="text/javascript" src="/static/js/typeahead.min.js"></script>
 			<script type='text/javascript' src='/static/js/gwserver.js'></script>
 
 			<p><strong>{{i18n .Lang "Copyright"}} © 2013 Go Walker</strong></p>
@@ -126,7 +127,6 @@
 	readme.innerHTML = content;
 	readme.style.display = "block";
 </script>
-{{end}}
 
 <script type="text/javascript">
     (function($){
@@ -134,9 +134,11 @@
         var doc = $("#markdown");
 
         var trans2zh = false;
+        {{if .IsDocumentation}}
         if (document.getElementById("lang").innerHTML == "zh-CN") {
         	trans2zh = true;
         }
+        {{end}}
 
         // Set anchor.
         doc.find("h1, h2, h3, h4, h5, h6").each(function(){
@@ -157,6 +159,7 @@
 {{end}}
 
 {{if .IsDocumentation}}
+<link href="/static/css/typeahead.js-bootstrap.css" rel="stylesheet" />
 <script type="text/javascript" src="https://apis.google.com/js/plusone.js"></script>
 {{end}}
 
@@ -170,5 +173,6 @@
 	ga('create', 'UA-40109089-2', 'gowalker.org');
 	ga('send', 'pageview');
 </script>
+{{end}}
 {{end}}
 {{end}}

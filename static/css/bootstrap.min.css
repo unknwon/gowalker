@@ -140,6 +140,9 @@ pre {
 .nav-tabs.nav-stacked > li > a {
     border: 1px solid rgb(221, 221, 221);
 }
+.modal-content {
+	border-radius: 0px;
+}
 /* Comment, String, Internal, External, Return/Break, Keyword, Boolean/nil, Builtin */
 pre .com {  color: #007500;} 
 pre .boo {  color: #0080FF;} 

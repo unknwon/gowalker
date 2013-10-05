@@ -233,8 +233,11 @@ func (this *HomeRouter) Get() {
 	if utils.IsGoRepoPath(broPath) {
 		broPath = "code.google.com/p/go/source/browse/src/pkg/" + broPath
 	} else if utils.IsGoSubrepoPath(broPath) {
-		broPath = "code.google.com/p/" + broPath
-		reqUrl = broPath
+		this.Redirect("/code.google.com/p/"+broPath, 301)
+		return
+	} else if strings.Index(broPath, "source/browse/") > -1 {
+		this.Redirect(strings.Replace(broPath, "source/browse/", "", 1), 301)
+		return
 	}
 
 	// Check if it's a remote path that can be used for 'go get', if not means it's a keyword.
@@ -464,7 +467,7 @@ func renderDoc(this *HomeRouter, pdoc *hv.Package, q, tag, docPath string) bool 
 			Name:    t.Name,
 			Comment: template.HTMLEscapeString(t.Doc),
 		})
-		buf.WriteString("&quot;" + t.Name + "&quot;,")
+		buf.WriteString("'" + t.Name + "',")
 	}
 
 	for _, f := range pdoc.Funcs {
@@ -472,7 +475,7 @@ func renderDoc(this *HomeRouter, pdoc *hv.Package, q, tag, docPath string) bool 
 			Name:    f.Name,
 			Comment: template.HTMLEscapeString(f.Doc),
 		})
-		buf.WriteString("&quot;" + f.Name + "&quot;,")
+		buf.WriteString("'" + f.Name + "',")
 	}
 
 	for _, t := range pdoc.Types {
@@ -481,11 +484,11 @@ func renderDoc(this *HomeRouter, pdoc *hv.Package, q, tag, docPath string) bool 
 				Name:    f.Name,
 				Comment: template.HTMLEscapeString(f.Doc),
 			})
-			buf.WriteString("&quot;" + f.Name + "&quot;,")
+			buf.WriteString("'" + f.Name + "',")
 		}
 
 		for _, m := range t.Methods {
-			buf.WriteString("&quot;" + t.Name + "." + m.Name + "&quot;,")
+			buf.WriteString("'" + t.Name + "." + m.Name + "',")
 		}
 	}
 
@@ -505,7 +508,8 @@ func renderDoc(this *HomeRouter, pdoc *hv.Package, q, tag, docPath string) bool 
 		pdoc.IsHasExport = true
 		this.Data["IsHasExports"] = true
 		exportDataSrc = exportDataSrc[:len(exportDataSrc)-1]
-		this.Data["ExportDataSrc"] = exportDataSrc
+		this.Data["ExportDataSrc"] = "<script>$('.search-export').typeahead({local: [" +
+			exportDataSrc + "]});</script>"
 	}
 
 	pdoc.UserExamples = getUserExamples(pdoc.ImportPath)

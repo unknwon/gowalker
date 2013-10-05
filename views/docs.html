@@ -54,62 +54,64 @@
 			<div id="sidebar" class="span3 hide" style="position:fixed; margin-left: -220px; top: 70px;">
 				<ul class="nav nav-tabs nav-stacked affix bs-docs-sidenav">
 					<li>
-						<a href="#"><i class="icon-chevron-right"></i>Top</a>
+						<a href="#"><i class="icon-chevron-right"></i>{{i18n .Lang "Top"}}</a>
 					</li>
 					
 					{{if .IsHasExports}}
 					<li>
-						<a href="#_index"><i class="icon-chevron-right"></i>Index</a>
+						<a href="#_index"><i class="icon-chevron-right"></i>{{i18n .Lang "Index"}}</a>
 					</li>
 					{{end}}
 					
 					{{if .IsHasConst}}
 					<li>
-						<a href="#_constants"><i class="icon-chevron-right"></i>Constants</a>
+						<a href="#_constants"><i class="icon-chevron-right"></i>{{i18n .Lang "Constants"}}</a>
 					</li>
 					{{end}}
 
 					{{if .IsHasVar}}
 					<li>
-						<a href="#_variables"><i class="icon-chevron-right"></i>Variables</a>
+						<a href="#_variables"><i class="icon-chevron-right"></i>{{i18n .Lang "Variables"}}</a>
 					</li>
 					{{end}}
 					
 					{{if .IsHasExams}}
 					<li>
-						<a href="#_exams"><i class="icon-chevron-right"></i>Examples</a>
+						<a href="#_exams"><i class="icon-chevron-right"></i>{{i18n .Lang "Examples"}}</a>
 					</li>
 					{{end}}
 
 					{{if .IsCmd}}
 					{{else}}
 					<li>
-						<a href="#example_modal" data-toggle="modal"><i class="icon-chevron-right"></i>Add examples</a>
+						<a href="#example_modal" data-toggle="modal"><i class="icon-chevron-right"></i>{{i18n .Lang "Add examples"}}</a>
 					</li>
 					{{end}}
 					
 					{{if .IsHasSubdirs}}
 					<li>
-						<a href="#_subdirs"><i class="icon-chevron-right"></i>Directories</a>
+						<a href="#_subdirs"><i class="icon-chevron-right"></i>{{i18n .Lang "Directories"}}</a>
 					</li>
 					{{end}}
 					
 					<li>
-						<a href="#_bottom"><i class="icon-chevron-right"></i>Bottom</a>
+						<a href="#_bottom"><i class="icon-chevron-right"></i>{{i18n .Lang "Bottom"}}</a>
 					</li>
 					
 					{{if .IsHasExports}}
 					<li>
-						<a href="#search_exports" data-toggle="modal"><i class="icon-chevron-right"></i>Search Exports</a>
+						<a href="#search_exports" data-toggle="modal"><i class="icon-chevron-right"></i>{{i18n .Lang "Search Exports"}}</a>
 					</li>
 					{{end}}
 					
+<!--
 					{{if .IsGoRepo}}
 					{{else}}
 					<li>
-						<a href="#label_modal" data-toggle="modal"><i class="icon-chevron-right"></i>Labels</a>
+						<a href="#label_modal" data-toggle="modal"><i class="icon-chevron-right"></i>{{i18n .Lang "Labels"}}</a>
 					</li>
 					{{end}}
+-->
 				</ul>
 			</div>
 

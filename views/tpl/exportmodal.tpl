@@ -1,37 +1,27 @@
-<div id="search_exports" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-	<form id="search_form" class="modal-form">
-		<div class="modal-header">
-			<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-			<h3 id="myModalLabel" style="margin: 10px">Search and Go to Exports.</h3>
-		</div>
-
-		<div class="modal-body" style="overflow-y: visible;">
-			<input id="search_export_box" autofocus="autofocus" autocomplete="off" class="span5" type="text" placeholder="type or function name"  data-source="[{{str2html .ExportDataSrc}}]" data-provide="typeahead">
-		</div>
-
-		<div class="modal-footer">
-			<button type='button' class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
-			<button class="btn btn-primary" type="submit">Go!</button>
-		</div>
-	</form>
+<div id="search_exports" class="modal fade">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h3 id="search_export_title" style="margin: 10px">Search and Go to Exports.</h3>
+            </div>
+            
+            <form id="search_form" class="modal-form">
+                <div class="modal-body">
+                    <input id="search_export_box" autofocus="autofocus" autocomplete="off" class="search-export" style="width: 400px;" type="text" placeholder="Input type, method or function name">
+                </div>
+                    
+                {{str2html .ExportDataSrc}}
+                
+                <div class="modal-footer">
+                    <button id="close_button" type='button' class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+                    <button id="search_export_button" class="btn btn-primary" type="submit">Go!</button>
+                </div>
+                    
+                <script>
+                    $('.tt-query').css('background-color','#fff');
+                </script>
+            </form>
+        </div>
+    </div>
 </div>
-
-{{define "exportmodal_zh"}}
-<div id="search_exports" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-	<form id="search_form" class="modal-form">
-		<div class="modal-header">
-			<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-			<h3 id="myModalLabel" style="margin: 10px">搜索导出对象.</h3>
-		</div>
-
-		<div class="modal-body" style="overflow-y: visible;">
-			<input id="search_export_box" autofocus="autofocus" autocomplete="off" class="span5" type="text" placeholder="请输入类型或函数名"  data-source="[{{str2html .ExportDataSrc}}]" data-provide="typeahead">
-		</div>
-
-		<div class="modal-footer">
-			<button type='button' class="btn" data-dismiss="modal" aria-hidden="true">关闭</button>
-			<button class="btn btn-primary" type="submit">跳转</button>
-		</div>
-	</form>
-</div>
-{{end}}
