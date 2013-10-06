@@ -111,7 +111,7 @@ func CheckDoc(broPath, tag string, rt requestType) (*hv.Package, error) {
 		}
 
 		if pdoc == nil {
-			if strings.HasPrefix(err.Error(), "Cannot find Go files") {
+			if err != nil && strings.HasPrefix(err.Error(), "Cannot find Go files") {
 				beego.Info("Added to block list:", broPath)
 				utils.Cfg.SetValue("info", "block_list",
 					utils.Cfg.MustValue("info", "block_list")+broPath+"|")
