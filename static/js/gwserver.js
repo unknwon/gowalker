@@ -144,7 +144,7 @@
             _modal.modal('hide');
             if (_ep) {
                 _ep.modal('show');
-                _ep.on('shown', function () {
+                _ep.on('shown.bs.modal', function () {
                     $(this).find('#search_export_box').focus();
                 })
             }
@@ -201,7 +201,7 @@
             GkeyCb( function() {
                 if (_ex) {
                     _ex.modal('show');
-                    _ex.on('shown', function () {
+                    _ex.on('shown.bs.modal', function () {
                         $(this).find('#example_box').focus();
                     })
                 }

@@ -484,6 +484,10 @@ func FlushCacheProjects(pinfos []*hv.PkgInfo) {
 
 		// Update rank.
 		p.Rank = calRefRanks(q, strings.Split(p.RefPids, "|")) + p.Views
+		if p.Rank > 2*p.Views {
+			p.Rank = 2 * p.Views
+		}
+
 		_, err = q.Save(p)
 		if err != nil {
 			beego.Error("models.FlushCacheProjects(", p.ImportPath, ") ->", err)
