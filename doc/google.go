@@ -36,7 +36,7 @@ var (
 	googlePattern    = regexp.MustCompile(`^code\.google\.com/p/(?P<repo>[a-z0-9\-]+)(:?\.(?P<subrepo>[a-z0-9\-]+))?(?P<dir>/[a-z0-9A-Z_.\-/]+)?$`)
 )
 
-func getStandardDoc(client *http.Client, importPath, tag, ptag string) (pdoc *hv.Package, err error) {
+func getStandardDoc(client *http.Client, importPath, tag, ptag string) (*hv.Package, error) {
 	// hg-higtory: http://go.googlecode.com/hg-history/release/src/pkg/"+importPath+"/"
 	stdout, _, err := com.ExecCmd("curl", "http://go.googlecode.com/hg/src/pkg/"+importPath+"/?r="+tag)
 	if err != nil {
@@ -86,7 +86,7 @@ func getStandardDoc(client *http.Client, importPath, tag, ptag string) (pdoc *hv
 	}
 
 	// Fetch file from VCS.
-	if err := com.FetchFilesCurl(files); err != nil {
+	if err := fetchGoogleFiles(files); err != nil {
 		return nil, err
 	}
 
@@ -115,17 +115,53 @@ func getStandardDoc(client *http.Client, importPath, tag, ptag string) (pdoc *hv
 	}
 
 	srcs := make([]*hv.Source, 0, len(files))
+	srcMap := make(map[string]*hv.Source)
 	for _, f := range files {
 		s, _ := f.(*hv.Source)
 		srcs = append(srcs, s)
+
+		if len(tag) == 0 && !strings.HasSuffix(f.Name(), "_test.go") {
+			srcMap[f.Name()] = s
+		}
 	}
 
-	return w.Build(&hv.WalkRes{
+	pdoc, err := w.Build(&hv.WalkRes{
 		WalkDepth: hv.WD_All,
 		WalkType:  hv.WT_Memory,
 		WalkMode:  hv.WM_All,
 		Srcs:      srcs,
 	})
+	if err != nil {
+		return nil, errors.New("doc.getStandardDoc(" + importPath + ") -> Fail to build: " + err.Error())
+	}
+
+	return pdoc, generateHv(importPath, srcMap)
+}
+
+func fetchGoogleFiles(files []com.RawFile) error {
+	count := len(files)
+	step := 5
+	start := 0
+	end := step
+	isExit := false
+
+	for {
+		if end > count {
+			end = count
+			isExit = true
+		}
+
+		if err := com.FetchFilesCurl(files[start:end]); err != nil {
+			return err
+		}
+
+		if isExit {
+			return nil
+		}
+
+		start += step
+		end += step
+	}
 }
 
 func getGoogleTags(importPath string, defaultBranch string, isGoRepo bool) []string {
@@ -245,7 +281,7 @@ func getGoogleDoc(client *http.Client, match map[string]string, tag, ptag string
 	}
 
 	// Fetch file from VCS.
-	if err := com.FetchFilesCurl(files); err != nil {
+	if err := fetchGoogleFiles(files); err != nil {
 		return nil, err
 	}
 
@@ -275,16 +311,30 @@ func getGoogleDoc(client *http.Client, match map[string]string, tag, ptag string
 	}
 
 	srcs := make([]*hv.Source, 0, len(files))
+	srcMap := make(map[string]*hv.Source)
 	for _, f := range files {
 		s, _ := f.(*hv.Source)
 		srcs = append(srcs, s)
+
+		if len(tag) == 0 && (w.Pdoc.IsGoSubrepo || w.Pdoc.IsCmd) &&
+			!strings.HasSuffix(f.Name(), "_test.go") {
+			srcMap[f.Name()] = s
+		}
 	}
 
-	return w.Build(&hv.WalkRes{
+	pdoc, err := w.Build(&hv.WalkRes{
 		WalkDepth: hv.WD_All,
 		WalkType:  hv.WT_Memory,
 		WalkMode:  hv.WM_All,
 		Srcs:      srcs,
 	})
-	return nil, nil
+	if err != nil {
+		return nil, errors.New("doc.getGoogleDoc(" + match["importPath"] + ") -> Fail to build: " + err.Error())
+	}
+
+	if len(tag) == 0 && (w.Pdoc.IsGoSubrepo || w.Pdoc.IsCmd) {
+		err = generateHv(match["importPath"], srcMap)
+	}
+
+	return pdoc, err
 }

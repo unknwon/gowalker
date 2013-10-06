@@ -1,4 +1,5 @@
 // Copyright 2012 Gary Burd
+// Copyright 2013 Unknown
 //
 // Licensed under the Apache License, Version 2.0 (the "License"): you may
 // not use this file except in compliance with the License. You may obtain
@@ -357,4 +358,33 @@ func getRepoByArchive(match map[string]string, downloadPath string) (bool, strin
 		}
 	}
 	return isGoPro, comment, files, dirs, nil
+}
+
+func generateHv(importPath string, srcMap map[string]*hv.Source) error {
+	w := &hv.Walker{
+		Pdoc: &hv.Package{
+			PkgInfo: &hv.PkgInfo{
+				ImportPath: importPath,
+			},
+		},
+		SrcFiles: srcMap,
+	}
+	hvs, err := w.Render()
+	if err != nil {
+		return errors.New("doc.generateHv(" + importPath + ") -> Fail to render: " + err.Error())
+	}
+
+	buf := new(bytes.Buffer)
+	for name, data := range hvs {
+		filePath := "." + utils.HvJsPath + importPath + "/" + name + ".js"
+		buf.Reset()
+		buf.WriteString("document.write(\"")
+		buf.Write(com.Html2JS(data))
+		buf.WriteString("\")")
+
+		if _, err := com.SaveFile(filePath, buf.Bytes()); err != nil {
+			return errors.New("doc.generateHv(" + importPath + ") -> Save hv: " + err.Error())
+		}
+	}
+	return nil
 }

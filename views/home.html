@@ -27,7 +27,7 @@
 			<p>
 				Go Walker is a web server that generates <a target="_blank" href="http://golang.org/">Go</a> projects API documentation and
 				<button class="btn feature" title=""
-				        data-content="Hacker view allows you study a Go project without any installation, and with awesome features like 'jump to definition'."
+				        data-content="Hacker view provides source file based project code view for Go Standard Library, Go Subrepo and command line project."
 				        data-placement="top" data-toggle="popover" data-original-title="Hacker View">Hacker View</button>
 				on the fly for the projects on <b><a target="_blank" href="https://bitbucket.org/">Bitbucket</a></b>, <b><a target="_blank" href="https://github.com/">GitHub</a></b>, <b><a target="_blank" href="http://code.google.com/">Google Code</a></b>, <b><a target="_blank" href="https://launchpad.net/">Launchpad</a></b> and <b><a target="_blank" href="http://git.oschina.net/">Git @ OSC</a></b>.
 			</p>
@@ -61,7 +61,7 @@
             <p>
                 Go Walker 是一个可以在线生成并浏览 <a target="_blank" href="http://docs.studygolang.com/">Go</a> 项目 API 文档及
                 <button class="btn feature" title=""
-                        data-content="黑客视图允许您不需要进行任何安装操作即可学习研究任何 Go 项目，同时提供 '跳转到定义' 等超强特性。"
+                        data-content="黑客视图允许您对 Go 标准库、Go 官方维护库和命令行项目进行基于源文件的浏览。"
                         data-placement="top" data-toggle="popover" data-original-title="黑客视图">黑客视图</button>
                 的 Web 服务器，目前已支持包括 <b><a target="_blank" href="https://bitbucket.org/">Bitbucket</a></b>、<b><a target="_blank" href="https://github.com/">GitHub</a></b>、<b><a target="_blank" href="http://code.google.com/">Google Code</a></b>、<b><a target="_blank" href="https://launchpad.net/">Launchpad</a></b> 和 <b><a target="_blank" href="http://git.oschina.net/">Git @ OSC</a></b> 在内的五大代码托管平台。
             </p>
@@ -160,7 +160,11 @@
 		<div>
 			<h4><b>{{i18n .Lang "Announcement"}}</b></h4>
 			<p>
-				{{i18n .Lang "Are you still downloading and installing Go projects but just for looking up some functions and methods? I know it's hard to do untile you found <b>Hacker View</b> today!" | str2html}}
+                {{if eq .Lang "en-US"}}
+				<b>Hacker View</b> provides source file based project code view on the fly for Go Standard Library, Go Subrepo and command line project.
+                {{else if eq .Lang "zh-CN"}}
+                <b>黑客视图</b> 允许您对 Go 标准库、Go 官方维护库和命令行项目进行基于源文件的即时浏览。
+                {{end}}
 			</p>
 			<a class="btn btn-primary" target="_blank" href="https://{{i18n .Lang "github.com/Unknwon/gowalker/wiki/Features"}}">{{i18n .Lang "Learn more"}}</a>
 		</div>

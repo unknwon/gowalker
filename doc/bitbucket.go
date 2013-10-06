@@ -146,15 +146,29 @@ func getBitbucketDoc(client *http.Client, match map[string]string, tag, savedEta
 	}
 
 	srcs := make([]*hv.Source, 0, len(files))
+	srcMap := make(map[string]*hv.Source)
 	for _, f := range files {
 		s, _ := f.(*hv.Source)
 		srcs = append(srcs, s)
+
+		if !strings.HasSuffix(f.Name(), "_test.go") {
+			srcMap[f.Name()] = s
+		}
 	}
 
-	return w.Build(&hv.WalkRes{
+	pdoc, err := w.Build(&hv.WalkRes{
 		WalkDepth: hv.WD_All,
 		WalkType:  hv.WT_Memory,
 		WalkMode:  hv.WM_All,
 		Srcs:      srcs,
 	})
+	if err != nil {
+		return nil, errors.New("doc.getBitbucketDoc(" + match["importPath"] + ") -> Fail to build: " + err.Error())
+	}
+
+	if len(tag) == 0 && w.Pdoc.IsCmd {
+		err = generateHv(match["importPath"], srcMap)
+	}
+
+	return pdoc, err
 }

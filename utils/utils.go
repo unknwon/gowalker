@@ -15,6 +15,7 @@
 package utils
 
 import (
+	"bytes"
 	"fmt"
 	"html/template"
 	"io"
@@ -24,18 +25,36 @@ import (
 
 	"github.com/Unknwon/com"
 	"github.com/Unknwon/goconfig"
+	"github.com/astaxie/beego"
 )
 
 var Cfg *goconfig.ConfigFile
+var (
+	DocsJsPath string
+	HvJsPath   string
+)
 
 // LoadConfig loads configuration file.
-func LoadConfig(cfgPath string) (err error) {
+func LoadConfig(cfgPath string) {
 	if !com.IsExist(cfgPath) {
 		os.Create(cfgPath)
 	}
 
+	var err error
 	Cfg, err = goconfig.LoadConfigFile(cfgPath)
-	return err
+	if err != nil {
+		panic("Fail to load configuration file: " + err.Error())
+	}
+
+	DocsJsPath, err = Cfg.GetValue("server", "docs_js_path")
+	if err != nil {
+		panic("Fail to load configuration file: cannot find key docs_js_path")
+	}
+
+	HvJsPath, err = Cfg.GetValue("server", "hv_js_path")
+	if err != nil {
+		panic("Fail to load configuration file: cannot find key hv_js_path")
+	}
 }
 
 // SaveConfig saves configuration file.
@@ -228,4 +247,72 @@ func findType(name string, links []*Link) (*Link, bool) {
 		}
 	}
 	return nil, false
+}
+
+// SaveDocPage saves doc. content to JS file(s),
+// it returns max index of JS file(s);
+// it returns -1 when error occurs.
+func SaveDocPage(docPath string, data []byte) int {
+	docPath = DocsJsPath + docPath
+
+	buf := new(bytes.Buffer)
+	count := 0
+	d := string(data)
+	l := len(d)
+	if l < 80000 {
+		buf.WriteString("document.write(\"")
+		buf.Write(data)
+		buf.WriteString("\")")
+
+		if _, err := com.SaveFile("."+docPath+".js", buf.Bytes()); err != nil {
+			beego.Error("utils.SaveDocPage(", docPath, ") ->", err)
+			return -1
+		}
+	} else {
+		// Too large, need to sperate.
+		start := 0
+		end := start + 40000
+		for {
+			if end >= l {
+				end = l
+			} else {
+				// Need to break in space.
+				for {
+					if d[end-3:end] == "/b>" {
+						break
+					}
+					end += 1
+
+					if end >= l {
+						break
+					}
+				}
+			}
+
+			buf.WriteString("document.write(\"")
+			buf.WriteString(d[start:end])
+			buf.WriteString("\")\n")
+
+			p := docPath
+			if count != 0 {
+				p += fmt.Sprintf("-%d", count)
+			}
+
+			if _, err := com.SaveFile("."+p+".js", buf.Bytes()); err != nil {
+				beego.Error("utils.SaveDocPage(", p, ") ->", err)
+				return -1
+			}
+
+			if end >= l {
+				break
+			}
+
+			buf.Reset()
+			start = end
+			end += 204800
+			count++
+		}
+	}
+
+	return count
 }

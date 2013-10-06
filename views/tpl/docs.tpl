@@ -222,13 +222,23 @@
 {{if .IsHasFiles}}
 <h3 id="_files">
 	<a target="_blank" href="http://{{.ViewFilePath}}">Files</a>
+	{{if .IsHasHv}}
+    <small class="text-info">Click any file to enable Hacker View.</small>
+    {{end}}
 </h3>
 {{end}}
 
 <p>
+    {{if .IsHasHv}}
+    {{$importPath := .ImportPath}}
+	{{range .Files}}
+	<a target="_blank" href="/{{$importPath}}?f={{.SrcName}}">{{.SrcName}}</a>
+	{{end}}
+    {{else}}
 	{{range .Files}}
 	<a target="_blank" href="http://{{.BrowseUrl}}">{{.SrcName}}</a>
 	{{end}}
+    {{end}}
 </p>
 
 {{if .IsHasSubdirs}}

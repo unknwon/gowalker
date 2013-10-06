@@ -73,13 +73,15 @@ func getPkgInfoWithQ(path, tag string, q *qbs.Qbs) (*hv.PkgInfo, error) {
 		// Basically, error means not found, so we set 'pinfo.PkgVer' to 0
 		// because server uses it to decide whether force update.
 		pinfo.PkgVer = 0
+		pinfo.Ptag = "ptag"
 		return pinfo, errors.New(
 			fmt.Sprintf("models.GetPkgInfo( %s:%s ) -> 'PkgDecl': %s", path, tag, err))
 	}
 
 	docPath := path + packer.TagSuffix("-", tag)
-	if !com.IsExist("./static/docs/" + docPath + ".js") {
+	if !com.IsExist("." + utils.DocsJsPath + docPath + ".js") {
 		pinfo.PkgVer = 0
+		pinfo.Ptag = "ptag"
 		return pinfo, errors.New(
 			fmt.Sprintf("models.GetPkgInfo( %s:%s ) -> JS: File not found", path, tag))
 	}

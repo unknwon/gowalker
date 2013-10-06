@@ -108,7 +108,7 @@ func getGithubDoc(client *http.Client, match map[string]string, tag, savedEtag s
 	// Because Github API URLs are case-insensitive, we need to check that the
 	// userRepo returned from Github matches the one that we are requesting.
 	if !strings.HasPrefix(tree.Url, com.Expand("https://api.github.com/repos/{owner}/{repo}/", match)) {
-		return nil, errors.New("Github import path has incorrect case.")
+		return nil, errors.New("Github import path has incorrect case")
 	}
 
 	// Get source file data and subdirectories.
@@ -157,11 +157,11 @@ func getGithubDoc(client *http.Client, match map[string]string, tag, savedEtag s
 	}
 
 	if !isGoPro {
-		return nil, com.NotFoundError{"Cannot find Go files, it's not a Go project."}
+		return nil, com.NotFoundError{"Cannot find Go files, it's not a Go project"}
 	}
 
 	if len(files) == 0 && len(dirs) == 0 {
-		return nil, com.NotFoundError{"Directory tree does not contain Go files and subdirs."}
+		return nil, com.NotFoundError{"Directory tree does not contain Go files and subdirs"}
 	}
 
 	// Fetch file from VCS.
@@ -217,15 +217,29 @@ func getGithubDoc(client *http.Client, match map[string]string, tag, savedEtag s
 	}
 
 	srcs := make([]*hv.Source, 0, len(files))
+	srcMap := make(map[string]*hv.Source)
 	for _, f := range files {
 		s, _ := f.(*hv.Source)
 		srcs = append(srcs, s)
+
+		if !strings.HasSuffix(f.Name(), "_test.go") {
+			srcMap[f.Name()] = s
+		}
 	}
 
-	return w.Build(&hv.WalkRes{
+	pdoc, err := w.Build(&hv.WalkRes{
 		WalkDepth: hv.WD_All,
 		WalkType:  hv.WT_Memory,
 		WalkMode:  hv.WM_All,
 		Srcs:      srcs,
 	})
+	if err != nil {
+		return nil, errors.New("doc.getGithubDoc(" + match["importPath"] + ") -> Fail to build: " + err.Error())
+	}
+
+	if len(tag) == 0 && w.Pdoc.IsCmd {
+		err = generateHv(match["importPath"], srcMap)
+	}
+
+	return pdoc, err
 }

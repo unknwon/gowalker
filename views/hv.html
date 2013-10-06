@@ -1,0 +1,12 @@
+{{template "base/base.html" .}}
+{{define "head"}}<title>{{.ProName}}/{{.FileName}} - Go Walker {{i18n .Lang "Hacker View"}}</title>{{end}}
+{{define "body"}}
+<div>
+	{{template "base/alert.html" .}}
+	<script>
+	    isHv = true;
+	</script>
+	<pre><script type="text/javascript" src="{{.HvJs}}"></script></pre>
+	<h6>View this file on <a href="http://{{.ViewDirPath}}/{{.FileName}}{{.Query}}">{{.ViewDirPath}}/{{.FileName}}</a></h6>
+</div>
+{{end}}

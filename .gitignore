@@ -12,7 +12,7 @@ log/
 data/
 .idea/
 bale/
-docs/
+public/
 
 # Architecture specific extensions/prefixes
 *.[568vq]

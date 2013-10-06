@@ -153,6 +153,12 @@
 					{{.ProName}} 
 					
 					<span class="label label-inverse label-sm">{{i18n .Lang "Rank"}}: {{.Rank}}</span>
+					
+                    {{if .IsHasFiles}}
+                    {{if .IsHasHv}}
+                    <a class="label label-danger label-sm" href="#_files">{{i18n .Lang "Hacker View"}}</a>
+                    {{end}}
+                    {{end}}
 
 					{{range .Labels}}
 					<a target="_blank" href="/label#{{.}}" class="label label-inverse label-sm">{{.}}</a>

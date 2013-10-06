@@ -17,7 +17,7 @@
         var delta = document.body.clientWidth - 1050;
 
         if (delta >= 0) {
-            if (document.getElementById("sidebar") == null) {
+            if (document.getElementById("sidebar") == null && isHv == false) {
                 navbarFrame.className = "navbar navbar-default navbar-fixed-top";
                 body.style.paddingTop = "60px";
             } else {

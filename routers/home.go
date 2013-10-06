@@ -21,7 +21,6 @@ import (
 	godoc "go/doc"
 	"html/template"
 	"net/http"
-	"os"
 	"path"
 	"strconv"
 	"strings"
@@ -386,75 +385,6 @@ func calDocCP(comNum, totalNum int) (label, perStr string) {
 	return label, perStr
 }
 
-// saveDocPage saves doc. content to JS file(s),
-// it returns max index of JS file(s);
-// it returns -1 when error occurs.
-func saveDocPage(docPath string, data []byte) int {
-	os.MkdirAll(path.Dir("./static/docs/"+docPath), os.ModePerm)
-
-	buf := new(bytes.Buffer)
-
-	count := 0
-	d := string(data)
-	l := len(d)
-	if l < 80000 {
-		buf.WriteString("document.write(\"")
-		buf.Write(data)
-		buf.WriteString("\")")
-
-		if _, err := com.SaveFile("./static/docs/"+docPath+".js", buf.Bytes()); err != nil {
-			beego.Error("saveDocPage(", docPath, ") ->", err)
-			return -1
-		}
-	} else {
-		// Too large, need to sperate.
-		start := 0
-		end := start + 40000
-		for {
-			if end >= l {
-				end = l
-			} else {
-				// Need to break in space.
-				for {
-					if d[end-3:end] == "/b>" {
-						break
-					}
-					end += 1
-
-					if end >= l {
-						break
-					}
-				}
-			}
-
-			buf.WriteString("document.write(\"")
-			buf.WriteString(d[start:end])
-			buf.WriteString("\")\n")
-
-			p := docPath
-			if count != 0 {
-				p += fmt.Sprintf("-%d", count)
-			}
-
-			if _, err := com.SaveFile("./static/docs/"+p+".js", buf.Bytes()); err != nil {
-				beego.Error("saveDocPage(", p, ") ->", err)
-				return -1
-			}
-
-			if end >= l {
-				break
-			}
-
-			buf.Reset()
-			start = end
-			end += 204800
-			count++
-		}
-	}
-
-	return count
-}
-
 func renderDoc(this *HomeRouter, pdoc *hv.Package, q, tag, docPath string) bool {
 	this.Data["PkgFullIntro"] = pdoc.Doc
 
@@ -509,7 +439,7 @@ func renderDoc(this *HomeRouter, pdoc *hv.Package, q, tag, docPath string) bool 
 		this.Data["IsHasExports"] = true
 		exportDataSrc = exportDataSrc[:len(exportDataSrc)-1]
 		this.Data["ExportDataSrc"] = "<script>$('.search-export').typeahead({local: [" +
-			exportDataSrc + "]});</script>"
+			exportDataSrc + "],limit: 10});</script>"
 	}
 
 	pdoc.UserExamples = getUserExamples(pdoc.ImportPath)
@@ -698,6 +628,12 @@ func renderDoc(this *HomeRouter, pdoc *hv.Package, q, tag, docPath string) bool 
 		e.Code = buf.String()
 	}
 
+	this.Data["ImportPath"] = pdoc.ImportPath
+
+	if len(tag) == 0 && (pdoc.IsCmd || pdoc.IsGoRepo || pdoc.IsGoSubrepo) {
+		this.Data["IsHasHv"] = true
+	}
+
 	this.TplNames = "tpl/docs.tpl"
 	data, err := this.RenderBytes()
 	if err != nil {
@@ -705,7 +641,7 @@ func renderDoc(this *HomeRouter, pdoc *hv.Package, q, tag, docPath string) bool 
 		return false
 	}
 
-	n := saveDocPage(docPath, com.Html2JS(data))
+	n := utils.SaveDocPage(docPath, com.Html2JS(data))
 	if n == -1 {
 		return false
 	}
@@ -813,28 +749,47 @@ func generatePage(this *HomeRouter, pdoc *hv.Package, q, tag string) bool {
 		this.Data["TimeSince"] = calTimeSince(pdoc.Created.Add(4 * time.Hour))
 	}
 
+	proName := path.Base(pdoc.ImportPath)
+	if i := strings.Index(proName, "?"); i > -1 {
+		proName = proName[:i]
+	}
+	this.Data["ProName"] = proName
+
+	// Check if need to show Hacker View.
+	f := this.Input().Get("f")
+	hvJs := utils.HvJsPath + pdoc.ImportPath + "/" + f + ".js"
+	if len(tag) == 0 && (pdoc.IsCmd || pdoc.IsGoRepo || pdoc.IsGoSubrepo) &&
+		len(f) > 0 && com.IsExist("."+hvJs) {
+		this.TplNames = "hv.html"
+
+		var query string
+		if i := strings.Index(pdoc.ViewDirPath, "?"); i > -1 {
+			query = pdoc.ViewDirPath[i:]
+			pdoc.ViewDirPath = pdoc.ViewDirPath[:i]
+		}
+		this.Data["ViewDirPath"] = strings.TrimSuffix(pdoc.ViewDirPath, "/")
+		this.Data["Query"] = query
+		this.Data["FileName"] = f
+		this.Data["HvJs"] = hvJs
+		return true
+	}
+
 	// Set properties.
 	this.TplNames = "docs.html"
 
 	this.Data["Pid"] = pdoc.Id
+	this.Data["IsGoRepo"] = pdoc.IsGoRepo
+
+	if len(tag) == 0 && (pdoc.IsCmd || pdoc.IsGoRepo || pdoc.IsGoSubrepo) {
+		this.Data["IsHasHv"] = true
+	}
 
 	// Refresh (within 10 seconds).
 	this.Data["IsRefresh"] = pdoc.Created.UTC().Add(10 * time.Second).After(time.Now().UTC())
 
 	this.Data["VCS"] = pdoc.Vcs
 	this.Data["ProPath"] = pdoc.ProjectPath
-
-	proName := path.Base(pdoc.ImportPath)
-	if i := strings.Index(proName, "?"); i > -1 {
-		proName = proName[:i]
-	}
-	this.Data["ProName"] = proName
 	this.Data["ProDocPath"] = path.Dir(pdoc.ImportPath)
-
-	if utils.IsGoRepoPath(pdoc.ImportPath) &&
-		strings.Index(pdoc.ImportPath, ".") == -1 {
-		this.Data["IsGoRepo"] = true
-	}
 
 	// Introduction.
 	this.Data["ImportPath"] = pdoc.ImportPath
@@ -879,11 +834,11 @@ func generatePage(this *HomeRouter, pdoc *hv.Package, q, tag string) bool {
 	this.Data["IsDocumentation"] = true
 
 	docJS := make([]string, 0, pdoc.JsNum+1)
-	docJS = append(docJS, "/static/docs/"+docPath+".js")
+	docJS = append(docJS, utils.DocsJsPath+docPath+".js")
 
 	for i := 1; i <= pdoc.JsNum; i++ {
 		docJS = append(docJS, fmt.Sprintf(
-			"/static/docs/%s-%d.js", docPath, i))
+			"%s%s-%d.js", utils.DocsJsPath, docPath, i))
 	}
 	this.Data["DocJS"] = docJS
 	return true

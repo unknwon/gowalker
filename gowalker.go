@@ -33,7 +33,7 @@ import (
 )
 
 const (
-	APP_VER = "1.0.0.1004"
+	APP_VER = "1.0.0.1005"
 )
 
 // We have to call a initialize function manully
@@ -41,11 +41,8 @@ const (
 // and we cannot make sure that which init() execute first.
 func initialize() {
 	// Load configuration, set app version and log level.
-	err := utils.LoadConfig("conf/app.ini")
-	if err != nil {
-		panic("Fail to load configuration file: " + err.Error())
-	}
-	err = i18n.SetMessage("conf/message.ini")
+	utils.LoadConfig("conf/app.ini")
+	err := i18n.SetMessage("conf/message.ini")
 	if err != nil {
 		panic("Fail to set message file: " + err.Error())
 	}
@@ -120,6 +117,9 @@ func main() {
 
 	// For all unknown pages.
 	beego.Router("/:all", &routers.HomeRouter{})
+
+	// Static path.
+	beego.SetStaticPath("/public", "public")
 	beego.Run()
 }
 

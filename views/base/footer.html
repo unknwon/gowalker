@@ -2,26 +2,26 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h3>Control panel</h3>
+                <h3>{{i18n .Lang "Control panel"}}</h3>
             </div>
             
             <div class="modal-body">
                 <table>
                     <tbody>
-                        <tr><td align="right"><b>?</b></td><td> : This menu</td></tr>
-                        <tr><td align="right"><b>/</b></td><td> : Search site</td></tr>
-                        <tr><td align="right"><b>.</b></td><td> : Go to export</td></tr>
-                        <tr><td align="right"><b>g</b> then <b>g</b></td><td> : Go to top of page</td></tr>
-                        <tr><td align="right"><b>g</b> then <b>b</b></td><td> : Go to bottom of page</td></tr>
-                        <tr><td align="right"><b>g</b> then <b>i</b></td><td> : Go to index</td></tr>
-<!--                        <tr><td align="right"><b>g</b> then <b>t</b></td><td> : Add or remove labels</td></tr>-->
-                        <tr><td align="right"><b>g</b> then <b>e</b></td><td> : Add examples</td></tr>
+                        <tr><td align="right"><b>?</b></td><td> : {{i18n .Lang "This menu"}}</td></tr>
+                        <tr><td align="right"><b>/</b></td><td> : {{i18n .Lang "Search site"}}</td></tr>
+                        <tr><td align="right"><b>.</b></td><td> : {{i18n .Lang "Go to export"}}</td></tr>
+                        <tr><td align="right"><b>g</b> + <b>g</b></td><td> : {{i18n .Lang "Go to top of page"}}</td></tr>
+                        <tr><td align="right"><b>g</b> + <b>b</b></td><td> : {{i18n .Lang "Go to bottom of page"}}</td></tr>
+                        <tr><td align="right"><b>g</b> + <b>i</b></td><td> : {{i18n .Lang "Go to index"}}</td></tr>
+<!--                        <tr><td align="right"><b>g</b> + <b>t</b></td><td> : {{i18n .Lang "Add or remove labels"}}</td></tr>-->
+                        <tr><td align="right"><b>g</b> + <b>e</b></td><td> : {{i18n .Lang "Add examples"}}</td></tr>
                     </tbody>
                 </table>
             </div>
             
             <div class="modal-footer">
-                <a href="#" class="btn" data-dismiss='modal' aria-hidden="true">Close</a>
+                <a href="#" class="btn" data-dismiss='modal' aria-hidden="true">{{i18n .Lang "Close"}}</a>
             </div>
         </div>
     </div>
@@ -57,34 +57,6 @@
 		{{template "static_file" .}}
 	</div>
 </footer>
-
-{{define "footer_zh"}}
-<div id='_keyshortcut' class="modal hide fade" tabindex="-1" role="dialog" aria-hidden="false">
-  <div class="modal-header">
-      <h3>控制面板</h3>
-  </div>
-
-  <div class="modal-body">
-      <table>
-          <tbody>
-	      <tr><td align="right"><b>?</b></td><td> ： 打开控制面板</td></tr>
-	      <tr><td align="right"><b>/</b></td><td> ： 站内搜索</td></tr>
-	      <tr><td align="right"><b>.</b></td><td> ： 搜索导出对象</td></tr>
-	      <tr><td align="right"><b>g</b> + <b>g</b></td><td> ： 回到顶部</td></tr>
-	      <tr><td align="right"><b>g</b> + <b>b</b></td><td> ： 跳至底部</td></tr>
-	      <tr><td align="right"><b>g</b> + <b>i</b></td><td> ： 跳至索引</td></tr>
-	      <tr><td align="right"><b>g</b> + <b>t</b></td><td> ： 增加或移除标签</td></tr>
-	      <tr><td align="right"><b>g</b> + <b>e</b></td><td> ： 增加示例</td></tr>
-          </tbody>
-      </table>
-  </div>
-
-  <div class="modal-footer">
-      <a href="#" class="btn" data-dismiss='modal' aria-hidden="true">关闭</a>
-      <!--<a href="#" class="btn btn-primary">Save changes</a>-->
-  </div>
-</div>
-{{end}}
 
 {{define "static_file"}}
 {{if .IsHome}}
