@@ -15,20 +15,36 @@
 package routers
 
 import (
-	"github.com/astaxie/beego"
+	"strings"
+
+	"github.com/Unknwon/gowalker/models"
 )
 
-// AboutRouter serves about pages.
-type AboutRouter struct {
-	beego.Controller
+// FuncsRouter serves AJAX function code API page.
+type FuncsRouter struct {
+	baseRouter
 }
 
-// Get implemented Get method for AboutRouter.
-func (this *AboutRouter) Get() {
-	this.Data["IsAbout"] = true
-	// Set language version.
-	curLang := globalSetting(this.Ctx, this.Input(), this.Data)
+// Get implemented Get method for FuncsRouter.
+func (this *FuncsRouter) Get() {
+	this.TplNames = "funcs.html"
+
+	// Get argument(s).
+	q := strings.TrimSpace(this.Input().Get("q"))
 
 	// Set properties.
-	this.TplNames = "about_" + curLang.Lang + ".html"
+	this.Data["Keyword"] = q
+
+	if len(q) > 0 {
+		// Function search.
+		pfuncs := models.SearchFunc(q)
+
+		// Show results after searched.
+		if len(pfuncs) > 0 {
+			this.Data["IsFindFunc"] = true
+			this.Data["Results"] = pfuncs
+		}
+	} else {
+		this.Data["IsShowIntro"] = true
+	}
 }

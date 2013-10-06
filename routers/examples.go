@@ -24,22 +24,18 @@ import (
 
 	"github.com/Unknwon/gowalker/doc"
 	"github.com/Unknwon/gowalker/models"
-	"github.com/astaxie/beego"
+	"github.com/Unknwon/hv"
 )
 
 // ExamplesRouter serves examples pages.
 type ExamplesRouter struct {
-	beego.Controller
+	baseRouter
 }
 
 // Get implemented Get method for ExamplesRouter.
 func (this *ExamplesRouter) Get() {
 	this.Data["IsExamples"] = true
-	// Set language version.
-	curLang := globalSetting(this.Ctx, this.Input(), this.Data)
-
-	// Set properties.
-	this.TplNames = "examples_" + curLang.Lang + ".html"
+	this.TplNames = "examples.html"
 
 	// Get argument(s).
 	gist := strings.TrimSpace(this.Input().Get("gist"))
@@ -119,7 +115,7 @@ func (this *ExamplesRouter) Get() {
 	this.Redirect("/"+q, 302)
 }
 
-func saveExamples(gist *doc.Gist) error {
+func saveExamples(gist *hv.Gist) error {
 	var buf bytes.Buffer
 	// Examples.
 	for _, e := range gist.Examples {
@@ -144,12 +140,12 @@ func saveExamples(gist *doc.Gist) error {
 	return models.SavePkgExam(pkgExam)
 }
 
-func parseExamples(html []byte, gist, path string) (*doc.Gist, error) {
+func parseExamples(html []byte, gist, path string) (*hv.Gist, error) {
 	gist = strings.TrimPrefix(gist, "https://")
 	gist = strings.TrimSuffix(gist, "/raw")
 	gist = strings.TrimSuffix(gist, "/")
-	g := &doc.Gist{Gist: gist}
-	exam := &doc.Example{}
+	g := &hv.Gist{Gist: gist}
+	exam := &hv.Example{}
 
 	var status int
 	// Status.
@@ -180,7 +176,7 @@ func parseExamples(html []byte, gist, path string) (*doc.Gist, error) {
 			// Add example to slice.
 			if len(exam.Name) > 0 && len(exam.Code) > 0 {
 				g.Examples = append(g.Examples, exam)
-				exam = &doc.Example{}
+				exam = &hv.Example{}
 			}
 			status = NAME
 		case len(g.ImportPath) == 0 && strings.HasPrefix(v, "import_path"):
@@ -218,7 +214,7 @@ func parseExamples(html []byte, gist, path string) (*doc.Gist, error) {
 	// Add example to slice.
 	if len(exam.Name) > 0 && len(exam.Code) > 0 {
 		g.Examples = append(g.Examples, exam)
-		exam = &doc.Example{}
+		exam = &hv.Example{}
 	}
 
 	return g, nil

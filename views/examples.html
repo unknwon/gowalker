@@ -1,0 +1,33 @@
+{{template "base/base.html" .}}
+{{define "head"}}<title>Go Walker - {{i18n .Lang "Example"}}</title>{{end}}
+{{define "body"}}
+<div>
+	{{template "base/alert.html" .}}
+    <div>
+        <h1>{{i18n .Lang "Example"}}</h1>
+        {{if .IsShowExam}}
+        <p>{{i18n .Lang "Number of total examples"}}: {{.ExamNum}}.</p>
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>{{i18n .Lang "Import Path"}}</th>
+                    <th>Gist</th>
+                </tr>
+            </thead>
+            
+            <tbody>
+                {{range .AllExams}}
+                <tr>
+                    <td><a href="/{{.Path}}">{{.Path}}</a></td>
+                    <td><a target="_blank" href="https://{{.Gist}}">{{.Gist}}</a></td>
+                </tr>
+                {{end}}
+            </tbody>
+        </table>
+        {{else}}
+        <p>Fail to parse Gist because error: <b>{{.ErrMsg}}</b></p>
+        <p>Click <a href="/{{.ImportPath}}">here</a> to back to documentation page.</p>
+        {{end}}
+    </div>
+</div>
+{{end}}

@@ -296,14 +296,14 @@ func SavePkgExam(gist *PkgExam) error {
 
 	// Check if corresponding package exists.
 	pinfo := new(hv.PkgInfo)
-	err := q.WhereEqual("path", gist.Path).Find(pinfo)
+	err := q.WhereEqual("import_path", gist.Path).Find(pinfo)
 	if err != nil {
 		return errors.New(
 			fmt.Sprintf("models.SavePkgExam( %s ) -> Package does not exist", gist.Path))
 	}
 
 	pexam := new(PkgExam)
-	cond := qbs.NewCondition("path = ?", gist.Path).And("gist = ?", gist.Gist)
+	cond := qbs.NewCondition("import_path = ?", gist.Path).And("gist = ?", gist.Gist)
 	err = q.Condition(cond).Find(pexam)
 	if err == nil {
 		// Check if refresh too frequently(within in 5 minutes).
@@ -396,7 +396,6 @@ func SearchFunc(key string) []*PkgFunc {
 	defer q.Close()
 
 	var pfuncs []*PkgFunc
-	cond := qbs.NewCondition("is_master = ?", true).And("name like ?", "%"+key+"%")
-	q.OmitFields("Pid", "IsMaster", "IsOld").Limit(200).Condition(cond).FindAll(&pfuncs)
+	q.Limit(200).Where("name like ?", "%"+key+"%").FindAll(&pfuncs)
 	return pfuncs
 }

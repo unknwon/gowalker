@@ -1,0 +1,14 @@
+{{template "base/base.html" .}}
+{{define "head"}}<title>Go Walker - {{i18n .Lang "About"}}</title>{{end}}
+{{define "body"}}
+<div>
+	{{template "base/alert.html" .}}
+    <div>
+        {{if eq .Lang "en-US"}}
+        <script src="https://gist.github.com/Unknwon/6852532.js"></script>
+        {{else if eq .Lang "zh-CN"}}
+        <script src="https://gist.github.com/Unknwon/6852627.js"></script>
+        {{end}}
+    </div>
+</div>
+{{end}}

@@ -98,7 +98,7 @@ func InitRouter() {
 	go cacheTickerCheck(cacheTicker.C)
 
 	initPopPros()
-	//initIndexStats()
+	initIndexStats()
 }
 
 func cacheTickerCheck(cacheChan <-chan time.Time) {
@@ -119,7 +119,7 @@ func cacheTickerCheck(cacheChan <-chan time.Time) {
 			refreshCount = 0
 		}
 
-		//initIndexStats()
+		initIndexStats()
 	}
 }
 

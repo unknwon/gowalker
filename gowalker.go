@@ -102,9 +102,9 @@ func main() {
 	beego.Router("/search", &routers.SearchRouter{})
 	beego.Router("/index", &routers.IndexRouter{})
 	// beego.Router("/label", &routers.LabelsRouter{})
-	// beego.Router("/function", &routers.FuncsRouter{})
-	// beego.Router("/example", &routers.ExamplesRouter{})
-	// beego.Router("/about", &routers.AboutRouter{})
+	beego.Router("/function", &routers.FuncsRouter{})
+	beego.Router("/example", &routers.ExamplesRouter{})
+	beego.Router("/about", &routers.AboutRouter{})
 
 	// Register template functions.
 	beego.AddFuncMap("i18n", i18n.Tr)
