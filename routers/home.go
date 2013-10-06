@@ -273,7 +273,9 @@ func (this *HomeRouter) Get() {
 	this.Data["IsHasError"] = true
 	this.Data["ErrMsg"] = strings.Replace(err.Error(),
 		doc.GetGithubCredentials(), "<githubCred>", 1)
-	beego.Error("HomeRouter.Get ->", err)
+	if !strings.Contains(err.Error(), "Cannot find Go files") {
+		beego.Error("HomeRouter.Get ->", err)
+	}
 	serveHome(this, urpids, urpts)
 }
 
@@ -707,7 +709,8 @@ func calTimeSince(created time.Time) string {
 
 	switch {
 	case mins < 0:
-		return fmt.Sprintf("in %d minutes later", -mins)
+		return calTimeSince(created.Add(-4 * time.Hour))
+		//return fmt.Sprintf("in %d minutes later", -mins)
 	case mins < 1:
 		return "less than 1 minute"
 	case mins < 60:
@@ -745,6 +748,7 @@ func generatePage(this *HomeRouter, pdoc *hv.Package, q, tag string) bool {
 			return false
 		}
 
+		fmt.Println(pdoc.Created.String())
 		this.Data["UtcTime"] = pdoc.Created.Add(4 * time.Hour)
 		this.Data["TimeSince"] = calTimeSince(pdoc.Created.Add(4 * time.Hour))
 	}

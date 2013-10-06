@@ -127,7 +127,7 @@ func CheckDoc(broPath, tag string, rt requestType) (*hv.Package, error) {
 				return pdoc, nil
 			case strings.HasPrefix(err.Error(), "Cannot find Go files"):
 				utils.Cfg.SetValue("info", "block_list",
-					utils.Cfg.MustValue("info", "block_list")+"|")
+					utils.Cfg.MustValue("info", "block_list")+broPath+"|")
 				utils.SaveConfig()
 			case pdoc != nil && len(pdoc.ImportPath) > 0:
 				return pdoc, err
