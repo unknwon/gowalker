@@ -1,0 +1,62 @@
+{{template "base/base.html" .}}
+{{define "head"}}<title>Go Walker - {{i18n .Lang "Index"}}</title>{{end}}
+{{define "body"}}
+<div>
+	{{template "base/alert.html" .}}
+    <div>
+        <h1>{{i18n .Lang "Index"}}</h1>
+        {{with .IndexStats}}
+        <p>Statistic information: <b>{{.ProNum}}</b> projects, <b>{{.DeclNum}}</b> documentations and <b>{{.FuncNum}}</b> functions.</p>
+        {{end}}
+    
+        <div>
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>{{i18n .Lang "Import Path"}}</th>
+                        <th>
+                            {{i18n .Lang "Synopsis"}} 
+                            <small class="text-info">{{i18n .Lang "Hover link to see more"}}.</small>
+                        </th>
+                        <th>{{i18n .Lang "Rank"}}</th>
+                    </tr>
+                </thead>
+    
+                {{$newLine := str2html "\n"}}
+                {{$lang := .Lang}}
+                <tbody>
+                    {{range .IndexPkgs}}
+                    <tr>
+                        <td><a title="{{i18n $lang "Refs"}}: {{.RefNum}}  {{i18n $lang "Views"}}: {{.Views}}{{$newLine}}{{i18n $lang "Issues"}}: {{.Issues}}  {{i18n $lang "Stars"}}: {{.Stars}}  {{i18n $lang "Forks"}}: {{.Forks}}" href="/{{.ImportPath}}">{{.ImportPath}}</a></td>
+                        <td>{{.Synopsis}}</td>
+                        <td><span class="label label-info">{{.Rank}}</span></td>
+                    </tr>
+                    {{end}}
+                </tbody>
+            </table>
+        </div>
+    
+        <div>
+            <ul class="pagination">
+                <li>
+                    <a href="/index?p={{.BackPageNum}}">&laquo;</a>
+                </li>
+    
+                {{range .PageList}}
+                <li {{if .IsActive}}class="active"{{end}}>
+                    {{if .IsActive}}
+                    <a href="#_buttom">{{.PageNum}}</a>
+                    {{else}}
+                    <a href="/index?p={{.PageNum}}">{{.PageNum}}</a>
+                    {{end}}
+                </li>
+                {{end}}
+    
+                <li>
+                    <a href="/index?p={{.ForwardPageNum}}">&raquo;</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+{{end}}

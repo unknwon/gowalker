@@ -18,7 +18,6 @@ import (
 	"strconv"
 
 	"github.com/Unknwon/gowalker/models"
-	"github.com/astaxie/beego"
 )
 
 // indexStats represents statistic information.
@@ -33,14 +32,13 @@ func initIndexStats() {
 
 // IndexRouter serves index pages.
 type IndexRouter struct {
-	beego.Controller
+	baseRouter
 }
 
 // Get implemented Get method for IndexRouter.
 func (this *IndexRouter) Get() {
 	this.Data["IsIndex"] = true
-	// Set language version.
-	curLang := globalSetting(this.Ctx, this.Input(), this.Data)
+	this.TplNames = "index.html"
 
 	// Calculate pages.
 	pn, err := strconv.Atoi(this.Input().Get("p"))
@@ -67,7 +65,6 @@ func (this *IndexRouter) Get() {
 	this.Data["PageList"] = calPageList(pn, maxPageNum)
 
 	// Set properties
-	this.TplNames = "index_" + curLang.Lang + ".html"
 	this.Data["IndexStats"] = indexStats
 }
 

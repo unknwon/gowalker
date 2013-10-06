@@ -33,7 +33,7 @@ import (
 )
 
 const (
-	APP_VER = "1.0.0.1005"
+	APP_VER = "1.0.0.1006"
 )
 
 // We have to call a initialize function manully
@@ -100,7 +100,7 @@ func main() {
 	beego.Router("/", &routers.HomeRouter{})
 	// beego.Router("/refresh", &routers.RefreshRouter{})
 	beego.Router("/search", &routers.SearchRouter{})
-	// beego.Router("/index", &routers.IndexRouter{})
+	beego.Router("/index", &routers.IndexRouter{})
 	// beego.Router("/label", &routers.LabelsRouter{})
 	// beego.Router("/function", &routers.FuncsRouter{})
 	// beego.Router("/example", &routers.ExamplesRouter{})
