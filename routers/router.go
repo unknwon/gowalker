@@ -127,7 +127,7 @@ func FlushCache() {
 	// Flush cache projects.
 	num := len(cachePros)
 	models.FlushCacheProjects(cachePros)
-	beego.Trace("FlushCacheProjects")
+	beego.Trace("FlushCacheProjects #", num)
 
 	cachePros = make([]*hv.PkgInfo, 0, num)
 }

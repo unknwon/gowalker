@@ -452,6 +452,9 @@ func calRefRanks(q *qbs.Qbs, refPids []string) int64 {
 	refRank := 0
 	for _, spid := range refPids {
 		pid, _ := strconv.Atoi(spid)
+		if pid == 0 {
+			continue
+		}
 		info := new(hv.PkgInfo)
 		err := q.WhereEqual("id", pid).Find(info)
 		if err == nil {

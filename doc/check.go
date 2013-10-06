@@ -111,6 +111,12 @@ func CheckDoc(broPath, tag string, rt requestType) (*hv.Package, error) {
 		}
 
 		if pdoc == nil {
+			if strings.HasPrefix(err.Error(), "Cannot find Go files") {
+				beego.Info("Added to block list:", broPath)
+				utils.Cfg.SetValue("info", "block_list",
+					utils.Cfg.MustValue("info", "block_list")+broPath+"|")
+				utils.SaveConfig()
+			}
 			return nil, err
 		}
 
@@ -125,11 +131,7 @@ func CheckDoc(broPath, tag string, rt requestType) (*hv.Package, error) {
 				pinfo.Created = time.Now().UTC()
 				pdoc.PkgInfo = pinfo
 				return pdoc, nil
-			case strings.HasPrefix(err.Error(), "Cannot find Go files"):
-				utils.Cfg.SetValue("info", "block_list",
-					utils.Cfg.MustValue("info", "block_list")+broPath+"|")
-				utils.SaveConfig()
-			case pdoc != nil && len(pdoc.ImportPath) > 0:
+			case len(pdoc.ImportPath) > 0:
 				return pdoc, err
 			case err == errUpdateTimeout:
 				// Handle timeout on packages never seen before as not found.
