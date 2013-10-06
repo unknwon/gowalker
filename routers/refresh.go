@@ -19,18 +19,17 @@ import (
 	"strings"
 
 	"github.com/Unknwon/gowalker/doc"
-	"github.com/astaxie/beego"
+	"github.com/Unknwon/gowalker/utils"
 )
 
 // RefreshRouter serves search pages.
 type RefreshRouter struct {
-	beego.Controller
+	baseRouter
 }
 
 // Get implemented Get method for RefreshRouter.
 func (this *RefreshRouter) Get() {
-	// Set language version.
-	curLang := globalSetting(this.Ctx, this.Input(), this.Data)
+	this.TplNames = "refresh.html"
 
 	// Get argument(s).
 	q := this.Input().Get("q")
@@ -41,12 +40,9 @@ func (this *RefreshRouter) Get() {
 		return
 	}
 
-	// Set properties.
-	this.TplNames = "refresh_" + curLang.Lang + ".html"
-
-	pdoc, err := doc.CheckDoc(q, "", doc.REFRESH_REQUEST)
+	pdoc, err := doc.CheckDoc(q, "", doc.RT_Refresh)
 	if err == nil {
-		os.Remove("./static/docs/" + pdoc.ImportPath + ".js")
+		os.Remove("." + utils.DocsJsPath + pdoc.ImportPath + ".js")
 
 		this.Redirect("/"+q, 302)
 		return
@@ -56,6 +52,11 @@ func (this *RefreshRouter) Get() {
 		this.Data["IsHasError"] = true
 		this.Data["ErrMsg"] = strings.Replace(err.Error(),
 			doc.GetGithubCredentials(), "<githubCred>", 1)
+		return
+	}
+
+	if strings.Contains(err.Error(), "Package not modified") {
+		this.Redirect("/"+q, 302)
 		return
 	}
 

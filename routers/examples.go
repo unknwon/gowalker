@@ -53,7 +53,7 @@ func (this *ExamplesRouter) Get() {
 
 	if !strings.Contains(gist, "gist.github.com") {
 		this.Data["IsHasError"] = true
-		this.Data["ErrMsg"] = fmt.Sprintf("Gist path[ %s ] is not legal.", gist)
+		this.Data["ErrMsg"] = fmt.Sprintf("Gist path[ %s ] is not legal", gist)
 		return
 	}
 

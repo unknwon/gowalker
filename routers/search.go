@@ -80,5 +80,4 @@ func (this *SearchRouter) Get() {
 		this.Data["Results"] = pinfos
 		this.Data["ResultCount"] = len(pinfos)
 	}
-	// this.Redirect("http://b.repl.ca/v1/play-here-yellow.png", 302)
 }

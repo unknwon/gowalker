@@ -52,7 +52,7 @@ func CheckDoc(broPath, tag string, rt requestType) (*hv.Package, error) {
 	broPath = strings.TrimPrefix(broPath, "code.google.com/p/go/source/browse/src/pkg/")
 
 	// Check Block List.
-	if i := strings.Index(utils.Cfg.MustValue("info", "block_list"), broPath); i > -1 {
+	if strings.Contains(utils.Cfg.MustValue("info", "block_list"), broPath) {
 		return nil, errors.New("Unable to process the operation bacause " + broPath +
 			" is in the Block List")
 	}
@@ -83,11 +83,10 @@ func CheckDoc(broPath, tag string, rt requestType) (*hv.Package, error) {
 			}
 
 			// Check if the refresh operation is too frequently (within 5 minutes).
-			needsCrawl = pinfo.Created.Add(_REFRESH_LIMIT).UTC().Before(time.Now().UTC())
-			needsCrawl = true
+			needsCrawl = pinfo.Created.Add(_REFRESH_LIMIT).Add(4 * time.Hour).Before(time.Now().UTC())
 			if !needsCrawl {
 				// Return limit time information as error message.
-				return nil, errors.New(pinfo.Created.Add(_REFRESH_LIMIT).UTC().String())
+				return nil, errors.New(pinfo.Created.Add(_REFRESH_LIMIT).Add(4 * time.Hour).String())
 			}
 		}
 	}

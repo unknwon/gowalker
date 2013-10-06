@@ -98,13 +98,15 @@ func main() {
 
 	// Register routers.
 	beego.Router("/", &routers.HomeRouter{})
-	// beego.Router("/refresh", &routers.RefreshRouter{})
+	beego.Router("/refresh", &routers.RefreshRouter{})
 	beego.Router("/search", &routers.SearchRouter{})
 	beego.Router("/index", &routers.IndexRouter{})
 	// beego.Router("/label", &routers.LabelsRouter{})
 	beego.Router("/function", &routers.FuncsRouter{})
 	beego.Router("/example", &routers.ExamplesRouter{})
 	beego.Router("/about", &routers.AboutRouter{})
+
+	beego.Router("/api/v1/badge", &routers.ApiRouter{}, "get:Badge")
 
 	// Register template functions.
 	beego.AddFuncMap("i18n", i18n.Tr)
