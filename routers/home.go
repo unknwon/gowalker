@@ -748,7 +748,6 @@ func generatePage(this *HomeRouter, pdoc *hv.Package, q, tag string) bool {
 			return false
 		}
 
-		fmt.Println(pdoc.Created.String())
 		this.Data["UtcTime"] = pdoc.Created.Add(4 * time.Hour)
 		this.Data["TimeSince"] = calTimeSince(pdoc.Created.Add(4 * time.Hour))
 	}

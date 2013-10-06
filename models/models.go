@@ -296,7 +296,7 @@ func SavePkgExam(gist *PkgExam) error {
 
 	// Check if corresponding package exists.
 	pinfo := new(hv.PkgInfo)
-	err := q.WhereEqual("path", gist.Path).Find(pinfo)
+	err := q.WhereEqual("import_path", gist.Path).Find(pinfo)
 	if err != nil {
 		return errors.New(
 			fmt.Sprintf("models.SavePkgExam( %s ) -> Package does not exist", gist.Path))
