@@ -6,18 +6,17 @@ Go Walker is a web server that generates <a target="_blank" href="http://golang.
 
 ## Features
 
-- **Search** and **view** huge amounts documentation of projects: over 8000 projects involved.
+- **Search** and **view** huge amounts documentation of projects.
 - Type package **import path** or **keywords** in search boxes to find or create documentation.
-- Generate Go project documentation **on the fly** : no more installation required for using.
-- **View documentation by tags** of projects: don't worry for using old version.
-- **Code view** for functions and methods code in current package in the same page with nice highlight: reduce rake up space and do more work at the same time.
-- **Mouse hover tip** and **jump link** for functions, methods and types in current package: reduce time to find.
-- **Code highlight** and **jump link** for functions, methods and types from imported packages: reduce time to find.
+- Generate Go project documentation **on the fly** .
+- **View documentation by tags** of projects.
+- One-click **Code view** for functions and methods code in current package in the same page with nice highlight.
+- **Mouse hover tip** and **jump link** for functions, methods and types in current package.
+- **Code highlight** and **jump link** for functions, methods and types from imported packages.
 - **Control panel** for keyboard shortcuts and more function: compatible with godoc.org.
-- Use **Tag** to label your project: list by categories.
 - **Multiple language** support for readme(.md): [About](http://gowalker.org/about).
 - Add **third-party examples** for your favorite projects: through Github Gist.
-- [Full documentation](https://github.com/Unknwon/gowalker/blob/master/docs/Features.md).
+- Source file based code view.
 
 ## Develop route
 

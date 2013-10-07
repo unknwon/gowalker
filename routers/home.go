@@ -235,8 +235,7 @@ func (this *HomeRouter) Get() {
 		this.Redirect("/code.google.com/p/"+broPath, 301)
 		return
 	} else if strings.Index(broPath, "source/browse/") > -1 {
-		this.Redirect(strings.Replace(broPath, "source/browse/", "", 1), 301)
-		return
+		broPath = strings.Replace(broPath, "source/browse/", "", 1)
 	}
 
 	// Check if it's a remote path that can be used for 'go get', if not means it's a keyword.
