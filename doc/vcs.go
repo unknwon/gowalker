@@ -311,7 +311,7 @@ func getRepoByArchive(match map[string]string, downloadPath string) (bool, strin
 		if strings.HasSuffix(fileName, "/") || !strings.HasPrefix(fileName, dirPrefix) {
 			continue
 		}
-		fmt.Println(fileName)
+		//fmt.Println(fileName)
 
 		// Get files and check if directories have acceptable files.
 		if d, fn := path.Split(fileName); utils.IsDocFile(fn) &&
