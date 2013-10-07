@@ -63,10 +63,9 @@ func initialize() {
 	if routers.IsProMode {
 		beego.SetLevel(beego.LevelInfo)
 		beego.Info("Product mode enabled")
-		beego.Info(beego.AppName, APP_VER)
 
-		os.Mkdir("../log", os.ModePerm)
-		beego.BeeLogger.SetLogger("file", "../log/server")
+		os.Mkdir("./log", os.ModePerm)
+		beego.BeeLogger.SetLogger("file", `{"filename": "log/log"}`)
 	}
 
 	doc.SetGithubCredentials(utils.Cfg.MustValue("github", "client_id"),
