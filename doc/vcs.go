@@ -340,7 +340,7 @@ func getRepoByArchive(match map[string]string, downloadPath string) (bool, strin
 					return isGoPro, comment, files, dirs,
 						errors.New(downloadPath + " -> read file: " + err.Error())
 				}
-				fmt.Println(com.Expand(match["browserUrlTpl"], match, fn))
+				//fmt.Println(com.Expand(match["browserUrlTpl"], match, fn))
 				files = append(files, &hv.Source{
 					SrcName:   fn,
 					BrowseUrl: com.Expand(match["browserUrlTpl"], match, fn),
