@@ -51,12 +51,6 @@ func CheckDoc(broPath, tag string, rt requestType) (*hv.Package, error) {
 	// Trim prefix of standard library path.
 	broPath = strings.TrimPrefix(broPath, "code.google.com/p/go/source/browse/src/pkg/")
 
-	// Check Block List.
-	if strings.Contains(utils.Cfg.MustValue("info", "block_list"), broPath+"|") {
-		return nil, errors.New("Unable to process the operation bacause " + broPath +
-			" is in the Block List")
-	}
-
 	// Get the package info.
 	pinfo, err := models.GetPkgInfo(broPath, tag)
 	switch {
@@ -112,12 +106,6 @@ func CheckDoc(broPath, tag string, rt requestType) (*hv.Package, error) {
 		}
 
 		if pdoc == nil {
-			if err != nil && strings.HasPrefix(err.Error(), "Cannot find Go files") {
-				beego.Info("Added to block list:", broPath)
-				utils.Cfg.SetValue("info", "block_list",
-					utils.Cfg.MustValue("info", "block_list")+broPath+"|")
-				utils.SaveConfig()
-			}
 			return nil, err
 		}
 

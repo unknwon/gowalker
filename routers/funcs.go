@@ -27,6 +27,7 @@ type FuncsRouter struct {
 
 // Get implemented Get method for FuncsRouter.
 func (this *FuncsRouter) Get() {
+	this.Data["IsFuncs"] = true
 	this.TplNames = "funcs.html"
 
 	// Get argument(s).
