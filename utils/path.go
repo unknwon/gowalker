@@ -733,7 +733,7 @@ var filterDirNames = []string{
 // FilterDirName guess the file or directory is or contains Go source files.
 func FilterDirName(name string) bool {
 	for _, v := range filterDirNames {
-		if strings.Contains(strings.ToLower(name), v+"/") {
+		if strings.Contains(strings.ToLower(name), "/"+v+"/") {
 			return false
 		}
 	}
