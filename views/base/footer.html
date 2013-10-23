@@ -102,7 +102,7 @@
 	// Resize images if too large.
 	var doc = $("#readme");
 
-	doc.find("img").each(function(){
+	doc.find("img").load(function(){
 		var w = $(this).width();
 		$(this).width(w > 600 ? 600 : w)
 	})
