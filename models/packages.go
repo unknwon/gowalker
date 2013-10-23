@@ -21,7 +21,6 @@ import (
 	"strings"
 
 	"github.com/Unknwon/com"
-	"github.com/Unknwon/ctw/packer"
 	"github.com/Unknwon/gowalker/utils"
 	"github.com/Unknwon/hv"
 	"github.com/astaxie/beego"
@@ -42,23 +41,24 @@ func SearchPkg(key string) []*hv.PkgInfo {
 func getPkgInfoWithQ(path, tag string, q *qbs.Qbs) (*hv.PkgInfo, error) {
 	// Check path length to reduce connect times.
 	if len(path) == 0 {
-		return nil, errors.New("models.GetPkgInfo -> Empty path as not found.")
+		return nil, errors.New("models.getPkgInfoWithQ -> Empty path as not found.")
 	}
 
 	pinfo := new(hv.PkgInfo)
 	q.WhereEqual("import_path", path).Find(pinfo)
 
-	proPath := packer.GetProjectPath(path)
+	proPath := utils.GetProjectPath(path)
 	if utils.IsGoRepoPath(path) {
 		proPath = "code.google.com/p/go"
 	}
+	beego.Trace("models.getPkgInfoWithQ -> proPath:", proPath)
 	ptag := new(PkgTag)
 	cond := qbs.NewCondition("path = ?", proPath).And("tag = ?", tag)
 	err := q.Condition(cond).Find(ptag)
 	if err != nil {
 		pinfo.Ptag = "ptag"
 		return pinfo, errors.New(
-			fmt.Sprintf("models.GetPkgInfo( %s:%s ) -> 'PkgTag': %s", path, tag, err))
+			fmt.Sprintf("models.getPkgInfoWithQ( %s:%s ) -> 'PkgTag': %s", path, tag, err))
 	}
 	pinfo.Vcs = ptag.Vcs
 	pinfo.Tags = ptag.Tags
@@ -75,15 +75,15 @@ func getPkgInfoWithQ(path, tag string, q *qbs.Qbs) (*hv.PkgInfo, error) {
 		pinfo.PkgVer = 0
 		pinfo.Ptag = "ptag"
 		return pinfo, errors.New(
-			fmt.Sprintf("models.GetPkgInfo( %s:%s ) -> 'PkgDecl': %s", path, tag, err))
+			fmt.Sprintf("models.getPkgInfoWithQ( %s:%s ) -> 'PkgDecl': %s", path, tag, err))
 	}
 
-	docPath := path + packer.TagSuffix("-", tag)
+	docPath := path + utils.TagSuffix("-", tag)
 	if !com.IsExist("." + utils.DocsJsPath + docPath + ".js") {
 		pinfo.PkgVer = 0
 		pinfo.Ptag = "ptag"
 		return pinfo, errors.New(
-			fmt.Sprintf("models.GetPkgInfo( %s:%s ) -> JS: File not found", path, tag))
+			fmt.Sprintf("models.getPkgInfoWithQ( %s:%s ) -> JS: File not found", path, tag))
 	}
 
 	return pinfo, nil

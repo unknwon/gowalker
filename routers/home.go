@@ -27,7 +27,6 @@ import (
 	"time"
 
 	"github.com/Unknwon/com"
-	"github.com/Unknwon/ctw/packer"
 	"github.com/Unknwon/gowalker/doc"
 	"github.com/Unknwon/gowalker/models"
 	"github.com/Unknwon/gowalker/utils"
@@ -635,6 +634,11 @@ func renderDoc(this *HomeRouter, pdoc *hv.Package, q, tag, docPath string) bool 
 		this.Data["IsHasHv"] = true
 	}
 
+	// GitHub redirects non-HTTPS link and Safari loses "#XXX".
+	if strings.HasPrefix(pdoc.ImportPath, "github") {
+		this.Data["Secure"] = "s"
+	}
+
 	this.TplNames = "tpl/docs.tpl"
 	data, err := this.RenderBytes()
 	if err != nil {
@@ -728,7 +732,7 @@ func calTimeSince(created time.Time) string {
 // generatePage genarates documentation page for project.
 // it returns false when it's a invaild(empty) project.
 func generatePage(this *HomeRouter, pdoc *hv.Package, q, tag string) bool {
-	docPath := pdoc.ImportPath + packer.TagSuffix("-", tag)
+	docPath := pdoc.ImportPath + utils.TagSuffix("-", tag)
 
 	if pdoc.IsNeedRender {
 		if !renderDoc(this, pdoc, q, tag, docPath) {

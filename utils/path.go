@@ -710,10 +710,16 @@ func GetProjectPath(importPath string) (projectPath string) {
 
 	// Check project hosting.
 	switch {
+	case strings.HasPrefix(importPath, "github.com") ||
+		strings.HasPrefix(importPath, "git.oschina.net") ||
+		strings.HasPrefix(importPath, "gitcafe.com"):
+		projectPath = joinPath(importPath, 3)
+	case strings.HasPrefix(importPath, "code.google.com"):
+		projectPath = joinPath(importPath, 3)
+	case strings.HasPrefix(importPath, "bitbucket.org"):
+		projectPath = joinPath(importPath, 3)
 	case strings.HasPrefix(importPath, "launchpad.net"):
 		projectPath = joinPath(importPath, 2)
-	default:
-		projectPath = joinPath(importPath, 3)
 	}
 
 	return projectPath
@@ -725,6 +731,13 @@ func joinPath(importPath string, num int) string {
 		return strings.Join(subdirs[:num], "/")
 	}
 	return importPath
+}
+
+func TagSuffix(prefix, t string) string {
+	if len(t) > 0 {
+		return prefix + t
+	}
+	return ""
 }
 
 var filterDirNames = []string{

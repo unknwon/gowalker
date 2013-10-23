@@ -33,7 +33,7 @@ import (
 )
 
 const (
-	APP_VER = "1.0.2.1010"
+	APP_VER = "1.0.3.1023"
 )
 
 // We have to call a initialize function manully
@@ -42,9 +42,15 @@ const (
 func initialize() {
 	// Load configuration, set app version and log level.
 	utils.LoadConfig("conf/app.ini")
-	err := i18n.SetMessage("conf/message.ini")
-	if err != nil {
-		panic("Fail to set message file: " + err.Error())
+
+	// Load locale files.
+	langs := strings.Split(utils.Cfg.MustValue("lang", "types"), "|")
+	// Skip en-US.
+	for i := 1; i < len(langs); i++ {
+		err := i18n.SetMessage(langs[i], "conf/locale_"+langs[i]+".ini")
+		if err != nil {
+			panic("Fail to set message file: " + err.Error())
+		}
 	}
 
 	// Initialize data.

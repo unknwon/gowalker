@@ -16,6 +16,7 @@
 package models
 
 import (
+	"bytes"
 	"encoding/base32"
 	"errors"
 	"fmt"
@@ -348,12 +349,16 @@ func SavePkgDoc(path string, readmes map[string][]byte) {
 		pdoc.Path = path
 		pdoc.Lang = lang
 		pdoc.Type = "rm"
-		pdoc.Doc = base32.StdEncoding.EncodeToString(data)
+		pdoc.Doc = base32.StdEncoding.EncodeToString(handleIllegalChars(data))
 		_, err := q.Save(pdoc)
 		if err != nil {
 			beego.Error("models.SavePkgDoc -> readme:", err)
 		}
 	}
+}
+
+func handleIllegalChars(data []byte) []byte {
+	return bytes.Replace(data, []byte("<"), []byte("&lt;"), -1)
 }
 
 // LoadPkgDoc loads project introduction documentation.

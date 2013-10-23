@@ -22,12 +22,12 @@ import (
 	"strings"
 
 	"github.com/Unknwon/com"
-	"github.com/Unknwon/ctw/packer"
 	"github.com/Unknwon/gowalker/utils"
 	"github.com/Unknwon/hv"
 )
 
 var (
+	googleRepoRe     = regexp.MustCompile(`id="checkoutcmd">(hg|git|svn)`)
 	googleRevisionRe = regexp.MustCompile(`<h2>(?:[^ ]+ - )?Revision *([^:]+):`)
 	googleTagRe      = regexp.MustCompile(`<option value="([^"/]+)"`)
 	googleEtagRe     = regexp.MustCompile(`^(hg|git|svn)-`)
@@ -199,11 +199,35 @@ func getGoogleTags(importPath string, defaultBranch string, isGoRepo bool) []str
 	return tags
 }
 
+func setupGoogleMatch(match map[string]string) {
+	if s := match["subrepo"]; s != "" {
+		match["dot"] = "."
+		match["query"] = "?repo=" + s
+	} else {
+		match["dot"] = ""
+		match["query"] = ""
+	}
+}
+
+func getGoogleVCS(match map[string]string) error {
+	// Scrape the HTML project page to find the VCS.
+	stdout, _, err := com.ExecCmd("curl", com.Expand("http://code.google.com/p/{repo}/source/checkout", match))
+	if err != nil {
+		return errors.New("doc.getGoogleVCS(" + match["importPath"] + ") -> " + err.Error())
+	}
+	m := googleRepoRe.FindSubmatch([]byte(stdout))
+	if m == nil {
+		return com.NotFoundError{"Could not VCS on Google Code project page."}
+	}
+	match["vcs"] = string(m[1])
+	return nil
+}
+
 func getGoogleDoc(client *http.Client, match map[string]string, tag, ptag string) (*hv.Package, error) {
-	packer.SetupGoogleMatch(match)
+	setupGoogleMatch(match)
 	if m := googleEtagRe.FindStringSubmatch(ptag); m != nil {
 		match["vcs"] = m[1]
-	} else if err := packer.GetGoogleVCS(match); err != nil {
+	} else if err := getGoogleVCS(match); err != nil {
 		return nil, err
 	}
 

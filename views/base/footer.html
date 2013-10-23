@@ -98,8 +98,18 @@
 	content = content.replace(/&amp;/g, "&");
 	readme.innerHTML = content;
 	readme.style.display = "block";
-</script>
 
+	// Resize images if too large.
+	var doc = $("#readme");
+
+	doc.find("img").each(function(){
+		var w = $(this).width();
+		$(this).width(w > 600 ? 600 : w)
+	})
+</script>
+{{end}}
+
+{{if .IsDocumentation}}
 <script type="text/javascript">
     (function($){
 
@@ -128,9 +138,7 @@
 
     })(jQuery);
 </script>
-{{end}}
 
-{{if .IsDocumentation}}
 <link href="/static/css/typeahead.js-bootstrap.css" rel="stylesheet" />
 <script type="text/javascript" src="https://apis.google.com/js/plusone.js"></script>
 {{end}}

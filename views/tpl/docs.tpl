@@ -96,11 +96,12 @@
 <b></b>
 <!-- END: Variables -->
 
+{{$secure := .Secure}}
 <!-- START: Functions -->
 {{range .Funcs}}
 <h3 id="{{.Name}}">
 	func 
-	<a target="_blank" href="http://{{.URL}}">{{.Name}}</a> 
+	<a target="_blank" href="http{{$secure}}://{{.URL}}">{{.Name}}</a> 
 	<button class="btn btn-info btn-xs" data-toggle="collapse" data-target="#collapse_{{.Name}}" onclick="viewCode(decl|||{{.Name}});">View Code</button>
 </h3>
 
@@ -128,7 +129,7 @@
 {{range .Types}}
 <h3 id="{{.Name}}">
 	type 
-	<a target="_blank" href="http://{{.URL}}">{{.Name}}</a>
+	<a target="_blank" href="http{{$secure}}://{{.URL}}">{{.Name}}</a>
 </h3>
 
 <pre class="pre-x-scrollable">{{str2html .FmtDecl}}</pre>
@@ -164,7 +165,7 @@
 {{range .Funcs}}
 <h4 id="{{.Name}}">
 	func 
-	<a target="_blank" href="http://{{.URL}}">{{.Name}}</a> 
+	<a target="_blank" href="http{{$secure}}://{{.URL}}">{{.Name}}</a> 
 	<button class="btn btn-info btn-xs" data-toggle="collapse" data-target="#collapse_{{.Name}}" onclick="viewCode(decl|||{{.Name}});">View Code</button>
 </h4>
 
@@ -192,7 +193,7 @@
 {{range .Methods}}
 <h4 id="{{.FullName}}">
 	func 
-	<a target="_blank" href="http://{{.URL}}">{{.Name}}</a> 
+	<a target="_blank" href="http{{$secure}}://{{.URL}}">{{.Name}}</a> 
 	<button class="btn btn-info btn-xs" data-toggle="collapse" data-target="#collapse_{{.FullName}}" onclick="viewCode(decl|||{{.Name}});">View Code</button>
 </h4>
 
@@ -221,7 +222,7 @@
 
 {{if .IsHasFiles}}
 <h3 id="_files">
-	<a target="_blank" href="http://{{.ViewFilePath}}">Files</a>
+	<a target="_blank" href="http{{$secure}}://{{.ViewFilePath}}">Files</a>
 	{{if .IsHasHv}}
     <small class="text-info">Click any file to enable Hacker View.</small>
     {{end}}
@@ -236,14 +237,14 @@
 	{{end}}
     {{else}}
 	{{range .Files}}
-	<a target="_blank" href="http://{{.BrowseUrl}}">{{.SrcName}}</a>
+	<a target="_blank" href="http{{$secure}}://{{.BrowseUrl}}">{{.SrcName}}</a>
 	{{end}}
     {{end}}
 </p>
 
 {{if .IsHasSubdirs}}
 <h3 id="_subdirs">
-	<a target="_blank" href="http://{{.ViewDirPath}}">Directories</a>
+	<a target="_blank" href="http{{$secure}}://{{.ViewDirPath}}">Directories</a>
 </h3>
 
 <table class="table table-hover table-striped table-condensed">

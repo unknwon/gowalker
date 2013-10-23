@@ -30,7 +30,6 @@ import (
 	"time"
 
 	"github.com/Unknwon/com"
-	"github.com/Unknwon/ctw/packer"
 	"github.com/Unknwon/gowalker/models"
 	"github.com/Unknwon/gowalker/utils"
 	"github.com/Unknwon/hv"
@@ -46,7 +45,7 @@ type crawlResult struct {
 // It returns error when error occurs in the underlying functions.
 func crawlDoc(path, tag string, pinfo *hv.PkgInfo) (pdoc *hv.Package, err error) {
 	var pdocNew *hv.Package
-	pdocNew, err = getRepo(packer.HttpClient, path, tag, pinfo.Ptag)
+	pdocNew, err = getRepo(HttpClient, path, tag, pinfo.Ptag)
 
 	if err != errNotModified && pdocNew != nil {
 		pdoc = pdocNew
