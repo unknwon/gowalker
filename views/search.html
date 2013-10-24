@@ -14,7 +14,7 @@
         <br>
         
         {{if .IsFindPro}}
-        <h5>{{i18n .Lang "%d project(s) found." .ResultCount}}</h5>
+        <h5>{{i18n .Lang ".%d project(s) found." .ResultCount}}</h5>
         <table class="table table-hover">
             <thead>
                 <tr>
@@ -40,7 +40,7 @@
             </tbody>
         </table>
         {{else}}
-        <p>{{i18n .Lang "Cannot find project with keyword <b>%s</b>." .Keyword | str2html}}</p>
+        <p>{{i18n .Lang ".Cannot find project with keyword <b>%s</b>." .Keyword | str2html}}</p>
         {{end}}
     </div>
 </div>
