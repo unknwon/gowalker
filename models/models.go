@@ -20,6 +20,7 @@ import (
 	"encoding/base32"
 	"errors"
 	"fmt"
+	"os/user"
 	"regexp"
 	"runtime"
 	"strings"
@@ -28,7 +29,7 @@ import (
 	"github.com/Unknwon/gowalker/utils"
 	"github.com/Unknwon/hv"
 	"github.com/astaxie/beego"
-	_ "github.com/coocood/mysql"
+	//_ "github.com/coocood/mysql"
 	"github.com/coocood/qbs"
 )
 
@@ -135,6 +136,14 @@ func setMg() (*qbs.Migration, error) {
 func InitDb() {
 	dbName := utils.Cfg.MustValue("db", "name")
 	dbPwd := utils.Cfg.MustValue("db", "pwd_"+runtime.GOOS)
+
+	if runtime.GOOS == "darwin" {
+		u, err := user.Current()
+		if err != nil {
+			panic("models.init -> fail to get user: " + err.Error())
+		}
+		dbPwd = utils.Cfg.MustValue("db", "pwd_"+runtime.GOOS+"_"+u.Username)
+	}
 
 	// Register database.
 	qbs.Register("mysql", fmt.Sprintf("%v:%v@%v/%v?charset=utf8&parseTime=true",
