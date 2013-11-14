@@ -24,7 +24,7 @@ import (
 	"os/user"
 	"regexp"
 	"runtime"
-	"strings"
+	//"strings"
 	"time"
 
 	"github.com/Unknwon/hv"
@@ -149,26 +149,16 @@ func InitDb() {
 }
 
 // GetGoRepo returns packages in go standard library.
-func GetGoRepo() []*hv.PkgInfo {
-	// Connect to database.
-	q := connDb()
-	defer q.Close()
-
-	var pinfos []*hv.PkgInfo
-	err := q.WhereEqual("is_go_repo", true).OrderBy("import_path").FindAll(&pinfos)
+func GetGoRepo() (pinfos []hv.PkgInfo) {
+	err := x.Where("is_go_repo = ?", true).Asc("import_path").Find(&pinfos)
 	if err != nil {
 		beego.Trace("models.GetGoRepo ->", err)
 	}
 	return pinfos
 }
 
-func GetGoSubrepo() []*hv.PkgInfo {
-	// Connect to database.
-	q := connDb()
-	defer q.Close()
-
-	var pinfos []*hv.PkgInfo
-	err := q.WhereEqual("is_go_subrepo", true).OrderBy("import_path").FindAll(&pinfos)
+func GetGoSubrepo() (pinfos []hv.PkgInfo) {
+	err := x.Where("is_go_subrepo = ?", true).Asc("import_path").Find(&pinfos)
 	if err != nil {
 		beego.Trace("models.GetGoSubrepo ->", err)
 	}
@@ -177,119 +167,104 @@ func GetGoSubrepo() []*hv.PkgInfo {
 
 // SearchRawDoc returns results for raw page,
 // which are package that import path and synopsis contains keyword.
-func SearchRawDoc(key string, isMatchSub bool) (pkgInfos []*hv.PkgInfo, err error) {
-	// Connect to database.
-	q := connDb()
-	defer q.Close()
+// func SearchRawDoc(key string, isMatchSub bool) (pkgInfos []*hv.PkgInfo, err error) {
+// 	// Connect to database.
+// 	q := connDb()
+// 	defer q.Close()
 
-	// TODO: need to use q.OmitFields to speed up.
-	// Check if need to match sub-packages.
-	if isMatchSub {
-		condition := qbs.NewCondition("pro_name != ?", "Go")
-		condition2 := qbs.NewCondition("path like ?", "%"+key+"%").Or("synopsis like ?", "%"+key+"%")
-		err = q.Condition(condition).Condition(condition2).Limit(50).OrderByDesc("views").FindAll(&pkgInfos)
-		return pkgInfos, err
-	}
+// 	// TODO: need to use q.OmitFields to speed up.
+// 	// Check if need to match sub-packages.
+// 	if isMatchSub {
+// 		condition := qbs.NewCondition("pro_name != ?", "Go")
+// 		condition2 := qbs.NewCondition("path like ?", "%"+key+"%").Or("synopsis like ?", "%"+key+"%")
+// 		err = q.Condition(condition).Condition(condition2).Limit(50).OrderByDesc("views").FindAll(&pkgInfos)
+// 		return pkgInfos, err
+// 	}
 
-	condition := qbs.NewCondition("pro_name like ?", "%"+key+"%").Or("synopsis like ?", "%"+key+"%")
-	err = q.Condition(condition).Limit(50).OrderByDesc("views").FindAll(&pkgInfos)
-	return pkgInfos, err
-}
+// 	condition := qbs.NewCondition("pro_name like ?", "%"+key+"%").Or("synopsis like ?", "%"+key+"%")
+// 	err = q.Condition(condition).Limit(50).OrderByDesc("views").FindAll(&pkgInfos)
+// 	return pkgInfos, err
+// }
 
 // GetPkgExams returns user examples.
-func GetPkgExams(path string) ([]*PkgExam, error) {
-	// Connect to database.
-	q := connDb()
-	defer q.Close()
-
-	var pkgExams []*PkgExam
-	err := q.WhereEqual("path", path).FindAll(&pkgExams)
+func GetPkgExams(path string) (pkgExams []PkgExam, err error) {
+	err = x.Where("path = ?", path).Find(&pkgExams)
 	return pkgExams, err
 }
 
 // GetAllExams returns all user examples.
-func GetAllExams() ([]*PkgExam, error) {
-	// Connect to database.
-	q := connDb()
-	defer q.Close()
-
-	var pkgExams []*PkgExam
-	err := q.OmitFields("Examples", "Created").OrderBy("path").FindAll(&pkgExams)
+func GetAllExams() (pkgExams []PkgExam, err error) {
+	err = x.Asc("path").Find(&pkgExams)
 	return pkgExams, err
 }
 
 // GetLabelsPageInfo returns all data that used for labels page.
 // One function is for reducing database connect times.
-func GetLabelsPageInfo() (WFPros, ORMPros, DBDPros, GUIPros, NETPros, TOOLPros []*hv.PkgInfo, err error) {
-	// Connect to database.
-	q := connDb()
-	defer q.Close()
+// func GetLabelsPageInfo() (WFPros, ORMPros, DBDPros, GUIPros, NETPros, TOOLPros []*hv.PkgInfo, err error) {
+// 	// Connect to database.
+// 	q := connDb()
+// 	defer q.Close()
 
-	condition := qbs.NewCondition("labels like ?", "%$wf|%")
-	err = q.Limit(10).Condition(condition).OrderByDesc("views").FindAll(&WFPros)
-	condition = qbs.NewCondition("labels like ?", "%$orm|%")
-	err = q.Limit(10).Condition(condition).OrderByDesc("views").FindAll(&ORMPros)
-	condition = qbs.NewCondition("labels like ?", "%$dbd|%")
-	err = q.Limit(10).Condition(condition).OrderByDesc("views").FindAll(&DBDPros)
-	condition = qbs.NewCondition("labels like ?", "%$gui|%")
-	err = q.Limit(10).Condition(condition).OrderByDesc("views").FindAll(&GUIPros)
-	condition = qbs.NewCondition("labels like ?", "%$net|%")
-	err = q.Limit(10).Condition(condition).OrderByDesc("views").FindAll(&NETPros)
-	condition = qbs.NewCondition("labels like ?", "%$tool|%")
-	err = q.Limit(10).Condition(condition).OrderByDesc("views").FindAll(&TOOLPros)
-	return WFPros, ORMPros, DBDPros, GUIPros, NETPros, TOOLPros, nil
-}
+// 	condition := qbs.NewCondition("labels like ?", "%$wf|%")
+// 	err = q.Limit(10).Condition(condition).OrderByDesc("views").FindAll(&WFPros)
+// 	condition = qbs.NewCondition("labels like ?", "%$orm|%")
+// 	err = q.Limit(10).Condition(condition).OrderByDesc("views").FindAll(&ORMPros)
+// 	condition = qbs.NewCondition("labels like ?", "%$dbd|%")
+// 	err = q.Limit(10).Condition(condition).OrderByDesc("views").FindAll(&DBDPros)
+// 	condition = qbs.NewCondition("labels like ?", "%$gui|%")
+// 	err = q.Limit(10).Condition(condition).OrderByDesc("views").FindAll(&GUIPros)
+// 	condition = qbs.NewCondition("labels like ?", "%$net|%")
+// 	err = q.Limit(10).Condition(condition).OrderByDesc("views").FindAll(&NETPros)
+// 	condition = qbs.NewCondition("labels like ?", "%$tool|%")
+// 	err = q.Limit(10).Condition(condition).OrderByDesc("views").FindAll(&TOOLPros)
+// 	return WFPros, ORMPros, DBDPros, GUIPros, NETPros, TOOLPros, nil
+// }
 
 // UpdateLabelInfo updates project label information, returns false if the project does not exist.
-func UpdateLabelInfo(path string, label string, add bool) bool {
-	// Connect to database.
-	q := connDb()
-	defer q.Close()
+// func UpdateLabelInfo(path string, label string, add bool) bool {
+// 	info := new(hv.PkgInfo)
+// 	err := q.WhereEqual("path", path).Find(info)
+// 	if err != nil {
+// 		return false
+// 	}
 
-	info := new(hv.PkgInfo)
-	err := q.WhereEqual("path", path).Find(info)
-	if err != nil {
-		return false
-	}
+// 	i := strings.Index(info.Labels, "$"+label+"|")
+// 	switch {
+// 	case i == -1 && add: // Add operation and does not contain.
+// 		info.Labels += "$" + label + "|"
+// 		_, err = q.Save(info)
+// 		if err != nil {
+// 			beego.Error("models.UpdateLabelInfo -> add:", path, err)
+// 		}
+// 	case i > -1 && !add: // Delete opetation and contains.
+// 		info.Labels = strings.Replace(info.Labels, "$"+label+"|", "", 1)
+// 		_, err = q.Save(info)
+// 		if err != nil {
+// 			beego.Error("models.UpdateLabelInfo -> delete:", path, err)
+// 		}
+// 	}
 
-	i := strings.Index(info.Labels, "$"+label+"|")
-	switch {
-	case i == -1 && add: // Add operation and does not contain.
-		info.Labels += "$" + label + "|"
-		_, err = q.Save(info)
-		if err != nil {
-			beego.Error("models.UpdateLabelInfo -> add:", path, err)
-		}
-	case i > -1 && !add: // Delete opetation and contains.
-		info.Labels = strings.Replace(info.Labels, "$"+label+"|", "", 1)
-		_, err = q.Save(info)
-		if err != nil {
-			beego.Error("models.UpdateLabelInfo -> delete:", path, err)
-		}
-	}
-
-	return true
-}
+// 	return true
+// }
 
 var buildPicPattern = regexp.MustCompile(`\[+!+\[+([a-zA-Z ]*)+\]+\(+[a-zA-z]+://[^\s]*`)
 
 // SavePkgExam saves user examples.
 func SavePkgExam(gist *PkgExam) error {
-	q := connDb()
-	defer q.Close()
-
-	// Check if corresponding package exists.
-	pinfo := new(hv.PkgInfo)
-	err := q.WhereEqual("import_path", gist.Path).Find(pinfo)
-	if err != nil {
+	pinfo := &hv.PkgInfo{ImportPath: gist.Path}
+	has, err := x.Get(pinfo)
+	if !has || err != nil {
 		return errors.New(
-			fmt.Sprintf("models.SavePkgExam( %s ) -> Package does not exist", gist.Path))
+			fmt.Sprintf("models.SavePkgExam( %s ) -> Package does not exist: %s",
+				gist.Path, err))
 	}
 
-	pexam := new(PkgExam)
-	cond := qbs.NewCondition("path = ?", gist.Path).And("gist = ?", gist.Gist)
-	err = q.Condition(cond).Find(pexam)
-	if err == nil {
+	pexam := &PkgExam{
+		Path: gist.Path,
+		Gist: gist.Gist,
+	}
+	has, err = x.Get(pexam)
+	if has {
 		// Check if refresh too frequently(within in 5 minutes).
 		if pexam.Created.Add(5 * time.Minute).UTC().After(time.Now().UTC()) {
 			return errors.New(
@@ -299,24 +274,23 @@ func SavePkgExam(gist *PkgExam) error {
 	}
 	gist.Created = time.Now().UTC()
 
-	_, err = q.Save(gist)
+	if has {
+		_, err = x.Id(gist.Id).Update(pexam)
+	} else {
+		_, err = x.Insert(pexam)
+	}
 	if err != nil {
 		return errors.New(
 			fmt.Sprintf("models.SavePkgExam( %s ) -> %s", gist.Path, err))
 	}
 
 	// Delete 'PkgDecl' in order to generate new page.
-	cond = qbs.NewCondition("pid = ?", pinfo.Id).And("tag = ?", "")
-	q.Condition(cond).Delete(new(PkgDecl))
-
+	x.Where("pid = ?", pinfo.Id).And("tag = ?", "").Delete(new(PkgDecl))
 	return nil
 }
 
 // SavePkgDoc saves readered readme.md file data.
 func SavePkgDoc(path string, readmes map[string][]byte) {
-	q := connDb()
-	defer q.Close()
-
 	for lang, data := range readmes {
 		if len(data) == 0 {
 			continue
@@ -326,14 +300,23 @@ func SavePkgDoc(path string, readmes map[string][]byte) {
 			data = data[1:]
 		}
 
-		pdoc := new(PkgDoc)
-		cond := qbs.NewCondition("path = ?", path).And("lang = ?", lang).And("type = ?", "rm")
-		q.Condition(cond).Find(pdoc)
+		pdoc := &PkgDoc{
+			Path: path,
+			Lang: lang,
+			Type: "rm",
+		}
+		has, _ := x.Get(pdoc)
 		pdoc.Path = path
 		pdoc.Lang = lang
 		pdoc.Type = "rm"
 		pdoc.Doc = base32.StdEncoding.EncodeToString(handleIllegalChars(data))
-		_, err := q.Save(pdoc)
+
+		var err error
+		if has {
+			_, err = x.Id(pdoc.Id).Update(pdoc)
+		} else {
+			_, err = x.Insert(pdoc)
+		}
 		if err != nil {
 			beego.Error("models.SavePkgDoc -> readme:", err)
 		}
@@ -346,25 +329,24 @@ func handleIllegalChars(data []byte) []byte {
 
 // LoadPkgDoc loads project introduction documentation.
 func LoadPkgDoc(path, lang, docType string) (doc string) {
-	q := connDb()
-	defer q.Close()
-
 	if len(lang) < 2 {
 		return ""
 	}
 
 	lang = lang[:2]
 
-	pdoc := new(PkgDoc)
-	cond := qbs.NewCondition("path = ?", path).And("lang = ?", lang).And("type = ?", docType)
-	err := q.Condition(cond).Find(pdoc)
-	if err == nil {
+	pdoc := &PkgDoc{
+		Path: path,
+		Lang: lang,
+		Type: docType,
+	}
+
+	if has, _ := x.Get(pdoc); has {
 		return pdoc.Doc
 	}
 
-	cond = qbs.NewCondition("path = ?", path).And("lang = ?", "en").And("type = ?", docType)
-	err = q.Condition(cond).Find(pdoc)
-	if err == nil {
+	pdoc.Lang = "en"
+	if has, _ := x.Get(pdoc); has {
 		return pdoc.Doc
 	}
 	return doc
@@ -372,18 +354,14 @@ func LoadPkgDoc(path, lang, docType string) (doc string) {
 
 // GetIndexStats returns index page statistic information.
 func GetIndexStats() (int64, int64, int64) {
-	q := connDb()
-	defer q.Close()
-
-	return q.Count(new(hv.PkgInfo)), q.Count(new(PkgDecl)), q.Count(new(PkgFunc))
+	num1, _ := x.Count(new(hv.PkgInfo))
+	num2, _ := x.Count(new(PkgDecl))
+	num3, _ := x.Count(new(PkgFunc))
+	return num1, num2, num3
 }
 
 // SearchFunc returns functions that name contains keyword.
-func SearchFunc(key string) []*PkgFunc {
-	q := connDb()
-	defer q.Close()
-
-	var pfuncs []*PkgFunc
-	q.Limit(200).Where("name like ?", "%"+key+"%").FindAll(&pfuncs)
+func SearchFunc(key string) (pfuncs []PkgFunc) {
+	x.Where("name like ?", "%"+key+"%").Find(&pfuncs)
 	return pfuncs
 }
