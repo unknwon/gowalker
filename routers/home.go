@@ -659,8 +659,8 @@ func renderDoc(this *HomeRouter, pdoc *hv.Package, q, tag, docPath string) bool 
 
 	models.SavePkgDoc(pdoc.ImportPath, pdoc.Readme)
 
-	this.Data["UtcTime"] = pdoc.Created
-	this.Data["TimeSince"] = calTimeSince(pdoc.Created)
+	this.Data["UtcTime"] = time.Unix(pdoc.Created, 0).UTC()
+	this.Data["TimeSince"] = calTimeSince(time.Unix(pdoc.Created, 0))
 	return true
 }
 
@@ -712,7 +712,7 @@ func calTimeSince(created time.Time) string {
 
 	switch {
 	case mins < 0:
-		return calTimeSince(created.Add(-4 * time.Hour))
+		return calTimeSince(created)
 		//return fmt.Sprintf("in %d minutes later", -mins)
 	case mins < 1:
 		return "less than 1 minute"
@@ -751,8 +751,8 @@ func generatePage(this *HomeRouter, pdoc *hv.Package, q, tag string) bool {
 			return false
 		}
 
-		this.Data["UtcTime"] = pdoc.Created.Add(4 * time.Hour)
-		this.Data["TimeSince"] = calTimeSince(pdoc.Created.Add(4 * time.Hour))
+		this.Data["UtcTime"] = time.Unix(pdoc.Created, 0).UTC()
+		this.Data["TimeSince"] = calTimeSince(time.Unix(pdoc.Created, 0))
 	}
 
 	proName := path.Base(pdoc.ImportPath)
@@ -791,7 +791,7 @@ func generatePage(this *HomeRouter, pdoc *hv.Package, q, tag string) bool {
 	}
 
 	// Refresh (within 10 seconds).
-	this.Data["IsRefresh"] = pdoc.Created.UTC().Add(10 * time.Second).After(time.Now().UTC())
+	this.Data["IsRefresh"] = time.Unix(pdoc.Created, 0).Add(10 * time.Second).After(time.Now())
 
 	this.Data["VCS"] = pdoc.Vcs
 	this.Data["ProPath"] = pdoc.ProjectPath

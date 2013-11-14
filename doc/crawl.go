@@ -127,7 +127,7 @@ func SaveProject(pdoc *hv.Package, pfuncs []*models.PkgFunc) (int64, error) {
 	// Save package information.
 	pinfo := pdoc.PkgInfo
 	pinfo.ViewedTime = time.Now().UTC().Unix()
-	pinfo.Created = time.Now().UTC()
+	pinfo.Created = time.Now().UTC().Unix()
 
 	// Save package declaration and functions.
 	pdecl := &models.PkgDecl{

@@ -20,17 +20,18 @@ import (
 	"encoding/base32"
 	"errors"
 	"fmt"
+	"os"
 	"os/user"
 	"regexp"
 	"runtime"
 	"strings"
 	"time"
 
-	"github.com/Unknwon/gowalker/utils"
 	"github.com/Unknwon/hv"
 	"github.com/astaxie/beego"
-	//_ "github.com/coocood/mysql"
-	"github.com/coocood/qbs"
+	"github.com/lunny/xorm"
+
+	"github.com/Unknwon/gowalker/utils"
 )
 
 // A PkgTag descriables the project revision tag for its sub-projects,
@@ -38,39 +39,35 @@ import (
 // and do not need to download whole project archive when refresh.
 type PkgTag struct {
 	Id   int64
-	Path string `qbs:"size:150,index"`
-	Tag  string `qbs:"size:50"`
-	Vcs  string `qbs:"size:50"`
+	Path string `xorm:"unique(pkg_tag_path_tag) index VARCHAR(150)"`
+	Tag  string `xorm:"unique(pkg_tag_path_tag) VARCHAR(50)"`
+	Vcs  string `xorm:"VARCHAR(50)"`
 	Tags string
-}
-
-func (*PkgTag) Indexes(indexes *qbs.Indexes) {
-	indexes.AddUnique("path", "tag")
 }
 
 // A PkgRock descriables the trending rank of the project.
 type PkgRock struct {
 	Id    int64
-	Pid   int64  `qbs:"index"`
-	Path  string `qbs:"size:150"`
+	Pid   int64  `xorm:"index"`
+	Path  string `xorm:"VARCHAR(150)"`
 	Rank  int64
-	Delta int64 `qbs:"index"`
+	Delta int64 `xorm:"index"`
 }
 
 // A PkgExam descriables the user example of the project.
 type PkgExam struct {
 	Id       int64
-	Path     string    `qbs:"size:150,index"`
-	Gist     string    `qbs:"size:150"` // Gist path.
+	Path     string    `xorm:"index VARCHAR(150)"`
+	Gist     string    `xorm:"VARCHAR(150)"` // Gist path.
 	Examples string    // Examples.
-	Created  time.Time `qbs:"index"`
+	Created  time.Time `xorm:"index"`
 }
 
 // PkgDecl is package declaration in database acceptable form.
 type PkgDecl struct {
 	Id  int64
-	Pid int64  `qbs:"index"`
-	Tag string `qbs:"size:50"`
+	Pid int64  `xorm:"unique(pkg_decl_pid_tag) index"`
+	Tag string `xorm:"unique(pkg_decl_pid_tag) VARCHAR(50)"`
 
 	// Indicate how many JS should be downloaded(JsNum=total num - 1)
 	JsNum       int
@@ -87,29 +84,21 @@ type PkgDecl struct {
 	IsHasSubdir bool
 }
 
-func (*PkgDecl) Indexes(indexes *qbs.Indexes) {
-	indexes.AddUnique("pid", "tag")
-}
-
 // PkgDoc is package documentation for multi-language usage.
 type PkgDoc struct {
 	Id   int64
-	Path string `qbs:"size:100,index"`
-	Lang string // Documentation language.
-	Type string
+	Path string `xorm:"unique(pkg_decl_path_lang_type) index VARCHAR(100)"`
+	Lang string `xorm:"unique(pkg_decl_path_lang_type)"` // Documentation language.
+	Type string `xorm:"unique(pkg_decl_path_lang_type)"`
 	Doc  string // Documentataion.
-}
-
-func (*PkgDoc) Indexes(indexes *qbs.Indexes) {
-	indexes.AddUnique("path", "lang", "Type")
 }
 
 // PkgFunc represents a package function.
 type PkgFunc struct {
 	Id    int64
-	Pid   int64  `qbs:"index"` // Id of package documentation it belongs to.
-	Path  string `qbs:"size:150"`
-	Name  string `qbs:"size:100,index"`
+	Pid   int64  `xorm:"index"` // Id of package documentation it belongs to.
+	Path  string `xorm:"VARCHAR(150)"`
+	Name  string `xorm:"index VARCHAR(100)"`
 	Doc   string
 	IsOld bool // Indicates if the function no longer exists.
 }
@@ -117,61 +106,46 @@ type PkgFunc struct {
 // PkgImport represents a package imports record.
 type PkgImport struct {
 	Id      int64
-	Path    string `qbs:"size:150,index"`
+	Path    string `xorm:"index VARCHAR(150)"`
 	Imports string
 }
 
-func connDb() *qbs.Qbs {
-	// 'sql.Open' only returns error when unknown driver, so it's not necessary to check in other places.
-	q, _ := qbs.GetQbs()
-	return q
-}
+var x *xorm.Engine
 
-func setMg() (*qbs.Migration, error) {
-	mg, err := qbs.GetMigration()
-	return mg, err
-}
-
-// InitDb initializes the database.
-func InitDb() {
+func setEngine() {
 	dbName := utils.Cfg.MustValue("db", "name")
 	dbPwd := utils.Cfg.MustValue("db", "pwd_"+runtime.GOOS)
 
 	if runtime.GOOS == "darwin" {
 		u, err := user.Current()
 		if err != nil {
-			panic("models.init -> fail to get user: " + err.Error())
+			beego.Critical("models.init -> fail to get user:", err.Error())
+			os.Exit(2)
 		}
 		dbPwd = utils.Cfg.MustValue("db", "pwd_"+runtime.GOOS+"_"+u.Username)
 	}
 
-	// Register database.
-	qbs.Register("mysql", fmt.Sprintf("%v:%v@%v/%v?charset=utf8&parseTime=true",
+	var err error
+	x, err = xorm.NewEngine("mysql", fmt.Sprintf("%v:%v@%v/%v?charset=utf8",
 		utils.Cfg.MustValue("db", "user"), dbPwd,
-		utils.Cfg.MustValue("db", "host"), dbName),
-		dbName, qbs.NewMysql())
-
-	// Connect to database.
-	q := connDb()
-	defer q.Close()
-
-	mg, err := setMg()
+		utils.Cfg.MustValue("db", "host"), dbName))
 	if err != nil {
-		panic("models.init -> " + err.Error())
+		beego.Critical("models.init -> fail to conntect database:", err.Error())
+		os.Exit(2)
 	}
-	defer mg.Close()
 
-	// Create data tables.
-	mg.CreateTableIfNotExists(new(hv.PkgInfo))
-	mg.CreateTableIfNotExists(new(PkgTag))
-	mg.CreateTableIfNotExists(new(PkgRock))
-	mg.CreateTableIfNotExists(new(PkgExam))
-	mg.CreateTableIfNotExists(new(PkgDecl))
-	mg.CreateTableIfNotExists(new(PkgDoc))
-	mg.CreateTableIfNotExists(new(PkgFunc))
-	mg.CreateTableIfNotExists(new(PkgImport))
+	x.ShowDebug = true
+	x.ShowErr = true
+	x.ShowSQL = true
 
 	beego.Trace("Initialized database ->", dbName)
+}
+
+// InitDb initializes the database.
+func InitDb() {
+	setEngine()
+	x.Sync(new(hv.PkgInfo), new(PkgTag), new(PkgRock), new(PkgExam),
+		new(PkgDecl), new(PkgDoc), new(PkgFunc), new(PkgImport))
 }
 
 // GetGoRepo returns packages in go standard library.

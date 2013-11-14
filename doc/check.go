@@ -84,11 +84,11 @@ func CheckDoc(broPath, tag string, rt requestType) (*hv.Package, error) {
 			}
 
 			// Check if the refresh operation is too frequently (within 5 minutes).
-			needsCrawl = pinfo.Created.Add(_REFRESH_LIMIT).Add(4 * time.Hour).Before(time.Now().UTC())
+			needsCrawl = time.Unix(pinfo.Created, 0).Add(_REFRESH_LIMIT).Before(time.Now())
 			needsCrawl = true
 			if !needsCrawl {
 				// Return limit time information as error message.
-				return nil, errors.New(pinfo.Created.Add(_REFRESH_LIMIT).Add(4 * time.Hour).String())
+				return nil, errors.New(time.Unix(pinfo.Created, 0).Add(_REFRESH_LIMIT).UTC().String())
 			}
 		}
 	}
@@ -131,7 +131,7 @@ func CheckDoc(broPath, tag string, rt requestType) (*hv.Package, error) {
 			case err == errNotModified:
 				beego.Info("Serving(", broPath, ")without modified")
 				pdoc = &hv.Package{}
-				pinfo.Created = time.Now().UTC()
+				pinfo.Created = time.Now().UTC().Unix()
 				pdoc.PkgInfo = pinfo
 				return pdoc, nil
 			case len(pdoc.ImportPath) > 0:
