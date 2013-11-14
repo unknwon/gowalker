@@ -97,8 +97,8 @@ func getRepo(client *http.Client, path, tag, ptag string) (pdoc *hv.Package, err
 	return pdoc, err
 }
 
-func RenderFuncs(pdoc *hv.Package) []*models.PkgFunc {
-	pfuncs := make([]*models.PkgFunc, 0, len(pdoc.Funcs)+len(pdoc.Types)*3)
+func RenderFuncs(pdoc *hv.Package) []models.PkgFunc {
+	pfuncs := make([]models.PkgFunc, 0, len(pdoc.Funcs)+len(pdoc.Types)*3)
 
 	links := getLinks(pdoc)
 
@@ -123,7 +123,7 @@ func RenderFuncs(pdoc *hv.Package) []*models.PkgFunc {
 }
 
 // SaveProject saves project information to database.
-func SaveProject(pdoc *hv.Package, pfuncs []*models.PkgFunc) (int64, error) {
+func SaveProject(pdoc *hv.Package, pfuncs []models.PkgFunc) (int64, error) {
 	// Save package information.
 	pinfo := pdoc.PkgInfo
 	pinfo.ViewedTime = time.Now().UTC().Unix()
@@ -209,7 +209,7 @@ func addValues(buf *bytes.Buffer, pvals *string, vals []*hv.Value) {
 
 // addFuncs appends functions to 'pfuncs'.
 // NOTE: it can be only use for pure functions(not belong to any type), not methods.
-func addFuncs(pfuncs []*models.PkgFunc, fs []*hv.Func, path string, links []*utils.Link) []*models.PkgFunc {
+func addFuncs(pfuncs []models.PkgFunc, fs []*hv.Func, path string, links []*utils.Link) []models.PkgFunc {
 	for _, f := range fs {
 		pfuncs = addFunc(pfuncs, f, path, f.Name, links)
 	}
@@ -217,13 +217,13 @@ func addFuncs(pfuncs []*models.PkgFunc, fs []*hv.Func, path string, links []*uti
 }
 
 // addFunc appends a function to 'pfuncs'.
-func addFunc(pfuncs []*models.PkgFunc, f *hv.Func, path, name string, links []*utils.Link) []*models.PkgFunc {
+func addFunc(pfuncs []models.PkgFunc, f *hv.Func, path, name string, links []*utils.Link) []models.PkgFunc {
 	var buf bytes.Buffer
 	f.FullName = name
 	f.Code = strings.Replace(f.Code, "<pre>", "&lt;pre&gt;", -1) + "}"
 	utils.FormatCode(&buf, &f.Code, links)
 	f.Code = buf.String()
-	return append(pfuncs, &models.PkgFunc{
+	return append(pfuncs, models.PkgFunc{
 		Name: name,
 		Path: path,
 		Doc:  f.Doc,

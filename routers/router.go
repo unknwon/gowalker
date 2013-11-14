@@ -76,7 +76,7 @@ func (this *baseRouter) Prepare() {
 var (
 	refreshCount int
 	cacheTicker  *time.Ticker
-	cachePros    []*hv.PkgInfo
+	cachePros    []hv.PkgInfo
 )
 
 func InitRouter() {
@@ -129,5 +129,5 @@ func FlushCache() {
 	models.FlushCacheProjects(cachePros)
 	beego.Trace("FlushCacheProjects #", num)
 
-	cachePros = make([]*hv.PkgInfo, 0, num)
+	cachePros = make([]hv.PkgInfo, 0, num)
 }

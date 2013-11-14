@@ -42,7 +42,7 @@ type PkgTag struct {
 	Path string `xorm:"unique(pkg_tag_path_tag) index VARCHAR(150)"`
 	Tag  string `xorm:"unique(pkg_tag_path_tag) VARCHAR(50)"`
 	Vcs  string `xorm:"VARCHAR(50)"`
-	Tags string
+	Tags string `xorm:"TEXT"`
 }
 
 // A PkgRock descriables the trending rank of the project.
@@ -59,7 +59,7 @@ type PkgExam struct {
 	Id       int64
 	Path     string    `xorm:"index VARCHAR(150)"`
 	Gist     string    `xorm:"VARCHAR(150)"` // Gist path.
-	Examples string    // Examples.
+	Examples string    `xorm:"TEXT"`         // Examples.
 	Created  time.Time `xorm:"index"`
 }
 
@@ -78,7 +78,7 @@ type PkgDecl struct {
 
 	IsHasExample bool
 
-	Imports, TestImports string
+	Imports, TestImports string `xorm:"TEXT"`
 
 	IsHasFile   bool
 	IsHasSubdir bool
@@ -90,7 +90,7 @@ type PkgDoc struct {
 	Path string `xorm:"unique(pkg_decl_path_lang_type) index VARCHAR(100)"`
 	Lang string `xorm:"unique(pkg_decl_path_lang_type)"` // Documentation language.
 	Type string `xorm:"unique(pkg_decl_path_lang_type)"`
-	Doc  string // Documentataion.
+	Doc  string `xorm:"TEXT"` // Documentataion.
 }
 
 // PkgFunc represents a package function.
@@ -99,15 +99,15 @@ type PkgFunc struct {
 	Pid   int64  `xorm:"index"` // Id of package documentation it belongs to.
 	Path  string `xorm:"VARCHAR(150)"`
 	Name  string `xorm:"index VARCHAR(100)"`
-	Doc   string
-	IsOld bool // Indicates if the function no longer exists.
+	Doc   string `xorm:"TEXT"`
+	IsOld bool   // Indicates if the function no longer exists.
 }
 
 // PkgImport represents a package imports record.
 type PkgImport struct {
 	Id      int64
 	Path    string `xorm:"index VARCHAR(150)"`
-	Imports string
+	Imports string `xorm:"TEXT"`
 }
 
 var x *xorm.Engine
@@ -264,6 +264,11 @@ func SavePkgExam(gist *PkgExam) error {
 		Gist: gist.Gist,
 	}
 	has, err = x.Get(pexam)
+	if err != nil {
+		return errors.New(
+			fmt.Sprintf("models.SavePkgExam( %s ) -> Get PkgExam: %s",
+				gist.Path, err))
+	}
 	if has {
 		// Check if refresh too frequently(within in 5 minutes).
 		if pexam.Created.Add(5 * time.Minute).UTC().After(time.Now().UTC()) {
@@ -281,12 +286,16 @@ func SavePkgExam(gist *PkgExam) error {
 	}
 	if err != nil {
 		return errors.New(
-			fmt.Sprintf("models.SavePkgExam( %s ) -> %s", gist.Path, err))
+			fmt.Sprintf("models.SavePkgExam( %s ) -> Save PkgExam: %s", gist.Path, err))
 	}
 
 	// Delete 'PkgDecl' in order to generate new page.
-	x.Where("pid = ?", pinfo.Id).And("tag = ?", "").Delete(new(PkgDecl))
-	return nil
+	_, err = x.Where("pid = ?", pinfo.Id).And("tag = ?", "").Delete(new(PkgDecl))
+	if err != nil {
+		return errors.New(
+			fmt.Sprintf("models.SavePkgExam( %s ) -> Delete PkgDecl: %s", gist.Path, err))
+	}
+	return err
 }
 
 // SavePkgDoc saves readered readme.md file data.
@@ -305,13 +314,17 @@ func SavePkgDoc(path string, readmes map[string][]byte) {
 			Lang: lang,
 			Type: "rm",
 		}
-		has, _ := x.Get(pdoc)
+		has, err := x.Get(pdoc)
+		if err != nil {
+			beego.Error("models.SavePkgDoc(", path, ") -> Get PkgDoc:", err.Error())
+			return
+		}
+
 		pdoc.Path = path
 		pdoc.Lang = lang
 		pdoc.Type = "rm"
 		pdoc.Doc = base32.StdEncoding.EncodeToString(handleIllegalChars(data))
 
-		var err error
 		if has {
 			_, err = x.Id(pdoc.Id).Update(pdoc)
 		} else {
@@ -341,12 +354,22 @@ func LoadPkgDoc(path, lang, docType string) (doc string) {
 		Type: docType,
 	}
 
-	if has, _ := x.Get(pdoc); has {
+	if has, err := x.Get(pdoc); has {
+		if err != nil {
+			beego.Error("models.LoadPkgDoc(", path, lang, docType,
+				") -> Fail to get PkgDoc:", err.Error())
+			return doc
+		}
 		return pdoc.Doc
 	}
 
 	pdoc.Lang = "en"
-	if has, _ := x.Get(pdoc); has {
+	if has, err := x.Get(pdoc); has {
+		if err != nil {
+			beego.Error("models.LoadPkgDoc(", path,
+				") -> Fail to get PkgDoc:", err.Error())
+			return doc
+		}
 		return pdoc.Doc
 	}
 	return doc
@@ -354,14 +377,29 @@ func LoadPkgDoc(path, lang, docType string) (doc string) {
 
 // GetIndexStats returns index page statistic information.
 func GetIndexStats() (int64, int64, int64) {
-	num1, _ := x.Count(new(hv.PkgInfo))
-	num2, _ := x.Count(new(PkgDecl))
-	num3, _ := x.Count(new(PkgFunc))
+	num1, err := x.Count(new(hv.PkgInfo))
+	if err != nil {
+		beego.Error("models.GetIndexStats -> Fail to count hv.PkgInfo:", err.Error())
+	}
+
+	num2, err := x.Count(new(PkgDecl))
+	if err != nil {
+		beego.Error("models.GetIndexStats -> Fail to count PkgDecl:", err.Error())
+	}
+
+	num3, err := x.Count(new(PkgFunc))
+	if err != nil {
+		beego.Error("models.GetIndexStats -> Fail to count PkgFunc:", err.Error())
+	}
 	return num1, num2, num3
 }
 
 // SearchFunc returns functions that name contains keyword.
 func SearchFunc(key string) (pfuncs []PkgFunc) {
-	x.Where("name like ?", "%"+key+"%").Find(&pfuncs)
+	err := x.Where("name like '%" + key + "%'").Find(&pfuncs)
+	if err != nil {
+		beego.Error("models.SearchFunc -> ", err.Error())
+		return pfuncs
+	}
 	return pfuncs
 }

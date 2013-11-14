@@ -38,8 +38,8 @@ var (
 	maxProInfoNum = 20
 	maxExamNum    = 15
 
-	recentUpdatedExs                                       []*models.PkgExam
-	recentViewedPros, topRankPros, topViewedPros, RockPros []*hv.PkgInfo
+	recentUpdatedExs                                       []models.PkgExam
+	recentViewedPros, topRankPros, topViewedPros, RockPros []hv.PkgInfo
 )
 
 // initPopPros initializes popular projects.
@@ -94,13 +94,13 @@ func updateCachePros(pdoc *hv.Package) {
 
 	for _, p := range cachePros {
 		if p.Id == pdoc.Id {
-			p = pdoc.PkgInfo
+			p = *pdoc.PkgInfo
 			return
 		}
 	}
 
 	pinfo := pdoc.PkgInfo
-	cachePros = append(cachePros, pinfo)
+	cachePros = append(cachePros, *pinfo)
 }
 
 func updateProInfos(pdoc *hv.Package) {
@@ -116,8 +116,8 @@ func updateProInfos(pdoc *hv.Package) {
 		}
 	}
 
-	s := make([]*hv.PkgInfo, 0, maxProInfoNum)
-	s = append(s, curPro)
+	s := make([]hv.PkgInfo, 0, maxProInfoNum)
+	s = append(s, *curPro)
 	switch {
 	case index == -1 && listLen < maxProInfoNum:
 		// Not found and list is not full

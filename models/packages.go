@@ -24,58 +24,73 @@ import (
 	"github.com/Unknwon/gowalker/utils"
 	"github.com/Unknwon/hv"
 	"github.com/astaxie/beego"
-	"github.com/coocood/qbs"
 )
 
 // SearchPkg returns packages that import path and synopsis contains keyword.
-func SearchPkg(key string) []*hv.PkgInfo {
-	q := connDb()
-	defer q.Close()
-
-	var pinfos []*hv.PkgInfo
-	cond := qbs.NewCondition("import_path like ?", "%"+key+"%").Or("synopsis like ?", "%"+key+"%")
-	q.Limit(200).Condition(cond).OrderByDesc("rank").FindAll(&pinfos)
+func SearchPkg(key string) (pinfos []hv.PkgInfo) {
+	err := x.Limit(200).Desc("rank").Where("name like '%" + key + "%'").
+		Or("synopsis like '%" + key + "%'").Find(&pinfos)
+	if err != nil {
+		beego.Error("models.SearchPkg -> ", err.Error())
+		return pinfos
+	}
 	return pinfos
 }
 
-func getPkgInfoWithQ(path, tag string, q *qbs.Qbs) (*hv.PkgInfo, error) {
+// GetPkgInfo returns 'PkgInfo' by given import path and tag.
+// It returns error when the package does not exist.
+func GetPkgInfo(path, tag string) (*hv.PkgInfo, error) {
 	// Check path length to reduce connect times.
 	if len(path) == 0 {
-		return nil, errors.New("models.getPkgInfoWithQ -> Empty path as not found.")
+		return nil, errors.New("models.GetPkgInfo -> Empty path as not found.")
 	}
 
-	pinfo := new(hv.PkgInfo)
-	q.WhereEqual("import_path", path).Find(pinfo)
+	pinfo := &hv.PkgInfo{ImportPath: path}
+	has, err := x.Get(pinfo)
+	if !has || err != nil {
+		return nil, errors.New(
+			fmt.Sprintf("models.GetPkgInfo( %s:%s ) -> Get hv.PkgInfo: %s",
+				path, tag, err))
+	}
 
 	proPath := utils.GetProjectPath(path)
 	if utils.IsGoRepoPath(path) {
 		proPath = "code.google.com/p/go"
 	}
-	beego.Trace("models.getPkgInfoWithQ -> proPath:", proPath)
-	ptag := new(PkgTag)
-	cond := qbs.NewCondition("path = ?", proPath).And("tag = ?", tag)
-	err := q.Condition(cond).Find(ptag)
-	if err != nil {
-		pinfo.Ptag = "ptag"
-		return pinfo, errors.New(
-			fmt.Sprintf("models.getPkgInfoWithQ( %s:%s ) -> 'PkgTag': %s", path, tag, err))
+	beego.Trace("models.GetPkgInfo -> proPath:", proPath)
+
+	ptag := &PkgTag{
+		Path: proPath,
+		Tag:  tag,
 	}
+	has, err = x.Get(ptag)
+	if !has || err != nil {
+		pinfo.Ptag = "ptag"
+		return nil, errors.New(
+			fmt.Sprintf("models.GetPkgInfo( %s:%s ) -> Get PkgTag: %s",
+				path, tag, err))
+	}
+
 	pinfo.Vcs = ptag.Vcs
 	pinfo.Tags = ptag.Tags
 
 	// Only 'PkgInfo' cannot prove that package exists,
 	// we have to check 'PkgDecl' as well in case it was deleted by mistake.
 
-	pdecl := new(PkgDecl)
-	cond = qbs.NewCondition("pid = ?", pinfo.Id).And("tag = ?", tag)
-	err = q.Condition(cond).Find(pdecl)
+	pdecl := &PkgDecl{
+		Pid: pinfo.Id,
+		Tag: tag,
+	}
+	has, err = x.Get(pdecl)
 	if err != nil {
-		// Basically, error means not found, so we set 'pinfo.PkgVer' to 0
-		// because server uses it to decide whether force update.
+		return nil, errors.New(
+			fmt.Sprintf("models.GetPkgInfo( %s:%s ) -> Get PkgDecl: %s", path, tag, err))
+	}
+	if !has {
 		pinfo.PkgVer = 0
 		pinfo.Ptag = "ptag"
 		return pinfo, errors.New(
-			fmt.Sprintf("models.getPkgInfoWithQ( %s:%s ) -> 'PkgDecl': %s", path, tag, err))
+			fmt.Sprintf("models.GetPkgInfo( %s:%s ) -> PkgDecl not exist: %s", path, tag, err))
 	}
 
 	docPath := path + utils.TagSuffix("-", tag)
@@ -83,69 +98,32 @@ func getPkgInfoWithQ(path, tag string, q *qbs.Qbs) (*hv.PkgInfo, error) {
 		pinfo.PkgVer = 0
 		pinfo.Ptag = "ptag"
 		return pinfo, errors.New(
-			fmt.Sprintf("models.getPkgInfoWithQ( %s:%s ) -> JS: File not found", path, tag))
+			fmt.Sprintf("models.GetPkgInfo( %s:%s ) -> JS: File not found", path, tag))
 	}
 
 	return pinfo, nil
 }
 
-// GetPkgInfo returns 'PkgInfo' by given import path and tag.
-// It returns error when the package does not exist.
-func GetPkgInfo(path, tag string) (*hv.PkgInfo, error) {
-	q := connDb()
-	defer q.Close()
-
-	return getPkgInfoWithQ(path, tag, q)
-}
-
 // GetPkgInfoById returns package information from database by pid.
-func GetPkgInfoById(pid int) (*hv.PkgInfo, error) {
-	// Connect to database.
-	q := connDb()
-	defer q.Close()
-
-	pinfo := new(hv.PkgInfo)
-	err := q.WhereEqual("id", pid).Find(pinfo)
-
+func GetPkgInfoById(pid int) (pinfo *hv.PkgInfo, err error) {
+	_, err = x.Id(int64(pid)).Get(pinfo)
 	return pinfo, err
 }
 
-func getGroupPkgInfoWithQ(q *qbs.Qbs, paths []string) []*hv.PkgInfo {
-	pinfos := make([]*hv.PkgInfo, 0, len(paths))
+// GetGroupPkgInfo returns group of package infomration in order to reduce database connect times.
+func GetGroupPkgInfo(paths []string) []hv.PkgInfo {
+	pinfos := make([]hv.PkgInfo, 0, len(paths))
 	for _, v := range paths {
 		if len(v) > 0 {
-			pinfo := new(hv.PkgInfo)
-			err := q.WhereEqual("import_path", v).Find(pinfo)
-			if err == nil {
-				pinfos = append(pinfos, pinfo)
-			} else {
-				pinfos = append(pinfos, &hv.PkgInfo{ImportPath: v})
+			pinfo := &hv.PkgInfo{ImportPath: v}
+			has, err := x.Get(pinfo)
+			if err != nil {
+				beego.Error("models.GetGroupPkgInfo(", v, ") -> Get PkgDoc:", err.Error())
 			}
-		}
-	}
-	return pinfos
-}
-
-// GetGroupPkgInfo returns group of package infomration in order to reduce database connect times.
-func GetGroupPkgInfo(paths []string) []*hv.PkgInfo {
-	// Connect to database.
-	q := connDb()
-	defer q.Close()
-
-	return getGroupPkgInfoWithQ(q, paths)
-}
-
-func getGroupPkgInfoByIdWithQ(q *qbs.Qbs, pids []string) []*hv.PkgInfo {
-	pinfos := make([]*hv.PkgInfo, 0, len(pids))
-	for _, v := range pids {
-		pid, _ := strconv.ParseInt(v, 10, 64)
-		if pid > 0 {
-			pinfo := new(hv.PkgInfo)
-			err := q.WhereEqual("id", pid).Find(pinfo)
-			if err == nil {
-				pinfos = append(pinfos, pinfo)
+			if has {
+				pinfos = append(pinfos, *pinfo)
 			} else {
-				beego.Trace("models.GetGroupPkgInfoById ->", err)
+				pinfos = append(pinfos, hv.PkgInfo{ImportPath: v})
 			}
 		}
 	}
@@ -153,68 +131,72 @@ func getGroupPkgInfoByIdWithQ(q *qbs.Qbs, pids []string) []*hv.PkgInfo {
 }
 
 // GetGroupPkgInfoById returns group of package infomration by pid.
-func GetGroupPkgInfoById(pids []string) []*hv.PkgInfo {
-	q := connDb()
-	defer q.Close()
-
-	return getGroupPkgInfoByIdWithQ(q, pids)
-}
-
-// GetIndexPkgs returns package information in given page.
-func GetIndexPkgs(page int) (pkgs []*hv.PkgInfo) {
-	q := connDb()
-	defer q.Close()
-
-	err := q.OmitFields("pro_name", "is_cmd", "tags", "views", "viewd_time", "created",
-		"etag", "labels", "imported_num", "import_pid", "note").
-		Limit(100).Offset((page - 1) * 100).OrderByDesc("Rank").FindAll(&pkgs)
-	if err != nil {
-		beego.Error("models.GetIndexPkgs ->", err)
-	}
-
-	return pkgs
-}
-
-// GetSubPkgs returns sub-projects by given sub-directories.
-func GetSubPkgs(importPath, tag string, dirs []string) []*hv.PkgInfo {
-	q := connDb()
-	defer q.Close()
-
-	pinfos := make([]*hv.PkgInfo, 0, len(dirs))
-	for _, v := range dirs {
-		v = importPath + "/" + v
-		if pinfo, err := getPkgInfoWithQ(v, tag, q); err == nil {
-			pinfos = append(pinfos, pinfo)
-		} else {
-			pinfos = append(pinfos, &hv.PkgInfo{ImportPath: v})
+func GetGroupPkgInfoById(pids []string) []hv.PkgInfo {
+	pinfos := make([]hv.PkgInfo, 0, len(pids))
+	for _, v := range pids {
+		pid, _ := strconv.ParseInt(v, 10, 64)
+		if pid > 0 {
+			pinfo := new(hv.PkgInfo)
+			has, err := x.Id(pid).Get(pinfo)
+			if err != nil {
+				beego.Error("models.GetGroupPkgInfoById(", pid, ") -> Get hv.PkgInfo:", err.Error())
+			}
+			if has {
+				pinfos = append(pinfos, *pinfo)
+			} else {
+				beego.Trace("models.GetGroupPkgInfoById -> Not exist:", pid)
+			}
 		}
 	}
 	return pinfos
 }
 
-func GetImports(pid, tag string) []*hv.PkgInfo {
-	q := connDb()
-	defer q.Close()
-
-	pdecl := new(PkgDecl)
-	cond := qbs.NewCondition("pid = ?", pid).And("tag = ?", tag)
-	err := q.Condition(cond).Find(pdecl)
+// GetIndexPkgs returns package information in given page.
+func GetIndexPkgs(page int) (pkgs []hv.PkgInfo) {
+	err := x.Limit(100, (page-1)*100).Asc("rank").Find(&pkgs)
 	if err != nil {
-		return nil
+		beego.Error("models.GetIndexPkgs ->", err)
 	}
-
-	return getGroupPkgInfoWithQ(q, strings.Split(pdecl.Imports, "|"))
+	return pkgs
 }
 
-func GetRefs(pid string) []*hv.PkgInfo {
-	q := connDb()
-	defer q.Close()
+// GetSubPkgs returns sub-projects by given sub-directories.
+func GetSubPkgs(importPath, tag string, dirs []string) []hv.PkgInfo {
+	pinfos := make([]hv.PkgInfo, 0, len(dirs))
+	for _, v := range dirs {
+		v = importPath + "/" + v
+		if pinfo, err := GetPkgInfo(v, tag); err == nil {
+			pinfos = append(pinfos, *pinfo)
+		} else {
+			pinfos = append(pinfos, hv.PkgInfo{ImportPath: v})
+		}
+	}
+	return pinfos
+}
 
-	pinfo := new(hv.PkgInfo)
-	err := q.WhereEqual("id", pid).Find(pinfo)
-	if err != nil {
+func GetImports(spid, tag string) []hv.PkgInfo {
+	pid, _ := strconv.ParseInt(spid, 10, 64)
+	pdecl := &PkgDecl{
+		Pid: pid,
+		Tag: tag,
+	}
+	has, err := x.Get(pdecl)
+	if !has || err != nil {
+		beego.Error("models.GetImports(", pid, tag, ") -> ", err.Error())
 		return nil
 	}
 
-	return getGroupPkgInfoByIdWithQ(q, strings.Split(pinfo.RefPids, "|"))
+	return GetGroupPkgInfo(strings.Split(pdecl.Imports, "|"))
+}
+
+func GetRefs(spid string) []hv.PkgInfo {
+	pid, _ := strconv.ParseInt(spid, 10, 64)
+	pinfo := new(hv.PkgInfo)
+	has, err := x.Id(pid).Get(pinfo)
+	if !has || err != nil {
+		beego.Error("models.GetRefs(", pid, ") -> ", err.Error())
+		return nil
+	}
+
+	return GetGroupPkgInfoById(strings.Split(pinfo.RefPids, "|"))
 }

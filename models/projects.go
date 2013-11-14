@@ -16,6 +16,7 @@ package models
 
 import (
 	"errors"
+	"fmt"
 	"strconv"
 	"strings"
 	"time"
@@ -23,7 +24,6 @@ import (
 	"github.com/Unknwon/gowalker/utils"
 	"github.com/Unknwon/hv"
 	"github.com/astaxie/beego"
-	"github.com/coocood/qbs"
 )
 
 /*
@@ -34,45 +34,33 @@ import (
 		4. Rock this week
 	projects and recent updated examples.
 */
-func GetPopulars(proNum, exNum int) (error, []*PkgExam, []*hv.PkgInfo, []*hv.PkgInfo, []*hv.PkgInfo, []*hv.PkgInfo) {
-	q := connDb()
-	defer q.Close()
-
-	var ruExs []*PkgExam
-	err := q.OmitFields("examples", "created").
-		Limit(exNum).OrderByDesc("created").FindAll(&ruExs)
+func GetPopulars(proNum, exNum int) (error, []PkgExam, []hv.PkgInfo, []hv.PkgInfo, []hv.PkgInfo, []hv.PkgInfo) {
+	var ruExs []PkgExam
+	err := x.Limit(exNum).Desc("created").Find(&ruExs)
 	if err != nil {
 		return err, nil, nil, nil, nil, nil
 	}
 
-	var rvPros, trPros, tvPros, rtwPros []*hv.PkgInfo
-	var procks []*PkgRock
-	err = q.OmitFields("ProName", "IsCmd", "Tags", "Created",
-		"Etag", "Labels", "RefPids", "Note").
-		Limit(proNum).OrderByDesc("viewed_time").FindAll(&rvPros)
+	var rvPros, trPros, tvPros, rtwPros []hv.PkgInfo
+	var procks []PkgRock
+	err = x.Limit(proNum).Desc("viewed_time").Find(&rvPros)
 	if err != nil {
 		return err, nil, nil, nil, nil, nil
 	}
-	err = q.OmitFields("ProName", "IsCmd", "Tags", "ViewedTime", "Created",
-		"Etag", "Labels", "RefPids", "Note").
-		Limit(proNum).OrderByDesc("rank").FindAll(&trPros)
+	err = x.Limit(proNum).Desc("rank").Find(&trPros)
 	if err != nil {
 		return err, nil, nil, nil, nil, nil
 	}
-	err = q.OmitFields("ProName", "IsCmd", "Tags", "ViewedTime", "Created",
-		"Etag", "Labels", "RefPids", "Note").
-		Limit(proNum).OrderByDesc("views").FindAll(&tvPros)
+	err = x.Limit(proNum).Desc("views").Find(&tvPros)
 	if err != nil {
 		return err, nil, nil, nil, nil, nil
 	}
-	err = q.OmitFields("ProName", "IsCmd", "Tags", "ViewedTime", "Created",
-		"Etag", "Labels", "RefPids", "Note").
-		Limit(proNum).OrderByDesc("delta").FindAll(&procks)
+	err = x.Limit(proNum).Desc("delta").Find(&procks)
 	if err != nil {
 		return err, nil, nil, nil, nil, nil
 	}
 	for _, pr := range procks {
-		rtwPros = append(rtwPros, &hv.PkgInfo{
+		rtwPros = append(rtwPros, hv.PkgInfo{
 			Id:         pr.Pid,
 			ImportPath: pr.Path,
 			Rank:       pr.Rank,
@@ -90,13 +78,18 @@ func getRefIndex(refPids []string, pid string) int {
 	return -1
 }
 
-func updateImportInfo(q *qbs.Qbs, path string, pid, rank int, add bool) {
+func updateImportInfo(path string, pid, rank int, add bool) {
 	spid := strconv.Itoa(pid)
 
 	// Save package information.
-	info := new(hv.PkgInfo)
-	err := q.WhereEqual("import_path", path).Find(info)
-	if err == nil {
+	info := &hv.PkgInfo{ImportPath: path}
+	has, err := x.Get(info)
+	if err != nil {
+		beego.Error("models.updateImportInfo(", path, ") -> Get hv.PkgInfo:", err)
+		return
+	}
+
+	if has {
 		// Check if pid exists in this project.
 		refPids := strings.Split(info.RefPids, "|")
 		i := getRefIndex(refPids, spid)
@@ -115,9 +108,9 @@ func updateImportInfo(q *qbs.Qbs, path string, pid, rank int, add bool) {
 				info.RefNum--
 			}
 
-			_, err = q.Save(info)
+			_, err = x.Id(info.Id).Update(info)
 			if err != nil {
-				beego.Error("models.updateImportInfo -> add:", path, err)
+				beego.Error("models.updateImportInfo(", path, ") -> add:", err)
 			}
 
 		} else if i > -1 {
@@ -131,9 +124,9 @@ func updateImportInfo(q *qbs.Qbs, path string, pid, rank int, add bool) {
 				info.RefNum--
 			}
 
-			_, err = q.Save(info)
+			_, err = x.Id(info.Id).Update(info)
 			if err != nil {
-				beego.Error("models.updateImportInfo -> delete:", path, err)
+				beego.Error("models.updateImportInfo(", path, ") -> delete:", err)
 			}
 		}
 		return
@@ -141,17 +134,26 @@ func updateImportInfo(q *qbs.Qbs, path string, pid, rank int, add bool) {
 
 	if add {
 		// Record imports.
-		pimp := new(PkgImport)
-		q.WhereEqual("path", path).Find(pimp)
+		pimp := &PkgImport{Path: path}
+		has, err := x.Get(pimp)
+		if err != nil {
+			beego.Error("models.updateImportInfo(", path, ") -> Get PkgImport:", err)
+		}
+
 		pimp.Path = path
 		pimps := strings.Split(pimp.Imports, "|")
 		i := getRefIndex(pimps, spid)
 		if i == -1 {
 			pimps = append(pimps, spid)
 			pimp.Imports = strings.Join(pimps, "|")
-			_, err = q.Save(pimp)
+
+			if has {
+				_, err = x.Id(pimp.Id).Update(info)
+			} else {
+				_, err = x.Insert(info)
+			}
 			if err != nil {
-				beego.Error("models.updateImportInfo -> record import:", path, err)
+				beego.Error("models.updateImportInfo(", path, ") -> record import:", err)
 			}
 		}
 	}
@@ -159,14 +161,16 @@ func updateImportInfo(q *qbs.Qbs, path string, pid, rank int, add bool) {
 
 // SaveProject saves package information, declaration and functions;
 // update import information.
-func SaveProject(pinfo *hv.PkgInfo, pdecl *PkgDecl, pfuncs []*PkgFunc, imports []string) error {
-	q := connDb()
-	defer q.Close()
-
+func SaveProject(pinfo *hv.PkgInfo, pdecl *PkgDecl, pfuncs []PkgFunc, imports []string) error {
 	// Load package information(save after checked import information).
-	info := new(hv.PkgInfo)
-	err := q.WhereEqual("import_path", pinfo.ImportPath).Find(info)
-	if err == nil {
+	info := &hv.PkgInfo{ImportPath: pinfo.ImportPath}
+	has, err := x.Get(info)
+	if err != nil {
+		return errors.New(
+			fmt.Sprintf("models.SaveProject( %s ) -> Get hv.PkgInfo: %s",
+				pinfo.ImportPath, err))
+	}
+	if has {
 		pinfo.Id = info.Id
 	}
 
@@ -181,7 +185,7 @@ func SaveProject(pinfo *hv.PkgInfo, pdecl *PkgDecl, pfuncs []*PkgFunc, imports [
 		importPids := make([]string, 0, len(importeds))
 		for _, v := range importeds {
 			pid, _ := strconv.ParseInt(v, 10, 64)
-			if checkImport(q, info.ImportPath, pid) {
+			if checkImport(info.ImportPath, pid) {
 				importPids = append(importPids, v)
 			}
 		}
@@ -191,9 +195,14 @@ func SaveProject(pinfo *hv.PkgInfo, pdecl *PkgDecl, pfuncs []*PkgFunc, imports [
 	}
 
 	if isMaster {
-		pimp := new(PkgImport)
-		err := q.WhereEqual("path", pinfo.ImportPath).Find(pimp)
-		if err == nil {
+		pimp := &PkgImport{Path: pinfo.ImportPath}
+		has, err := x.Get(pimp)
+		if err != nil {
+			return errors.New(
+				fmt.Sprintf("models.SaveProject( %s ) -> Get PkgImport: %s",
+					pinfo.ImportPath, err))
+		}
+		if has {
 			importPids := strings.Split(pinfo.RefPids, "|")
 			pimps := strings.Split(pimp.Imports, "|")
 			for _, v := range pimps {
@@ -202,11 +211,16 @@ func SaveProject(pinfo *hv.PkgInfo, pdecl *PkgDecl, pfuncs []*PkgFunc, imports [
 				}
 				pid, _ := strconv.ParseInt(v, 10, 64)
 				if i := getRefIndex(importPids, v); i == -1 &&
-					checkImport(q, info.ImportPath, pid) {
+					checkImport(info.ImportPath, pid) {
 					importPids = append(importPids, v)
 				}
 			}
-			q.WhereEqual("id", pimp.Id).Delete(pimp)
+			_, err := x.Id(pimp.Id).Delete(pimp)
+			if err != nil {
+				beego.Error("models.SaveProject(", pinfo.ImportPath,
+					") -> Delete PkgImport:", err.Error())
+			}
+
 			pinfo.RefPids = strings.Join(importPids, "|")
 			pinfo.RefNum = len(importPids)
 			if pinfo.RefNum > 0 && strings.HasPrefix(pinfo.RefPids, "|") {
@@ -219,7 +233,11 @@ func SaveProject(pinfo *hv.PkgInfo, pdecl *PkgDecl, pfuncs []*PkgFunc, imports [
 		pinfo.Ptag = info.Ptag
 	}
 
-	_, err = q.Save(pinfo)
+	if has {
+		_, err = x.Id(pinfo.Id).Update(pinfo)
+	} else {
+		_, err = x.Insert(pinfo)
+	}
 	if err != nil {
 		beego.Error("models.SaveProject(", pinfo.ImportPath, ") -> Information2:", err)
 	}
@@ -230,7 +248,7 @@ func SaveProject(pinfo *hv.PkgInfo, pdecl *PkgDecl, pfuncs []*PkgFunc, imports [
 		for _, v := range imports {
 			if !utils.IsGoRepoPath(v) {
 				// Only count non-standard library.
-				updateImportInfo(q, v, int(pinfo.Id), int(pinfo.Rank), true)
+				updateImportInfo(v, int(pinfo.Id), int(pinfo.Rank), true)
 			}
 		}
 	}
@@ -239,14 +257,21 @@ func SaveProject(pinfo *hv.PkgInfo, pdecl *PkgDecl, pfuncs []*PkgFunc, imports [
 	// Save package declaration.
 	decl := new(PkgDecl)
 	if pdecl != nil {
-		cond := qbs.NewCondition("pid = ?", pinfo.Id).And("tag = ?", pdecl.Tag)
-		err = q.Condition(cond).Find(decl)
-		if err == nil {
+		has, err := x.Where("pid = ?", pinfo.Id).And("tag = ?", pdecl.Tag).Get(decl)
+		if err != nil {
+			beego.Error("models.SaveProject(", pinfo.Id, pdecl.Tag,
+				") -> Get PkgDecl:", err.Error())
+		}
+		if has {
 			pdecl.Id = decl.Id
 		}
 
 		pdecl.Pid = pinfo.Id
-		_, err = q.Save(pdecl)
+		if has {
+			_, err = x.Id(pdecl.Id).Update(pdecl)
+		} else {
+			_, err = x.Insert(pdecl)
+		}
 		if err != nil {
 			beego.Error("models.SaveProject(", pinfo.ImportPath, ") -> Declaration:", err)
 		}
@@ -259,19 +284,28 @@ func SaveProject(pinfo *hv.PkgInfo, pdecl *PkgDecl, pfuncs []*PkgFunc, imports [
 		if utils.IsGoRepoPath(pinfo.ImportPath) {
 			proPath = "code.google.com/p/go"
 		}
-		pkgTag := new(PkgTag)
-		cond = qbs.NewCondition("path = ?", proPath).And("tag = ?", pdecl.Tag)
-		err = q.Condition(cond).Find(pkgTag)
+		pkgTag := &PkgTag{
+			Path: proPath,
+			Tag:  pdecl.Tag,
+		}
+		has, err = x.Get(pkgTag)
 		if err != nil {
+			beego.Error("models.SaveProject(", proPath, pdecl.Tag, ") -> Get PkgTag:", err)
+		}
+		if !has {
 			pkgTag.Path = proPath
 			pkgTag.Tag = pdecl.Tag
 		}
 		pkgTag.Vcs = pinfo.Vcs
 		pkgTag.Tags = pinfo.Tags
 
-		_, err = q.Save(pkgTag)
+		if has {
+			_, err = x.Id(pkgTag.Id).Update(pkgTag)
+		} else {
+			_, err = x.Insert(pkgTag)
+		}
 		if err != nil {
-			beego.Error("models.SaveProject(", pinfo.ImportPath, ") -> PkgTag:", err)
+			beego.Error("models.SaveProject(", pinfo.ImportPath, ") -> Save PkgTag:", err)
 		}
 
 		// ------------- END ------------
@@ -288,22 +322,34 @@ func SaveProject(pinfo *hv.PkgInfo, pdecl *PkgDecl, pfuncs []*PkgFunc, imports [
 			type pkgFunc struct {
 				IsOld bool
 			}
-			pfunc := new(pkgFunc)
-			pfunc.IsOld = true
-			_, err = q.WhereEqual("pid", pdecl.Id).Update(pfunc)
+			pfunc := &pkgFunc{IsOld: true}
+			_, err = x.Where("pid = ?", pdecl.Id).Update(pfunc)
+			if err != nil {
+				beego.Error("models.SaveProject(", pdecl.Id, ") -> Mark function old:", err)
+			}
 		}
 
 		// Save new ones.
 		for _, pf := range pfuncs {
-			f := new(PkgFunc)
-			cond := qbs.NewCondition("pid = ?", pdecl.Id).And("name = ?", pf.Name)
-			err = q.Condition(cond).Find(f)
-			if err == nil {
+			f := &PkgFunc{
+				Pid:  pdecl.Id,
+				Name: pf.Name,
+			}
+			has, err := x.Get(f)
+			if err != nil {
+				beego.Error("models.SaveProject(", pdecl.Id, ") -> Get PkgFunc:", err)
+				continue
+			}
+			if has {
 				pf.Id = f.Id
 			}
 
 			pf.Pid = pdecl.Id
-			_, err = q.Save(pf)
+			if has {
+				_, err = x.Id(pf.Id).Update(pf)
+			} else {
+				_, err = x.Insert(pf)
+			}
 			if err != nil {
 				beego.Error("models.SaveProject(", pinfo.ImportPath, ") -> Update function(", pf.Name, "):", err)
 			}
@@ -311,8 +357,7 @@ func SaveProject(pinfo *hv.PkgInfo, pdecl *PkgDecl, pfuncs []*PkgFunc, imports [
 
 		if decl.Id > 0 {
 			// Delete old ones if exist.
-			cond := qbs.NewCondition("pid = ?", pdecl.Id).And("is_old = ?", true)
-			_, err = q.Condition(cond).Delete(new(PkgFunc))
+			_, err := x.Where("pid = ?", pdecl.Id).And("is_old = ?", true).Delete(new(PkgFunc))
 			if err != nil {
 				beego.Error("models.SaveProject(", pinfo.ImportPath, ") -> Delete functions:", err)
 			}
@@ -325,26 +370,31 @@ func SaveProject(pinfo *hv.PkgInfo, pdecl *PkgDecl, pfuncs []*PkgFunc, imports [
 }
 
 // checkImport returns true if the package(id) imports given package(path).
-func checkImport(q *qbs.Qbs, path string, id int64) bool {
-	pinfo := &hv.PkgInfo{
-		Id: id,
-	}
-	err := q.Find(pinfo)
+func checkImport(path string, id int64) bool {
+	pinfo := new(hv.PkgInfo)
+	has, err := x.Id(id).Get(pinfo)
 	if err != nil {
+		beego.Error("models.checkImport(", path, id, ") -> Get hv.PkgInfo", err)
+		// When error occurs, the best thing is keep the things same.
+		return true
+	}
+	if !has {
 		return false
 	}
 
 	decl := new(PkgDecl)
-	cond := qbs.NewCondition("pid = ?", pinfo.Id).And("tag = ?", "")
-	err = q.Condition(cond).Find(decl)
+	err = x.Where("pid = ?", pinfo.Id).And("tag = ?", "").Find(decl)
 	if err != nil {
+		beego.Error("models.checkImport(", path, id, pinfo.Id, ") -> Get PkgDecl", err)
+		return true
+	}
+	if decl.Id == 0 {
 		return false
 	}
 
 	if strings.Index(decl.Imports, path) == -1 {
 		return false
 	}
-
 	return true
 }
 
@@ -355,12 +405,17 @@ func LoadProject(pid int64, tag string) (*PkgDecl, error) {
 		return nil, errors.New("models.LoadProject -> Zero id.")
 	}
 
-	q := connDb()
-	defer q.Close()
-
-	pdecl := new(PkgDecl)
-	cond := qbs.NewCondition("pid = ?", pid).And("tag = ?", tag)
-	err := q.Condition(cond).Find(pdecl)
+	pdecl := &PkgDecl{
+		Pid: pid,
+		Tag: tag,
+	}
+	has, err := x.Get(pdecl)
+	if err != nil {
+		return nil, err
+	}
+	if !has {
+		return nil, errors.New("models.LoadProject -> Project does not exist")
+	}
 	return pdecl, err
 }
 
@@ -373,16 +428,17 @@ func DeleteProject(path string) {
 		return
 	}
 
-	q := connDb()
-	defer q.Close()
-
 	var i1, i2, i3, i4, i5 int64
 	// Delete package information.
 	// TODO: NEED TO DELETE ALL SUB-PEOJECTS.
-	info := new(hv.PkgInfo)
-	err := q.WhereEqual("import_path", path).Find(info)
-	if err == nil {
-		i1, err = q.WhereEqual("import_path", path).Delete(info)
+	info := &hv.PkgInfo{ImportPath: path}
+	has, err := x.Get(info)
+	if err != nil {
+		beego.Error("models.DeleteProject(", path, ") -> Get hv.PkgInfo", err)
+		return
+	}
+	if has {
+		i1, err = x.Where("import_path = ?", path).Delete(info)
 		if err != nil {
 			beego.Error("models.DeleteProject(", path, ") -> Information:", err)
 		}
@@ -391,8 +447,8 @@ func DeleteProject(path string) {
 	// Delete package declaration.
 	if info.Id > 0 {
 		// Find.
-		var pdecls []*PkgDecl
-		err = q.WhereEqual("pid", info.Id).FindAll(&pdecls)
+		var pdecls []PkgDecl
+		err = x.Where("pid = ?", info.Id).Find(&pdecls)
 		if err != nil {
 			beego.Error("models.DeleteProject(", path, ") -> Find declaration:", err)
 		}
@@ -407,34 +463,34 @@ func DeleteProject(path string) {
 				for _, v := range imports {
 					if !utils.IsGoRepoPath(v) {
 						// Only count non-standard library.
-						updateImportInfo(q, v, int(info.Id), 0, false)
+						updateImportInfo(v, int(info.Id), 0, false)
 					}
 				}
 			}
 		}
 
 		// Delete.
-		i2, err = q.WhereEqual("pid", info.Id).Delete(new(PkgDecl))
+		i2, err = x.Where("pid = ?", info.Id).Delete(new(PkgDecl))
 		if err != nil {
 			beego.Error("models.DeleteProject(", path, ") -> Delete declaration:", err)
 		}
 	}
 
 	// Delete package documentation.
-	i3, err = q.WhereEqual("path", path).Delete(new(PkgDoc))
+	i3, err = x.Where("path = ?", path).Delete(new(PkgDoc))
 	if err != nil {
 		beego.Error("models.DeleteProject(", path, ") -> Documentation:", err)
 	}
 
 	// Delete package examples.
-	i4, err = q.WhereEqual("path", path).Delete(new(PkgExam))
+	i4, err = x.Where("path = ?", path).Delete(new(PkgExam))
 	if err != nil {
 		beego.Error("models.DeleteProject(", path, ") -> Examples:", err)
 	}
 
 	// Delete package functions.
 	if info.Id > 0 {
-		i5, err = q.WhereEqual("path", path).Delete(new(PkgExam))
+		i5, err = x.Where("path = ?", path).Delete(new(PkgExam))
 		if err != nil {
 			beego.Error("models.DeleteProject(", path, ") -> Functions:", err)
 		}
@@ -447,7 +503,7 @@ func DeleteProject(path string) {
 	return
 }
 
-func calRefRanks(q *qbs.Qbs, refPids []string) int64 {
+func calRefRanks(refPids []string) int64 {
 	refRank := 0
 	for _, spid := range refPids {
 		pid, _ := strconv.Atoi(spid)
@@ -455,27 +511,32 @@ func calRefRanks(q *qbs.Qbs, refPids []string) int64 {
 			continue
 		}
 		info := new(hv.PkgInfo)
-		err := q.WhereEqual("id", pid).Find(info)
-		if err == nil {
+		has, err := x.Id(int64(pid)).Get(info)
+		if err != nil {
+			beego.Error("models.calRefRanks(", pid, ") -> Get hv.PkgInfo:", err)
+			continue
+		}
+		if has {
 			refRank += int(info.Rank) * 10 / 100
 		} else {
-			beego.Trace("models.calRefRanks ->", err)
+			beego.Trace("models.calRefRanks(", pid, ") ->", err)
 		}
 	}
 	return int64(refRank)
 }
 
 // FlushCacheProjects saves cache data to database.
-func FlushCacheProjects(pinfos []*hv.PkgInfo) {
-	q := connDb()
-	defer q.Close()
-
-	procks := make([]*PkgRock, 0, len(pinfos))
+func FlushCacheProjects(pinfos []hv.PkgInfo) {
+	procks := make([]PkgRock, 0, len(pinfos))
 	// Update project data.
 	for _, p := range pinfos {
-		info := new(hv.PkgInfo)
-		err := q.WhereEqual("import_path", p.ImportPath).Find(info)
-		if err == nil {
+		info := &hv.PkgInfo{ImportPath: p.ImportPath}
+		has, err := x.Get(info)
+		if err != nil {
+			beego.Error("models.FlushCacheProjects(", p.ImportPath, ") -> Get hv.PkgInfo:", err)
+			continue
+		}
+		if has {
 			// Shoule always be nil, just in case not exist.
 			p.Id = info.Id
 			// Limit 10 views each period.
@@ -485,17 +546,23 @@ func FlushCacheProjects(pinfos []*hv.PkgInfo) {
 		}
 
 		// Update rank.
-		p.Rank = calRefRanks(q, strings.Split(p.RefPids, "|")) + p.Views
+		p.Rank = calRefRanks(strings.Split(p.RefPids, "|")) + p.Views
 		if p.Rank > 2*p.Views {
 			p.Rank = 2 * p.Views
 		}
 
-		_, err = q.Save(p)
+		if has {
+			_, err = x.Id(p.Id).Update(p)
+		} else {
+			_, err = x.Insert(p)
+		}
 		if err != nil {
-			beego.Error("models.FlushCacheProjects(", p.ImportPath, ") ->", err)
+			beego.Error("models.FlushCacheProjects(", p.ImportPath,
+				") -> Save hv.PkgInfo:", err)
+			continue
 		}
 
-		procks = append(procks, &PkgRock{
+		procks = append(procks, PkgRock{
 			Pid:  p.Id,
 			Path: p.ImportPath,
 			Rank: p.Rank,
@@ -507,7 +574,7 @@ func FlushCacheProjects(pinfos []*hv.PkgInfo) {
 		utils.Cfg.SetValue("task", "rock_reset", "0")
 		utils.SaveConfig()
 		// Reset rock table.
-		_, err := q.Where("id > ?", int64(0)).Delete(new(PkgRock))
+		_, err := x.Where("id > ?", int64(0)).Delete(new(PkgRock))
 		if err != nil {
 			beego.Error("models.FlushCacheProjects -> Reset rock table:", err)
 		}
@@ -517,13 +584,22 @@ func FlushCacheProjects(pinfos []*hv.PkgInfo) {
 	}
 
 	for _, pr := range procks {
-		r := new(PkgRock)
-		err := q.WhereEqual("path", pr.Path).Find(r)
-		if err == nil {
+		r := &PkgRock{Path: pr.Path}
+		has, err := x.Get(r)
+		if err != nil {
+			beego.Error("models.FlushCacheProjects(", pr.Path, ") -> Get PkgRock:", err)
+			continue
+		}
+		if has {
 			pr.Id = r.Id
 			r.Delta += pr.Rank - r.Rank
 			pr.Delta = r.Delta
+			_, err = x.Id(pr.Id).Update(pr)
+		} else {
+			_, err = x.Insert(pr)
 		}
-		q.Save(pr)
+		if err != nil {
+			beego.Error("models.FlushCacheProjects(", pr.Path, ") -> Save PkgRock:", err)
+		}
 	}
 }

@@ -27,7 +27,7 @@ type SearchRouter struct {
 }
 
 func checkSpecialUsage(this *SearchRouter, q, t, pid, tag string) bool {
-	var pinfos []*hv.PkgInfo
+	var pinfos []hv.PkgInfo
 
 	switch {
 	case t == "imports":

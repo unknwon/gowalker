@@ -23,17 +23,18 @@ import (
 	"syscall"
 
 	"github.com/Unknwon/com"
+	"github.com/Unknwon/hv"
+	"github.com/astaxie/beego"
+	"github.com/beego/i18n"
+
 	"github.com/Unknwon/gowalker/doc"
 	"github.com/Unknwon/gowalker/models"
 	"github.com/Unknwon/gowalker/routers"
 	"github.com/Unknwon/gowalker/utils"
-	"github.com/Unknwon/hv"
-	"github.com/astaxie/beego"
-	"github.com/beego/i18n"
 )
 
 const (
-	APP_VER = "1.0.4.1113"
+	APP_VER = "1.0.5.1114"
 )
 
 // We have to call a initialize function manully
