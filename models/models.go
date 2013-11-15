@@ -134,9 +134,11 @@ func setEngine() {
 		os.Exit(2)
 	}
 
-	x.ShowDebug = true
-	x.ShowErr = true
-	x.ShowSQL = true
+	if beego.RunMode != "pro" {
+		x.ShowDebug = true
+		x.ShowErr = true
+		//x.ShowSQL = true
+	}
 
 	beego.Trace("Initialized database ->", dbName)
 }
@@ -280,9 +282,9 @@ func SavePkgExam(gist *PkgExam) error {
 	gist.Created = time.Now().UTC()
 
 	if has {
-		_, err = x.Id(gist.Id).Update(pexam)
+		_, err = x.Id(gist.Id).Update(gist)
 	} else {
-		_, err = x.Insert(pexam)
+		_, err = x.Insert(gist)
 	}
 	if err != nil {
 		return errors.New(
@@ -295,7 +297,9 @@ func SavePkgExam(gist *PkgExam) error {
 		return errors.New(
 			fmt.Sprintf("models.SavePkgExam( %s ) -> Delete PkgDecl: %s", gist.Path, err))
 	}
-	return err
+
+	beego.Trace("models.SavePkgExam(", gist.Path, ") -> Saved")
+	return nil
 }
 
 // SavePkgDoc saves readered readme.md file data.

@@ -54,10 +54,6 @@ func initialize() {
 		}
 	}
 
-	// Initialize data.
-	models.InitDb()
-	routers.InitRouter()
-
 	// Trim 4th part.
 	routers.AppVer = strings.Join(strings.Split(APP_VER, ".")[:3], ".")
 
@@ -74,6 +70,10 @@ func initialize() {
 		os.Mkdir("./log", os.ModePerm)
 		beego.BeeLogger.SetLogger("file", `{"filename": "log/log"}`)
 	}
+
+	// Initialize data.
+	models.InitDb()
+	routers.InitRouter()
 
 	doc.SetGithubCredentials(utils.Cfg.MustValue("github", "client_id"),
 		utils.Cfg.MustValue("github", "client_secret"))

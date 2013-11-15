@@ -148,9 +148,9 @@ func updateImportInfo(path string, pid, rank int, add bool) {
 			pimp.Imports = strings.Join(pimps, "|")
 
 			if has {
-				_, err = x.Id(pimp.Id).Update(info)
+				_, err = x.Id(pimp.Id).Update(pimp)
 			} else {
-				_, err = x.Insert(info)
+				_, err = x.Insert(pimp)
 			}
 			if err != nil {
 				beego.Error("models.updateImportInfo(", path, ") -> record import:", err)
@@ -383,12 +383,12 @@ func checkImport(path string, id int64) bool {
 	}
 
 	decl := new(PkgDecl)
-	err = x.Where("pid = ?", pinfo.Id).And("tag = ?", "").Find(decl)
+	has, err = x.Where("pid = ?", pinfo.Id).And("tag = ?", "").Get(decl)
 	if err != nil {
 		beego.Error("models.checkImport(", path, id, pinfo.Id, ") -> Get PkgDecl", err)
 		return true
 	}
-	if decl.Id == 0 {
+	if !has {
 		return false
 	}
 

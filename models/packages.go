@@ -28,7 +28,7 @@ import (
 
 // SearchPkg returns packages that import path and synopsis contains keyword.
 func SearchPkg(key string) (pinfos []hv.PkgInfo) {
-	err := x.Limit(200).Desc("rank").Where("name like '%" + key + "%'").
+	err := x.Limit(200).Desc("rank").Where("import_path like '%" + key + "%'").
 		Or("synopsis like '%" + key + "%'").Find(&pinfos)
 	if err != nil {
 		beego.Error("models.SearchPkg -> ", err.Error())
@@ -48,7 +48,7 @@ func GetPkgInfo(path, tag string) (*hv.PkgInfo, error) {
 	pinfo := &hv.PkgInfo{ImportPath: path}
 	has, err := x.Get(pinfo)
 	if !has || err != nil {
-		return nil, errors.New(
+		return pinfo, errors.New(
 			fmt.Sprintf("models.GetPkgInfo( %s:%s ) -> Get hv.PkgInfo: %s",
 				path, tag, err))
 	}
@@ -66,7 +66,7 @@ func GetPkgInfo(path, tag string) (*hv.PkgInfo, error) {
 	has, err = x.Get(ptag)
 	if !has || err != nil {
 		pinfo.Ptag = "ptag"
-		return nil, errors.New(
+		return pinfo, errors.New(
 			fmt.Sprintf("models.GetPkgInfo( %s:%s ) -> Get PkgTag: %s",
 				path, tag, err))
 	}
@@ -83,7 +83,7 @@ func GetPkgInfo(path, tag string) (*hv.PkgInfo, error) {
 	}
 	has, err = x.Get(pdecl)
 	if err != nil {
-		return nil, errors.New(
+		return pinfo, errors.New(
 			fmt.Sprintf("models.GetPkgInfo( %s:%s ) -> Get PkgDecl: %s", path, tag, err))
 	}
 	if !has {
