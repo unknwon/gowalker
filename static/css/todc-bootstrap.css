@@ -34,10 +34,10 @@
   box-sizing: border-box;
 }
 h1, h2, h3, h4, h5, h6 {
-  font-family: Microsoft Yahei, Arial, Helvetica, sans-serif;
+  font-family: "Microsoft Yahei", "Open Sans", "Helvetica Neue", "Helvetica", "Arial", sans-serif;
 }
 body {
-  font-family: Microsoft Yahei, Arial, Helvetica, sans-serif;
+  font-family: "Microsoft Yahei", "Open Sans", "Helvetica Neue", "Helvetica", "Arial", sans-serif;
   font-size: 13px;
   line-height: 20px;
   color: #333333;

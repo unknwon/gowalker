@@ -323,7 +323,7 @@ func SaveProject(pinfo *hv.PkgInfo, pdecl *PkgDecl, pfuncs []PkgFunc, imports []
 				IsOld bool
 			}
 			pfunc := &pkgFunc{IsOld: true}
-			_, err = x.Where("pid = ?", pdecl.Id).Update(pfunc)
+			_, err = x.Where("pid = ?", pdecl.Id).UseBool().Update(pfunc)
 			if err != nil {
 				beego.Error("models.SaveProject(", pdecl.Id, ") -> Mark function old:", err)
 			}
@@ -346,7 +346,7 @@ func SaveProject(pinfo *hv.PkgInfo, pdecl *PkgDecl, pfuncs []PkgFunc, imports []
 
 			pf.Pid = pdecl.Id
 			if has {
-				_, err = x.Id(pf.Id).Update(pf)
+				_, err = x.Id(pf.Id).UseBool().Update(pf)
 			} else {
 				_, err = x.Insert(pf)
 			}
