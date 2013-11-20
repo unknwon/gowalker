@@ -85,7 +85,6 @@ func CheckDoc(broPath, tag string, rt requestType) (*hv.Package, error) {
 
 			// Check if the refresh operation is too frequently (within 5 minutes).
 			needsCrawl = time.Unix(pinfo.Created, 0).Add(_REFRESH_LIMIT).Before(time.Now())
-			needsCrawl = true
 			if !needsCrawl {
 				// Return limit time information as error message.
 				return nil, errors.New(time.Unix(pinfo.Created, 0).Add(_REFRESH_LIMIT).UTC().String())
