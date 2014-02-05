@@ -49,7 +49,7 @@ func GetPkgInfo(path, tag string) (*hv.PkgInfo, error) {
 	has, err := x.Get(pinfo)
 	if !has || err != nil {
 		return pinfo, errors.New(
-			fmt.Sprintf("models.GetPkgInfo( %s:%s ) -> Get hv.PkgInfo: %s",
+			fmt.Sprintf("models.GetPkgInfo( %s:%s ) -> Get hv.PkgInfo: %v",
 				path, tag, err))
 	}
 
@@ -67,7 +67,7 @@ func GetPkgInfo(path, tag string) (*hv.PkgInfo, error) {
 	if !has || err != nil {
 		pinfo.Ptag = "ptag"
 		return pinfo, errors.New(
-			fmt.Sprintf("models.GetPkgInfo( %s:%s ) -> Get PkgTag: %s",
+			fmt.Sprintf("models.GetPkgInfo( %s:%s ) -> Get PkgTag: %v",
 				path, tag, err))
 	}
 
@@ -84,13 +84,13 @@ func GetPkgInfo(path, tag string) (*hv.PkgInfo, error) {
 	has, err = x.Get(pdecl)
 	if err != nil {
 		return pinfo, errors.New(
-			fmt.Sprintf("models.GetPkgInfo( %s:%s ) -> Get PkgDecl: %s", path, tag, err))
+			fmt.Sprintf("models.GetPkgInfo( %s:%s ) -> Get PkgDecl: %v", path, tag, err))
 	}
 	if !has {
 		pinfo.PkgVer = 0
 		pinfo.Ptag = "ptag"
 		return pinfo, errors.New(
-			fmt.Sprintf("models.GetPkgInfo( %s:%s ) -> PkgDecl not exist: %s", path, tag, err))
+			fmt.Sprintf("models.GetPkgInfo( %s:%s ) -> PkgDecl not exist: %v", path, tag, err))
 	}
 
 	docPath := path + utils.TagSuffix("-", tag)
