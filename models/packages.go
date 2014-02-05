@@ -28,8 +28,9 @@ import (
 
 // SearchPkg returns packages that import path and synopsis contains keyword.
 func SearchPkg(key string) (pinfos []hv.PkgInfo) {
-	err := x.Limit(200).Desc("rank").Where("import_path like '%" + key + "%'").
-		Or("synopsis like '%" + key + "%'").Find(&pinfos)
+	keys := strings.Split(key, " ")
+	err := x.Limit(200).Desc("rank").Where("import_path like '%" + keys[0] + "%'").
+		Or("synopsis like '%" + keys[0] + "%'").Find(&pinfos)
 	if err != nil {
 		beego.Error("models.SearchPkg -> ", err.Error())
 		return pinfos
@@ -153,7 +154,7 @@ func GetGroupPkgInfoById(pids []string) []hv.PkgInfo {
 
 // GetIndexPkgs returns package information in given page.
 func GetIndexPkgs(page int) (pkgs []hv.PkgInfo) {
-	err := x.Limit(100, (page-1)*100).Asc("rank").Find(&pkgs)
+	err := x.Limit(100, (page-1)*100).Desc("rank").Find(&pkgs)
 	if err != nil {
 		beego.Error("models.GetIndexPkgs ->", err)
 	}

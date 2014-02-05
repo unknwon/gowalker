@@ -327,7 +327,7 @@ func SavePkgDoc(path string, readmes map[string][]byte) {
 		pdoc.Path = path
 		pdoc.Lang = lang
 		pdoc.Type = "rm"
-		pdoc.Doc = base32.StdEncoding.EncodeToString(handleIllegalChars(data))
+		pdoc.Doc = base32.StdEncoding.EncodeToString(data)
 
 		if has {
 			_, err = x.Id(pdoc.Id).Update(pdoc)

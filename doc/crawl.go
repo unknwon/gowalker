@@ -29,11 +29,13 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Unknwon/com"
 	"github.com/Unknwon/gowalker/models"
 	"github.com/Unknwon/gowalker/utils"
+
+	"github.com/Unknwon/com"
 	"github.com/Unknwon/hv"
 	"github.com/astaxie/beego"
+	"github.com/astaxie/beego/httplib"
 )
 
 type crawlResult struct {
@@ -94,6 +96,16 @@ func getRepo(client *http.Client, path, tag, ptag string) (pdoc *hv.Package, err
 		pdoc.PkgVer = hv.PACKAGE_VER
 	}
 
+	// Render README.
+	for name, content := range pdoc.Readme {
+		p, err := httplib.Post("https://api.github.com/markdown/raw?"+GetGithubCredentials()).
+			Header("Content-Type", "text/plain").Body(content).Bytes()
+		if err != nil {
+			return nil, errors.New(
+				fmt.Sprintf("doc.getRepo -> Render README( %s:%s ): %v", path, tag, err))
+		}
+		pdoc.Readme[name] = p
+	}
 	return pdoc, err
 }
 
