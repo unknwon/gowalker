@@ -253,6 +253,7 @@ func findType(name string, links []*Link) (*Link, bool) {
 // it returns max index of JS file(s);
 // it returns -1 when error occurs.
 func SaveDocPage(docPath string, data []byte) int {
+	data = com.Html2JS(data)
 	docPath = DocsJsPath + docPath
 
 	buf := new(bytes.Buffer)
@@ -315,4 +316,28 @@ func SaveDocPage(docPath string, data []byte) int {
 	}
 
 	return count
+}
+
+// SavePkgDoc saves readered readme.md file data.
+func SavePkgDoc(docPath string, readmes map[string][]byte) {
+	for lang, data := range readmes {
+		if len(data) == 0 {
+			continue
+		}
+
+		if data[0] == '\n' {
+			data = data[1:]
+		}
+
+		data = com.Html2JS(data)
+		localeDocPath := DocsJsPath + docPath + "_RM_" + lang
+
+		buf := new(bytes.Buffer)
+		buf.WriteString("document.write(\"")
+		buf.Write(data)
+		buf.WriteString("\")")
+		if _, err := com.SaveFile("."+localeDocPath+".js", buf.Bytes()); err != nil {
+			beego.Error("utils.SavePkgDoc(", localeDocPath, ") ->", err)
+		}
+	}
 }

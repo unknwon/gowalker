@@ -188,15 +188,16 @@
 				{{end}}
 				{{end}}
 
+				{{$timestamp := .Timestamp}}
 				{{if .IsHasReadme}}
 				<br>
-				<div id="readme" class="readme">{{str2html .PkgDoc}}</div>
+				<div id="readme" class="readme"><script type="text/javascript" src="{{.PkgDocPath}}?={{$timestamp}}"></script></div>
 				<br>
 				{{end}}
 
 				<div id="markdown" class="markdown">
 					{{range .DocJS}}
-					<script type="text/javascript" src="{{.}}"></script>
+					<script type="text/javascript" src="{{.}}?={{$timestamp}}"></script>
 					{{end}}
 				</div>
 				

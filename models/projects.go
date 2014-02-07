@@ -476,12 +476,6 @@ func DeleteProject(path string) {
 		}
 	}
 
-	// Delete package documentation.
-	i3, err = x.Where("path = ?", path).Delete(new(PkgDoc))
-	if err != nil {
-		beego.Error("models.DeleteProject(", path, ") -> Documentation:", err)
-	}
-
 	// Delete package examples.
 	i4, err = x.Where("path = ?", path).Delete(new(PkgExam))
 	if err != nil {

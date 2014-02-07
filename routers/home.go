@@ -646,7 +646,7 @@ func renderDoc(this *HomeRouter, pdoc *hv.Package, q, tag, docPath string) bool 
 		return false
 	}
 
-	n := utils.SaveDocPage(docPath, com.Html2JS(data))
+	n := utils.SaveDocPage(docPath, data)
 	if n == -1 {
 		return false
 	}
@@ -657,7 +657,7 @@ func renderDoc(this *HomeRouter, pdoc *hv.Package, q, tag, docPath string) bool 
 		return false
 	}
 
-	models.SavePkgDoc(pdoc.ImportPath, pdoc.Readme)
+	utils.SavePkgDoc(pdoc.ImportPath, pdoc.Readme)
 
 	this.Data["UtcTime"] = time.Unix(pdoc.Created, 0).UTC()
 	this.Data["TimeSince"] = calTimeSince(time.Unix(pdoc.Created, 0))
@@ -755,6 +755,9 @@ func generatePage(this *HomeRouter, pdoc *hv.Package, q, tag string) bool {
 		this.Data["TimeSince"] = calTimeSince(time.Unix(pdoc.Created, 0))
 	}
 
+	// Add create time for JS files' link to prevent cache in case the page is recreated.
+	this.Data["Timestamp"] = pdoc.Created
+
 	proName := path.Base(pdoc.ImportPath)
 	if i := strings.Index(proName, "?"); i > -1 {
 		proName = proName[:i]
@@ -799,12 +802,13 @@ func generatePage(this *HomeRouter, pdoc *hv.Package, q, tag string) bool {
 
 	// Introduction.
 	this.Data["ImportPath"] = pdoc.ImportPath
-	lang := this.Data["Lang"].(string)
-	byts, _ := base32.StdEncoding.DecodeString(
-		models.LoadPkgDoc(pdoc.ImportPath, lang, "rm"))
-	if len(byts) > 0 {
+
+	// README.
+	lang := this.Data["Lang"].(string)[:2]
+	readmePath := utils.DocsJsPath + docPath + "_RM_" + lang + ".js"
+	if com.IsFile("." + readmePath) {
 		this.Data["IsHasReadme"] = true
-		this.Data["PkgDoc"] = string(byts)
+		this.Data["PkgDocPath"] = readmePath
 	}
 
 	// Index.

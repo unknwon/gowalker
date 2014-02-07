@@ -17,7 +17,6 @@ package models
 
 import (
 	"bytes"
-	"encoding/base32"
 	"errors"
 	"fmt"
 	"os"
@@ -84,15 +83,6 @@ type PkgDecl struct {
 	IsHasSubdir bool
 }
 
-// PkgDoc is package documentation for multi-language usage.
-type PkgDoc struct {
-	Id   int64
-	Path string `xorm:"unique(pkg_decl_path_lang_type) index VARCHAR(100)"`
-	Lang string `xorm:"unique(pkg_decl_path_lang_type)"` // Documentation language.
-	Type string `xorm:"unique(pkg_decl_path_lang_type)"`
-	Doc  string `xorm:"TEXT"` // Documentataion.
-}
-
 // PkgFunc represents a package function.
 type PkgFunc struct {
 	Id    int64
@@ -147,7 +137,7 @@ func setEngine() {
 func InitDb() {
 	setEngine()
 	x.Sync(new(hv.PkgInfo), new(PkgTag), new(PkgRock), new(PkgExam),
-		new(PkgDecl), new(PkgDoc), new(PkgFunc), new(PkgImport))
+		new(PkgDecl), new(PkgFunc), new(PkgImport))
 }
 
 // GetGoRepo returns packages in go standard library.
@@ -302,81 +292,8 @@ func SavePkgExam(gist *PkgExam) error {
 	return nil
 }
 
-// SavePkgDoc saves readered readme.md file data.
-func SavePkgDoc(path string, readmes map[string][]byte) {
-	for lang, data := range readmes {
-		if len(data) == 0 {
-			continue
-		}
-
-		if data[0] == '\n' {
-			data = data[1:]
-		}
-
-		pdoc := &PkgDoc{
-			Path: path,
-			Lang: lang,
-			Type: "rm",
-		}
-		has, err := x.Get(pdoc)
-		if err != nil {
-			beego.Error("models.SavePkgDoc(", path, ") -> Get PkgDoc:", err.Error())
-			return
-		}
-
-		pdoc.Path = path
-		pdoc.Lang = lang
-		pdoc.Type = "rm"
-		pdoc.Doc = base32.StdEncoding.EncodeToString(data)
-
-		if has {
-			_, err = x.Id(pdoc.Id).Update(pdoc)
-		} else {
-			_, err = x.Insert(pdoc)
-		}
-		if err != nil {
-			beego.Error("models.SavePkgDoc -> readme:", err)
-		}
-	}
-}
-
 func handleIllegalChars(data []byte) []byte {
 	return bytes.Replace(data, []byte("<"), []byte("&lt;"), -1)
-}
-
-// LoadPkgDoc loads project introduction documentation.
-func LoadPkgDoc(path, lang, docType string) (doc string) {
-	if len(lang) < 2 {
-		return ""
-	}
-
-	lang = lang[:2]
-
-	pdoc := &PkgDoc{
-		Path: path,
-		Lang: lang,
-		Type: docType,
-	}
-
-	if has, err := x.Get(pdoc); has {
-		if err != nil {
-			beego.Error("models.LoadPkgDoc(", path, lang, docType,
-				") -> Fail to get PkgDoc:", err.Error())
-			return doc
-		}
-		return pdoc.Doc
-	}
-
-	pdoc.Lang = "en"
-	if has, err := x.Get(pdoc); has {
-		if err != nil {
-			beego.Error("models.LoadPkgDoc(", path,
-				") -> Fail to get PkgDoc:", err.Error())
-			return doc
-		}
-		return pdoc.Doc
-	}
-	return doc
 }
 
 // GetIndexStats returns index page statistic information.
