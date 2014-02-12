@@ -1,4 +1,4 @@
-Go Walker Server
+Go Walker Server [![wercker status](https://app.wercker.com/status/cd3bece96df89a704e3a1fbdcac7c6da/s/ "wercker status")](https://app.wercker.com/project/bykey/cd3bece96df89a704e3a1fbdcac7c6da)
 ========
 
 Go Walker 是一个用于在线生成并浏览 <a target="_blank" href="http://docs.studygolang.com/">Go</a> 项目 API 文档及黑客视图的 Web 服务器，目前已支持包括 [Bitbucket](https://bitbucket.org)、[GitHub](https://github.com)、[Google Code](http://code.google.com)、[Launchpad](https://launchpad.net) 和 [Git @ OSC](http://git.oschina.net) 在内的五大代码托管平台。

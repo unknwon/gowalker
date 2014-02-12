@@ -1,4 +1,4 @@
-Go Walker
+Go Walker [![wercker status](https://app.wercker.com/status/cd3bece96df89a704e3a1fbdcac7c6da/s/ "wercker status")](https://app.wercker.com/project/bykey/cd3bece96df89a704e3a1fbdcac7c6da)
 ========
 [中文文档](README_ZH.md)
 
