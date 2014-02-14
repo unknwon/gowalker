@@ -418,7 +418,7 @@ func renderDoc(this *HomeRouter, pdoc *hv.Package, q, tag, docPath string) bool 
 		}
 
 		for _, m := range t.Methods {
-			buf.WriteString("'" + t.Name + "." + m.Name + "',")
+			buf.WriteString("'" + t.Name + "_" + m.Name + "',")
 		}
 	}
 
@@ -797,6 +797,11 @@ func generatePage(this *HomeRouter, pdoc *hv.Package, q, tag string) bool {
 	this.Data["IsRefresh"] = time.Unix(pdoc.Created, 0).Add(10 * time.Second).After(time.Now())
 
 	this.Data["VCS"] = pdoc.Vcs
+
+	// GitHub URL change.
+	if strings.HasPrefix(pdoc.ProjectPath, "github.com") {
+		pdoc.ProjectPath = strings.Replace(pdoc.ProjectPath, "blob/", "tree/", 1)
+	}
 	this.Data["ProPath"] = pdoc.ProjectPath
 	this.Data["ProDocPath"] = path.Dir(pdoc.ImportPath)
 
