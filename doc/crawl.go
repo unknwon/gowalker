@@ -92,9 +92,11 @@ func getRepo(client *http.Client, path, tag, ptag string) (pdoc *hv.Package, err
 			fmt.Sprintf("doc.getRepo -> No match( %s:%s )", path, tag))
 	}
 
-	if pdoc != nil {
-		pdoc.PkgVer = hv.PACKAGE_VER
+	if pdoc == nil {
+		return nil, err
 	}
+
+	pdoc.PkgVer = hv.PACKAGE_VER
 
 	// Render README.
 	for name, content := range pdoc.Readme {
