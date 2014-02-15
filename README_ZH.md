@@ -23,7 +23,3 @@ Go Walker 是一个用于在线生成并浏览 <a target="_blank" href="http://d
 [建站手记](http://git.oschina.net/Unknown/gowalker/wikis/home)
 
 请到 [Trello](https://trello.com/b/wS7CzdcI/go-walker) 的面板上查看有关 Todo，Bugs 以及路线图的说明。
-
-## 授权许可
-
-[Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.html)

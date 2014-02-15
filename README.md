@@ -25,7 +25,7 @@ See board on [Trello](https://trello.com/b/wS7CzdcI/go-walker) about to do, bugs
 ## Third-party packages
 
 - [Beego](http://gowalker.org/github.com/astaxie/beego): a **lightweight** web framework for web application **quick** development.
-- [Qbs](http://gowalker.org/github.com/coocood/qbs): **Query by Struct** is an excellent ORM, it supports MySQL, SQLite3 and PosgreSQL.
+- [Xorm](http://gowalker.org/github.com/lunny/xorm): Simple and powerful ORM in Go.
 - [goconfig](https://github.com/Unknwon/goconfig): a easy-use **comments-support** configuration file(.ini) parser for the Go Programming Language.
 
 ## Credits
@@ -35,7 +35,3 @@ See board on [Trello](https://trello.com/b/wS7CzdcI/go-walker) about to do, bugs
 - [atotto](https://github.com/atotto) Thanks for translating site user interface to Japanese.
 - [garyburd](https://github.com/garyburd) Thanks for teaching me about license.
 - Sub-package **doc** is originally a fork of [gosrc](https://github.com/garyburd/gosrc).
-
-## License
-
-[Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.html).
