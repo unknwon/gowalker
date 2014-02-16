@@ -21,16 +21,27 @@ import (
 	"strings"
 
 	"github.com/Unknwon/com"
-	"github.com/Unknwon/gowalker/utils"
 	"github.com/Unknwon/hv"
 	"github.com/astaxie/beego"
+
+	"github.com/Unknwon/gowalker/utils"
 )
 
 // SearchPkg returns packages that import path and synopsis contains keyword.
-func SearchPkg(key string) (pinfos []hv.PkgInfo) {
+func SearchPkg(key string, includeSynopsis bool) (pinfos []hv.PkgInfo) {
+	key = strings.TrimSpace(key)
+	if len(key) == 0 {
+		return nil
+	}
 	keys := strings.Split(key, " ")
-	err := x.Limit(200).Desc("rank").Where("import_path like '%" + keys[0] + "%'").
-		Or("synopsis like '%" + keys[0] + "%'").Find(&pinfos)
+	var err error
+	if includeSynopsis {
+		err = x.Limit(200).Desc("rank").Where("import_path like '%" + keys[0] + "%'").
+			Or("synopsis like '%" + keys[0] + "%'").Find(&pinfos)
+	} else {
+		err = x.Limit(200).Desc("rank").Where("import_path like '%" + keys[0] + "%'").
+			Find(&pinfos)
+	}
 	if err != nil {
 		beego.Error("models.SearchPkg -> ", err.Error())
 		return pinfos

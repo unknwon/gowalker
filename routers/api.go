@@ -14,6 +14,10 @@
 
 package routers
 
+import (
+	"github.com/Unknwon/gowalker/models"
+)
+
 // ApiRouter serves API service.
 type ApiRouter struct {
 	baseRouter
@@ -22,4 +26,17 @@ type ApiRouter struct {
 // Badge redirector.
 func (this *ApiRouter) Badge() {
 	this.Redirect("http://b.repl.ca/v1/Go_Walker-API_Documentation-green.png", 302)
+}
+
+func (this *ApiRouter) Search() {
+	var result struct {
+		Packages []string `json:"packages"`
+	}
+	pinfos := models.SearchPkg(this.GetString("key"), false)
+	result.Packages = make([]string, len(pinfos))
+	for i := range pinfos {
+		result.Packages[i] = pinfos[i].ImportPath
+	}
+	this.Data["json"] = &result
+	this.ServeJson(true)
 }

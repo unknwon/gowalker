@@ -113,6 +113,7 @@ func main() {
 	beego.Router("/about", &routers.AboutRouter{})
 
 	beego.Router("/api/v1/badge", &routers.ApiRouter{}, "get:Badge")
+	beego.Router("/api/v1/search", &routers.ApiRouter{}, "get:Search")
 
 	// Register template functions.
 	beego.AddFuncMap("i18n", i18n.Tr)
