@@ -27,11 +27,12 @@ import (
 	"time"
 
 	"github.com/Unknwon/com"
+	"github.com/astaxie/beego"
+
 	"github.com/Unknwon/gowalker/doc"
+	"github.com/Unknwon/gowalker/hv"
 	"github.com/Unknwon/gowalker/models"
 	"github.com/Unknwon/gowalker/utils"
-	"github.com/Unknwon/hv"
-	"github.com/astaxie/beego"
 )
 
 var (
@@ -506,7 +507,13 @@ func renderDoc(this *HomeRouter, pdoc *hv.Package, q, tag, docPath string) bool 
 		if i := strings.Index(pdoc.Files[0].BrowseUrl, "?"); i > -1 {
 			query = pdoc.Files[0].BrowseUrl[i:]
 		}
-		this.Data["ViewFilePath"] = path.Dir(pdoc.Files[0].BrowseUrl) + "/" + query
+
+		viewFilePath := path.Dir(pdoc.Files[0].BrowseUrl) + "/" + query
+		// GitHub URL change.
+		if strings.HasPrefix(viewFilePath, "github.com") {
+			viewFilePath = strings.Replace(viewFilePath, "blob/", "tree/", 1)
+		}
+		this.Data["ViewFilePath"] = viewFilePath
 	}
 
 	var err error
@@ -798,10 +805,6 @@ func generatePage(this *HomeRouter, pdoc *hv.Package, q, tag string) bool {
 
 	this.Data["VCS"] = pdoc.Vcs
 
-	// GitHub URL change.
-	if strings.HasPrefix(pdoc.ProjectPath, "github.com") {
-		pdoc.ProjectPath = strings.Replace(pdoc.ProjectPath, "blob/", "tree/", 1)
-	}
 	this.Data["ProPath"] = pdoc.ProjectPath
 	this.Data["ProDocPath"] = path.Dir(pdoc.ImportPath)
 
@@ -834,6 +837,7 @@ func generatePage(this *HomeRouter, pdoc *hv.Package, q, tag string) bool {
 	} else {
 		this.Data["IsCmd"] = true
 	}
+	this.Data["IsCgo"] = pdoc.IsCgo
 
 	this.Data["Rank"] = pdoc.Rank
 	this.Data["Views"] = pdoc.Views + 1

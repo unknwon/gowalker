@@ -30,8 +30,9 @@ import (
 	"strings"
 
 	"github.com/Unknwon/com"
+
+	"github.com/Unknwon/gowalker/hv"
 	"github.com/Unknwon/gowalker/utils"
-	"github.com/Unknwon/hv"
 )
 
 // TODO: specify with command line flag

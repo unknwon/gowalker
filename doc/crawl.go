@@ -29,13 +29,13 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Unknwon/gowalker/models"
-	"github.com/Unknwon/gowalker/utils"
-
 	"github.com/Unknwon/com"
-	"github.com/Unknwon/hv"
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/httplib"
+
+	"github.com/Unknwon/gowalker/hv"
+	"github.com/Unknwon/gowalker/models"
+	"github.com/Unknwon/gowalker/utils"
 )
 
 type crawlResult struct {

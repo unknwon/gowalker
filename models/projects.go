@@ -21,9 +21,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Unknwon/gowalker/utils"
-	"github.com/Unknwon/hv"
 	"github.com/astaxie/beego"
+
+	"github.com/Unknwon/gowalker/hv"
+	"github.com/Unknwon/gowalker/utils"
 )
 
 /*
@@ -246,7 +247,7 @@ func SaveProject(pinfo *hv.PkgInfo, pdecl *PkgDecl, pfuncs []PkgFunc, imports []
 	if imports != nil && isMaster && !utils.IsGoRepoPath(pinfo.ImportPath) {
 		// Other packages.
 		for _, v := range imports {
-			if !utils.IsGoRepoPath(v) {
+			if !utils.IsGoRepoPath(v) && v != "C" {
 				// Only count non-standard library.
 				updateImportInfo(v, int(pinfo.Id), int(pinfo.Rank), true)
 			}

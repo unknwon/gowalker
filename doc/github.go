@@ -23,8 +23,9 @@ import (
 	"strings"
 
 	"github.com/Unknwon/com"
+
+	"github.com/Unknwon/gowalker/hv"
 	"github.com/Unknwon/gowalker/utils"
-	"github.com/Unknwon/hv"
 )
 
 var (
@@ -193,8 +194,8 @@ func getGithubDoc(client *http.Client, match map[string]string, tag, savedEtag s
 			PkgInfo: &hv.PkgInfo{
 				ImportPath:  match["importPath"],
 				ProjectName: match["repo"],
-				ProjectPath: com.Expand("github.com/{owner}/{repo}/blob/{tag}", match),
-				ViewDirPath: com.Expand("github.com/{owner}/{repo}/blob/{tag}{dir}", match),
+				ProjectPath: com.Expand("github.com/{owner}/{repo}/tree/{tag}", match),
+				ViewDirPath: com.Expand("github.com/{owner}/{repo}/tree/{tag}{dir}", match),
 				Tags:        strings.Join(tags, "|||"),
 				Ptag:        commit,
 				Vcs:         "GitHub",

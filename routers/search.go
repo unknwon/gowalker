@@ -1,4 +1,4 @@
-// Copyright 2013 Unknown
+// Copyright 2013-2014 Unknown
 //
 // Licensed under the Apache License, Version 2.0 (the "License"): you may
 // not use this file except in compliance with the License. You may obtain
@@ -17,8 +17,8 @@ package routers
 import (
 	"strings"
 
+	"github.com/Unknwon/gowalker/hv"
 	"github.com/Unknwon/gowalker/models"
-	"github.com/Unknwon/hv"
 )
 
 // SearchRouter serves search pages.

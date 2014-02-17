@@ -21,7 +21,8 @@ import (
 	"strings"
 
 	"github.com/Unknwon/com"
-	"github.com/Unknwon/hv"
+
+	"github.com/Unknwon/gowalker/hv"
 )
 
 var (

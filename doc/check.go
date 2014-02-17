@@ -22,10 +22,11 @@ import (
 	"strings"
 	"time"
 
+	"github.com/astaxie/beego"
+
+	"github.com/Unknwon/gowalker/hv"
 	"github.com/Unknwon/gowalker/models"
 	"github.com/Unknwon/gowalker/utils"
-	"github.com/Unknwon/hv"
-	"github.com/astaxie/beego"
 )
 
 type requestType int

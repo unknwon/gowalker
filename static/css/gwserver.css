@@ -89,7 +89,7 @@ code, pre {
 }
 .btn-default {
     position: relative;
-    padding: 4px 12px;
+    padding: 5px 12px;
     margin-top: 0px;
     color: #333;
     text-shadow: 0px 1px 0px #FFF;
@@ -210,6 +210,9 @@ code, pre {
 .label-sm {
 	vertical-align: middle;
 }
+.alert-success, .alert-info, .alert-warning, .alert-danger {
+    text-shadow: 0 0px 0 rgba(255,255,255,.5);
+}
 .readme {
     padding: 10px 15px;
     border: 1px solid #d9d9d9;
@@ -281,6 +284,8 @@ pre .bui {  color: #009393;}
     background: url("/static/img/top.png") no-repeat scroll 0% 0% transparent;
 }       
 #example_box, #search_export_box {
+    padding: 5px;
+    border: 1px solid rgb(221, 221, 221);
 	width: 400px;
 } 
 footer {

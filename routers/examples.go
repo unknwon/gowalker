@@ -23,8 +23,8 @@ import (
 	"strings"
 
 	"github.com/Unknwon/gowalker/doc"
+	"github.com/Unknwon/gowalker/hv"
 	"github.com/Unknwon/gowalker/models"
-	"github.com/Unknwon/hv"
 )
 
 // ExamplesRouter serves examples pages.
