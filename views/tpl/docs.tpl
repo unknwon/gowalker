@@ -102,7 +102,8 @@
 <h3 id="{{.Name}}">
 	func 
 	<a target="_blank" href="http{{$secure}}://{{.URL}}">{{.Name}}</a> 
-	<button class="btn btn-info btn-xs" data-toggle="collapse" data-target="#collapse_{{.Name}}" onclick="viewCode(decl|||{{.Name}});">View Code</button>
+	<button class="btn btn-info btn-xs" data-toggle="collapse" data-target="#collapse_{{.Name}}">View Code</button>
+	<!-- onclick="viewCode(decl|||{{.Name}});" -->
 </h3>
 
 <div class="panel panel-default">
@@ -166,7 +167,7 @@
 <h4 id="{{.Name}}">
 	func 
 	<a target="_blank" href="http{{$secure}}://{{.URL}}">{{.Name}}</a> 
-	<button class="btn btn-info btn-xs" data-toggle="collapse" data-target="#collapse_{{.Name}}" onclick="viewCode(decl|||{{.Name}});">View Code</button>
+	<button class="btn btn-info btn-xs" data-toggle="collapse" data-target="#collapse_{{.Name}}">View Code</button>
 </h4>
 
 <div class="panel panel-default">
@@ -194,7 +195,7 @@
 <h4 id="{{.FullName}}">
 	func 
 	<a target="_blank" href="http{{$secure}}://{{.URL}}">{{.Name}}</a> 
-	<button class="btn btn-info btn-xs" data-toggle="collapse" data-target="#collapse_{{.FullName}}" onclick="viewCode(decl|||{{.Name}});">View Code</button>
+	<button class="btn btn-info btn-xs" data-toggle="collapse" data-target="#collapse_{{.FullName}}">View Code</button>
 </h4>
 
 <div class="panel panel-default">
