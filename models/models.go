@@ -23,7 +23,6 @@ import (
 	"os/user"
 	"regexp"
 	"runtime"
-	//"strings"
 	"time"
 
 	"github.com/astaxie/beego"
@@ -157,27 +156,6 @@ func GetGoSubrepo() (pinfos []hv.PkgInfo) {
 	return pinfos
 }
 
-// SearchRawDoc returns results for raw page,
-// which are package that import path and synopsis contains keyword.
-// func SearchRawDoc(key string, isMatchSub bool) (pkgInfos []*hv.PkgInfo, err error) {
-// 	// Connect to database.
-// 	q := connDb()
-// 	defer q.Close()
-
-// 	// TODO: need to use q.OmitFields to speed up.
-// 	// Check if need to match sub-packages.
-// 	if isMatchSub {
-// 		condition := qbs.NewCondition("pro_name != ?", "Go")
-// 		condition2 := qbs.NewCondition("path like ?", "%"+key+"%").Or("synopsis like ?", "%"+key+"%")
-// 		err = q.Condition(condition).Condition(condition2).Limit(50).OrderByDesc("views").FindAll(&pkgInfos)
-// 		return pkgInfos, err
-// 	}
-
-// 	condition := qbs.NewCondition("pro_name like ?", "%"+key+"%").Or("synopsis like ?", "%"+key+"%")
-// 	err = q.Condition(condition).Limit(50).OrderByDesc("views").FindAll(&pkgInfos)
-// 	return pkgInfos, err
-// }
-
 // GetPkgExams returns user examples.
 func GetPkgExams(path string) (pkgExams []PkgExam, err error) {
 	err = x.Where("path = ?", path).Find(&pkgExams)
@@ -189,55 +167,6 @@ func GetAllExams() (pkgExams []PkgExam, err error) {
 	err = x.Asc("path").Find(&pkgExams)
 	return pkgExams, err
 }
-
-// GetLabelsPageInfo returns all data that used for labels page.
-// One function is for reducing database connect times.
-// func GetLabelsPageInfo() (WFPros, ORMPros, DBDPros, GUIPros, NETPros, TOOLPros []*hv.PkgInfo, err error) {
-// 	// Connect to database.
-// 	q := connDb()
-// 	defer q.Close()
-
-// 	condition := qbs.NewCondition("labels like ?", "%$wf|%")
-// 	err = q.Limit(10).Condition(condition).OrderByDesc("views").FindAll(&WFPros)
-// 	condition = qbs.NewCondition("labels like ?", "%$orm|%")
-// 	err = q.Limit(10).Condition(condition).OrderByDesc("views").FindAll(&ORMPros)
-// 	condition = qbs.NewCondition("labels like ?", "%$dbd|%")
-// 	err = q.Limit(10).Condition(condition).OrderByDesc("views").FindAll(&DBDPros)
-// 	condition = qbs.NewCondition("labels like ?", "%$gui|%")
-// 	err = q.Limit(10).Condition(condition).OrderByDesc("views").FindAll(&GUIPros)
-// 	condition = qbs.NewCondition("labels like ?", "%$net|%")
-// 	err = q.Limit(10).Condition(condition).OrderByDesc("views").FindAll(&NETPros)
-// 	condition = qbs.NewCondition("labels like ?", "%$tool|%")
-// 	err = q.Limit(10).Condition(condition).OrderByDesc("views").FindAll(&TOOLPros)
-// 	return WFPros, ORMPros, DBDPros, GUIPros, NETPros, TOOLPros, nil
-// }
-
-// UpdateLabelInfo updates project label information, returns false if the project does not exist.
-// func UpdateLabelInfo(path string, label string, add bool) bool {
-// 	info := new(hv.PkgInfo)
-// 	err := q.WhereEqual("path", path).Find(info)
-// 	if err != nil {
-// 		return false
-// 	}
-
-// 	i := strings.Index(info.Labels, "$"+label+"|")
-// 	switch {
-// 	case i == -1 && add: // Add operation and does not contain.
-// 		info.Labels += "$" + label + "|"
-// 		_, err = q.Save(info)
-// 		if err != nil {
-// 			beego.Error("models.UpdateLabelInfo -> add:", path, err)
-// 		}
-// 	case i > -1 && !add: // Delete opetation and contains.
-// 		info.Labels = strings.Replace(info.Labels, "$"+label+"|", "", 1)
-// 		_, err = q.Save(info)
-// 		if err != nil {
-// 			beego.Error("models.UpdateLabelInfo -> delete:", path, err)
-// 		}
-// 	}
-
-// 	return true
-// }
 
 var buildPicPattern = regexp.MustCompile(`\[+!+\[+([a-zA-Z ]*)+\]+\(+[a-zA-z]+://[^\s]*`)
 
