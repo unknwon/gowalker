@@ -5,8 +5,9 @@
 	{{template "base/alert.html" .}}
     <div>
         <h1>{{i18n .Lang "Index"}}</h1>
+        {{$lang := .Lang}}
         {{with .IndexStats}}
-        <p>Statistic information: <b>{{.ProNum}}</b> projects, <b>{{.DeclNum}}</b> documentations and <b>{{.FuncNum}}</b> functions.</p>
+        <p>{{i18n $lang "Statistic information"}}: <b>{{.ProNum}}</b> {{i18n $lang "projects"}}, <b>{{.DeclNum}}</b> {{i18n $lang "documentations and"}} <b>{{.FuncNum}}</b> {{i18n $lang "functions"}}.</p>
         {{end}}
     
         <div>
