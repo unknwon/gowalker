@@ -8,13 +8,13 @@
             
             <form id="search_form" class="modal-form">
                 <div class="modal-body">
-                    <input id="search_export_box" autofocus="autofocus" autocomplete="off" class="search-export" style="width: 400px;" type="text" placeholder="Input type, method or function name">
+                    <input id="search_export_box" autofocus="autofocus" autocomplete="off" class="search-export" type="text" placeholder="Input type, method or function name">
                 </div>
                     
                 {{str2html .ExportDataSrc}}
                 
                 <div class="modal-footer">
-                    <button id="close_button" type='button' class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+                    <button id="close_button" type='button' class="btn-default" data-dismiss="modal" aria-hidden="true">Close</button>
                     <button id="search_export_button" class="btn btn-primary" type="submit">Go!</button>
                 </div>
                     

@@ -8,11 +8,11 @@
             <form id="example_form" class="modal-form" action="/example">
                 <input type="hidden" name="q" value="{{.ImportPath}}">	
                 <div class="modal-body">
-                    <input id="example_box" autofocus="autofocus" style="width: 400px;" type="text" name="gist" placeholder="{{i18n .Lang "Please type Gist address"}}">
+                    <input id="example_box" autofocus="autofocus" type="text" name="gist" placeholder="{{i18n .Lang "Please type Gist address"}}">
                 </div>
                 
                 <div class="modal-footer">
-                    <button type='button' class="btn" data-dismiss="modal" aria-hidden="true">{{i18n .Lang "Close"}}</button>
+                    <button type='button' class="btn-default" data-dismiss="modal" aria-hidden="true">{{i18n .Lang "Close"}}</button>
                     <button class="btn btn-primary" type="submit">{{i18n .Lang "Gist!"}}</button>
                 </div>
             </form>
