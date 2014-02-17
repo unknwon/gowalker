@@ -10,11 +10,11 @@
             <g:plusone></g:plusone>
         </h2>
 
-   		<form class="form-inline" action="/">
-    		<div class="form-group col-md-6">
-            	<input autocomplete="off" class="typeahead form-control" type="text" placeholder="{{i18n .Lang "Type import path to add and view or use keywords to search"}}" name="q" style="position: relative; display: inline-block; direction: ltr;">
+   		<form class="form-inline search-from" action="/">
+    		<div class="form-group col-md-6 main-search">
+            	<input autocomplete="off" class="typeahead form-control" type="text" placeholder="{{i18n .Lang "Type import path to add and view or use keywords to search"}}" name="q">
             </div>
-            <button class="btn btn-success btn-lg" style="border-radius: 0px;" type="submit"><i class="icon-search"></i> {{i18n .Lang "I'm feeling lucky"}}</button>
+            <button class="btn btn-success btn-lg btn-search" type="submit"><i class="icon-search"></i> {{i18n .Lang "I'm feeling lucky"}}</button>
     	</form>
     </div>
 </div>
@@ -26,7 +26,7 @@
 			<h4><b>What is this?</b></h4>
 			<p>
 				Go Walker is a web server that generates <a target="_blank" href="http://golang.org/">Go</a> projects API documentation and
-				<button class="btn feature" title=""
+				<button class="btn-default feature" title=""
 				        data-content="Hacker view provides source file based project code view for Go Standard Library, Go Subrepo and command line project."
 				        data-placement="top" data-toggle="popover" data-original-title="Hacker View">Hacker View</button>
 				on the fly for the projects on <b><a target="_blank" href="https://bitbucket.org/">Bitbucket</a></b>, <b><a target="_blank" href="https://github.com/">GitHub</a></b>, <b><a target="_blank" href="http://code.google.com/">Google Code</a></b>, <b><a target="_blank" href="https://launchpad.net/">Launchpad</a></b> and <b><a target="_blank" href="http://git.oschina.net/">Git @ OSC</a></b>.
@@ -34,19 +34,19 @@
 
 			<p>
 				Awesome features
-                <button class="btn feature" title=""
+                <button class="btn-default feature" title=""
                         data-content="View function and method code with nice highlight in the same page, reduce rake up space and do more work at the same time."
                         data-placement="bottom" data-toggle="popover" data-original-title="Code View">Code View</button>
 
-                <button class="btn feature" title=""
+                <button class="btn-default feature" title=""
                         data-content="Quick jump to functions, methods and types from imported packages, reduce time to find."
                         data-placement="top" data-toggle="popover" data-original-title="Link Jump">Link Jump</button>
 
-                <button class="btn feature" title=""
+                <button class="btn-default feature" title=""
                         data-content="Add examples for your favorite projects through Github Gist." data-placement="bottom"
                         data-toggle="popover" data-original-title="Add Example">Add Example</button>
 
-                <button class="btn feature" title=""
+                <button class="btn-default feature" title=""
                         data-content="Don't worry if you use old version of a project, now you can view documentation by its Tags!"
                         data-placement="right" data-toggle="popover" data-original-title="View by Tag">Doc Tag</button>
 

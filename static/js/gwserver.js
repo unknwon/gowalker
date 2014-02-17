@@ -4,6 +4,8 @@
  *  @author: chenwenli <kapa2robert@gmail.com>, Unknown <joe2010xtmf@163.com>
  */
 
+isHv = false;
+
 (function () {
     // Fit navbar padding.
     Responsive();
@@ -18,16 +20,17 @@
 
         if (delta >= 0) {
             if (document.getElementById("sidebar") == null && isHv == false) {
-                navbarFrame.className = "navbar navbar-default navbar-fixed-top";
+                navbarFrame.className = "navbar navbar-inverse navbar-fixed-top";
                 body.style.paddingTop = "60px";
             } else {
-                navbarFrame.className = "navbar navbar-default";
+                navbarFrame.className = "navbar navbar-inverse";
                 body.style.paddingTop = "0px";
             }
-
+            document.getElementById("global_search_form").style.display = "block";
         } else {
-            navbarFrame.className = "navbar navbar-default";
+            navbarFrame.className = "navbar navbar-inverse";
             body.style.paddingTop = "0px";
+            document.getElementById("global_search_form").style.display = "none";
         }
     }
 

@@ -5,11 +5,11 @@
 	{{template "base/alert.html" .}}
     <div>
         <h1>{{i18n .Lang "Function"}}</h1>
-        <form class="form-inline" action="/function">
-            <div class="form-group col-md-6">
-                <input class="form-control" type="text" placeholder="{{i18n .Lang "Type keywords to search"}}" name="q" value="{{.Keyword}}" style="position: relative; display: inline-block; direction: ltr;">
+        <form class="form-inline search-from" action="/function">
+            <div class="form-group col-md-6 main-search">
+                <input class="typeahead form-control" type="text" placeholder="{{i18n .Lang "Type keywords to search"}}" name="q" value="{{.Keyword}}">
             </div>
-            <button class="btn btn-success btn-lg" style="border-radius: 0px;" type="submit"><i class="icon-search"></i> {{i18n .Lang "Let's go!"}}</button>
+            <button class="btn btn-success btn-lg btn-search" type="submit"><i class="icon-search"></i> {{i18n .Lang "Let's go!"}}</button>
         </form>
         <br>
 

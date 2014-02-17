@@ -1,0 +1,286 @@
+/*!
+ * Go Walker Server (http://gowalker.org)
+ * Copyright 2014 Go Walker.
+ */
+
+body {
+	padding-top: 70px;
+	font-size: 14px;
+	font-family:'Microsoft Yahei', 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+a {
+    color: #428BCA;
+    text-decoration: none;
+}
+a:hover, a:focus {
+    color: #2A6496;
+    text-decoration: underline;
+}
+pre {
+    margin: 0px;
+    border-radius: 0px;
+}
+code, pre {
+    font-family: Monaco,Menlo,Consolas,"Courier New",monospace;
+}
+.container {
+    max-width: none !important;
+    width: 1000px;
+}
+.navbar {
+	min-height: 45px;
+}
+.navbar-brand {
+	font-size: 18px;
+	line-height: 20px;
+	height: 45px;
+	padding: 15px 15px 5px 0px;
+}
+.navbar-nav > li > a {
+	font-size: 15px;
+	padding-top: 15px;
+	padding-bottom: 15px;
+	border-right: 1px solid #e5e5e5;
+}
+.navbar-inverse .navbar-brand {
+	color: #777;
+}
+.navbar-inverse .navbar-brand:hover, .navbar-inverse .navbar-brand:focus {
+    color: #5E5E5E;
+    background-color: transparent;
+}
+.navbar-inverse .navbar-nav > .active > a, 
+.navbar-inverse .navbar-nav > .active > a:hover, 
+.navbar-inverse .navbar-nav > .active > a:focus,
+.navbar-inverse .navbar-nav > .open > a,
+.navbar-inverse .navbar-nav > .open > a:hover,
+.navbar-inverse .navbar-nav > .open > a:focus {
+    color: #555;
+    background-color: transparent;
+}
+.nav .open > a, .nav .open > a:hover, .nav .open > a:focus {
+	border-color: #e5e5e5;
+}
+.form-control {
+	height: 34px;
+}
+.navbar-form .form-control {
+	height: 34px;
+	padding: 2px 14px;
+}
+.navbar-form input {
+	margin-top: 7px;
+}
+.search-from .col-md-6 {
+	width: 470px;
+}
+.form-inline .main-search {
+	padding-left: 0px;
+	padding-right: 0px;
+}
+.form-inline .typeahead {
+	width: 470px;
+}
+.btn-search {
+	padding: 7px 14px;
+	margin-left: 0px;
+	border-radius: 0px;
+}
+.unstyled {
+    margin-left: 0px;
+    list-style: none outside none;
+    padding: 0px;
+}
+.btn-default {
+    position: relative;
+    padding: 4px 12px;
+    margin-top: 0px;
+    color: #333;
+    text-shadow: 0px 1px 0px #FFF;
+    white-space: nowrap;
+    font-family: Microsoft Yahei,Arial,Helvetica,sans-serif;
+    font-weight: bold;
+    font-size: 13px;
+    text-align: center;
+    vertical-align: middle;
+    cursor: default;
+    background-color: #F3F3F3;
+    background-image: linear-gradient(to bottom, #F5F5F5, #F1F1F1);
+    background-repeat: repeat-x;
+    border: 1px solid #DCDCDC;
+    border-radius: 2px;
+    box-shadow: none;
+}
+.btn-inverse {
+    border: 1px solid #464646;
+    color: #FFF;
+    background-color: #515151;
+    background-image: linear-gradient(to bottom, #515151, #515151);
+    background-repeat: repeat-x;
+}
+.btn-inverse:hover, .btn-inverse:active, .btn-inverse.active, .btn-inverse:focus {
+    border: 1px solid #3A3A3A;
+    color: #FFF;
+    background-image: linear-gradient(to bottom, #515151, #444);
+    background-repeat: repeat-x;
+    background-color: #444;
+}
+.btn-inverse:hover, .btn-inverse:active, .btn-inverse.active, .btn-inverse:focus {
+    border: 1px solid #3A3A3A;
+    color: #FFF;
+    background-image: linear-gradient(to bottom, #515151, #444);
+    background-repeat: repeat-x;
+    background-color: #444;
+}
+.btn-inverse:focus {
+    border: 1px solid #464646;
+    box-shadow: 0px 0px 0px 1px #FFF inset;
+}
+.btn-inverse:active, .btn-inverse.active {
+    border: 1px solid #2D2D2D;
+    background-color: #464646;
+    background-image: linear-gradient(to bottom, #515151, #373737);
+    background-repeat: repeat-x;
+}
+.readme {
+    padding: 10px 15px;
+    border: 1px solid #D9D9D9;
+    background-color: #FAFAFA;
+    border-radius: 3px;
+}
+.label {
+	font-size: 90%;
+}
+.label-info {
+    background-color: #3A87AD;
+}
+.nav-tabs-google > li > a {
+	padding: 8px 8px;
+}
+.label-success, .badge-success {
+    background-color: #468847;
+}
+.label-inverse, .badge-inverse {
+    background-color: #333;
+}
+.dropdown-menu > li > a:hover, .dropdown-menu > li > a:focus {
+    color: #FFF;
+    text-decoration: none;
+    background-image: linear-gradient(to bottom, #428BCA 0px, #428BCA 100%);
+    background-color: #428BCA;
+}
+.dropdown-menu li > a:hover, .dropdown-menu li > a:focus, .dropdown-submenu:hover > a, .dropdown-submenu:focus > a  {
+    color: #FFF;
+    text-decoration: none;
+    background-image: linear-gradient(to bottom, #428BCA 0px, #428BCA 100%);
+    background-color: #428BCA;
+}
+#project_nav {
+    padding: 9px;
+}
+.label-sm {
+    font-size: 50%;
+}
+.dropdown-menu {
+    max-height: 300px;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+.version {
+  font-size: 50%;
+  color: rgb(204, 154, 204);
+}
+.page-header {
+	min-height: 110px;
+}
+.bs-docs-sidenav .icon-chevron-right {
+	opacity: 0.25;
+	float: right;
+	margin-top: 2px;
+	margin-right: -6px;
+}
+.bs-docs-sidenav a:hover .icon-chevron-right {
+	opacity: 0.5;
+}
+.bs-docs-sidenav li {
+	min-width: 200px;
+}
+.nav-stacked > li + li{
+	margin-top: 0px;
+}
+.docsright {
+	min-width: 740px; 
+}
+.label-sm {
+	vertical-align: middle;
+}
+.readme {
+    padding: 10px 15px;
+    border: 1px solid #d9d9d9;
+    background-color:#fafafa;
+    border-radius: 3px;
+    -moz-border-radius: 3px;
+    -webkit-border-radius: 3px;    
+}
+.code {
+	border-top: 0px;
+	margin-top: -10px;
+}
+.panel {
+    border: 0px;
+    border-radius: 0px;
+}
+.panel-ex {
+	border: 1px solid transparent; 
+	border-color: rgb(221, 221, 221);
+}
+pre {
+	margin: 0px;
+	border-radius: 0px;
+}
+.pre-var {
+	margin-top: 13px;
+	margin-bottom: 13px;
+}
+.nav-tabs.nav-stacked > li > a {
+    border: 1px solid rgb(221, 221, 221);
+}
+.modal-content {
+	border-radius: 0px;
+}
+/* Comment, String, Internal, External, Return/Break, Keyword, Boolean/nil, Builtin */
+pre .com {  color: #007500;} 
+pre .boo {  color: #0080FF;} 
+pre .str {  color: #796400;}
+pre .int {  color: #5A5AAD;}
+pre .ext {  color: #6F00D2;}
+pre .ret {  color: #CE0000;}
+pre .key {  color: #F00078;}
+pre .bui {  color: #009393;}
+
+.backToTop {   
+	display: none;   
+	width: 18px; 
+	line-height: 1.2; 
+	padding: 5px 0;    
+	background-color: #000;   
+	color: #fff;    
+	font-size: 12px; 
+	text-align: center;  
+	position: fixed;  
+	_position: absolute;  
+	right: 10px;    
+	bottom: 100px;    
+	_bottom: "auto";  
+	cursor: pointer;  
+}                               
+.backToTop {
+    bottom: 20px;
+    right: 20px;
+    height: 38px;
+    width: 38px;
+    background: url("/static/img/top.png") no-repeat scroll 0% 0% transparent;
+}
+footer {
+    background: url('/static/img/noise_lines.png') repeat scroll 0% 0% transparent;
+}

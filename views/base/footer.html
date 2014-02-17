@@ -33,7 +33,7 @@
 			<script type="text/javascript" src="/static/js/bootstrap.min.js"></script>
 			<script type='text/javascript' src='/static/js/gwserver.js'></script>
 
-			<p><strong>{{i18n .Lang "Copyright"}} © 2013 Go Walker</strong></p>
+			<p><strong>{{i18n .Lang "Copyright"}} © 2013-2014 Go Walker</strong></p>
             {{if eq .Lang "en-US"}}
 			<p>Website built by <i class="icon-user"></i> <a target="_blank" href="https://github.com/Unknwon">@Unknown</a>. Powered by <a target="_blank" href="http://gowalker.org/github.com/astaxie/beego"><i class="icon-bold"></i>eego</a> and <a target="_blank" href="http://gowalker.org/github.com/lunny/xorm">Xorm</a>.</p>
 			{{if .IsHome}}<p>Based on <a target="_blank" href="http://getbootstrap.com/">Bootstrap</a>. Icons from <a target="_blank" href="http://fortawesome.github.io/Font-Awesome/">Font Awesome</a>.</p>{{end}}
@@ -45,7 +45,7 @@
 			{{end}}
 
 		    <div class="btn-group dropup">
-			    <button class="btn dropdown-toggle" data-toggle="dropdown">{{.CurLang}} <span class="caret"></span></button>
+			    <button class="btn-default dropdown-toggle" data-toggle="dropdown">{{.CurLang}} <span class="caret"></span></button>
 			    <ul class="dropdown-menu">
 				{{$keyword := .Keyword}}
 			    	{{range .RestLangs}}

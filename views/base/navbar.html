@@ -1,4 +1,4 @@
-<div id="navbar_frame" class="navbar navbar-default navbar-fixed-top">
+<div id="navbar_frame" class="navbar navbar-inverse navbar-fixed-top">
 	<div class="container" style="padding-left: 30px;">
 		<a class="navbar-brand" href="/">
 			Go Walker
@@ -27,22 +27,15 @@
 				<a href="/example">{{i18n .Lang "Example"}}</a>
 			</li>
 
-<!--
 			<li class="dropdown">
 				<a class="dropdown-toggle" data-toggle="dropdown" href="#">
 					{{i18n .Lang "More"}}.
 					<b class="caret"></b>
 				</a>
 				<ul class="dropdown-menu">
-					<li><a href="http://ctw.gowalker.org">{{i18n .Lang "Cross the Wall"}}</a></li>
-					<li><a href="http://res.gowalker.org">{{i18n .Lang "Resources"}}</a></li>
 					<li><a href="http://gowalker.org/api">{{i18n .Lang "API service"}}</a></li>
-					<li class="divider"></li>
-					<li><a href="http://golangnews.com">Golang News</a></li>
-					<li><a href="http://gotalks.io">Go Talks</a></li>
 				</ul>
 			</li>
--->
 			
 			<li {{if .IsAbout}}class="active"{{end}}>
 				<a href="/about">{{i18n .Lang "About"}}</a>
@@ -74,12 +67,10 @@
 		</div>
 -->
 
-		<div class="navbar-right">
-			<form  class="navbar-form form-inline" action="/search">
-				<div class="form-group">
-					<input type="text" class="form-control" placeholder="{{i18n .Lang "Search"}}" name="q">
-				</div>
-			</form>
-		</div>
+		<form id="global_search_form" class="navbar-form navbar-right" action="/search">
+			<div class="form-group">
+				<input type="text" class="form-control" placeholder="{{i18n .Lang "Search"}}" name="q">
+			</div>
+		</form>
 	</div>
 </div>
