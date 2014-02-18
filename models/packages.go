@@ -28,21 +28,47 @@ import (
 )
 
 // SearchPkg returns packages that import path and synopsis contains keyword.
-func SearchPkg(key string, includeSynopsis bool) (pinfos []hv.PkgInfo) {
+// 0 = false, 1 = true, other = undefined
+func SearchPkg(key string, isCmd, isCgo, isGoRepo, isGoSubrepo int, isSynopsis bool) (pinfos []hv.PkgInfo) {
 	key = strings.TrimSpace(key)
 	if len(key) == 0 {
 		return nil
 	}
 	keys := strings.Split(key, " ")
-	var err error
-	if includeSynopsis {
-		err = x.Limit(200).Desc("rank").Where("import_path like '%" + keys[0] + "%'").
-			Or("synopsis like '%" + keys[0] + "%'").Find(&pinfos)
-	} else {
-		err = x.Limit(200).Desc("rank").Where("import_path like '%" + keys[0] + "%'").
-			Find(&pinfos)
+	if keys[0] == "" {
+		return nil
 	}
-	if err != nil {
+
+	sess := x.Limit(200).Desc("rank").Where("id > ?", 0)
+
+	if isCmd == 0 {
+		sess = sess.And("is_cmd = ?", false)
+	} else if isCmd == 1 {
+		sess = sess.And("is_cmd = ?", true)
+	}
+	if isCgo == 0 {
+		sess = sess.And("is_cgo = ?", false)
+	} else if isCgo == 1 {
+		sess = sess.And("is_cgo = ?", true)
+	}
+	if isGoRepo == 0 {
+		sess = sess.And("is_go_repo = ?", false)
+	} else if isGoRepo == 1 {
+		sess = sess.And("is_go_repo = ?", true)
+	}
+	if isGoSubrepo == 0 {
+		sess = sess.And("is_go_subrepo = ?", false)
+	} else if isGoSubrepo == 1 {
+		sess = sess.And("is_go_subrepo = ?", true)
+	}
+
+	sess = sess.And("import_path like '%" + keys[0] + "%'")
+
+	if isSynopsis {
+		sess = sess.Or("synopsis like '%" + keys[0] + "%'")
+	}
+
+	if err := sess.Find(&pinfos); err != nil {
 		beego.Error("models.SearchPkg -> ", err.Error())
 		return pinfos
 	}

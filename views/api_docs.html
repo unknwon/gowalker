@@ -1,0 +1,123 @@
+{{template "base/base.html" .}}
+{{define "head"}}<title>API {{i18n .Lang "Documentation"}} | Go Walker: {{i18n .Lang "Go API documentation and source code view"}}</title>{{end}}
+{{define "body"}}
+<div>
+	{{template "base/alert.html" .}}
+	<p>
+        <h1>{{i18n .Lang "API service"}}</h1>
+        {{if eq .Lang "en-US"}}
+        API service provides open access to Go Walker database, all data will be returned as JSON format, the base request URL is
+        {{else if eq .Lang "zh-CN"}}
+        API 服务提供对 Go Walker 数据库的开放搜索，所有的数据都会以 JSON 的格式返回，根请求 URL 为
+        {{end}}
+        <a href="https://gowalker.org/api/v1">https://gowalker.org/api/v1</a>.
+	</p>
+    {{if eq .Lang "en-US"}}
+    <div>
+    	<h3>Search packages <small><span class="label label-success">GET</span></small></h3>
+    	<p>
+    		Request address: <code>/search</code>
+    	</p>
+    	<table class="table table-bordered">
+    		<thead>
+    			<tr>
+    				<th>Parameter</th>
+	    			<th>Type</th>
+	    			<th>Required</th>
+	    			<th>Note</th>
+    			</tr>
+    		</thead>
+    		<tbody>
+    			<tr>
+    				<td><code>key</code></td>
+    				<td><code>string</code></td>
+    				<td><b>True</b></td>
+    				<td>Keywords of import path</td>
+    			</tr>
+
+    			<tr>
+    				<td><code>cmd</code></td>
+    				<td><code>string</code></td>
+    				<td>False</td>
+    				<td><b>true</b> = only show <code>main</code> packages; <b>false</b> = does not show <code>main</code> packages; otherwise, doesn't care</td>
+    			</tr>
+
+    			<tr>
+    				<td><code>cgo</code></td>
+    				<td><code>string</code></td>
+    				<td>False</td>
+    				<td><b>true</b> = only show packages that use <code>cgo</code>; <b>false</b> = does not show packages that use <code>cgo</code> ; otherwise, doesn't care</td>
+    			</tr>
+
+    			<tr>
+    				<td><code>gorepo</code></td>
+    				<td><code>string</code></td>
+    				<td>False</td>
+    				<td><b>true</b> = only show Go Standard Library; <b>false</b> = does not show Go Standard Library; otherwise, doesn't care</td>
+    			</tr>
+
+    			<tr>
+    				<td><code>gosubrepo</code></td>
+    				<td><code>string</code></td>
+    				<td>False</td>
+    				<td><b>true</b> = only show Go Subrepos; <b>false</b> = does not show Go Subrepos; otherwise, doesn't care</td>
+    			</tr>
+    		</tbody>
+    	</table>
+    </div>
+    {{else if eq .Lang "zh-CN"}}
+    <div>
+    	<h3>搜索包 <small><span class="label label-success">GET</span></small></h3>
+    	<p>
+    		请求地址：<code>/search</code>
+    	</p>
+    	<table class="table table-bordered">
+    		<thead>
+    			<tr>
+    				<th>参数名称</th>
+	    			<th>类型</th>
+	    			<th>必需</th>
+	    			<th>备注</th>
+    			</tr>
+    		</thead>
+    		<tbody>
+    			<tr>
+    				<td><code>key</code></td>
+    				<td><code>string</code></td>
+    				<td><b>True</b></td>
+    				<td>导入路径的关键字</td>
+    			</tr>
+
+    			<tr>
+    				<td><code>cmd</code></td>
+    				<td><code>string</code></td>
+    				<td>False</td>
+    				<td><b>true</b> = 只显示 <code>main</code> 包；<b>false</b> = 不显示 <code>main</code> 包；其它，无所谓</td>
+    			</tr>
+
+    			<tr>
+    				<td><code>cgo</code></td>
+    				<td><code>string</code></td>
+    				<td>False</td>
+    				<td><b>true</b> = 只显示使用 <code>cgo</code> 的包；<b>false</b> = 不显示使用 <code>cgo</code> 的包；其它，无所谓</td>
+    			</tr>
+
+    			<tr>
+    				<td><code>gorepo</code></td>
+    				<td><code>string</code></td>
+    				<td>False</td>
+    				<td><b>true</b> = 只显示 Go 标准库；<b>false</b> = 不显示 Go 标准库；其它，无所谓</td>
+    			</tr>
+
+    			<tr>
+    				<td><code>gosubrepo</code></td>
+    				<td><code>string</code></td>
+    				<td>False</td>
+    				<td><b>true</b> = 只显示 Go 子仓库；<b>false</b> = 不显示 Go 子仓库；其它，无所谓</td>
+    			</tr>
+    		</tbody>
+    	</table>
+    </div>
+    {{end}}
+</div>
+{{end}}

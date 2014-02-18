@@ -74,7 +74,7 @@ func (this *SearchRouter) Get() {
 		return
 	}
 
-	pinfos := models.SearchPkg(q, true)
+	pinfos := models.SearchPkg(q, -1, -1, -1, -1, true)
 	if len(pinfos) > 0 {
 		this.Data["IsFindPro"] = true
 		this.Data["Results"] = pinfos

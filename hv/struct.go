@@ -25,13 +25,13 @@ import (
 
 // A PkgInfo describles a project information.
 type PkgInfo struct {
-	Id         int64
-	ImportPath string `xorm:"index VARCHAR(150)"`
+	Id         int64  `json:"id"`
+	ImportPath string `xorm:"index VARCHAR(150)" json:"import_path"`
 
-	ProjectName string `xorm:"VARCHAR(50)"`
-	ProjectPath string `xorm:"VARCHAR(120)"`
-	ViewDirPath string `xorm:"VARCHAR(120)"`
-	Synopsis    string `xorm:"VARCHAR(300)"`
+	ProjectName string `xorm:"VARCHAR(50)" json:"project_name"`
+	ProjectPath string `xorm:"VARCHAR(120)" json:"project_path"`
+	ViewDirPath string `xorm:"VARCHAR(120)" json:"-"`
+	Synopsis    string `xorm:"VARCHAR(300)" json:"synopsis"`
 
 	/*
 		- Indicates whether it's a command line tool or package.
@@ -39,16 +39,16 @@ type PkgInfo struct {
 		- Indicates whether it belongs to Go standard library.
 		- Indicates whether it's developed by Go team.
 	*/
-	IsCmd, IsCgo          bool
-	IsGoRepo, IsGoSubrepo bool
+	IsCmd       bool `json:"cmd"`
+	IsCgo       bool `json:"cgo"`
+	IsGoRepo    bool `json:"go_repo"`
+	IsGoSubrepo bool `json:"go_subrepo"`
 
 	/*
 		- All tags of project.
 		eg.
 			master|||v0.6.2.0718
 		- Views of projects.
-		eg.
-			1342
 		- User viewed time(Unix-timestamp).
 		eg.
 			1374127619
@@ -56,17 +56,15 @@ type PkgInfo struct {
 		eg.
 			2013-07-16 21:09:27.48932087
 	*/
-	Tags       string `xorm:"-"`
-	Views      int64  `xorm:"index"`
-	ViewedTime int64
-	Created    int64 `xorm:"index"`
+	Tags       string `xorm:"-" json:"tags"`
+	Views      int64  `xorm:"index" json:"-"`
+	ViewedTime int64  `json:"-"`
+	Created    int64  `xorm:"index" json:"-"`
 
 	/*
 		- Rank is the benchmark of projects, it's based on BaseRank and views.
-		eg.
-			826
 	*/
-	Rank int64 `xorm:"index"`
+	Rank int64 `xorm:"index" json:"-"`
 
 	/*
 		- Package (structure) version.
@@ -79,32 +77,30 @@ type PkgInfo struct {
 		eg.
 			$tool|
 	*/
-	PkgVer int
-	Ptag   string `xorm:"VARCHAR(50)"`
-	Labels string `xorm:"TEXT"`
+	PkgVer int    `json:"-"`
+	Ptag   string `xorm:"VARCHAR(50)" json:"-"`
+	Labels string `xorm:"TEXT" json:"-"`
 
 	/*
 		- Number of projects that import this project.
-		eg.
-			11
 		- Ids of projects that import this project.
 		eg.
 			$47|$89|$5464|$8586|$8595|$8787|$8789|$8790|$8918|$9134|$9139|
 	*/
-	RefNum  int
-	RefPids string `xorm:"TEXT"`
+	RefNum  int    `json:"-"`
+	RefPids string `xorm:"TEXT" json:"-"`
 
 	/*
 		- Addtional information.
 	*/
-	Vcs      string `xorm:"-"`
-	Homepage string `xorm:"VARCHAR(100)"`
-	ForkUrl  string `xorm:"VARCHAR(150)"`
+	Vcs      string `xorm:"-" json:"-"`
+	Homepage string `xorm:"VARCHAR(100)" json:"homepage"`
+	ForkUrl  string `xorm:"VARCHAR(150)" json:"-"`
 
-	Issues, Stars, Forks int
-	Note                 string `xorm:"TEXT"`
+	Issues, Stars, Forks int    `json:"-"`
+	Note                 string `xorm:"TEXT" json:"-"`
 
-	SourceSize int64
+	SourceSize int64 `json:"-"`
 }
 
 // Value represents constants and variable
