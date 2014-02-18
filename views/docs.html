@@ -226,7 +226,7 @@
 					{{end}}.
 					{{end}}
 
-					Go Walker generated this page <i>{{.TimeSince}}</i>. <a class="btn" href="/refresh?q={{.ImportPath}}">Refresh</a>
+					Go Walker generated this page <i>{{.TimeSince}}</i>. <a class="btn-default" href="/refresh?q={{.ImportPath}}">Refresh</a>
 					{{else if eq .Lang "zh-CN"}}
 					{{if .IsHasFiles}}
 					项目 <b>{{.ProName}}</b> 共计导入 
@@ -241,7 +241,7 @@
 					{{end}}。 
 					{{end}}
 
-					Go Walker 在 <i>{{.TimeSince}}</i> 生成了此页面. <a class="btn" rel="nofollow" href="/refresh?q={{.ImportPath}}">刷新文档</a>
+					Go Walker 在 <i>{{.TimeSince}}</i> 生成了此页面. <a class="btn-default" rel="nofollow" href="/refresh?q={{.ImportPath}}">刷新文档</a>
 					{{end}}
 				</p>
 			</div>

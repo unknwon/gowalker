@@ -156,6 +156,9 @@ code, pre {
 .label-success, .badge-success {
     background-color: #468847;
 }
+.label-important {
+    background-color: #d84a38;
+}
 .label-inverse, .badge-inverse {
     background-color: #333;
 }
