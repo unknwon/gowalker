@@ -235,7 +235,7 @@ func SaveProject(pinfo *hv.PkgInfo, pdecl *PkgDecl, pfuncs []PkgFunc, imports []
 	}
 
 	if has {
-		_, err = x.Id(pinfo.Id).Update(pinfo)
+		_, err = x.Id(pinfo.Id).UseBool("is_cgo").Update(pinfo)
 	} else {
 		_, err = x.Insert(pinfo)
 	}

@@ -7,17 +7,7 @@
 		"controllers": "routers",
 		"models": "",
 		"others": [
-			"doc", "utils", "conf",
-			"$GOPATH/src/github.com/Unknwon/hv"
-		]
-	},
-	"bale": {
-		"import": "github.com/Unknwon/gowalker/gwserver/bale",
-		"dirs": [
-			"views", "static", "conf"
-		],
-		"ignore_ext": [
-			".go", ".DS_Store"
+			"doc", "utils", "conf", "hv"
 		]
 	}
 }
