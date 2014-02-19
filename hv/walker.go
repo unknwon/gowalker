@@ -447,7 +447,10 @@ var goEnvs = []struct{ GOOS, GOARCH string }{
 // Build generates documentation from given source files through 'WalkType'.
 func (w *Walker) Build(wr *WalkRes) (*Package, error) {
 	ctxt := build.Context{
-		Compiler: "gc",
+		CgoEnabled:  true,
+		ReleaseTags: build.Default.ReleaseTags,
+		BuildTags:   build.Default.BuildTags,
+		Compiler:    "gc",
 	}
 
 	if w.Pdoc.PkgDecl == nil {

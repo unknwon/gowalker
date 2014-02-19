@@ -10,6 +10,7 @@ import (
 )
 
 func main() {
+	log.Println("201402181")
 	client := &http.Client{}
 	p, err := com.HttpGetBytes(client, "http://godoc.org/-/index", nil)
 	if err != nil {
@@ -22,10 +23,13 @@ func main() {
 
 	pkgs := strings.Split(content, "<tr>")[1:]
 
-	skipUntilIndex := 360
+	skipUntilIndex := 3017
+	endWhenIndex := 5000
 	for i, name := range pkgs {
 		if i < skipUntilIndex {
 			continue
+		} else if i == endWhenIndex {
+			break
 		}
 		name = strings.TrimSpace(name)[14:]
 		end := strings.Index(name, "\">")
@@ -35,6 +39,6 @@ func main() {
 		if err != nil {
 			log.Fatalf("Fail to load page: %v", err)
 		}
-		time.Sleep(1 * time.Second)
+		time.Sleep(0 * time.Second)
 	}
 }
