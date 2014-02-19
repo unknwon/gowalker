@@ -190,6 +190,14 @@ func updateUrPros(pdoc *hv.Package, urpids, urpts *http.Cookie) (string, string)
 	return strings.Join(s, "|"), strings.Join(ts, "|")
 }
 
+func handleSpecialURLs(url string) string {
+	if url[0] == 'c' {
+		url = strings.Replace(url, "camlistore.org", "github.com/bradfitz/camlistore", 1)
+		return url
+	}
+	return url
+}
+
 // Get implemented Get method for HomeRouter.
 func (this *HomeRouter) Get() {
 	// Get argument(s).
@@ -237,6 +245,8 @@ func (this *HomeRouter) Get() {
 	} else if strings.Index(broPath, "source/browse/") > -1 {
 		broPath = strings.Replace(broPath, "source/browse/", "", 1)
 	}
+
+	reqUrl = handleSpecialURLs(reqUrl)
 
 	// Check if it's a remote path that can be used for 'go get', if not means it's a keyword.
 	if !utils.IsValidRemotePath(broPath) {

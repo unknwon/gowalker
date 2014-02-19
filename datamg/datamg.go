@@ -15,7 +15,7 @@ type PkgInfo struct {
 	Views int64
 }
 
-func main() {
+func main2() {
 	qbs.Register("sqlite3", "gowalker.db", "", qbs.NewSqlite3())
 
 	q, _ := qbs.GetQbs()
