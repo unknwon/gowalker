@@ -814,9 +814,7 @@ func generatePage(this *HomeRouter, pdoc *hv.Package, q, tag string) bool {
 	this.Data["IsRefresh"] = time.Unix(pdoc.Created, 0).Add(10 * time.Second).After(time.Now())
 
 	this.Data["VCS"] = pdoc.Vcs
-
-	this.Data["ProPath"] = pdoc.ProjectPath
-	this.Data["ProDocPath"] = path.Dir(pdoc.ImportPath)
+	proPath := pdoc.ProjectPath
 
 	// Introduction.
 	this.Data["ImportPath"] = pdoc.ImportPath
@@ -844,10 +842,16 @@ func generatePage(this *HomeRouter, pdoc *hv.Package, q, tag string) bool {
 		}
 		this.Data["CurTag"] = tag
 		this.Data["Tags"] = tags
+		if strings.HasPrefix(proPath, "github.com") {
+			proPath = proPath[:strings.Index(proPath, "/tree/")+1] + tag
+		}
 	} else {
 		this.Data["IsCmd"] = true
 	}
 	this.Data["IsCgo"] = pdoc.IsCgo
+
+	this.Data["ProPath"] = proPath
+	this.Data["ProDocPath"] = path.Dir(pdoc.ImportPath)
 
 	this.Data["Rank"] = pdoc.Rank
 	this.Data["Views"] = pdoc.Views + 1

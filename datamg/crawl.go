@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-	log.Println("201402181")
+	log.Println("201402191")
 	client := &http.Client{}
 	p, err := com.HttpGetBytes(client, "http://godoc.org/-/index", nil)
 	if err != nil {
@@ -23,8 +23,8 @@ func main() {
 
 	pkgs := strings.Split(content, "<tr>")[1:]
 
-	skipUntilIndex := 3017
-	endWhenIndex := 5000
+	skipUntilIndex := 9052
+	endWhenIndex := 12000
 	for i, name := range pkgs {
 		if i < skipUntilIndex {
 			continue

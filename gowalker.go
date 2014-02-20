@@ -34,7 +34,7 @@ import (
 )
 
 const (
-	APP_VER = "1.0.10.0219"
+	APP_VER = "1.0.11.0219"
 )
 
 // We have to call a initialize function manully
