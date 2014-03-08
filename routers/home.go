@@ -843,7 +843,12 @@ func generatePage(this *HomeRouter, pdoc *hv.Package, q, tag string) bool {
 		this.Data["CurTag"] = tag
 		this.Data["Tags"] = tags
 		if strings.HasPrefix(proPath, "github.com") {
-			proPath = proPath[:strings.Index(proPath, "/tree/")+6] + tag
+			offset := 6
+			if len(tag) == 0 {
+				// Projects with no tag.
+				offset = 0
+			}
+			proPath = proPath[:strings.Index(proPath, "/tree/")+offset] + tag
 		} else if strings.HasPrefix(proPath, "code.google.com") {
 			proPath = proPath[:strings.Index(proPath, "?r=")+3] + tag
 		}
