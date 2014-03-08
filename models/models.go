@@ -246,7 +246,7 @@ func GetIndexStats() (int64, int64, int64) {
 
 // SearchFunc returns functions that name contains keyword.
 func SearchFunc(key string) (pfuncs []PkgFunc) {
-	err := x.Where("name like '%" + key + "%'").Find(&pfuncs)
+	err := x.Limit(200).Where("name like '%" + key + "%'").Find(&pfuncs)
 	if err != nil {
 		beego.Error("models.SearchFunc -> ", err.Error())
 		return pfuncs
