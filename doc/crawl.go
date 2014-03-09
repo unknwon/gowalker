@@ -310,7 +310,7 @@ func getDynamic(client *http.Client, importPath, tag, etag string) (pdoc *hv.Pac
 
 	pdoc, err = getStatic(client, com.Expand("{repo}{dir}", match), tag, etag)
 	if err == errNoMatch {
-		//pdoc, err = getVCSDoc(client, match, etag)
+		pdoc, err = getVCSDoc(client, match, etag)
 	}
 	if err != nil {
 		return nil, err

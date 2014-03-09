@@ -13,6 +13,7 @@ data/
 .idea/
 bale/
 public/
+repos/
 
 # Architecture specific extensions/prefixes
 *.[568vq]
