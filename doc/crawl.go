@@ -318,6 +318,7 @@ func getDynamic(client *http.Client, importPath, tag, etag string) (pdoc *hv.Pac
 
 	if pdoc != nil {
 		pdoc.ImportPath = importPath
+		pdoc.ProjectPath = importPath
 		pdoc.ProjectName = match["projectName"]
 	}
 
