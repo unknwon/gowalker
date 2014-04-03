@@ -79,7 +79,8 @@ func getRefIndex(refPids []string, pid string) int {
 	return -1
 }
 
-func updateImportInfo(path string, pid, rank int, add bool) {
+// updateImportInfo updates import infomration and returns ture if the package uses cgo.
+func updateImportInfo(path string, pid, rank int, add bool) (isCgo bool) {
 	spid := strconv.Itoa(pid)
 
 	// Save package information.
@@ -96,6 +97,9 @@ func updateImportInfo(path string, pid, rank int, add bool) {
 		i := getRefIndex(refPids, spid)
 
 		if add {
+			// Check cgo.
+			isCgo = info.IsCgo
+
 			// Add operation.
 			if i == -1 {
 				refPids = append(refPids, spid)
@@ -158,6 +162,8 @@ func updateImportInfo(path string, pid, rank int, add bool) {
 			}
 		}
 	}
+
+	return isCgo
 }
 
 // SaveProject saves package information, declaration and functions;
@@ -200,8 +206,7 @@ func SaveProject(pinfo *hv.PkgInfo, pdecl *PkgDecl, pfuncs []PkgFunc, imports []
 		has, err := x.Get(pimp)
 		if err != nil {
 			return errors.New(
-				fmt.Sprintf("models.SaveProject( %s ) -> Get PkgImport: %s",
-					pinfo.ImportPath, err))
+				fmt.Sprintf("models.SaveProject( %s ) -> Get PkgImport: %s", pinfo.ImportPath, err))
 		}
 		if has {
 			importPids := strings.Split(pinfo.RefPids, "|")
@@ -218,8 +223,7 @@ func SaveProject(pinfo *hv.PkgInfo, pdecl *PkgDecl, pfuncs []PkgFunc, imports []
 			}
 			_, err := x.Id(pimp.Id).Delete(pimp)
 			if err != nil {
-				beego.Error("models.SaveProject(", pinfo.ImportPath,
-					") -> Delete PkgImport:", err.Error())
+				beego.Error("models.SaveProject(", pinfo.ImportPath, ") -> Delete PkgImport:", err.Error())
 			}
 
 			pinfo.RefPids = strings.Join(importPids, "|")

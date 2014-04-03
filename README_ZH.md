@@ -17,9 +17,3 @@ Go Walker 是一个用于在线生成并浏览 <a target="_blank" href="http://d
 - **多语言** 支持：[关于](http://gowalker.org/about)。
 - 通过 Github Gist 为您喜爱的项目增加 **第三方示例**。
 - 基于源文件的代码浏览。
-
-## 发展路线
-
-[建站手记](http://git.oschina.net/Unknown/gowalker/wikis/home)
-
-请到 [Trello](https://trello.com/b/wS7CzdcI/go-walker) 的面板上查看有关 Todo，Bugs 以及路线图的说明。

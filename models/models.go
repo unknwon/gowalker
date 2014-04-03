@@ -124,7 +124,7 @@ func setEngine() {
 	}
 
 	if beego.RunMode != "pro" {
-		x.ShowDebug = true
+		// x.ShowDebug = true
 		x.ShowErr = true
 		//x.ShowSQL = true
 	}

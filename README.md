@@ -18,10 +18,6 @@ Go Walker is a web server that generates <a target="_blank" href="http://golang.
 - Add **third-party examples** for your favorite projects: through Github Gist.
 - Source file based code view.
 
-## Develop route
-
-See board on [Trello](https://trello.com/b/wS7CzdcI/go-walker) about to do, bugs and road map.
-
 ## Third-party packages
 
 - [Beego](http://gowalker.org/github.com/astaxie/beego): a **lightweight** web framework for web application **quick** development.

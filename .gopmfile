@@ -2,4 +2,9 @@
 github.com/Unknwon/com=
 github.com/astaxie/beego=
 github.com/beego/i18n=
+github.com/lunny/xorm=
+github.com/Unknwon/goconfig=
+
+[res]
+include=views|static|conf
 
