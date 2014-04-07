@@ -19,10 +19,8 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"os"
-	"os/user"
+	"log"
 	"regexp"
-	"runtime"
 	"time"
 
 	"github.com/astaxie/beego"
@@ -103,24 +101,14 @@ var x *xorm.Engine
 
 func setEngine() {
 	dbName := utils.Cfg.MustValue("db", "name")
-	dbPwd := utils.Cfg.MustValue("db", "pwd_"+runtime.GOOS)
-
-	if runtime.GOOS == "darwin" {
-		u, err := user.Current()
-		if err != nil {
-			beego.Critical("models.init -> fail to get user:", err.Error())
-			os.Exit(2)
-		}
-		dbPwd = utils.Cfg.MustValue("db", "pwd_"+runtime.GOOS+"_"+u.Username)
-	}
+	dbPwd := utils.Cfg.MustValue("db", "pwd")
 
 	var err error
 	x, err = xorm.NewEngine("mysql", fmt.Sprintf("%v:%v@%v/%v?charset=utf8",
 		utils.Cfg.MustValue("db", "user"), dbPwd,
 		utils.Cfg.MustValue("db", "host"), dbName))
 	if err != nil {
-		beego.Critical("models.init -> fail to conntect database:", err.Error())
-		os.Exit(2)
+		log.Fatalf("models.init -> fail to conntect database: %v", err)
 	}
 
 	if beego.RunMode != "pro" {

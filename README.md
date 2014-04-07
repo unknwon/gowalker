@@ -30,4 +30,4 @@ Go Walker is a web server that generates <a target="_blank" href="http://golang.
 - [slene](https://github.com/slene) Thanks for README css.
 - [atotto](https://github.com/atotto) Thanks for translating site user interface to Japanese.
 - [garyburd](https://github.com/garyburd) Thanks for teaching me about license.
-- Sub-package **doc** is originally a fork of [gosrc](https://github.com/garyburd/gosrc).
+- Sub-package **doc** is originally a fork of [gosrc](https://github.com/golang/gddo/tree/master/gosrc).

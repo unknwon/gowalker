@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"html/template"
 	"io"
+	"log"
 	"os"
 	"regexp"
 	"strings"
@@ -43,23 +44,29 @@ func LoadConfig(cfgPath string) {
 	var err error
 	Cfg, err = goconfig.LoadConfigFile(cfgPath)
 	if err != nil {
-		panic("Fail to load configuration file: " + err.Error())
+		log.Fatalf("Fail to load configuration file: %v", err)
+	}
+	if com.IsFile("custom/app.ini") {
+		if err = Cfg.AppendFiles("custom/app.ini"); err != nil {
+			log.Fatalf("Fail to load custom configuration file: %v", err)
+		}
 	}
 
 	DocsJsPath, err = Cfg.GetValue("server", "docs_js_path")
 	if err != nil {
-		panic("Fail to load configuration file: cannot find key docs_js_path")
+		log.Fatalln("Fail to load configuration file: cannot find key docs_js_path")
 	}
 
 	HvJsPath, err = Cfg.GetValue("server", "hv_js_path")
 	if err != nil {
-		panic("Fail to load configuration file: cannot find key hv_js_path")
+		log.Fatalln("Fail to load configuration file: cannot find key hv_js_path")
 	}
 }
 
 // SaveConfig saves configuration file.
 func SaveConfig() error {
-	return goconfig.SaveConfigFile(Cfg, "conf/app.ini")
+	os.MkdirAll("custom", os.ModePerm)
+	return goconfig.SaveConfigFile(Cfg, "custom/app.ini")
 }
 
 var readmePat = regexp.MustCompile(`^[Rr][Ee][Aa][Dd][Mm][Ee](?:$|\.)`)

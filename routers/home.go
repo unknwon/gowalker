@@ -20,6 +20,7 @@ import (
 	"fmt"
 	godoc "go/doc"
 	"html/template"
+	"log"
 	"net/http"
 	"path"
 	"strconv"
@@ -49,7 +50,7 @@ func initPopPros() {
 	err, recentUpdatedExs, recentViewedPros, topRankPros, topViewedPros, RockPros =
 		models.GetPopulars(maxProInfoNum, maxExamNum)
 	if err != nil {
-		panic("initPopPros -> " + err.Error())
+		log.Fatalf("initPopPros -> %v", err)
 	}
 }
 
@@ -82,16 +83,24 @@ func serveHome(this *HomeRouter, urpids, urpts *http.Cookie) {
 	this.Data["RecentExams"] = recentUpdatedExs
 }
 
-func updateCacheInfo(pdoc *hv.Package, urpids, urpts *http.Cookie) (string, string) {
+func updateCacheInfo(remoteAddr string, pdoc *hv.Package, urpids, urpts *http.Cookie) (string, string) {
 	pdoc.ViewedTime = time.Now().UTC().Unix()
 
-	updateCachePros(pdoc)
+	updateCachePros(remoteAddr, pdoc)
 	updateProInfos(pdoc)
 	return updateUrPros(pdoc, urpids, urpts)
 }
 
-func updateCachePros(pdoc *hv.Package) {
-	pdoc.Views++
+func updateCachePros(remoteAddr string, pdoc *hv.Package) {
+	if i := strings.LastIndex(remoteAddr, ":"); i > -1 {
+		remoteAddr = remoteAddr[:i]
+	}
+	visitIps := cacheVisitIps[pdoc.Id]
+	if visitIps == nil {
+		visitIps = make(map[string]bool)
+		cacheVisitIps[pdoc.Id] = visitIps
+	}
+	visitIps[remoteAddr] = true
 
 	for _, p := range cachePros {
 		if p.Id == pdoc.Id {
@@ -268,7 +277,7 @@ func (this *HomeRouter) Get() {
 		if pdoc != nil {
 			// Generate documentation page.
 			if generatePage(this, pdoc, broPath, tag) {
-				ps, ts := updateCacheInfo(pdoc, urpids, urpts)
+				ps, ts := updateCacheInfo(this.Ctx.Request.RemoteAddr, pdoc, urpids, urpts)
 				this.Ctx.SetCookie("UserHistory", ps, 9999999999, "/")
 				this.Ctx.SetCookie("UHTimestamps", ts, 9999999999, "/")
 				return

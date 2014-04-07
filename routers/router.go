@@ -124,11 +124,19 @@ func cacheTickerCheck(cacheChan <-chan time.Time) {
 	}
 }
 
+var cacheVisitIps = make(map[int64]map[string]bool)
+
 func FlushCache() {
 	// Flush cache projects.
 	num := len(cachePros)
+	// Set views increament.
+	for _, pinfo := range cachePros {
+		pinfo.Views += int64(len(cacheVisitIps[pinfo.Id]))
+	}
+
 	models.FlushCacheProjects(cachePros)
-	beego.Trace("FlushCacheProjects #", num)
+	beego.Info("FlushCacheProjects #", num)
 
 	cachePros = make([]hv.PkgInfo, 0, num)
+	cacheVisitIps = make(map[int64]map[string]bool)
 }
