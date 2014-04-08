@@ -24,6 +24,7 @@ import (
 	"time"
 
 	"github.com/astaxie/beego"
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/lunny/xorm"
 
 	"github.com/Unknwon/gowalker/hv"
