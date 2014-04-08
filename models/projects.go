@@ -273,7 +273,7 @@ func SaveProject(pinfo *hv.PkgInfo, pdecl *PkgDecl, pfuncs []PkgFunc, imports []
 
 		pdecl.Pid = pinfo.Id
 		if has {
-			_, err = x.Id(pdecl.Id).Update(pdecl)
+			_, err = x.Id(pdecl.Id).Cols("js_num").Update(pdecl)
 		} else {
 			_, err = x.Insert(pdecl)
 		}
