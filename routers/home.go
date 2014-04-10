@@ -812,6 +812,7 @@ func generatePage(this *HomeRouter, pdoc *hv.Package, q, tag string) bool {
 	// Set properties.
 	this.TplNames = "docs.html"
 
+	this.Data["PkgDesc"] = pdoc.Synopsis
 	this.Data["Pid"] = pdoc.Id
 	this.Data["IsGoRepo"] = pdoc.IsGoRepo
 

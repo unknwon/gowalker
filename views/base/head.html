@@ -1,7 +1,7 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <link rel="shortcut icon" href="/static/img/favicon.ico" />
 <meta name="author" content="Unknown" />
-<meta name="description" content="{{i18n .Lang "Go online project API documentation, docuemnts, videos"}}" />
+<meta name="description" content="{{if not .PkgDesc}}{{i18n .Lang "Go online project API documentation, docuemnts, videos"}}{{else}}{{.PkgDesc}}{{end}}" />
 <meta name="keywords" content="{{i18n .Lang "Go, golang, API documentation, video, document"}}">
 
  <!-- Stylesheets -->

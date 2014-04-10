@@ -142,13 +142,7 @@
 				</div>
 
 				<h2>
-					{{if .IsCmd}}
-					Command
-					{{else if .IsHasFiles}}
-					Package
-					{{else}}
-					Project
-					{{end}}
+					{{if .IsCmd}}Command{{else if .IsHasFiles}}Package{{else}}Project{{end}}
 
 					{{.ProName}} 
 					
