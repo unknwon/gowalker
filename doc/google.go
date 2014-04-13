@@ -65,7 +65,7 @@ func getStandardDoc(client *http.Client, importPath, tag, ptag string) (*hv.Pack
 			files = append(files, &hv.Source{
 				SrcName:   fname,
 				BrowseUrl: "code.google.com/p/go/source/browse/src/pkg/" + importPath + "/" + fname + "?r=" + tag,
-				RawSrcUrl: "go.googlecode.com/hg/src/pkg/" + importPath + "/" + fname + "?r=" + tag,
+				RawSrcUrl: "http://go.googlecode.com/hg/src/pkg/" + importPath + "/" + fname + "?r=" + tag,
 			})
 		}
 	}
@@ -87,7 +87,7 @@ func getStandardDoc(client *http.Client, importPath, tag, ptag string) (*hv.Pack
 	}
 
 	// Fetch file from VCS.
-	if err := fetchGoogleFiles(files); err != nil {
+	if err := fetchGoogleFiles(client, files); err != nil {
 		return nil, err
 	}
 
@@ -139,7 +139,7 @@ func getStandardDoc(client *http.Client, importPath, tag, ptag string) (*hv.Pack
 	return pdoc, generateHv(importPath, srcMap)
 }
 
-func fetchGoogleFiles(files []com.RawFile) error {
+func fetchGoogleFiles(client *http.Client, files []com.RawFile) error {
 	count := len(files)
 	step := 5
 	start := 0
@@ -152,7 +152,7 @@ func fetchGoogleFiles(files []com.RawFile) error {
 			isExit = true
 		}
 
-		if err := com.FetchFilesCurl(files[start:end]); err != nil {
+		if err := com.FetchFiles(client, files[start:end], nil); err != nil {
 			return err
 		}
 
@@ -306,7 +306,7 @@ func getGoogleDoc(client *http.Client, match map[string]string, tag, ptag string
 	}
 
 	// Fetch file from VCS.
-	if err := fetchGoogleFiles(files); err != nil {
+	if err := fetchGoogleFiles(client, files); err != nil {
 		return nil, err
 	}
 

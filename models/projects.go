@@ -238,6 +238,20 @@ func SaveProject(pinfo *hv.PkgInfo, pdecl *PkgDecl, pfuncs []PkgFunc, imports []
 		pinfo.Ptag = info.Ptag
 	}
 
+	// Don't need to check standard library and non-master projects.
+	if imports != nil && isMaster && !utils.IsGoRepoPath(pinfo.ImportPath) {
+		// Other packages.
+		for _, v := range imports {
+			if !utils.IsGoRepoPath(v) && v != "C" {
+				// Only count non-standard library.
+				isCgo := updateImportInfo(v, int(pinfo.Id), int(pinfo.Rank), true)
+				if isCgo && !info.IsCgo {
+					info.IsCgo = true
+				}
+			}
+		}
+	}
+
 	if has {
 		_, err = x.Id(pinfo.Id).UseBool("is_cgo").Update(pinfo)
 	} else {
@@ -245,17 +259,6 @@ func SaveProject(pinfo *hv.PkgInfo, pdecl *PkgDecl, pfuncs []PkgFunc, imports []
 	}
 	if err != nil {
 		beego.Error("models.SaveProject(", pinfo.ImportPath, ") -> Information2:", err)
-	}
-
-	// Don't need to check standard library and non-master projects.
-	if imports != nil && isMaster && !utils.IsGoRepoPath(pinfo.ImportPath) {
-		// Other packages.
-		for _, v := range imports {
-			if !utils.IsGoRepoPath(v) && v != "C" {
-				// Only count non-standard library.
-				updateImportInfo(v, int(pinfo.Id), int(pinfo.Rank), true)
-			}
-		}
 	}
 	// ------------- END ------------
 
