@@ -149,8 +149,8 @@ func GetPkgInfoById(pid int) (pinfo *hv.PkgInfo, err error) {
 }
 
 // GetGroupPkgInfo returns group of package infomration in order to reduce database connect times.
-func GetGroupPkgInfo(paths []string) []hv.PkgInfo {
-	pinfos := make([]hv.PkgInfo, 0, len(paths))
+func GetGroupPkgInfo(paths []string) []*hv.PkgInfo {
+	pinfos := make([]*hv.PkgInfo, 0, len(paths))
 	for _, v := range paths {
 		if len(v) > 0 {
 			pinfo := &hv.PkgInfo{ImportPath: v}
@@ -159,9 +159,9 @@ func GetGroupPkgInfo(paths []string) []hv.PkgInfo {
 				beego.Error("models.GetGroupPkgInfo(", v, ") -> Get PkgDoc:", err.Error())
 			}
 			if has {
-				pinfos = append(pinfos, *pinfo)
+				pinfos = append(pinfos, pinfo)
 			} else {
-				pinfos = append(pinfos, hv.PkgInfo{ImportPath: v})
+				pinfos = append(pinfos, &hv.PkgInfo{ImportPath: v})
 			}
 		}
 	}
@@ -169,8 +169,8 @@ func GetGroupPkgInfo(paths []string) []hv.PkgInfo {
 }
 
 // GetGroupPkgInfoById returns group of package infomration by pid.
-func GetGroupPkgInfoById(pids []string) []hv.PkgInfo {
-	pinfos := make([]hv.PkgInfo, 0, len(pids))
+func GetGroupPkgInfoById(pids []string) []*hv.PkgInfo {
+	pinfos := make([]*hv.PkgInfo, 0, len(pids))
 	for _, v := range pids {
 		pid, _ := strconv.ParseInt(v, 10, 64)
 		if pid > 0 {
@@ -180,7 +180,7 @@ func GetGroupPkgInfoById(pids []string) []hv.PkgInfo {
 				beego.Error("models.GetGroupPkgInfoById(", pid, ") -> Get hv.PkgInfo:", err.Error())
 			}
 			if has {
-				pinfos = append(pinfos, *pinfo)
+				pinfos = append(pinfos, pinfo)
 			} else {
 				beego.Trace("models.GetGroupPkgInfoById -> Not exist:", pid)
 			}
@@ -212,7 +212,7 @@ func GetSubPkgs(importPath, tag string, dirs []string) []hv.PkgInfo {
 	return pinfos
 }
 
-func GetImports(spid, tag string) []hv.PkgInfo {
+func GetImports(spid, tag string) []*hv.PkgInfo {
 	pid, _ := strconv.ParseInt(spid, 10, 64)
 	pdecl := &PkgDecl{
 		Pid: pid,
@@ -227,7 +227,7 @@ func GetImports(spid, tag string) []hv.PkgInfo {
 	return GetGroupPkgInfo(strings.Split(pdecl.Imports, "|"))
 }
 
-func GetRefs(spid string) []hv.PkgInfo {
+func GetRefs(spid string) []*hv.PkgInfo {
 	pid, _ := strconv.ParseInt(spid, 10, 64)
 	pinfo := new(hv.PkgInfo)
 	has, err := x.Id(pid).Get(pinfo)

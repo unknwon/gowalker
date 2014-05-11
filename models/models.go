@@ -129,7 +129,7 @@ func InitDb() {
 }
 
 // GetGoRepo returns packages in go standard library.
-func GetGoRepo() (pinfos []hv.PkgInfo) {
+func GetGoRepo() (pinfos []*hv.PkgInfo) {
 	err := x.Where("is_go_repo = ?", true).Asc("import_path").Find(&pinfos)
 	if err != nil {
 		beego.Trace("models.GetGoRepo ->", err)
@@ -137,7 +137,7 @@ func GetGoRepo() (pinfos []hv.PkgInfo) {
 	return pinfos
 }
 
-func GetGoSubrepo() (pinfos []hv.PkgInfo) {
+func GetGoSubrepo() (pinfos []*hv.PkgInfo) {
 	err := x.Where("is_go_subrepo = ?", true).Asc("import_path").Find(&pinfos)
 	if err != nil {
 		beego.Trace("models.GetGoSubrepo ->", err)

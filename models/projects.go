@@ -35,15 +35,15 @@ import (
 		4. Rock this week
 	projects and recent updated examples.
 */
-func GetPopulars(proNum, exNum int) (error, []PkgExam, []hv.PkgInfo, []hv.PkgInfo, []hv.PkgInfo, []hv.PkgInfo) {
-	var ruExs []PkgExam
+func GetPopulars(proNum, exNum int) (error, []*PkgExam, []*hv.PkgInfo, []*hv.PkgInfo, []*hv.PkgInfo, []*hv.PkgInfo) {
+	var ruExs []*PkgExam
 	err := x.Limit(exNum).Desc("created").Find(&ruExs)
 	if err != nil {
 		return err, nil, nil, nil, nil, nil
 	}
 
-	var rvPros, trPros, tvPros, rtwPros []hv.PkgInfo
-	var procks []PkgRock
+	var rvPros, trPros, tvPros, rtwPros []*hv.PkgInfo
+	var procks []*PkgRock
 	err = x.Limit(proNum).Desc("viewed_time").Find(&rvPros)
 	if err != nil {
 		return err, nil, nil, nil, nil, nil
@@ -61,7 +61,7 @@ func GetPopulars(proNum, exNum int) (error, []PkgExam, []hv.PkgInfo, []hv.PkgInf
 		return err, nil, nil, nil, nil, nil
 	}
 	for _, pr := range procks {
-		rtwPros = append(rtwPros, hv.PkgInfo{
+		rtwPros = append(rtwPros, &hv.PkgInfo{
 			Id:         pr.Pid,
 			ImportPath: pr.Path,
 			Rank:       pr.Rank,
