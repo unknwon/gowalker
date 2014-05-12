@@ -860,7 +860,7 @@ func generatePage(this *HomeRouter, pdoc *hv.Package, q, tag string) bool {
 			}
 			proPath = proPath[:strings.Index(proPath, "/tree/")+offset] + tag
 		} else if strings.HasPrefix(proPath, "code.google.com") {
-			proPath = proPath[:strings.Index(proPath, "?r=")+3] + tag
+			proPath = proPath[:strings.Index(proPath, "&r=")+3] + tag
 		}
 	} else {
 		this.Data["IsCmd"] = true

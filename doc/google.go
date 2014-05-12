@@ -252,7 +252,7 @@ func getGoogleDoc(client *http.Client, match map[string]string, tag, ptag string
 	}
 
 	match["browserUrlTpl"] = "code.google.com/p/{repo}/source/browse{dir}/{0}?repo={subrepo}&r={tag}"
-	match["rawSrcUrlTpl"] = "{subrepo}{dot}{repo}.googlecode.com/{vcs}{dir}/{0}?r={tag}"
+	match["rawSrcUrlTpl"] = "http://{subrepo}{dot}{repo}.googlecode.com/{vcs}{dir}/{0}?r={tag}"
 	var isGoPro bool
 	var files []com.RawFile
 	var dirs []string

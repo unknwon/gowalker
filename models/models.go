@@ -25,7 +25,7 @@ import (
 
 	"github.com/astaxie/beego"
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/lunny/xorm"
+	"github.com/go-xorm/xorm"
 
 	"github.com/Unknwon/gowalker/hv"
 	"github.com/Unknwon/gowalker/utils"
