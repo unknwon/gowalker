@@ -1,4 +1,4 @@
-// Copyright 2013-2014 Unknown
+// Copyright 2013 Unknown
 //
 // Licensed under the Apache License, Version 2.0 (the "License"): you may
 // not use this file except in compliance with the License. You may obtain
@@ -15,6 +15,7 @@
 package routers
 
 import (
+	"github.com/Unknwon/gowalker/doc"
 	"github.com/Unknwon/gowalker/hv"
 	"github.com/Unknwon/gowalker/models"
 )
@@ -50,6 +51,22 @@ func (this *ApiRouter) Search() {
 		parseParaToInt(this.GetString("cmd")), parseParaToInt(this.GetString("cgo")),
 		parseParaToInt(this.GetString("gorepo")), parseParaToInt(this.GetString("gosubrepo")),
 		false)
+	this.Data["json"] = &result
+	this.ServeJson(true)
+}
+
+func (this *ApiRouter) Refresh() {
+	var result struct {
+		Ok        bool   `json:"ok"`
+		LimitTime string `json:"limit_time"`
+	}
+	_, err := doc.CheckDoc(this.GetString("pkgname"), "", doc.RT_Refresh)
+	if err == nil {
+		result.Ok = true
+	} else {
+		result.Ok = false
+		result.LimitTime = err.Error()
+	}
 	this.Data["json"] = &result
 	this.ServeJson(true)
 }

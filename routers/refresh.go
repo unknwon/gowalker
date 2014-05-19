@@ -1,4 +1,4 @@
-// Copyright 2013-2014 Unknown
+// Copyright 2013 Unknown
 //
 // Licensed under the Apache License, Version 2.0 (the "License"): you may
 // not use this file except in compliance with the License. You may obtain
@@ -15,11 +15,11 @@
 package routers
 
 import (
-	"os"
+	// "os"
 	"strings"
 
 	"github.com/Unknwon/gowalker/doc"
-	"github.com/Unknwon/gowalker/utils"
+	// "github.com/Unknwon/gowalker/utils"
 )
 
 // RefreshRouter serves search pages.
@@ -42,8 +42,7 @@ func (this *RefreshRouter) Get() {
 
 	pdoc, err := doc.CheckDoc(q, "", doc.RT_Refresh)
 	if err == nil && pdoc != nil {
-		os.Remove("." + utils.DocsJsPath + pdoc.ImportPath + ".js")
-
+		// os.Remove("." + utils.DocsJsPath + pdoc.ImportPath + ".js")
 		this.Redirect("/"+q, 302)
 		return
 	}
