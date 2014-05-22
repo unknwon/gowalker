@@ -34,7 +34,7 @@ import (
 )
 
 const (
-	APP_VER = "1.0.11.0519"
+	APP_VER = "1.0.11.0521"
 )
 
 // We have to call a initialize function manully
@@ -116,6 +116,7 @@ func main() {
 	beego.Router("/api/v1/badge", &routers.ApiRouter{}, "get:Badge")
 	beego.Router("/api/v1/search", &routers.ApiRouter{}, "get:Search")
 	beego.Router("/api/v1/refresh", &routers.ApiRouter{}, "get:Refresh")
+	beego.Router("/api/v1/pkginfo", &routers.ApiRouter{}, "get:PkgInfo")
 
 	// Register template functions.
 	beego.AddFuncMap("i18n", i18n.Tr)

@@ -1,4 +1,4 @@
-// Copyright 2013-2014 Unknown
+// Copyright 2013 Unknown
 //
 // Licensed under the Apache License, Version 2.0 (the "License"): you may
 // not use this file except in compliance with the License. You may obtain
@@ -19,8 +19,10 @@ import (
 	"fmt"
 	"html/template"
 	"io"
+	"io/ioutil"
 	"log"
 	"os"
+	"path"
 	"regexp"
 	"strings"
 
@@ -272,7 +274,8 @@ func SaveDocPage(docPath string, data []byte) int {
 		buf.Write(data)
 		buf.WriteString("\")")
 
-		if _, err := com.SaveFile("."+docPath+".js", buf.Bytes()); err != nil {
+		os.MkdirAll(path.Dir("."+docPath+".js"), os.ModePerm)
+		if err := ioutil.WriteFile("."+docPath+".js", buf.Bytes(), 0655); err != nil {
 			beego.Error("utils.SaveDocPage(", docPath, ") ->", err)
 			return -1
 		}
@@ -306,7 +309,8 @@ func SaveDocPage(docPath string, data []byte) int {
 				p += fmt.Sprintf("-%d", count)
 			}
 
-			if _, err := com.SaveFile("."+p+".js", buf.Bytes()); err != nil {
+			os.MkdirAll(path.Dir("."+p+".js"), os.ModePerm)
+			if err := ioutil.WriteFile("."+p+".js", buf.Bytes(), 0655); err != nil {
 				beego.Error("utils.SaveDocPage(", p, ") ->", err)
 				return -1
 			}
@@ -343,7 +347,7 @@ func SavePkgDoc(docPath string, readmes map[string][]byte) {
 		buf.WriteString("document.write(\"")
 		buf.Write(data)
 		buf.WriteString("\")")
-		if _, err := com.SaveFile("."+localeDocPath+".js", buf.Bytes()); err != nil {
+		if err := ioutil.WriteFile("."+localeDocPath+".js", buf.Bytes(), 0655); err != nil {
 			beego.Error("utils.SavePkgDoc(", localeDocPath, ") ->", err)
 		}
 	}

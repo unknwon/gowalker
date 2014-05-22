@@ -59,7 +59,7 @@ type PkgInfo struct {
 	Tags       string `xorm:"-" json:"tags"`
 	Views      int64  `xorm:"index" json:"-"`
 	ViewedTime int64  `json:"-"`
-	Created    int64  `xorm:"index" json:"-"`
+	Created    int64  `xorm:"index" json:"created"`
 
 	/*
 		- Rank is the benchmark of projects, it's based on BaseRank and views.
@@ -78,7 +78,7 @@ type PkgInfo struct {
 			$tool|
 	*/
 	PkgVer int    `json:"-"`
-	Ptag   string `xorm:"VARCHAR(50)" json:"-"`
+	Ptag   string `xorm:"VARCHAR(50)" json:"ptag"`
 	Labels string `xorm:"TEXT" json:"-"`
 
 	/*

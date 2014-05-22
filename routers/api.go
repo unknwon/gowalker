@@ -70,3 +70,9 @@ func (this *ApiRouter) Refresh() {
 	this.Data["json"] = &result
 	this.ServeJson(true)
 }
+
+func (this *ApiRouter) PkgInfo() {
+	pkginfo, _ := models.GetPkgInfo(this.GetString("pkgname"), "")
+	this.Data["json"] = &pkginfo
+	this.ServeJson(true)
+}

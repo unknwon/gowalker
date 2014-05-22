@@ -19,7 +19,6 @@ import (
 	"archive/zip"
 	"bytes"
 	"errors"
-	//"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -383,7 +382,8 @@ func generateHv(importPath string, srcMap map[string]*hv.Source) error {
 		buf.Write(com.Html2JS(data))
 		buf.WriteString("\")")
 
-		if _, err := com.SaveFile(filePath, buf.Bytes()); err != nil {
+		os.MkdirAll(path.Dir(filePath), os.ModePerm)
+		if err := ioutil.WriteFile(filePath, buf.Bytes(), 0655); err != nil {
 			return errors.New("doc.generateHv(" + importPath + ") -> Save hv: " + err.Error())
 		}
 	}
