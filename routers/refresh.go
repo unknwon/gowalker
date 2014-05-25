@@ -15,11 +15,11 @@
 package routers
 
 import (
-	// "os"
+	"os"
 	"strings"
 
 	"github.com/Unknwon/gowalker/doc"
-	// "github.com/Unknwon/gowalker/utils"
+	"github.com/Unknwon/gowalker/utils"
 )
 
 // RefreshRouter serves search pages.
