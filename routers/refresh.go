@@ -42,7 +42,7 @@ func (this *RefreshRouter) Get() {
 
 	pdoc, err := doc.CheckDoc(q, "", doc.RT_Refresh)
 	if err == nil && pdoc != nil {
-		// os.Remove("." + utils.DocsJsPath + pdoc.ImportPath + ".js")
+		os.Remove("." + utils.DocsJsPath + pdoc.ImportPath + ".js")
 		this.Redirect("/"+q, 302)
 		return
 	}
