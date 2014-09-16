@@ -147,6 +147,10 @@ func (r *Render) Render(name string, data []byte) []byte {
 						}
 					}
 
+					// FIXME: index out of range
+					if len(code) <= pos {
+						break CutWords
+					}
 					if !isString {
 						switch {
 						case curChar == '/' && (code[pos+1] == '/' || code[pos+1] == '*'):
