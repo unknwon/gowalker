@@ -1,4 +1,4 @@
-// Copyright 2013-2014 Unknown
+// Copyright 2013 Unknwon
 //
 // Licensed under the Apache License, Version 2.0 (the "License"): you may
 // not use this file except in compliance with the License. You may obtain
@@ -148,7 +148,7 @@ func (r *Render) Render(name string, data []byte) []byte {
 					}
 
 					// FIXME: index out of range
-					if len(code) <= pos {
+					if len(code) == pos+1 {
 						break CutWords
 					}
 					if !isString {
