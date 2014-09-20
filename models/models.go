@@ -1,4 +1,4 @@
-// Copyright 2013-2014 Unknown
+// Copyright 2013 Unknwon
 //
 // Licensed under the Apache License, Version 2.0 (the "License"): you may
 // not use this file except in compliance with the License. You may obtain
@@ -19,7 +19,6 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"log"
 	"regexp"
 	"time"
 
@@ -28,7 +27,8 @@ import (
 	"github.com/go-xorm/xorm"
 
 	"github.com/Unknwon/gowalker/hv"
-	"github.com/Unknwon/gowalker/utils"
+	"github.com/Unknwon/gowalker/modules/log"
+	"github.com/Unknwon/gowalker/modules/setting"
 )
 
 // A PkgTag descriables the project revision tag for its sub-projects,
@@ -100,32 +100,23 @@ type PkgImport struct {
 
 var x *xorm.Engine
 
-func setEngine() {
-	dbName := utils.Cfg.MustValue("db", "name")
-	dbPwd := utils.Cfg.MustValue("db", "pwd")
-
+func init() {
 	var err error
-	x, err = xorm.NewEngine("mysql", fmt.Sprintf("%v:%v@%v/%v?charset=utf8",
-		utils.Cfg.MustValue("db", "user"), dbPwd,
-		utils.Cfg.MustValue("db", "host"), dbName))
+	x, err = xorm.NewEngine("mysql", fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8",
+		setting.Cfg.MustValue("database", "USER"),
+		setting.Cfg.MustValue("database", "PASSWD"),
+		setting.Cfg.MustValue("database", "HOST"),
+		setting.Cfg.MustValue("database", "NAME")))
 	if err != nil {
-		log.Fatalf("models.init -> fail to conntect database: %v", err)
+		log.Fatal(4, "Fail to init new engine: %v", err)
+	} else if err = x.Sync(new(hv.PkgInfo), new(PkgTag), new(PkgRock), new(PkgExam),
+		new(PkgDecl), new(PkgFunc), new(PkgImport)); err != nil {
+		log.Fatal(4, "Fail to sync database: %v", err)
 	}
-
-	if beego.RunMode != "pro" {
-		// x.ShowDebug = true
-		x.ShowErr = true
-		//x.ShowSQL = true
-	}
-
-	beego.Trace("Initialized database ->", dbName)
 }
 
-// InitDb initializes the database.
-func InitDb() {
-	setEngine()
-	x.Sync(new(hv.PkgInfo), new(PkgTag), new(PkgRock), new(PkgExam),
-		new(PkgDecl), new(PkgFunc), new(PkgImport))
+func Ping() error {
+	return x.Ping()
 }
 
 // GetGoRepo returns packages in go standard library.

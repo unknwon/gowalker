@@ -1,4 +1,4 @@
-// Copyright 2013-2014 Unknown
+// Copyright 2013 Unknwon
 //
 // Licensed under the Apache License, Version 2.0 (the "License"): you may
 // not use this file except in compliance with the License. You may obtain
@@ -19,7 +19,7 @@ import (
 	"html/template"
 	"strings"
 
-	"github.com/Unknwon/gowalker/utils"
+	"github.com/Unknwon/gowalker/modules/setting"
 	"github.com/astaxie/beego"
 )
 
@@ -43,11 +43,11 @@ func (this *RobotRouter) Get() {
 		// Generate "robot.txt".
 		t := template.New("robotTpl")
 		t.Parse(robotTpl)
-		uas := strings.Split(utils.Cfg.MustValue("robot", "uas"), "|")
+		uas := strings.Split(setting.Cfg.MustValue("robot", "uas"), "|")
 
 		data := make(map[string]interface{})
 		data["Uas"] = uas
-		data["Disallow"] = utils.Cfg.MustValue("robot", "disallow")
+		data["Disallow"] = setting.Cfg.MustValue("robot", "disallow")
 
 		buf := new(bytes.Buffer)
 		t.Execute(buf, data)

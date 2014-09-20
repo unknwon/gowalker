@@ -24,6 +24,7 @@ import (
 	"github.com/astaxie/beego"
 
 	"github.com/Unknwon/gowalker/hv"
+	"github.com/Unknwon/gowalker/modules/setting"
 	"github.com/Unknwon/gowalker/utils"
 )
 
@@ -572,17 +573,17 @@ func FlushCacheProjects(pinfos []hv.PkgInfo) {
 	}
 
 	// Update rock this week.
-	if time.Now().UTC().Weekday() == time.Monday && utils.Cfg.MustBool("task", "rock_reset") {
-		utils.Cfg.SetValue("task", "rock_reset", "0")
-		utils.SaveConfig()
+	if time.Now().UTC().Weekday() == time.Monday && setting.Cfg.MustBool("task", "rock_reset") {
+		setting.Cfg.SetValue("task", "rock_reset", "0")
+		setting.SaveConfig()
 		// Reset rock table.
 		_, err := x.Where("id > ?", int64(0)).Delete(new(PkgRock))
 		if err != nil {
 			beego.Error("models.FlushCacheProjects -> Reset rock table:", err)
 		}
-	} else if time.Now().UTC().Weekday() != time.Monday && !utils.Cfg.MustBool("task", "rock_reset") {
-		utils.Cfg.SetValue("task", "rock_reset", "1")
-		utils.SaveConfig()
+	} else if time.Now().UTC().Weekday() != time.Monday && !setting.Cfg.MustBool("task", "rock_reset") {
+		setting.Cfg.SetValue("task", "rock_reset", "1")
+		setting.SaveConfig()
 	}
 
 	for _, pr := range procks {

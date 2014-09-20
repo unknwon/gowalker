@@ -2,7 +2,8 @@ Go Walker [![wercker status](https://app.wercker.com/status/cd3bece96df89a704e3a
 ========
 [中文文档](README_ZH.md)
 
-Go Walker is a web server that generates <a target="_blank" href="http://golang.org/">Go</a> projects API documentation and hacker view on the fly for the projects that are hosted on <b><a target="_blank" href="https://bitbucket.org/">Bitbucket</a></b>, <b><a target="_blank" href="https://github.com/">GitHub</a></b>, <b><a target="_blank" href="http://code.google.com/">Google Code</a></b>, <b><a target="_blank" href="https://launchpad.net/">Launchpad</a></b> and <b><a target="_blank" href="http://git.oschina.net/">Git @ OSC</a></b>.
+
+Go Walker is a server that generates Go projects API documentation on the fly. It supports BitBucket, GitHub, Google Code, Launchpad, Git @ OSC and GitCafe.
 
 ## Features
 
@@ -16,13 +17,6 @@ Go Walker is a web server that generates <a target="_blank" href="http://golang.
 - **Control panel** for keyboard shortcuts and more function: compatible with godoc.org.
 - **Multiple language** support for readme(.md): [About](http://gowalker.org/about).
 - Add **third-party examples** for your favorite projects: through Github Gist.
-- Source file based code view.
-
-## Third-party packages
-
-- [Beego](http://gowalker.org/github.com/astaxie/beego): a **lightweight** web framework for web application **quick** development.
-- [Xorm](http://gowalker.org/github.com/lunny/xorm): Simple and powerful ORM in Go.
-- [goconfig](https://github.com/Unknwon/goconfig): a easy-use **comments-support** configuration file(.ini) parser for the Go Programming Language.
 
 ## Credits
 
@@ -31,3 +25,8 @@ Go Walker is a web server that generates <a target="_blank" href="http://golang.
 - [atotto](https://github.com/atotto) Thanks for translating site user interface to Japanese.
 - [garyburd](https://github.com/garyburd) Thanks for teaching me about license.
 - Sub-package **doc** is originally a fork of [gosrc](https://github.com/golang/gddo/tree/master/gosrc).
+
+## License
+
+This project is under Apache v2 License. See the [LICENSE](LICENSE) file for the full license text.
+

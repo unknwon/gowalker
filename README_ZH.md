@@ -1,7 +1,7 @@
-Go Walker Server [![wercker status](https://app.wercker.com/status/cd3bece96df89a704e3a1fbdcac7c6da/s/ "wercker status")](https://app.wercker.com/project/bykey/cd3bece96df89a704e3a1fbdcac7c6da)
+Go Walker [![wercker status](https://app.wercker.com/status/cd3bece96df89a704e3a1fbdcac7c6da/s/ "wercker status")](https://app.wercker.com/project/bykey/cd3bece96df89a704e3a1fbdcac7c6da)
 ========
 
-Go Walker 是一个用于在线生成并浏览 <a target="_blank" href="http://docs.studygolang.com/">Go</a> 项目 API 文档及黑客视图的 Web 服务器，目前已支持包括 [Bitbucket](https://bitbucket.org)、[GitHub](https://github.com)、[Google Code](http://code.google.com)、[Launchpad](https://launchpad.net) 和 [Git @ OSC](http://git.oschina.net) 在内的五大代码托管平台。
+Go Walker 是一个用于在线生成并浏览 <a target="_blank" href="http://docs.studygolang.com/">Go</a> 项目 API 文档的 Web 服务器，目前已支持 BitBucket、GitHub、Google Code、Launchpad、Git @ OSC 和 GitCafe。
 
 ## 主要特性
 
@@ -16,4 +16,3 @@ Go Walker 是一个用于在线生成并浏览 <a target="_blank" href="http://d
 - 使用 **标签** 标记项目：更好地分类显示。
 - **多语言** 支持：[关于](http://gowalker.org/about)。
 - 通过 Github Gist 为您喜爱的项目增加 **第三方示例**。
-- 基于源文件的代码浏览。

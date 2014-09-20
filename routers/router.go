@@ -1,4 +1,4 @@
-// Copyright 2013-2014 Unknown
+// Copyright 2013 Unknwon
 //
 // Licensed under the Apache License, Version 2.0 (the "License"): you may
 // not use this file except in compliance with the License. You may obtain
@@ -16,62 +16,19 @@
 package routers
 
 import (
-	"fmt"
-	"strings"
 	"time"
 
 	"github.com/astaxie/beego"
 
 	"github.com/Unknwon/gowalker/hv"
 	"github.com/Unknwon/gowalker/models"
-	"github.com/Unknwon/gowalker/utils"
-)
-
-var (
-	AppVer    string
-	IsProMode bool
-	IsBeta    bool
+	"github.com/Unknwon/gowalker/modules/log"
+	"github.com/Unknwon/gowalker/modules/setting"
 )
 
 // baseRouter implemented global settings for all other routers.
 type baseRouter struct {
 	beego.Controller
-}
-
-// Prepare implemented Prepare method for baseRouter.
-func (this *baseRouter) Prepare() {
-	// Setting properties.
-	this.Data["AppVer"] = AppVer
-	this.Data["IsProMode"] = IsProMode
-	this.Data["IsBeta"] = IsBeta
-
-	// Setting language version.
-	if len(utils.LangTypes) == 0 {
-		// Initialize languages.
-		langs := strings.Split(utils.Cfg.MustValue("lang", "types"), "|")
-		names := strings.Split(utils.Cfg.MustValue("lang", "names"), "|")
-		utils.LangTypes = make([]*utils.LangType, 0, len(langs))
-		for i, v := range langs {
-			utils.LangTypes = append(utils.LangTypes, &utils.LangType{
-				Lang: v,
-				Name: names[i],
-			})
-		}
-	}
-
-	var isNeedRedir bool
-	isNeedRedir, this.Data["LangVer"] = utils.SetLangVer(this.Ctx, this.Input(), this.Data)
-	if isNeedRedir {
-		// Redirect to make URL clean.
-		i := strings.Index(this.Ctx.Request.RequestURI, "?")
-		redirUrl := this.Ctx.Request.RequestURI[:i]
-		q := strings.TrimSpace(this.Input().Get("q"))
-		if len(q) > 0 {
-			redirUrl += "?q=" + q
-		}
-		this.Redirect(redirUrl, 302)
-		return
-	}
 }
 
 var (
@@ -80,19 +37,18 @@ var (
 	cachePros    []hv.PkgInfo
 )
 
-func InitRouter() {
+func init() {
 	// Load max element numbers.
-	num := utils.Cfg.MustInt("setting", "max_pro_info_num")
+	num := setting.Cfg.MustInt("setting", "MAX_PRO_INFO_NUM")
 	if num > 0 {
 		maxProInfoNum = num
 	}
 
-	num = utils.Cfg.MustInt("setting", "max_exam_num")
+	num = setting.Cfg.MustInt("setting", "MAX_EXAM_NUM")
 	if num > 0 {
 		maxExamNum = num
 	}
-	beego.Trace(fmt.Sprintf("maxProInfoNum: %d; maxExamNum: %d",
-		maxProInfoNum, maxExamNum))
+	log.Trace("maxProInfoNum: %d; maxExamNum: %d", maxProInfoNum, maxExamNum)
 
 	// Start cache ticker.
 	cacheTicker = time.NewTicker(time.Minute)
@@ -108,13 +64,13 @@ func cacheTickerCheck(cacheChan <-chan time.Time) {
 		refreshCount++
 
 		// Check if reach the maximum limit of skip.
-		if refreshCount >= utils.Cfg.MustInt("task", "max_skip_time") {
+		if refreshCount >= setting.Cfg.MustInt("task", "MAX_SKIP_TIME") {
 			// Yes.
 			refreshCount = 0
 		}
 
 		// Check if need to flush cache.
-		if refreshCount == 0 || len(cachePros) >= utils.Cfg.MustInt("task", "min_pro_num") {
+		if refreshCount == 0 || len(cachePros) >= setting.Cfg.MustInt("task", "MIN_PRO_NUM") {
 			FlushCache()
 			initPopPros()
 			refreshCount = 0

@@ -26,7 +26,7 @@ import (
 
 	"github.com/Unknwon/gowalker/hv"
 	"github.com/Unknwon/gowalker/models"
-	"github.com/Unknwon/gowalker/utils"
+	"github.com/Unknwon/gowalker/modules/setting"
 )
 
 type requestType int
@@ -53,7 +53,7 @@ func CheckDoc(broPath, tag string, rt requestType) (*hv.Package, error) {
 	broPath = strings.TrimPrefix(broPath, "code.google.com/p/go/source/browse/src/pkg/")
 
 	// Check Block List.
-	if strings.Contains(utils.Cfg.MustValue("info", "block_list"), "|"+broPath+"|") {
+	if strings.Contains(setting.Cfg.MustValue("info", "block_list"), "|"+broPath+"|") {
 		return nil, errors.New("Unable to process the operation bacause " + broPath +
 			" is in the Block List")
 	}
@@ -116,9 +116,9 @@ func CheckDoc(broPath, tag string, rt requestType) (*hv.Package, error) {
 			if err != nil && strings.HasPrefix(err.Error(), "Cannot find Go files") &&
 				len(tag) == 0 {
 				beego.Info("Added to block list:", broPath)
-				utils.Cfg.SetValue("info", "block_list",
-					utils.Cfg.MustValue("info", "block_list")+broPath+"|")
-				utils.SaveConfig()
+				setting.Cfg.SetValue("info", "block_list",
+					setting.Cfg.MustValue("info", "block_list")+broPath+"|")
+				setting.SaveConfig()
 			}
 			return nil, err
 		}
