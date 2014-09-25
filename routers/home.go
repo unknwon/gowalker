@@ -1,4 +1,4 @@
-// Copyright 2013-2014 Unknown
+// Copyright 2013 Unknwon
 //
 // Licensed under the Apache License, Version 2.0 (the "License"): you may
 // not use this file except in compliance with the License. You may obtain
@@ -33,8 +33,13 @@ import (
 	"github.com/Unknwon/gowalker/doc"
 	"github.com/Unknwon/gowalker/hv"
 	"github.com/Unknwon/gowalker/models"
+	"github.com/Unknwon/gowalker/modules/middleware"
 	"github.com/Unknwon/gowalker/utils"
 )
+
+func Home(ctx *middleware.Context) {
+	ctx.HTML(200, "home")
+}
 
 var (
 	maxProInfoNum = 20

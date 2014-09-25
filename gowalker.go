@@ -39,7 +39,7 @@ import (
 )
 
 const (
-	APP_VER = "1.1.0.0919"
+	APP_VER = "1.1.1.0924"
 )
 
 func catchExit() {
@@ -111,8 +111,8 @@ func main() {
 
 	m := newMacaron()
 
-	// // Register routers.
-	// beego.Router("/", &routers.HomeRouter{})
+	// Routers.
+	m.Get("/", routers.Home)
 	// beego.Router("/refresh", &routers.RefreshRouter{})
 	// beego.Router("/search", &routers.SearchRouter{})
 	// beego.Router("/index", &routers.IndexRouter{})
@@ -135,7 +135,7 @@ func main() {
 	// // "robot.txt"
 	// beego.Router("/robots.txt", &routers.RobotRouter{})
 
-	// // For all unknown pages.
+	// For all unknown pages.
 	// beego.Router("/:all", &routers.HomeRouter{})
 
 	listenAddr := "0.0.0.0:" + setting.HttpPort

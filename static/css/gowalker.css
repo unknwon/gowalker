@@ -1,0 +1,14 @@
+body {
+	margin: 0;
+	font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+	background: #FCFCFC url(../img/bg.jpg) repeat;
+}
+.container {
+	padding: 0 15%;
+}
+#navbar {
+	margin: 0;
+	border-radius: 0;
+}
+#navbar .nav-body {
+}
