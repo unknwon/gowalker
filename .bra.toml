@@ -2,7 +2,6 @@
 init_cmds = [["./gowalker"]]
 watch_all = true
 watch_dirs = [
-	"$WORKDIR/conf",
 	"$WORKDIR/models",
 	"$WORKDIR/modules",
 	"$WORKDIR/routers"

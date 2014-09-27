@@ -39,7 +39,7 @@ import (
 )
 
 const (
-	APP_VER = "1.1.1.0924"
+	APP_VER = "1.1.1.0926"
 )
 
 func catchExit() {

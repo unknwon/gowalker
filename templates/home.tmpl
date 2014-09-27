@@ -1,2 +1,15 @@
 {{define "head"}}<title>Go Walker - {{.i18n.Tr "app_desc"}}</title>{{end}}
+{{define "body"}}
+<h1>
+	{{.i18n.Tr "home.title"}}
+	<small>{{.i18n.Tr "home.title_helper"}}.</small>
+</h1>
+<form action="/search" id="main-search-form">
+	<div class="ui fluid action input">
+		<input type="search" name="q" placeholder="{{.i18n.Tr "home.search_holder"}}">
+	  	<div class="ui green button" id="search-btn">{{.i18n.Tr "home.search_btn"}}</div>
+	</div>
+</form>
+<div class="ui divider"></div>
+{{end}}
 {{template "base/base" .}}

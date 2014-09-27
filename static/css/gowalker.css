@@ -10,5 +10,18 @@ body {
 	margin: 0;
 	border-radius: 0;
 }
-#navbar .nav-body {
+.body {
+	padding: 25px 15px;
+}
+small {
+	font-size: 65%;
+}
+h1 small {
+	font-weight: 400;
+	line-height: 1;
+	color: #999;
+}
+#main-search-form {
+	width: 80%;
+	margin-bottom: 30px;
 }
