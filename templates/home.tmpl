@@ -4,7 +4,7 @@
 	{{.i18n.Tr "home.title"}}
 	<small>{{.i18n.Tr "home.title_helper"}}.</small>
 </h1>
-<form action="/search" id="main-search-form">
+<form action="/search" id="home-search-form">
 	<div class="ui fluid action input">
 		<input type="search" name="q" placeholder="{{.i18n.Tr "home.search_holder"}}">
 	  	<div class="ui green button" id="search-btn">{{.i18n.Tr "home.search_btn"}}</div>
@@ -42,10 +42,37 @@
             <span class="ui teal label feature" data-content="Don't worry if you use old version of a project, now you can view documentation by its Tags!" data-position="bottom center">Doc Tag</span>
             and <a href="/about">More</a>.
 		</p>
-        <p class="text-success ">
+        <p class="text-success">
             Please read the <a href="/about">About Page</a> for information about hacking with Go Walker and more.
         </p>
 		{{end}}
+	</div>
+	<div>
+		<h3>
+			<b>{{.i18n.Tr "home.global_history_title"}}.</b>
+			<a class="ui mini black button">{{.i18n.Tr "home.local_history"}}</a>
+		</h3>
+		<table class="ui table segment" name="history-table">
+			<thead>
+		    	<tr>
+		    		<th>{{.i18n.Tr "import_path"}}</th>
+		    		<th>{{.i18n.Tr "home.viewed_time"}}</th>
+		  		</tr>
+		  	</thead>
+		  	<tbody>
+				{{range .GlobalHistory}}
+			    <tr>
+			    	<td>
+			      		<a class="ui feature" href="/{{.ImportPath}}" data-html="<b>{{$.i18n.Tr "Refs"}}</b>: {{.RefNum}}  <b>{{$.i18n.Tr "Rank"}}</b>: {{.Rank}}  <b>{{$.i18n.Tr "Views"}}</b>: {{.Views}}<br><b>{{$.i18n.Tr "Issues"}}</b>: {{.Issues}}  <b>{{$.i18n.Tr "Stars"}}</b>: {{.Stars}}  <b>{{$.i18n.Tr "Forks"}}</b>: {{.Forks}}<br><b>{{$.i18n.Tr "Intro"}}</b>: {{.Synopsis}}">{{SubStr .ImportPath 0 40}}</a>
+			      		{{if .IsGoRepo}}
+			      		<a class="ui small blue label" href="/gorepos">{{$.i18n.Tr "standard"}}</a>
+			      		{{end}}
+			      	</td>
+			      	<td class="meta-time">{{.ViewedTime}}</td>
+			    </tr>
+		    	{{end}}
+		  </tbody>
+		</table>
 	</div>
 </div>
 <div class="grid-1-4 left">

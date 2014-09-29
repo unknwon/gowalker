@@ -20,7 +20,6 @@ import (
 	"fmt"
 	godoc "go/doc"
 	"html/template"
-	"log"
 	"net/http"
 	"path"
 	"strconv"
@@ -33,11 +32,13 @@ import (
 	"github.com/Unknwon/gowalker/doc"
 	"github.com/Unknwon/gowalker/hv"
 	"github.com/Unknwon/gowalker/models"
+	"github.com/Unknwon/gowalker/modules/log"
 	"github.com/Unknwon/gowalker/modules/middleware"
 	"github.com/Unknwon/gowalker/utils"
 )
 
 func Home(ctx *middleware.Context) {
+	ctx.Data["GlobalHistory"] = globalHistory
 	ctx.HTML(200, "home")
 }
 
@@ -45,17 +46,17 @@ var (
 	maxProInfoNum = 20
 	maxExamNum    = 15
 
-	recentUpdatedExs                                       []*models.PkgExam
-	recentViewedPros, topRankPros, topViewedPros, RockPros []*hv.PkgInfo
+	recentUpdatedExs                                    []*models.PkgExam
+	globalHistory, topRankPros, topViewedPros, RockPros []*hv.PkgInfo
 )
 
 // initPopPros initializes popular projects.
 func initPopPros() {
 	var err error
-	err, recentUpdatedExs, recentViewedPros, topRankPros, topViewedPros, RockPros =
+	err, recentUpdatedExs, globalHistory, topRankPros, topViewedPros, RockPros =
 		models.GetPopulars(maxProInfoNum, maxExamNum)
 	if err != nil {
-		log.Fatalf("initPopPros -> %v", err)
+		log.Fatal(4, "initPopPros -> %v", err)
 	}
 }
 
@@ -65,11 +66,6 @@ type HomeRouter struct {
 }
 
 func serveHome(this *HomeRouter, urpids, urpts *http.Cookie) {
-	// this.Data["IsHome"] = true
-	this.TplNames = "home.html"
-
-	// Global Recent projects.
-	this.Data["GlobalHistory"] = recentViewedPros
 	// User Recent projects.
 	if urpids != nil && urpts != nil {
 		upros := models.GetGroupPkgInfoById(strings.Split(urpids.Value, "|"))
@@ -120,11 +116,11 @@ func updateCachePros(remoteAddr string, pdoc *hv.Package) {
 
 func updateProInfos(pdoc *hv.Package) {
 	index := -1
-	listLen := len(recentViewedPros)
+	listLen := len(globalHistory)
 	curPro := pdoc.PkgInfo
 
 	// Check if in the list
-	for i, s := range recentViewedPros {
+	for i, s := range globalHistory {
 		if s.ImportPath == curPro.ImportPath {
 			index = i
 			break
@@ -136,16 +132,16 @@ func updateProInfos(pdoc *hv.Package) {
 	switch {
 	case index == -1 && listLen < maxProInfoNum:
 		// Not found and list is not full
-		s = append(s, recentViewedPros...)
+		s = append(s, globalHistory...)
 	case index == -1 && listLen >= maxProInfoNum:
 		// Not found but list is full
-		s = append(s, recentViewedPros[:maxProInfoNum-1]...)
+		s = append(s, globalHistory[:maxProInfoNum-1]...)
 	case index > -1:
 		// Found
-		s = append(s, recentViewedPros[:index]...)
-		s = append(s, recentViewedPros[index+1:]...)
+		s = append(s, globalHistory[:index]...)
+		s = append(s, globalHistory[index+1:]...)
 	}
-	recentViewedPros = s
+	globalHistory = s
 }
 
 // updateUrPros returns strings of user recent viewd projects and timestamps.
