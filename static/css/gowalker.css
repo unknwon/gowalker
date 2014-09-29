@@ -2,6 +2,7 @@ body {
 	margin: 0;
 	font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
 	background: #FCFCFC url(../img/bg.jpg) repeat;
+	line-height: 22px;
 }
 .container {
 	padding: 0 15%;
@@ -24,4 +25,25 @@ h1 small {
 #main-search-form {
 	width: 80%;
 	margin-bottom: 30px;
+}
+.grid-1-4 {
+	width: 33.33333333333333%;
+}
+.grid-3-4 {
+	width: 65%;
+	padding-right: 1.66666666666666%;
+}
+.left {
+	float: left;
+}
+a {
+	color: #428BCA;
+	text-decoration: none;
+}
+a:hover, a:focus {
+    color: #2A6496;
+    text-decoration: underline;
+}
+.text-success {
+	color: #3c763d;
 }

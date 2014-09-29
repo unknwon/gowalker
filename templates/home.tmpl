@@ -11,5 +11,50 @@
 	</div>
 </form>
 <div class="ui divider"></div>
+<div class="grid-3-4 left">
+	<div>
+        {{if eq .Lang "zh-CN"}}
+		<h3><b>超凡体验，您值得拥有.</b></h3>
+		<p>
+			 Go Walker 是一个可以在线生成并浏览 <a target="_blank" href="http://golang.org/">Go</a> 项目 API 文档的 Web 服务器，目前已支持包括 <b>BitBucket</b>、<b>GitHub</b>、<b>Google Code</b>、<b>Launchpad</b> 和 <b>Git @ OSC</b> 在内的五大代码托管平台。
+		</p>
+		<p>
+			经典绝伦的特性包括
+            <span class="ui teal label feature" data-content="在相同页面快速查看高亮渲染后的函数或方法的代码，减少页面占用，可以同时做更多的工作。">查看代码</span>
+            <span class="ui teal label feature" data-content="快速跳转至函数、方法或类型所以在项目的文档页面，节省您的宝贵时间。" data-position="bottom center">链接跳转</span>
+            <span class="ui teal label feature" data-content="通过 GitHub Gist 来为您喜爱的文档添加示例，更好地展示给更多人。">增加示例</span>
+            <span class="ui teal label feature" data-content="不必再为使用旧版的库而烦恼，现在您可以查看任意 Tag 版本的项目文档喔！" data-position="bottom center">文档标签</span>
+            以及 <a href="/about">更多</a>。
+		</p>
+        <p class="text-success">
+            如果您想了解如何更好地提升 Go Walker 操作体验及更多，请仔细阅读  <a href="/about">关于</a> 页面。
+        </p>
+		{{else}}
+		<h3><b>What is this?</b></h3>
+		<p>
+			Go Walker is a server that generates <a target="_blank" href="http://golang.org/">Go</a> projects API documentation on the fly for the projects on <b>BitBucket</b>, <b>GitHub</b>, <b>Google Code</b>, <b>Launchpad</b> and <b>Git @ OSC</b>.
+		</p>
+		<p>
+			Awesome features
+            <span class="ui teal label feature" data-content="View function and method code with nice highlight in the same page, reduce rake up space and do more work at the same time.">Code View</span>
+            <span class="ui teal label feature" data-content="Quick jump to functions, methods and types from imported packages, reduce time to find." data-position="bottom center">Link Jump</span>
+            <span class="ui teal label feature" data-content="Add examples for your favorite projects through GitHub Gist.">Add Example</span>
+            <span class="ui teal label feature" data-content="Don't worry if you use old version of a project, now you can view documentation by its Tags!" data-position="bottom center">Doc Tag</span>
+            and <a href="/about">More</a>.
+		</p>
+        <p class="text-success ">
+            Please read the <a href="/about">About Page</a> for information about hacking with Go Walker and more.
+        </p>
+		{{end}}
+	</div>
+</div>
+<div class="grid-1-4 left">
+	<div>
+        {{if eq .Lang "zh-CN"}}
+		{{else}}
+		<h3><b>Announcement</b></h3>
+		{{end}}
+    </div>
+</div>
 {{end}}
 {{template "base/base" .}}
