@@ -12,6 +12,7 @@ body {
 	border-radius: 0;
 }
 .body {
+	margin-bottom: 50px;
 	padding: 25px 15px;
 }
 small {
@@ -33,6 +34,9 @@ h1 small {
 	width: 65%;
 	padding-right: 1.66666666666666%;
 }
+.inline {
+	display: inline;
+}
 .left {
 	float: left;
 }
@@ -47,3 +51,34 @@ a:hover, a:focus {
 .text-success {
 	color: #3c763d;
 }
+.pre-footer {
+	clear: both;
+	height: 30px;
+}
+footer {
+	font-size: 14px;
+	line-height: 10px;
+	padding: 1px 15px;
+    background: url('../img/noise_lines.png') repeat scroll 0% 0% transparent;
+}
+.backToTop {   
+	display: none;   
+	width: 18px; 
+	line-height: 1.2; 
+	padding: 5px 0;    
+	background-color: #000;   
+	color: #fff;    
+	font-size: 12px; 
+	text-align: center;  
+	position: fixed;  
+	_position: absolute;  
+	right: 10px;    
+	bottom: 100px;    
+	_bottom: "auto";  
+	cursor: pointer;  
+    bottom: 20px;
+    right: 20px;
+    height: 38px;
+    width: 38px;
+    background: url("../img/top.png") no-repeat scroll 0% 0% transparent;
+}       

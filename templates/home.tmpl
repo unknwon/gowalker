@@ -63,7 +63,7 @@
 				{{range .GlobalHistory}}
 			    <tr>
 			    	<td>
-			      		<a class="ui feature" href="/{{.ImportPath}}" data-html="<b>{{$.i18n.Tr "Refs"}}</b>: {{.RefNum}}  <b>{{$.i18n.Tr "Rank"}}</b>: {{.Rank}}  <b>{{$.i18n.Tr "Views"}}</b>: {{.Views}}<br><b>{{$.i18n.Tr "Issues"}}</b>: {{.Issues}}  <b>{{$.i18n.Tr "Stars"}}</b>: {{.Stars}}  <b>{{$.i18n.Tr "Forks"}}</b>: {{.Forks}}<br><b>{{$.i18n.Tr "Intro"}}</b>: {{.Synopsis}}">{{SubStr .ImportPath 0 40}}</a>
+			      		<a class="ui feature" href="/{{.ImportPath}}" data-html="<b>{{$.i18n.Tr "Refs"}}</b>: {{.RefNum}}  <b>{{$.i18n.Tr "Rank"}}</b>: {{.Rank}}  <b>{{$.i18n.Tr "Views"}}</b>: {{.Views}}<br><b>{{$.i18n.Tr "Issues"}}</b>: {{.Issues}}  <b>{{$.i18n.Tr "Stars"}}</b>: {{.Stars}}  <b>{{$.i18n.Tr "Forks"}}</b>: {{.Forks}}<br><b>{{$.i18n.Tr "Intro"}}</b>: {{.Synopsis}}">{{SubStr .ImportPath 0 45}}</a>
 			      		{{if .IsGoRepo}}
 			      		<a class="ui small blue label" href="/gorepos">{{$.i18n.Tr "standard"}}</a>
 			      		{{end}}
