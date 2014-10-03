@@ -17,10 +17,8 @@ package models
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
 	"regexp"
-	"time"
 
 	"github.com/astaxie/beego"
 	_ "github.com/go-sql-driver/mysql"
@@ -40,24 +38,6 @@ type PkgTag struct {
 	Tag  string `xorm:"unique(pkg_tag_path_tag) VARCHAR(50)"`
 	Vcs  string `xorm:"VARCHAR(50)"`
 	Tags string `xorm:"TEXT"`
-}
-
-// A PkgRock descriables the trending rank of the project.
-type PkgRock struct {
-	Id    int64
-	Pid   int64  `xorm:"index"`
-	Path  string `xorm:"VARCHAR(150)"`
-	Rank  int64
-	Delta int64 `xorm:"index"`
-}
-
-// A PkgExam descriables the user example of the project.
-type PkgExam struct {
-	Id       int64
-	Path     string    `xorm:"index VARCHAR(150)"`
-	Gist     string    `xorm:"VARCHAR(150)"` // Gist path.
-	Examples string    `xorm:"TEXT"`         // Examples.
-	Created  time.Time `xorm:"index"`
 }
 
 // PkgDecl is package declaration in database acceptable form.
@@ -109,7 +89,7 @@ func init() {
 		setting.Cfg.MustValue("database", "NAME")))
 	if err != nil {
 		log.Fatal(4, "Fail to init new engine: %v", err)
-	} else if err = x.Sync(new(hv.PkgInfo), new(PkgTag), new(PkgRock), new(PkgExam),
+	} else if err = x.Sync(new(hv.PkgInfo), new(PkgTag),
 		new(PkgDecl), new(PkgFunc), new(PkgImport)); err != nil {
 		log.Fatal(4, "Fail to sync database: %v", err)
 	}
@@ -136,70 +116,7 @@ func GetGoSubrepo() (pinfos []*hv.PkgInfo) {
 	return pinfos
 }
 
-// GetPkgExams returns user examples.
-func GetPkgExams(path string) (pkgExams []PkgExam, err error) {
-	err = x.Where("path = ?", path).Find(&pkgExams)
-	return pkgExams, err
-}
-
-// GetAllExams returns all user examples.
-func GetAllExams() (pkgExams []PkgExam, err error) {
-	err = x.Asc("path").Find(&pkgExams)
-	return pkgExams, err
-}
-
 var buildPicPattern = regexp.MustCompile(`\[+!+\[+([a-zA-Z ]*)+\]+\(+[a-zA-z]+://[^\s]*`)
-
-// SavePkgExam saves user examples.
-func SavePkgExam(gist *PkgExam) error {
-	pinfo := &hv.PkgInfo{ImportPath: gist.Path}
-	has, err := x.Get(pinfo)
-	if !has || err != nil {
-		return errors.New(
-			fmt.Sprintf("models.SavePkgExam( %s ) -> Package does not exist: %s",
-				gist.Path, err))
-	}
-
-	pexam := &PkgExam{
-		Path: gist.Path,
-		Gist: gist.Gist,
-	}
-	has, err = x.Get(pexam)
-	if err != nil {
-		return errors.New(
-			fmt.Sprintf("models.SavePkgExam( %s ) -> Get PkgExam: %s",
-				gist.Path, err))
-	}
-	if has {
-		// Check if refresh too frequently(within in 5 minutes).
-		if pexam.Created.Add(5 * time.Minute).UTC().After(time.Now().UTC()) {
-			return errors.New(
-				fmt.Sprintf("models.SavePkgExam( %s ) -> Refresh too frequently(within in 5 minutes)", gist.Path))
-		}
-		gist.Id = pexam.Id
-	}
-	gist.Created = time.Now().UTC()
-
-	if has {
-		_, err = x.Id(gist.Id).Update(gist)
-	} else {
-		_, err = x.Insert(gist)
-	}
-	if err != nil {
-		return errors.New(
-			fmt.Sprintf("models.SavePkgExam( %s ) -> Save PkgExam: %s", gist.Path, err))
-	}
-
-	// Delete 'PkgDecl' in order to generate new page.
-	_, err = x.Where("pid = ?", pinfo.Id).And("tag = ?", "").Delete(new(PkgDecl))
-	if err != nil {
-		return errors.New(
-			fmt.Sprintf("models.SavePkgExam( %s ) -> Delete PkgDecl: %s", gist.Path, err))
-	}
-
-	beego.Trace("models.SavePkgExam(", gist.Path, ") -> Saved")
-	return nil
-}
 
 func handleIllegalChars(data []byte) []byte {
 	return bytes.Replace(data, []byte("<"), []byte("&lt;"), -1)

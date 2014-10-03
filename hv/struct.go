@@ -56,10 +56,11 @@ type PkgInfo struct {
 		eg.
 			2013-07-16 21:09:27.48932087
 	*/
-	Tags       string `xorm:"-" json:"tags"`
-	Views      int64  `xorm:"index" json:"-"`
-	ViewedTime int64  `json:"-"`
-	Created    int64  `xorm:"index" json:"created"`
+	Tags        string `xorm:"-" json:"tags"`
+	Views       int64  `xorm:"index" json:"-"`
+	RecentViews int64  `xorm:"index" json:"-"`
+	ViewedTime  int64  `json:"-"`
+	Created     int64  `xorm:"index" json:"created"`
 
 	/*
 		- Rank is the benchmark of projects, it's based on BaseRank and views.
@@ -162,9 +163,9 @@ type PkgDecl struct {
 
 	File
 
-	Examples, UserExamples []*Example // Function or method example.
-	Imports, TestImports   []string   // Imports.
-	Files, TestFiles       []*Source  // Source files.
+	Examples             []*Example // Function or method example.
+	Imports, TestImports []string   // Imports.
+	Files, TestFiles     []*Source  // Source files.
 
 	Notes []string // Source code notes.
 	Dirs  []string // Subdirectories

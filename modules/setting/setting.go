@@ -38,6 +38,8 @@ var (
 	Cfg               *goconfig.ConfigFile
 	ProdMode          bool
 	GithubCredentials string
+	HistoryProNum     = 21
+	PopularProNum     = 15
 
 	// I18n settings.
 	Langs, Names []string

@@ -19,7 +19,6 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/astaxie/beego"
 
@@ -36,39 +35,13 @@ import (
 		4. Rock this week
 	projects and recent updated examples.
 */
-func GetPopulars(proNum, exNum int) (error, []*PkgExam, []*hv.PkgInfo, []*hv.PkgInfo, []*hv.PkgInfo, []*hv.PkgInfo) {
-	var ruExs []*PkgExam
-	err := x.Limit(exNum).Desc("created").Find(&ruExs)
-	if err != nil {
-		return err, nil, nil, nil, nil, nil
-	}
-
-	var rvPros, trPros, tvPros, rtwPros []*hv.PkgInfo
-	var procks []*PkgRock
-	err = x.Limit(proNum).Desc("viewed_time").Find(&rvPros)
-	if err != nil {
-		return err, nil, nil, nil, nil, nil
-	}
-	err = x.Limit(proNum).Desc("rank").Find(&trPros)
-	if err != nil {
-		return err, nil, nil, nil, nil, nil
-	}
-	err = x.Limit(proNum).Desc("views").Find(&tvPros)
-	if err != nil {
-		return err, nil, nil, nil, nil, nil
-	}
-	err = x.Limit(proNum).Desc("delta").Find(&procks)
-	if err != nil {
-		return err, nil, nil, nil, nil, nil
-	}
-	for _, pr := range procks {
-		rtwPros = append(rtwPros, &hv.PkgInfo{
-			Id:         pr.Pid,
-			ImportPath: pr.Path,
-			Rank:       pr.Rank,
-		})
-	}
-	return nil, ruExs, rvPros, trPros, tvPros, rtwPros
+func GetPopulars() ([]*hv.PkgInfo, []*hv.PkgInfo, []*hv.PkgInfo, []*hv.PkgInfo) {
+	var rvPros, trPros, newPros, rtwPros []*hv.PkgInfo
+	x.Limit(setting.HistoryProNum).Desc("viewed_time").Find(&rvPros)
+	x.Limit(setting.PopularProNum).Desc("rank").Find(&trPros)
+	x.Limit(setting.PopularProNum).Asc("created").Find(&newPros)
+	x.Limit(setting.PopularProNum).Desc("recent_views").Find(&rtwPros)
+	return rvPros, trPros, newPros, rtwPros
 }
 
 func getRefIndex(refPids []string, pid string) int {
@@ -485,15 +458,9 @@ func DeleteProject(path string) {
 		}
 	}
 
-	// Delete package examples.
-	i4, err = x.Where("path = ?", path).Delete(new(PkgExam))
-	if err != nil {
-		beego.Error("models.DeleteProject(", path, ") -> Examples:", err)
-	}
-
 	// Delete package functions.
 	if info.Id > 0 {
-		i5, err = x.Where("path = ?", path).Delete(new(PkgExam))
+		i5, err = x.Where("path = ?", path).Delete(new(PkgFunc))
 		if err != nil {
 			beego.Error("models.DeleteProject(", path, ") -> Functions:", err)
 		}
@@ -530,7 +497,6 @@ func calRefRanks(refPids []string) int64 {
 
 // FlushCacheProjects saves cache data to database.
 func FlushCacheProjects(pinfos []hv.PkgInfo) {
-	procks := make([]PkgRock, 0, len(pinfos))
 	// Update project data.
 	for _, p := range pinfos {
 		info := &hv.PkgInfo{ImportPath: p.ImportPath}
@@ -543,9 +509,12 @@ func FlushCacheProjects(pinfos []hv.PkgInfo) {
 			// Shoule always be nil, just in case not exist.
 			p.Id = info.Id
 			// Limit 10 views each period.
-			if p.Views-info.Views > 10 {
-				p.Views = info.Views + 10
+			delta := p.Views - info.Views
+			if delta > 10 {
+				delta = 10
 			}
+			p.Views += delta
+			p.RecentViews += delta
 		}
 
 		// Update rank.
@@ -560,49 +529,22 @@ func FlushCacheProjects(pinfos []hv.PkgInfo) {
 			_, err = x.Insert(p)
 		}
 		if err != nil {
-			beego.Error("models.FlushCacheProjects(", p.ImportPath,
-				") -> Save hv.PkgInfo:", err)
+			beego.Error("models.FlushCacheProjects(", p.ImportPath, ") -> Save hv.PkgInfo:", err)
 			continue
 		}
-
-		procks = append(procks, PkgRock{
-			Pid:  p.Id,
-			Path: p.ImportPath,
-			Rank: p.Rank,
-		})
 	}
 
 	// Update rock this week.
-	if time.Now().UTC().Weekday() == time.Monday && setting.Cfg.MustBool("task", "rock_reset") {
-		setting.Cfg.SetValue("task", "rock_reset", "0")
-		setting.SaveConfig()
-		// Reset rock table.
-		_, err := x.Where("id > ?", int64(0)).Delete(new(PkgRock))
-		if err != nil {
-			beego.Error("models.FlushCacheProjects -> Reset rock table:", err)
-		}
-	} else if time.Now().UTC().Weekday() != time.Monday && !setting.Cfg.MustBool("task", "rock_reset") {
-		setting.Cfg.SetValue("task", "rock_reset", "1")
-		setting.SaveConfig()
-	}
-
-	for _, pr := range procks {
-		r := &PkgRock{Path: pr.Path}
-		has, err := x.Get(r)
-		if err != nil {
-			beego.Error("models.FlushCacheProjects(", pr.Path, ") -> Get PkgRock:", err)
-			continue
-		}
-		if has {
-			pr.Id = r.Id
-			r.Delta += pr.Rank - r.Rank
-			pr.Delta = r.Delta
-			_, err = x.Id(pr.Id).Update(pr)
-		} else {
-			_, err = x.Insert(pr)
-		}
-		if err != nil {
-			beego.Error("models.FlushCacheProjects(", pr.Path, ") -> Save PkgRock:", err)
-		}
-	}
+	// if time.Now().UTC().Weekday() == time.Monday && setting.Cfg.MustBool("task", "rock_reset") {
+	// 	setting.Cfg.SetValue("task", "rock_reset", "0")
+	// 	setting.SaveConfig()
+	// 	// Reset rock table.
+	// 	_, err := x.Where("id > ?", int64(0)).Delete(new(PkgRock))
+	// 	if err != nil {
+	// 		beego.Error("models.FlushCacheProjects -> Reset rock table:", err)
+	// 	}
+	// } else if time.Now().UTC().Weekday() != time.Monday && !setting.Cfg.MustBool("task", "rock_reset") {
+	// 	setting.Cfg.SetValue("task", "rock_reset", "1")
+	// 	setting.SaveConfig()
+	// }
 }

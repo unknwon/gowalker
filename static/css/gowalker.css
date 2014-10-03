@@ -1,8 +1,10 @@
 body {
 	margin: 0;
+	font-size: 15px;
 	font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
 	background: #FCFCFC url(../img/bg.jpg) repeat;
 	line-height: 22px;
+	min-width: 1200px;
 }
 .container {
 	padding: 0 15%;
@@ -82,3 +84,19 @@ footer {
     width: 38px;
     background: url("../img/top.png") no-repeat scroll 0% 0% transparent;
 }       
+ul.ui.list.no-style {
+	margin: 0;
+	white-space: nowrap;
+}
+ul.ui.list.no-style li:before {
+	content: none;
+}
+.label {
+	line-height: 1;
+}
+.hide {
+	display: none;
+}
+.one-line {
+	white-space: nowrap;
+}

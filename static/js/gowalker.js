@@ -29,4 +29,16 @@ $(document).ready(function () {
             });
         });
     }
+
+    // Switch list.
+    $('.ui.menu .item').click(function () {
+        if (!$(this).hasClass('active')) {
+            $(this).parent().find('.item').each(function () {
+                $(this).removeClass('active');
+                $($(this).data("target")).hide();
+            });
+            $(this).addClass('active');
+            $($(this).data("target")).show();
+        }
+    });
 });

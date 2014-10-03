@@ -22,7 +22,6 @@ import (
 
 	"github.com/Unknwon/gowalker/hv"
 	"github.com/Unknwon/gowalker/models"
-	"github.com/Unknwon/gowalker/modules/log"
 	"github.com/Unknwon/gowalker/modules/setting"
 )
 
@@ -38,18 +37,6 @@ var (
 )
 
 func init() {
-	// Load max element numbers.
-	num := setting.Cfg.MustInt("setting", "MAX_PRO_INFO_NUM")
-	if num > 0 {
-		maxProInfoNum = num
-	}
-
-	num = setting.Cfg.MustInt("setting", "MAX_EXAM_NUM")
-	if num > 0 {
-		maxExamNum = num
-	}
-	log.Trace("maxProInfoNum: %d; maxExamNum: %d", maxProInfoNum, maxExamNum)
-
 	// Start cache ticker.
 	cacheTicker = time.NewTicker(time.Minute)
 	go cacheTickerCheck(cacheTicker.C)

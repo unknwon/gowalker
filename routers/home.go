@@ -32,32 +32,26 @@ import (
 	"github.com/Unknwon/gowalker/doc"
 	"github.com/Unknwon/gowalker/hv"
 	"github.com/Unknwon/gowalker/models"
-	"github.com/Unknwon/gowalker/modules/log"
 	"github.com/Unknwon/gowalker/modules/middleware"
+	"github.com/Unknwon/gowalker/modules/setting"
 	"github.com/Unknwon/gowalker/utils"
 )
 
-func Home(ctx *middleware.Context) {
-	ctx.Data["GlobalHistory"] = globalHistory
-	ctx.HTML(200, "home")
-}
-
 var (
-	maxProInfoNum = 20
-	maxExamNum    = 15
-
-	recentUpdatedExs                                    []*models.PkgExam
-	globalHistory, topRankPros, topViewedPros, RockPros []*hv.PkgInfo
+	globalHistory, rankingPros, newPros, trendingPros []*hv.PkgInfo
 )
 
 // initPopPros initializes popular projects.
 func initPopPros() {
-	var err error
-	err, recentUpdatedExs, globalHistory, topRankPros, topViewedPros, RockPros =
-		models.GetPopulars(maxProInfoNum, maxExamNum)
-	if err != nil {
-		log.Fatal(4, "initPopPros -> %v", err)
-	}
+	globalHistory, rankingPros, newPros, trendingPros = models.GetPopulars()
+}
+
+func Home(ctx *middleware.Context) {
+	ctx.Data["GlobalHistory"] = globalHistory
+	ctx.Data["TrendingPros"] = trendingPros
+	ctx.Data["NewPros"] = newPros
+	ctx.Data["RankingPros"] = rankingPros
+	ctx.HTML(200, "home")
 }
 
 // HomeRouter serves home page.
@@ -77,11 +71,6 @@ func serveHome(this *HomeRouter, urpids, urpts *http.Cookie) {
 		this.Data["UserHistory"] = upros
 	}
 
-	// Popular projects and examples.
-	this.Data["WeeklyStarPros"] = RockPros
-	this.Data["TopRankPros"] = topRankPros
-	this.Data["TopViewsPros"] = topViewedPros
-	this.Data["RecentExams"] = recentUpdatedExs
 }
 
 func updateCacheInfo(remoteAddr string, pdoc *hv.Package, urpids, urpts *http.Cookie) (string, string) {
@@ -127,15 +116,15 @@ func updateProInfos(pdoc *hv.Package) {
 		}
 	}
 
-	s := make([]*hv.PkgInfo, 0, maxProInfoNum)
+	s := make([]*hv.PkgInfo, 0, setting.HistoryProNum)
 	s = append(s, curPro)
 	switch {
-	case index == -1 && listLen < maxProInfoNum:
+	case index == -1 && listLen < setting.HistoryProNum:
 		// Not found and list is not full
 		s = append(s, globalHistory...)
-	case index == -1 && listLen >= maxProInfoNum:
+	case index == -1 && listLen >= setting.HistoryProNum:
 		// Not found but list is full
-		s = append(s, globalHistory[:maxProInfoNum-1]...)
+		s = append(s, globalHistory[:setting.HistoryProNum-1]...)
 	case index > -1:
 		// Found
 		s = append(s, globalHistory[:index]...)
@@ -176,20 +165,20 @@ func updateUrPros(pdoc *hv.Package, urpids, urpts *http.Cookie) (string, string)
 		}
 	}
 
-	s := make([]string, 0, maxProInfoNum)
-	ts := make([]string, 0, maxProInfoNum)
+	s := make([]string, 0, setting.HistoryProNum)
+	ts := make([]string, 0, setting.HistoryProNum)
 	s = append(s, strconv.Itoa(int(pdoc.Id)))
 	ts = append(ts, strconv.Itoa(int(time.Now().UTC().Unix())))
 
 	switch {
-	case index == -1 && listLen < maxProInfoNum:
+	case index == -1 && listLen < setting.HistoryProNum:
 		// Not found and list is not full
 		s = append(s, urPros...)
 		ts = append(ts, urTs...)
-	case index == -1 && listLen >= maxProInfoNum:
+	case index == -1 && listLen >= setting.HistoryProNum:
 		// Not found but list is full
-		s = append(s, urPros[:maxProInfoNum-1]...)
-		ts = append(ts, urTs[:maxProInfoNum-1]...)
+		s = append(s, urPros[:setting.HistoryProNum-1]...)
+		ts = append(ts, urTs[:setting.HistoryProNum-1]...)
 	case index > -1:
 		// Found
 		s = append(s, urPros[:index]...)
@@ -330,22 +319,6 @@ func convertDataFormatExample(examStr, suffix string) []*hv.Example {
 	return exams
 }
 
-// getUserExamples returns user examples of given import path.
-func getUserExamples(path string) []*hv.Example {
-	gists, _ := models.GetPkgExams(path)
-	// Doesn't have Gists.
-	if len(gists) == 0 {
-		return nil
-	}
-
-	pexams := make([]*hv.Example, 0, 5)
-	for _, g := range gists {
-		exams := convertDataFormatExample(g.Examples, "_"+g.Gist[strings.LastIndex(g.Gist, "/")+1:])
-		pexams = append(pexams, exams...)
-	}
-	return pexams
-}
-
 // getExamples returns index of function example if it exists.
 func getExamples(pdoc *hv.Package, typeName, name string) (exams []*hv.Example) {
 	matchName := name
@@ -372,16 +345,6 @@ func getExamples(pdoc *hv.Package, typeName, name string) (exams []*hv.Example) 
 		}
 
 		pdoc.Examples[i].IsUsed = true
-		exams = append(exams, v)
-	}
-
-	for i, v := range pdoc.UserExamples {
-		// Already used or doesn't match.
-		if v.IsUsed || !strings.HasPrefix(v.Name, matchName) {
-			continue
-		}
-
-		pdoc.UserExamples[i].IsUsed = true
 		exams = append(exams, v)
 	}
 	return exams
@@ -463,14 +426,12 @@ func renderDoc(this *HomeRouter, pdoc *hv.Package, q, tag, docPath string) bool 
 			exportDataSrc + "],limit: 10});</script>"
 	}
 
-	pdoc.UserExamples = getUserExamples(pdoc.ImportPath)
-
 	pdoc.IsHasConst = len(pdoc.Consts) > 0
 	pdoc.IsHasVar = len(pdoc.Vars) > 0
-	if len(pdoc.Examples)+len(pdoc.UserExamples) > 0 {
+	if len(pdoc.Examples) > 0 {
 		pdoc.IsHasExample = true
 		this.Data["IsHasExample"] = pdoc.IsHasExample
-		this.Data["Examples"] = append(pdoc.Examples, pdoc.UserExamples...)
+		this.Data["Examples"] = pdoc.Examples
 	}
 
 	// Commented and total objects number.
@@ -645,11 +606,6 @@ func renderDoc(this *HomeRouter, pdoc *hv.Package, q, tag, docPath string) bool 
 	})
 
 	for _, e := range pdoc.Examples {
-		buf.Reset()
-		utils.FormatCode(&buf, &e.Code, links)
-		e.Code = buf.String()
-	}
-	for _, e := range pdoc.UserExamples {
 		buf.Reset()
 		utils.FormatCode(&buf, &e.Code, links)
 		e.Code = buf.String()
