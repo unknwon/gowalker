@@ -1,15 +1,18 @@
 [run]
-init_cmds = [["./gowalker"]]
+init_cmds = [
+	["./gowalker"]
+]
 watch_all = true
 watch_dirs = [
+	"$WORKDIR/conf/locale",
 	"$WORKDIR/models",
 	"$WORKDIR/modules",
 	"$WORKDIR/routers"
 ]
-watch_exts = [".go", ".ini"]
+watch_exts = [".go"]
 build_delay = 1500
 cmds = [
-	["go", "install"],
+	["go", "install"],# redis memcache
 	["go", "build"],
 	["./gowalker"]
 ]

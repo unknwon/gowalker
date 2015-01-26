@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+		<link rel="shortcut icon" href="/img/favicon.ico" />
+		<meta name="author" content="Unknwon" />
+		<meta name="description" content="{% if PkgDesc %}{{PkgDesc}}{% else %}Go Walker is a server that generates Go projects API documentation on the fly.{% endif %}" />
+		<meta name="keywords" content="{{Tr(Lang, "head_keywords")}}">
+		<title>{% block title %}{{Title}} - Go Walker{% endblock %}</title>
+
+		 <!-- Stylesheets -->
+		<link href="/css/semantic.min.css" rel="stylesheet" />
+		<link href="/css/gowalker.min.css" rel="stylesheet" />
+
+		<script type="text/javascript" src="/js/jquery-1.11.2.min.js"></script>
+		<script type="text/javascript" src="/js/semantic.min.js"></script>
+		<script type="text/javascript" src="/js/gowalker.js"></script>
+	</head>
+	<body>
+		<noscript>Please enable JavaScript in your browser!</noscript>
+		<div class="full height">
+			<div class="following bar light">
+			  <div class="ui page grid">
+			    <div class="column">
+			      <div class="ui right floated secondary menu">
+			        <div class="ui language floating dropdown link item">
+			          <i class="world icon"></i>
+			          <div class="text">{{LangName}}</div>
+			          	<div class="menu">
+			  						<a class="item {% if Lang == "en-US"%}active selected{% endif %}" href="{{Link}}?lang=en-US">English</a>
+			  						<a class="item {% if Lang == "zh-CN"%}active selected{% endif %}"  href="{{Link}}?lang=zh-CN">简体中文</a>
+									</div>
+			        </div>
+			      </div>
+			      <div class="ui large secondary network menu">
+			      	<span class="view-ui item">Go Walker</span>
+			        <a class="view-ui item {% if PageIsHome %}active{% endif %}" href="/">{{Tr(Lang, "home")}}</a>
+			        {# <a class="view-ui item {% if PageIsIndex %}active{% endif %}" href="/-/index">{{Tr(Lang, "index")}}</a> #}
+			        {# <a class="view-ui item {% if PageIsApi %}active{% endif %}" href="/api/docs">{{Tr(Lang, "api_service")}}</a> #}
+			        {# <a class="view-ui item {% if PageIsAbout %}active{% endif %}" href="/about">{{Tr(Lang, "about")}}</a> #}
+			      </div>
+			    </div>
+			  </div>
+			</div>
+			
+			<div class="ui page grid alert">
+				<div class="{% if PageIsDocs %}fifteen{% else %}thirteen{% endif %} wide center aligned centered column">
+					{% if Flash.ErrorMsg %}
+					<div class="ui negative message">
+					  <div class="header">
+					    {{Tr(Lang, "form.flash_error_title")}}
+					  </div>
+					  <p>{{Flash.ErrorMsg|safe}}</p>
+					</div>
+					{% endif %}
+					{% if Flash.InfoMsg %}
+					<div class="ui info message">
+						{% if InfoHeader %}
+					  <div class="header">
+					    {{InfoHeader}}
+					  </div>
+					  {% endif %}
+					  {{Flash.InfoMsg|safe}}
+					</div>
+					{% endif %}
+				</div>
+			</div>
+
+			{% block body %}{% endblock %}
+			<div class="ui inverted black footer vertical segment grid">
+			  <div class="fourteen wide center aligned centered column">
+			    <div class="ui stackable inverted divided relaxed grid">
+			      <div class="eight wide column">
+			        <h3 class="ui inverted header">Copyright © 2015 Go Walker</h3>
+			        {% if Lang == "zh-CN" %}
+			        <p>网站由 <i class="user icon"></i><a target="_blank" href="https://github.com/Unknwon">@Unknwon</a> 建设，并由 <a target="_blank" href="http://gowalker.org/github.com/Unknwon/macaron">Macaron</a> 和 <a target="_blank" href="/github.com/go-xorm/xorm">Xorm</a> 提供动力。</p>
+			        <p>请给 <i class="mail icon"></i>我们（u@gogs.io）发送反馈信息或提交 <i class="tasks icon"></i><a target="_blank" href="https://github.com/Unknwon/gowalker/issues">网站问题</a>。</p>
+			        {% else %}
+			        <p>Website built by <i class="user icon"></i><a target="_blank" href="https://github.com/Unknwon">@Unknwon</a>. Powered by <a target="_blank" href="/github.com/Unknwon/macaron">Macaron</a> and <a target="_blank" href="http://gowalker.org/github.com/go-xorm/xorm">Xorm</a>.</p>
+			        <p>Send us <i class="mail icon"></i>Feedback(u@gogs.io) or submit <i class="tasks icon"></i><a target="_blank" href="https://github.com/Unknwon/gowalker/issues">Website Issues</a>.</p>
+			        {% endif %}
+			      </div>
+			      <div class="four wide column">
+			        <h5 class="ui teal inverted header">{{Tr(Lang, "home.more_projects")}}</h5>
+			        <div class="ui inverted link list">
+			          {# <a class="item" href="/gorepos">{{Tr(Lang, "home.gorepos")}}</a> #}
+			          {# <a class="item" href="/gosubrepos">{{Tr(Lang, "home.gosubrepos")}}</a> #}
+			          <a class="item" href="https://sourcegraph.com/" target="_blank">Sourcegraph </a>
+			        </div>
+			      </div>
+			      <div class="four wide column">
+			        <h5 class="ui teal inverted header">{{Tr(Lang, "home.community")}}</h5>
+			        <div class="ui inverted link list">
+			          <a class="item" href="http://golanghome.com" target="_blank">Golang Home</a>
+			          <a class="item" href="http://golangtc.com" target="_blank">Golang 中国</a>
+			          <a class="item" href="http://blog.gopheracademy.com/" target="_blank">Gopher Academy</a>
+			        </div>
+			      </div>
+			    </div>
+			  </div>
+			</div>
+			{% if ProdMode %}
+			<script>
+				(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+				(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+				m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+				})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+				ga('create', 'UA-40109089-2', 'gowalker.org');
+				ga('send', 'pageview');
+			</script>
+			{% endif %}
+		</div>
+	</body>
+</html>

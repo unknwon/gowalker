@@ -15,68 +15,54 @@
 package setting
 
 import (
-	"os"
+	"time"
 
 	"github.com/Unknwon/com"
-	"github.com/Unknwon/goconfig"
 	"github.com/Unknwon/macaron"
+	"gopkg.in/ini.v1"
 
 	"github.com/Unknwon/gowalker/modules/log"
 )
 
 var (
-	// App settings.
+	// Application settings.
 	AppVer string
 
 	// Server settings.
 	HttpPort string
 
-	// Server settings.
-	DisableRouterLog bool
-
 	// Global setting objects.
-	Cfg               *goconfig.ConfigFile
+	Cfg               *ini.File
 	ProdMode          bool
 	GithubCredentials string
-	HistoryProNum     = 21
-	PopularProNum     = 15
+	FetchTimeout      time.Duration = 60 * time.Second
 
-	// I18n settings.
-	Langs, Names []string
+	DocsJsPath  = "raw/docs/"
+	DocsGobPath = "raw/gob/"
 )
 
 func init() {
 	log.NewLogger(0, "console", `{"level": 0}`)
 
-	var err error
-	Cfg, err = goconfig.LoadConfigFile("conf/app.ini")
-	if err != nil {
-		log.Fatal(4, "Fail to parse 'conf/app.ini': %v", err)
-	}
+	sources := []interface{}{"conf/app.ini"}
 	if com.IsFile("custom/app.ini") {
-		if err = Cfg.AppendFiles("custom/app.ini"); err != nil {
-			log.Fatal(4, "Fail to load 'custom/app.ini': %v", err)
-		}
+		sources = append(sources, "custom/app.ini")
 	}
 
-	if Cfg.MustValue("", "RUN_MODE", "dev") == "prod" {
-		macaron.Env = macaron.PROD
+	var err error
+	Cfg, err = macaron.SetConfig(sources[0], sources[1:]...)
+	if err != nil {
+		log.Fatal(4, "Fail to set configuration: %v", err)
+	}
+
+	if Cfg.Section("").Key("RUN_MODE").MustString("dev") == "prod" {
 		ProdMode = true
+		macaron.Env = macaron.PROD
+		macaron.ColorLog = false
 	}
 
-	HttpPort = Cfg.MustValue("server", "HTTP_PORT", "8080")
+	HttpPort = Cfg.Section("server").Key("HTTP_PORT").MustString("8080")
 
-	DisableRouterLog = Cfg.MustBool("server", "DISABLE_ROUTER_LOG")
-
-	GithubCredentials = "client_id=" + Cfg.MustValue("github", "CLIENT_ID") +
-		"&client_secret=" + Cfg.MustValue("github", "CLIENT_SECRET")
-
-	Langs = Cfg.MustValueArray("i18n", "LANGS", ",")
-	Names = Cfg.MustValueArray("i18n", "NAMES", ",")
-}
-
-// SaveConfig saves configuration file.
-func SaveConfig() error {
-	os.MkdirAll("custom", os.ModePerm)
-	return goconfig.SaveConfigFile(Cfg, "custom/app.ini")
+	GithubCredentials = "client_id=" + Cfg.Section("github").Key("CLIENT_ID").String() +
+		"&client_secret=" + Cfg.Section("github").Key("CLIENT_SECRET").String()
 }

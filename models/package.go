@@ -1,4 +1,4 @@
-// Copyright 2013 Unknown
+// Copyright 2015 Unknwon
 //
 // Licensed under the Apache License, Version 2.0 (the "License"): you may
 // not use this file except in compliance with the License. You may obtain
@@ -16,225 +16,119 @@ package models
 
 import (
 	"errors"
-	"fmt"
-	"strconv"
-	"strings"
+	"path"
+	"time"
 
 	"github.com/Unknwon/com"
-	"github.com/astaxie/beego"
 
-	"github.com/Unknwon/gowalker/hv"
-	"github.com/Unknwon/gowalker/utils"
+	"github.com/Unknwon/gowalker/modules/setting"
 )
 
-// SearchPkg returns packages that import path and synopsis contains keyword.
-// 0 = false, 1 = true, other = undefined
-func SearchPkg(key string, isCmd, isCgo, isGoRepo, isGoSubrepo int, isSynopsis bool) (pinfos []hv.PkgInfo) {
-	key = strings.TrimSpace(key)
-	if len(key) == 0 {
-		return nil
-	}
-	keys := strings.Split(key, " ")
-	if keys[0] == "" {
-		return nil
-	}
+var (
+	ErrEmptyPackagePath     = errors.New("Package import path is empty")
+	ErrPackageNotFound      = errors.New("Package does not found")
+	ErrPackageVersionTooOld = errors.New("Package version is too old")
+)
 
-	sess := x.Limit(200).Desc("rank").Where("id > ?", 0)
+// PkgInfo represents the package information.
+type PkgInfo struct {
+	Id         int64
+	ImportPath string `xorm:"UNIQUE"`
+	Etag       string
 
-	if isCmd == 0 {
-		sess = sess.And("is_cmd = ?", false)
-	} else if isCmd == 1 {
-		sess = sess.And("is_cmd = ?", true)
-	}
-	if isCgo == 0 {
-		sess = sess.And("is_cgo = ?", false)
-	} else if isCgo == 1 {
-		sess = sess.And("is_cgo = ?", true)
-	}
-	if isGoRepo == 0 {
-		sess = sess.And("is_go_repo = ?", false)
-	} else if isGoRepo == 1 {
-		sess = sess.And("is_go_repo = ?", true)
-	}
-	if isGoSubrepo == 0 {
-		sess = sess.And("is_go_subrepo = ?", false)
-	} else if isGoSubrepo == 1 {
-		sess = sess.And("is_go_subrepo = ?", true)
-	}
+	ProjectPath string
+	ViewDirPath string
+	Synopsis    string
 
-	sess = sess.And("import_path like '%" + keys[0] + "%'")
+	IsCmd       bool
+	IsCgo       bool
+	IsGoRepo    bool
+	IsGoSubrepo bool
 
-	if isSynopsis {
-		sess = sess.Or("synopsis like '%" + keys[0] + "%'")
-	}
+	// RefNum  int64
+	// RefPids string `xorm:"TEXT"`
+	Views int64
+	// Rank    int64 `xorm:"INDEX"`
 
-	if err := sess.Find(&pinfos); err != nil {
-		beego.Error("models.SearchPkg -> ", err.Error())
-		return pinfos
-	}
-	return pinfos
+	PkgVer int
+
+	// Indicate how many JS should be downloaded(JsNum=total num - 1)
+	JsNum int
+
+	LastView int64 `xorm:"-"`
+	Created  int64
 }
 
-// GetPkgInfo returns 'PkgInfo' by given import path and tag.
-// It returns error when the package does not exist.
-func GetPkgInfo(path, tag string) (*hv.PkgInfo, error) {
-	// Check path length to reduce connect times.
-	if len(path) == 0 {
-		return nil, errors.New("models.GetPkgInfo -> Empty path as not found.")
+func (p *PkgInfo) JsPath() string {
+	return path.Join(setting.DocsJsPath, p.ImportPath) + ".js"
+}
+
+// PACKAGE_VER is modified when previously stored packages are invalid.
+const PACKAGE_VER = 1
+
+// SavePkgInfo saves package information.
+func SavePkgInfo(pinfo *PkgInfo) (err error) {
+	pinfo.PkgVer = PACKAGE_VER
+	pinfo.Created = time.Now().UTC().Unix()
+
+	if pinfo.Id == 0 {
+		pinfo.Views = 1
+		_, err = x.Insert(pinfo)
+	} else {
+		_, err = x.Id(pinfo.Id).AllCols().Update(pinfo)
+	}
+	return err
+}
+
+// GetPkgInfo returns package information by given import path.
+func GetPkgInfo(importPath string) (*PkgInfo, error) {
+	if len(importPath) == 0 {
+		return nil, ErrEmptyPackagePath
 	}
 
-	pinfo := &hv.PkgInfo{ImportPath: path}
-	has, err := x.Get(pinfo)
-	if !has || err != nil {
-		return pinfo, errors.New(
-			fmt.Sprintf("models.GetPkgInfo( %s:%s ) -> Get hv.PkgInfo: %v",
-				path, tag, err))
-	}
-
-	proPath := utils.GetProjectPath(path)
-	if utils.IsGoRepoPath(path) {
-		proPath = "code.google.com/p/go"
-	}
-	beego.Trace("models.GetPkgInfo -> proPath:", proPath)
-
-	ptag := &PkgTag{
-		Path: proPath,
-		Tag:  tag,
-	}
-	has, err = x.Get(ptag)
-	if !has || err != nil {
-		pinfo.Ptag = "ptag"
-		return pinfo, errors.New(
-			fmt.Sprintf("models.GetPkgInfo( %s:%s ) -> Get PkgTag: %v",
-				path, tag, err))
-	}
-
-	pinfo.Vcs = ptag.Vcs
-	pinfo.Tags = ptag.Tags
-
-	// Only 'PkgInfo' cannot prove that package exists,
-	// we have to check 'PkgDecl' as well in case it was deleted by mistake.
-
-	pdecl := &PkgDecl{
-		Pid: pinfo.Id,
-		Tag: tag,
-	}
-	has, err = x.Get(pdecl)
+	pinfo := new(PkgInfo)
+	has, err := x.Where("import_path=?", importPath).Get(pinfo)
 	if err != nil {
-		return pinfo, errors.New(
-			fmt.Sprintf("models.GetPkgInfo( %s:%s ) -> Get PkgDecl: %v", path, tag, err))
-	}
-	if !has {
-		pinfo.PkgVer = 0
-		pinfo.Ptag = "ptag"
-		return pinfo, errors.New(
-			fmt.Sprintf("models.GetPkgInfo( %s:%s ) -> PkgDecl not exist: %v", path, tag, err))
+		return nil, err
+	} else if !has {
+		return nil, ErrPackageNotFound
+	} else if pinfo.PkgVer < PACKAGE_VER {
+		pinfo.Etag = ""
+		return pinfo, ErrPackageVersionTooOld
 	}
 
-	docPath := path + utils.TagSuffix("-", tag)
-	if !com.IsExist("." + utils.DocsJsPath + docPath + ".js") {
-		pinfo.PkgVer = 0
-		pinfo.Ptag = "ptag"
-		return pinfo, errors.New(
-			fmt.Sprintf("models.GetPkgInfo( %s:%s ) -> JS: File not found", path, tag))
+	if !com.IsFile(pinfo.JsPath()) {
+		pinfo.Etag = ""
+		return pinfo, ErrPackageVersionTooOld
 	}
 
 	return pinfo, nil
 }
 
-// GetPkgInfoById returns package information from database by pid.
-func GetPkgInfoById(pid int) (pinfo *hv.PkgInfo, err error) {
-	_, err = x.Id(int64(pid)).Get(pinfo)
-	return pinfo, err
-}
-
-// GetGroupPkgInfo returns group of package infomration in order to reduce database connect times.
-func GetGroupPkgInfo(paths []string) []*hv.PkgInfo {
-	pinfos := make([]*hv.PkgInfo, 0, len(paths))
-	for _, v := range paths {
-		if len(v) > 0 {
-			pinfo := &hv.PkgInfo{ImportPath: v}
-			has, err := x.Get(pinfo)
-			if err != nil {
-				beego.Error("models.GetGroupPkgInfo(", v, ") -> Get PkgDoc:", err.Error())
-			}
-			if has {
-				pinfos = append(pinfos, pinfo)
-			} else {
-				pinfos = append(pinfos, &hv.PkgInfo{ImportPath: v})
-			}
-		}
-	}
-	return pinfos
-}
-
-// GetGroupPkgInfoById returns group of package infomration by pid.
-func GetGroupPkgInfoById(pids []string) []*hv.PkgInfo {
-	pinfos := make([]*hv.PkgInfo, 0, len(pids))
-	for _, v := range pids {
-		pid, _ := strconv.ParseInt(v, 10, 64)
-		if pid > 0 {
-			pinfo := new(hv.PkgInfo)
-			has, err := x.Id(pid).Get(pinfo)
-			if err != nil {
-				beego.Error("models.GetGroupPkgInfoById(", pid, ") -> Get hv.PkgInfo:", err.Error())
-			}
-			if has {
-				pinfos = append(pinfos, pinfo)
-			} else {
-				beego.Trace("models.GetGroupPkgInfoById -> Not exist:", pid)
-			}
-		}
-	}
-	return pinfos
-}
-
-// GetIndexPkgs returns package information in given page.
-func GetIndexPkgs(page int) (pkgs []hv.PkgInfo) {
-	err := x.Limit(100, (page-1)*100).Desc("rank").Find(&pkgs)
+// GetPkgInfoById returns package information by given ID.
+func GetPkgInfoById(id int64) (*PkgInfo, error) {
+	pinfo := new(PkgInfo)
+	has, err := x.Id(id).Get(pinfo)
 	if err != nil {
-		beego.Error("models.GetIndexPkgs ->", err)
+		return nil, err
+	} else if !has {
+		return nil, ErrPackageNotFound
+	} else if pinfo.PkgVer < PACKAGE_VER {
+		return pinfo, ErrPackageVersionTooOld
 	}
-	return pkgs
+
+	if !com.IsFile(pinfo.JsPath()) {
+		return pinfo, ErrPackageVersionTooOld
+	}
+
+	return pinfo, nil
 }
 
-// GetSubPkgs returns sub-projects by given sub-directories.
-func GetSubPkgs(importPath, tag string, dirs []string) []hv.PkgInfo {
-	pinfos := make([]hv.PkgInfo, 0, len(dirs))
-	for _, v := range dirs {
-		v = importPath + "/" + v
-		if pinfo, err := GetPkgInfo(v, tag); err == nil {
-			pinfos = append(pinfos, *pinfo)
-		} else {
-			pinfos = append(pinfos, hv.PkgInfo{ImportPath: v})
-		}
+// SearchPkgInfo searches package information by given keyword.
+func SearchPkgInfo(keyword string) ([]*PkgInfo, error) {
+	if len(keyword) == 0 {
+		return nil, nil
 	}
-	return pinfos
-}
-
-func GetImports(spid, tag string) []*hv.PkgInfo {
-	pid, _ := strconv.ParseInt(spid, 10, 64)
-	pdecl := &PkgDecl{
-		Pid: pid,
-		Tag: tag,
-	}
-	has, err := x.Get(pdecl)
-	if !has || err != nil {
-		beego.Error("models.GetImports(", pid, tag, ") -> ", err.Error())
-		return nil
-	}
-
-	return GetGroupPkgInfo(strings.Split(pdecl.Imports, "|"))
-}
-
-func GetRefs(spid string) []*hv.PkgInfo {
-	pid, _ := strconv.ParseInt(spid, 10, 64)
-	pinfo := new(hv.PkgInfo)
-	has, err := x.Id(pid).Get(pinfo)
-	if !has || err != nil {
-		beego.Error("models.GetRefs(", pid, ") -> ", err.Error())
-		return nil
-	}
-
-	return GetGroupPkgInfoById(strings.Split(pinfo.RefPids, "|"))
+	pkgs := make([]*PkgInfo, 0, 100)
+	return pkgs, x.Limit(100).Where("import_path like ?", "%"+keyword+"%").Find(&pkgs)
 }

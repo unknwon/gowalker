@@ -12,35 +12,12 @@
 // License for the specific language governing permissions and limitations
 // under the License.
 
-package routers
+package apiv1
 
 import (
-	"github.com/Unknwon/gowalker/models"
-	"github.com/Unknwon/gowalker/modules/base"
-	"github.com/Unknwon/gowalker/modules/doc"
 	"github.com/Unknwon/gowalker/modules/middleware"
 )
 
-const (
-	SEARCH base.TplName = "search"
-)
-
-func Search(ctx *middleware.Context) {
-	q := ctx.Query("q")
-
-	if ctx.Query("auto_redirect") == "true" &&
-		(doc.IsGoRepoPath(q) || doc.IsValidRemotePath(q)) {
-		ctx.Redirect("/" + q)
-		return
-	}
-
-	results, err := models.SearchPkgInfo(q)
-	if err != nil {
-		ctx.Flash.Error(err.Error(), true)
-	} else {
-		ctx.Data["Results"] = results
-	}
-
-	ctx.Data["Keyword"] = q
-	ctx.HTML(200, SEARCH)
+func Badge(ctx *middleware.Context) {
+	ctx.Redirect("/img/badge.svg")
 }

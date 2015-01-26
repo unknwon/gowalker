@@ -16,30 +16,20 @@ package middleware
 
 import (
 	"fmt"
-	"io"
-	"net/http"
-	"path"
 	"strings"
-	"time"
 
 	"github.com/Unknwon/macaron"
-	"github.com/macaron-contrib/i18n"
 	"github.com/macaron-contrib/session"
 
+	"github.com/Unknwon/gowalker/modules/base"
 	"github.com/Unknwon/gowalker/modules/log"
+	"github.com/Unknwon/gowalker/modules/setting"
 )
 
 // Context represents context of a request.
 type Context struct {
 	*macaron.Context
-	i18n.Locale
 	Flash *session.Flash
-}
-
-// Query querys form parameter.
-func (ctx *Context) Query(name string) string {
-	ctx.Req.ParseForm()
-	return ctx.Req.Form.Get(name)
 }
 
 // HasError returns true if error occurs in form validation.
@@ -67,12 +57,12 @@ func (ctx *Context) HasError() bool {
 }
 
 // HTML calls Context.HTML and converts template name to string.
-func (ctx *Context) HTML(status int, name string) {
+func (ctx *Context) HTML(status int, name base.TplName) {
 	ctx.Context.HTML(status, string(name))
 }
 
 // RenderWithErr used for page has form validation but need to prompt error to users.
-func (ctx *Context) RenderWithErr(msg string, tpl string, form interface{}) {
+func (ctx *Context) RenderWithErr(msg string, tpl base.TplName, form interface{}) {
 	if form != nil {
 		// auth.AssignForm(form, ctx.Data)
 	}
@@ -96,50 +86,14 @@ func (ctx *Context) Handle(status int, title string, err error) {
 	case 500:
 		ctx.Data["Title"] = "Internal Server Error"
 	}
-	ctx.HTML(status, fmt.Sprintf("status/%d", status))
-}
-
-func (ctx *Context) ServeFile(file string, names ...string) {
-	var name string
-	if len(names) > 0 {
-		name = names[0]
-	} else {
-		name = path.Base(file)
-	}
-	ctx.Resp.Header().Set("Content-Description", "File Transfer")
-	ctx.Resp.Header().Set("Content-Type", "application/octet-stream")
-	ctx.Resp.Header().Set("Content-Disposition", "attachment; filename="+name)
-	ctx.Resp.Header().Set("Content-Transfer-Encoding", "binary")
-	ctx.Resp.Header().Set("Expires", "0")
-	ctx.Resp.Header().Set("Cache-Control", "must-revalidate")
-	ctx.Resp.Header().Set("Pragma", "public")
-	http.ServeFile(ctx.Resp, ctx.Req, file)
-}
-
-func (ctx *Context) ServeContent(name string, r io.ReadSeeker, params ...interface{}) {
-	modtime := time.Now()
-	for _, p := range params {
-		switch v := p.(type) {
-		case time.Time:
-			modtime = v
-		}
-	}
-	ctx.Resp.Header().Set("Content-Description", "File Transfer")
-	ctx.Resp.Header().Set("Content-Type", "application/octet-stream")
-	ctx.Resp.Header().Set("Content-Disposition", "attachment; filename="+name)
-	ctx.Resp.Header().Set("Content-Transfer-Encoding", "binary")
-	ctx.Resp.Header().Set("Expires", "0")
-	ctx.Resp.Header().Set("Cache-Control", "must-revalidate")
-	ctx.Resp.Header().Set("Pragma", "public")
-	http.ServeContent(ctx.Resp, ctx.Req, name, modtime, r)
+	ctx.HTML(status, base.TplName(fmt.Sprintf("status/%d", status)))
 }
 
 // Contexter initializes a classic context for a request.
 func Contexter() macaron.Handler {
-	return func(c *macaron.Context, l i18n.Locale, f *session.Flash) {
+	return func(c *macaron.Context, f *session.Flash) {
 		ctx := &Context{
 			Context: c,
-			Locale:  l,
 			Flash:   f,
 		}
 		// Compute current URL for real-time change language.
@@ -149,6 +103,11 @@ func Contexter() macaron.Handler {
 			link = link[:i]
 		}
 		ctx.Data["Link"] = link
+
+		ctx.Data["ProdMode"] = setting.ProdMode
+		ctx.Data["SubStr"] = base.SubStr
+		ctx.Data["RearSubStr"] = base.RearSubStr
+		ctx.Data["HasPrefix"] = strings.HasPrefix
 
 		c.Map(ctx)
 	}

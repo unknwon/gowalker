@@ -1,0 +1,45 @@
+{% extends "base/base.html" %}
+{% block title %}{{Tr(Lang, "search.search")}} - Go Walker{% endblock %}
+{% block body %}
+<div class="ui stackable very relaxed page grid">
+	<div class="sixteen wide aligned centered column">
+		<h1 class="ui header">{{Tr(Lang, "search.search")}}</h1>
+		<form class="ui form real search" action="/search">
+		  <div class="field">
+		    <div class="ui fluid search">
+		      <div class="ui large input">
+		        <input class="prompt" name="q" placeholder="{{Tr(Lang, "search.search_holder")}}" value="{{Keyword}}">
+		      </div>
+		      <div class="results"></div>
+		      <button type="submit" class="ui large submit green button">
+		        {{Tr(Lang, "search.search_btn")}}
+		      </button>
+		    </div>
+		  </div>
+		</form>
+
+		{% if Results %}
+		<table class="ui very basic table">
+		  <thead>
+		    <tr>
+		      <th>{{Tr(Lang, "import_path")}}</th>
+		      <th>{{Tr(Lang, "short_intro")}}</th>
+		    </tr>
+		  </thead>
+		  <tbody>
+		  	{% for p in Results %}
+		    <tr>
+		      <td><a href="{{p.ImportPath}}">{{p.ImportPath}}</a></td>
+		      <td>{{p.Synopsis}}</td>
+		    </tr>
+		    {% endfor %}
+		  </tbody>
+		</table>
+		{% else %}
+		<div class="ui basic segment">
+  		<p>{{Tr(Lang, "search.not_found")}}</p>
+		</div>
+		{% endif %}
+	</div>
+</div>
+{% endblock %}

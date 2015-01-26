@@ -16,48 +16,23 @@
 package main
 
 import (
-	"fmt"
-	"html/template"
 	"net/http"
-	"os"
-	"os/signal"
 	"runtime"
 	"strings"
-	"syscall"
 
 	"github.com/Unknwon/macaron"
 	"github.com/macaron-contrib/i18n"
+	"github.com/macaron-contrib/pongo2"
 	"github.com/macaron-contrib/session"
-	"github.com/macaron-contrib/toolbox"
 
-	"github.com/Unknwon/gowalker/models"
-	"github.com/Unknwon/gowalker/modules/base"
 	"github.com/Unknwon/gowalker/modules/log"
 	"github.com/Unknwon/gowalker/modules/middleware"
 	"github.com/Unknwon/gowalker/modules/setting"
 	"github.com/Unknwon/gowalker/routers"
+	"github.com/Unknwon/gowalker/routers/apiv1"
 )
 
-const (
-	APP_VER = "1.1.1.1002"
-)
-
-func catchExit() {
-	sigTerm := syscall.Signal(15)
-	sig := make(chan os.Signal)
-	signal.Notify(sig, os.Interrupt, sigTerm)
-
-	for {
-		switch <-sig {
-		case os.Interrupt, sigTerm:
-			fmt.Println()
-			log.Warn("INTERRUPT SIGNAL DETECTED!!!")
-			routers.FlushCache()
-			log.Warn("[WARN] READY TO EXIT")
-			os.Exit(0)
-		}
-	}
-}
+const APP_VER = "1.3.5.0126"
 
 func init() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
@@ -69,36 +44,21 @@ func newMacaron() *macaron.Macaron {
 	m := macaron.New()
 	m.Use(macaron.Logger())
 	m.Use(macaron.Recovery())
-	m.Use(macaron.Static("static",
-		macaron.StaticOptions{
-			SkipLogging: !setting.DisableRouterLog,
-		},
-	))
 	m.Use(macaron.Static("public",
 		macaron.StaticOptions{
-			Prefix:      "public",
-			SkipLogging: !setting.DisableRouterLog,
+			SkipLogging: setting.ProdMode,
 		},
 	))
-	m.Use(macaron.Renderer(macaron.RenderOptions{
-		Directory:  "templates",
-		Funcs:      []template.FuncMap{base.TemplateFuncs},
-		IndentJSON: macaron.Env != macaron.PROD,
+	m.Use(macaron.Static("raw",
+		macaron.StaticOptions{
+			Prefix:      "raw",
+			SkipLogging: setting.ProdMode,
+		}))
+	m.Use(pongo2.Pongoer(pongo2.Options{
+		IndentJSON: !setting.ProdMode,
 	}))
-	m.Use(i18n.I18n(i18n.Options{
-		Langs:    setting.Langs,
-		Names:    setting.Names,
-		Redirect: true,
-	}))
+	m.Use(i18n.I18n())
 	m.Use(session.Sessioner())
-	m.Use(toolbox.Toolboxer(m, toolbox.Options{
-		HealthCheckFuncs: []*toolbox.HealthCheckFuncDesc{
-			&toolbox.HealthCheckFuncDesc{
-				Desc: "Database connection",
-				Func: models.Ping,
-			},
-		},
-	}))
 	m.Use(middleware.Contexter())
 	return m
 }
@@ -107,40 +67,25 @@ func main() {
 	log.Info("Go Walker %s", APP_VER)
 	log.Info("Run Mode: %s", strings.Title(macaron.Env))
 
-	go catchExit()
-
 	m := newMacaron()
-
-	// Routers.
 	m.Get("/", routers.Home)
-	// beego.Router("/refresh", &routers.RefreshRouter{})
-	// beego.Router("/search", &routers.SearchRouter{})
-	// beego.Router("/index", &routers.IndexRouter{})
-	// // beego.Router("/label", &routers.LabelsRouter{})
-	// beego.Router("/function", &routers.FuncsRouter{})
-	// beego.Router("/example", &routers.ExamplesRouter{})
-	// beego.Router("/about", &routers.AboutRouter{})
+	m.Get("/search", routers.Search)
 
-	// beego.Router("/api/docs", &routers.ApiRouter{}, "get:Docs")
-	// beego.Router("/api/v1/badge", &routers.ApiRouter{}, "get:Badge")
-	// beego.Router("/api/v1/search", &routers.ApiRouter{}, "get:Search")
-	// beego.Router("/api/v1/refresh", &routers.ApiRouter{}, "get:Refresh")
-	// beego.Router("/api/v1/pkginfo", &routers.ApiRouter{}, "get:PkgInfo")
+	m.Group("/api", func() {
+		m.Group("/v1", func() {
+			m.Get("/badge", apiv1.Badge)
+		})
+	})
 
-	// // Register template functions.
-	// beego.AddFuncMap("isHasEleS", isHasEleS)
-	// beego.AddFuncMap("isHasEleE", isHasEleE)
-	// beego.AddFuncMap("isNotEmptyS", isNotEmptyS)
-
-	// // "robot.txt"
-	// beego.Router("/robots.txt", &routers.RobotRouter{})
-
-	// For all unknown pages.
-	// beego.Router("/:all", &routers.HomeRouter{})
+	m.Get("/robots.txt", func() string {
+		return `User-agent: *
+Disallow: /search`
+	})
+	m.Get("/*", routers.Docs)
 
 	listenAddr := "0.0.0.0:" + setting.HttpPort
 	log.Info("Listen: http://%s", listenAddr)
 	if err := http.ListenAndServe(listenAddr, m); err != nil {
-		log.Fatal(4, "Fail to start server: %v", err)
+		log.Fatal(4, "Error starting server: %v", err)
 	}
 }

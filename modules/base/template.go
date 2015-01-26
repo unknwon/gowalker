@@ -15,9 +15,7 @@
 package base
 
 import (
-	"html/template"
 	"path/filepath"
-	"runtime"
 	"strings"
 
 	"github.com/Unknwon/i18n"
@@ -61,61 +59,23 @@ func init() {
 	}
 }
 
-func Str2html(raw string) template.HTML {
-	return template.HTML(raw)
-}
-
-func Range(l int) []int {
-	return make([]int, l)
-}
-
-func ShortSha(sha1 string) string {
-	if len(sha1) == 40 {
-		return sha1[:10]
+func SubStr(str string, start, length int) string {
+	if len(str) == 0 {
+		return ""
 	}
-	return sha1
+	end := start + length
+	if len(str) < end {
+		return str
+	}
+	return str[start:end] + "..."
 }
 
-// func isHasEleS(s []string) bool {
-// 	if len(s) == 1 && len(s[0]) == 0 {
-// 		return false
-// 	}
-// 	return len(s) > 0
-// }
-
-// func isHasEleE(s []*hv.Example) bool {
-// 	return len(s) > 0
-// }
-
-// func isNotEmptyS(s string) bool {
-// 	return len(s) > 0
-// }
-
-var TemplateFuncs template.FuncMap = map[string]interface{}{
-	"GoVer": func() string {
-		return runtime.Version()
-	},
-	"AppVer": func() string {
-		return setting.AppVer
-	},
-	"str2html":  Str2html,
-	"TimeSince": TimeSince,
-	"FileSize":  FileSize,
-	"Subtract":  Subtract,
-	"Add": func(a, b int) int {
-		return a + b
-	},
-	"DateFormat": DateFormat,
-	"SubStr": func(str string, start, length int) string {
-		if len(str) == 0 {
-			return ""
-		}
-		end := start + length
-		if len(str) < end {
-			return str
-		}
-		return str[start:end] + "..."
-	},
-	"ShortSha": ShortSha,
-	"i18n":     i18n.Tr,
+func RearSubStr(str string, length int) string {
+	if len(str) == 0 {
+		return ""
+	}
+	if len(str) < length {
+		return str
+	}
+	return "..." + str[len(str)-length:]
 }

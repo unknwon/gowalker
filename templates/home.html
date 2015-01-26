@@ -1,0 +1,71 @@
+{% extends "base/base.html" %}
+{% block title %}Go Walker - {{Tr(Lang, "app_desc")}}{% endblock %}
+{% block body %}
+<div class="ui stackable middle very relaxed page grid">
+	<div class="fourteen wide center aligned centered column">
+    <h1 class="ui icon header">
+      <i class="terminal icon"></i>
+      {{Tr(Lang, "home.hero_title")}}
+    </h1>
+    <p class="large">
+    {% if Lang == "zh-CN" %}
+			Go Walker 是一个可以在线生成并浏览 <a target="_blank" href="http://golang.org/">Go</a> 项目 API 文档的 Web 服务器，目前已支持包括 <b>GitHub</b> 等代码托管平台。
+      {# 、<b>Google Code</b>、<b>BitBucket</b> 和 <b>Launchpad</b> #}
+    {% else %}
+			Go Walker is a server that generates <a target="_blank" href="http://golang.org/">Go</a> projects API documentation on the fly for the projects on <b>GitHub</b>.
+      {# , <b>Google Code</b>, <b>BitBucket</b> and <b>Launchpad</b> #}
+    {% endif %}
+    </p>
+    <form class="ui form main search" action="/search">
+      <div class="field">
+        <div class="ui fluid search">
+          <div class="ui large input">
+            <input class="prompt" name="q" placeholder="{{Tr(Lang, "home.search_holder")}}" autocomplete="off">
+            <input type="hidden" name="auto_redirect" value="true">
+          </div>
+          <div class="results"></div>
+          <button type="submit" class="ui large submit green button">
+            {{Tr(Lang, "home.search_btn")}}
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+<div class="ui stackable very relaxed page grid">
+	<div class="fourteen wide center aligned centered column">
+    <h1 class="ui icon header">
+      <i class="browser icon"></i>
+      {{Tr(Lang, "home.browse_history")}}
+    </h1>
+    <table class="ui basic table">
+      <thead>
+        <tr>
+          <th width="35%">{{Tr(Lang, "import_path")}}</th>
+          <th width="25%">{{Tr(Lang, "home.view_time")}}</th>
+          <th>{{Tr(Lang, "short_intro")}}</th>
+        </tr>
+      </thead>
+      <tbody id="browse_history">
+        {% for p in BrowseHistory %}
+        <tr>
+          <td>
+            <a href="{{p.ImportPath}}">{{RearSubStr(p.ImportPath,40)}}</a>
+            {% comment %}
+            {% if p.IsGoRepo %}
+            <a class="ui blue label" href="/gorepos">{{Tr(Lang, "home.standard")}}</a>
+            {% endif %}
+            {% endcomment %}
+          </td>
+          <td class="meta-time">{{p.LastView}}</td>
+          <td class="popup" data-content="{{p.Synopsis}}">{{SubStr(p.Synopsis, 0, 80)}}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+<script>
+  search_content = {{SearchContent|safe}}
+</script>
+{% endblock %}
