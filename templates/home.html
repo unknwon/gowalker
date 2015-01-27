@@ -50,7 +50,7 @@
         {% for p in BrowseHistory %}
         <tr>
           <td>
-            <a href="{{p.ImportPath}}">{{RearSubStr(p.ImportPath,40)}}</a>
+            <a href="/{{p.ImportPath}}">{{RearSubStr(p.ImportPath,40)}}</a>
             {% comment %}
             {% if p.IsGoRepo %}
             <a class="ui blue label" href="/gorepos">{{Tr(Lang, "home.standard")}}</a>

@@ -66,7 +66,7 @@ func getStatic(importPath, etag string) (pdoc *Package, err error) {
 		m := s.pattern.FindStringSubmatch(importPath)
 		if m == nil {
 			if s.prefix != "" {
-				log.Trace(importPath, "-> Import path prefix matches known service, but regexp does not")
+				log.Trace("Import path prefix matches known service, but regexp does not: %s", importPath)
 				return nil, ErrInvalidRemotePath
 			}
 			continue
