@@ -4,7 +4,7 @@ $(document).ready(function () {
     });
     $('.popup').popup();
     $('.ui.accordion').accordion();
-    $('.ui.search').search({
+    $('.ui.main.search').search({
         type: "standard",
         apiSettings: {
             url: '/search/json?q={query}'

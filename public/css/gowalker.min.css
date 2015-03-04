@@ -77,6 +77,9 @@ p.large {
   width: 80%;
   margin: 0 auto;
 }
+.form.search .result {
+  text-align: left;
+}
 .ui.stackable.middle .column {
   padding-bottom: 30px !important;
   border-bottom: 1px solid rgba(0, 0, 0, 0.1);
@@ -90,6 +93,10 @@ p.large {
 }
 .ui.grid.alert {
   padding-top: 10px;
+}
+.ui.grid.alert > div {
+  padding-left: 0!important;
+  padding-right: 0!important;
 }
 .ui.accordion {
   margin-bottom: 10px;

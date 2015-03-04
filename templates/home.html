@@ -56,7 +56,7 @@
             {% endcomment %}
           </td>
           <td class="meta-time">{{p.LastView}}</td>
-          <td class="popup" data-content="{{p.Synopsis}}">{{SubStr(p.Synopsis, 0, 80)}}</td>
+          <td {% if p.Synopsis|length >= 80 %}class="popup" data-content="{{p.Synopsis}}"{% endif %}">{{SubStr(p.Synopsis, 0, 80)}}</td>
         </tr>
         {% endfor %}
       </tbody>
