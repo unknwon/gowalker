@@ -1,5 +1,3 @@
-var search_content;
-
 $(document).ready(function () {
     $('.dropdown').dropdown({
         transition: 'drop'
@@ -7,7 +5,15 @@ $(document).ready(function () {
     $('.popup').popup();
     $('.ui.accordion').accordion();
     $('.ui.search').search({
-        source: search_content
+        type: "standard",
+        apiSettings: {
+            url: '/search/json?q={query}'
+        },
+        searchFields: [
+            'title'
+        ],
+        searchDelay: 500,
+        searchFullText: false
     });
 
     $('.ex-link').click(function () {

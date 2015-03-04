@@ -71,6 +71,7 @@ func main() {
 	m := newMacaron()
 	m.Get("/", routers.Home)
 	m.Get("/search", routers.Search)
+	m.Get("/search/json", routers.SearchJSON)
 
 	m.Group("/api", func() {
 		m.Group("/v1", func() {

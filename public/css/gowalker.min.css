@@ -78,6 +78,7 @@ p.large {
 }
 .form.search .results {
   left: 5%;
+  width: 70%;
 }
 .ui.stackable.middle .column {
   padding-bottom: 30px !important;

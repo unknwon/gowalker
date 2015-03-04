@@ -122,10 +122,10 @@ func GetPkgInfoById(id int64) (*PkgInfo, error) {
 }
 
 // SearchPkgInfo searches package information by given keyword.
-func SearchPkgInfo(keyword string) ([]*PkgInfo, error) {
+func SearchPkgInfo(limit int, keyword string) ([]*PkgInfo, error) {
 	if len(keyword) == 0 {
 		return nil, nil
 	}
-	pkgs := make([]*PkgInfo, 0, 100)
-	return pkgs, x.Limit(100).Where("import_path like ?", "%"+keyword+"%").Find(&pkgs)
+	pkgs := make([]*PkgInfo, 0, limit)
+	return pkgs, x.Limit(limit).Where("import_path like ?", "%"+keyword+"%").Find(&pkgs)
 }
