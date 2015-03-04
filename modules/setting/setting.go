@@ -18,31 +18,29 @@ import (
 	"time"
 
 	"github.com/Unknwon/com"
+	"github.com/Unknwon/log"
 	"github.com/Unknwon/macaron"
 	"gopkg.in/ini.v1"
-
-	"github.com/Unknwon/gowalker/modules/log"
 )
 
 var (
 	// Application settings.
-	AppVer string
+	AppVer   string
+	ProdMode bool
 
 	// Server settings.
-	HttpPort string
+	HTTPPort     int
+	FetchTimeout time.Duration
+	DocsJsPath   string
+	DocsGobPath  string
 
-	// Global setting objects.
+	// Global settings.
 	Cfg               *ini.File
-	ProdMode          bool
-	GithubCredentials string
-	FetchTimeout      time.Duration = 60 * time.Second
-
-	DocsJsPath  = "raw/docs/"
-	DocsGobPath = "raw/gob/"
+	GitHubCredentials string
 )
 
 func init() {
-	log.NewLogger(0, "console", `{"level": 0}`)
+	log.Prefix = "[Go Walker]"
 
 	sources := []interface{}{"conf/app.ini"}
 	if com.IsFile("custom/app.ini") {
@@ -52,17 +50,22 @@ func init() {
 	var err error
 	Cfg, err = macaron.SetConfig(sources[0], sources[1:]...)
 	if err != nil {
-		log.Fatal(4, "Fail to set configuration: %v", err)
+		log.FatalD(4, "Fail to set configuration: %v", err)
 	}
 
-	if Cfg.Section("").Key("RUN_MODE").MustString("dev") == "prod" {
+	if Cfg.Section("").Key("RUN_MODE").String() == "prod" {
 		ProdMode = true
 		macaron.Env = macaron.PROD
 		macaron.ColorLog = false
 	}
 
-	HttpPort = Cfg.Section("server").Key("HTTP_PORT").MustString("8080")
+	sec := Cfg.Section("server")
+	HTTPPort = sec.Key("HTTP_PORT").MustInt(8080)
+	FetchTimeout = time.Duration(sec.Key("FETCH_TIMEOUT").MustInt(60)) * time.Second
+	DocsJsPath = sec.Key("DOCS_JS_PATH").MustString("raw/docs/")
+	DocsGobPath = sec.Key("DOCS_GOB_PATH").MustString("raw/gob/")
 
-	GithubCredentials = "client_id=" + Cfg.Section("github").Key("CLIENT_ID").String() +
+	GitHubCredentials = "client_id=" + Cfg.Section("github").Key("CLIENT_ID").String() +
 		"&client_secret=" + Cfg.Section("github").Key("CLIENT_SECRET").String()
+
 }

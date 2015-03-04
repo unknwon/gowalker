@@ -17,10 +17,10 @@ package models
 import (
 	"fmt"
 
+	"github.com/Unknwon/log"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/go-xorm/xorm"
 
-	"github.com/Unknwon/gowalker/modules/log"
 	"github.com/Unknwon/gowalker/modules/setting"
 )
 
@@ -35,8 +35,11 @@ func init() {
 		sec.Key("HOST").String(),
 		sec.Key("NAME").String()))
 	if err != nil {
-		log.Fatal(4, "Fail to init new engine: %v", err)
-	} else if err = x.Sync(new(PkgInfo)); err != nil {
-		log.Fatal(4, "Fail to sync database: %v", err)
+		log.FatalD(4, "Fail to init new engine: %v", err)
+	}
+	x.SetLogger(nil)
+
+	if err = x.Sync(new(PkgInfo)); err != nil {
+		log.FatalD(4, "Fail to sync database: %v", err)
 	}
 }

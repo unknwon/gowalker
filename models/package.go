@@ -45,13 +45,10 @@ type PkgInfo struct {
 	IsGoRepo    bool
 	IsGoSubrepo bool
 
-	// RefNum  int64
-	// RefPids string `xorm:"TEXT"`
-	Views int64
-	// Rank    int64 `xorm:"INDEX"`
-
 	PkgVer int
 
+	Views  int64
+	RefNum int64
 	// Indicate how many JS should be downloaded(JsNum=total num - 1)
 	JsNum int
 
@@ -59,7 +56,7 @@ type PkgInfo struct {
 	Created  int64
 }
 
-func (p *PkgInfo) JsPath() string {
+func (p *PkgInfo) JSPath() string {
 	return path.Join(setting.DocsJsPath, p.ImportPath) + ".js"
 }
 
@@ -97,7 +94,7 @@ func GetPkgInfo(importPath string) (*PkgInfo, error) {
 		return pinfo, ErrPackageVersionTooOld
 	}
 
-	if !com.IsFile(pinfo.JsPath()) {
+	if !com.IsFile(pinfo.JSPath()) {
 		pinfo.Etag = ""
 		return pinfo, ErrPackageVersionTooOld
 	}
@@ -117,7 +114,7 @@ func GetPkgInfoById(id int64) (*PkgInfo, error) {
 		return pinfo, ErrPackageVersionTooOld
 	}
 
-	if !com.IsFile(pinfo.JsPath()) {
+	if !com.IsFile(pinfo.JSPath()) {
 		return pinfo, ErrPackageVersionTooOld
 	}
 

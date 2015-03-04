@@ -32,7 +32,7 @@ var (
 )
 
 func getGolangDoc(importPath, etag string) (*Package, error) {
-	match := map[string]string{"cred": setting.GithubCredentials}
+	match := map[string]string{"cred": setting.GitHubCredentials}
 
 	// Check revision.
 	commit, err := getGithubRevision("github.com/golang/go")
@@ -73,7 +73,7 @@ func getGolangDoc(importPath, etag string) (*Package, error) {
 				files = append(files, &Source{
 					SrcName:   f,
 					BrowseUrl: com.Expand("github.com/golang/go/blob/master/{0}", nil, node.Path),
-					RawSrcUrl: com.Expand("https://raw.github.com/golang/go/master/{0}?{1}", nil, node.Path, setting.GithubCredentials),
+					RawSrcUrl: com.Expand("https://raw.github.com/golang/go/master/{0}?{1}", nil, node.Path, setting.GitHubCredentials),
 				})
 			}
 		}

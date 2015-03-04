@@ -18,11 +18,11 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/Unknwon/log"
 	"github.com/Unknwon/macaron"
 	"github.com/macaron-contrib/session"
 
 	"github.com/Unknwon/gowalker/modules/base"
-	"github.com/Unknwon/gowalker/modules/log"
 	"github.com/Unknwon/gowalker/modules/setting"
 )
 
@@ -30,19 +30,6 @@ import (
 type Context struct {
 	*macaron.Context
 	Flash *session.Flash
-}
-
-// HasError returns true if error occurs in form validation.
-func (ctx *Context) HasApiError() bool {
-	hasErr, ok := ctx.Data["HasError"]
-	if !ok {
-		return false
-	}
-	return hasErr.(bool)
-}
-
-func (ctx *Context) GetErrMsg() string {
-	return ctx.Data["ErrorMsg"].(string)
 }
 
 // HasError returns true if error occurs in form validation.
@@ -74,7 +61,7 @@ func (ctx *Context) RenderWithErr(msg string, tpl base.TplName, form interface{}
 // Handle handles and logs error by given status.
 func (ctx *Context) Handle(status int, title string, err error) {
 	if err != nil {
-		log.Error(4, "%s: %v", title, err)
+		log.ErrorD(4, "%s: %v", title, err)
 		if macaron.Env != macaron.PROD {
 			ctx.Data["ErrorMsg"] = err
 		}
@@ -96,13 +83,9 @@ func Contexter() macaron.Handler {
 			Context: c,
 			Flash:   f,
 		}
+
 		// Compute current URL for real-time change language.
-		link := ctx.Req.RequestURI
-		i := strings.Index(link, "?")
-		if i > -1 {
-			link = link[:i]
-		}
-		ctx.Data["Link"] = link
+		ctx.Data["Link"] = ctx.Req.URL.Path
 
 		ctx.Data["ProdMode"] = setting.ProdMode
 		ctx.Data["SubStr"] = base.SubStr

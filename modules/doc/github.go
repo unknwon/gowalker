@@ -54,7 +54,7 @@ func getGithubRevision(importPath string) (string, error) {
 }
 
 func getGithubDoc(match map[string]string, etag string) (*Package, error) {
-	match["cred"] = setting.GithubCredentials
+	match["cred"] = setting.GitHubCredentials
 
 	// Check revision.
 	commit, err := getGithubRevision(com.Expand("github.com/{owner}/{repo}", match))
@@ -106,7 +106,7 @@ func getGithubDoc(match map[string]string, etag string) (*Package, error) {
 				files = append(files, &Source{
 					SrcName:   f,
 					BrowseUrl: com.Expand("github.com/{owner}/{repo}/blob/master/{0}", match, node.Path),
-					RawSrcUrl: com.Expand("https://raw.github.com/{owner}/{repo}/master/{0}?{1}", match, node.Path, setting.GithubCredentials),
+					RawSrcUrl: com.Expand("https://raw.github.com/{owner}/{repo}/master/{0}?{1}", match, node.Path, setting.GitHubCredentials),
 				})
 			}
 		}

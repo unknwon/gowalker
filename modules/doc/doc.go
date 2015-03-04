@@ -31,11 +31,11 @@ import (
 	"time"
 
 	"github.com/Unknwon/com"
+	"github.com/Unknwon/log"
 	"github.com/Unknwon/macaron"
 	// "github.com/davecgh/go-spew/spew"
 
 	"github.com/Unknwon/gowalker/models"
-	"github.com/Unknwon/gowalker/modules/log"
 	"github.com/Unknwon/gowalker/modules/setting"
 )
 
@@ -57,7 +57,7 @@ func RefreshSearchContent() {
 	}
 	data, err := json.Marshal(&items)
 	if err != nil {
-		log.Error(4, "Fail to marshal search content: %v", err)
+		log.ErrorD(4, "Fail to marshal search content: %v", err)
 		return
 	}
 	SearchContent = string(data)
@@ -372,7 +372,7 @@ func SaveDocPage(docPath string, data []byte) int {
 
 		os.MkdirAll(path.Dir(docPath+".js"), os.ModePerm)
 		if err := ioutil.WriteFile(docPath+".js", buf.Bytes(), 0655); err != nil {
-			log.Error(4, "SaveDocPage( %s ): %v", docPath, err)
+			log.ErrorD(4, "SaveDocPage( %s ): %v", docPath, err)
 			return -1
 		}
 	} else {
@@ -407,7 +407,7 @@ func SaveDocPage(docPath string, data []byte) int {
 
 			os.MkdirAll(path.Dir(p+".js"), os.ModePerm)
 			if err := ioutil.WriteFile(p+".js", buf.Bytes(), 0655); err != nil {
-				log.Error(4, "SaveDocPage( %s ): %v", p, err)
+				log.ErrorD(4, "SaveDocPage( %s ): %v", p, err)
 				return -1
 			}
 
@@ -445,7 +445,7 @@ func SavePkgDoc(docPath string, readmes map[string][]byte) {
 		buf.Write(data)
 		buf.WriteString("\")")
 		if err := ioutil.WriteFile(localeDocPath+".js", buf.Bytes(), 0655); err != nil {
-			log.Error(4, "SavePkgDoc( %s ): %v", localeDocPath, err)
+			log.ErrorD(4, "SavePkgDoc( %s ): %v", localeDocPath, err)
 		}
 	}
 }

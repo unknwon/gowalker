@@ -16,23 +16,24 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 	"runtime"
 	"strings"
 
+	"github.com/Unknwon/log"
 	"github.com/Unknwon/macaron"
 	"github.com/macaron-contrib/i18n"
 	"github.com/macaron-contrib/pongo2"
 	"github.com/macaron-contrib/session"
 
-	"github.com/Unknwon/gowalker/modules/log"
 	"github.com/Unknwon/gowalker/modules/middleware"
 	"github.com/Unknwon/gowalker/modules/setting"
 	"github.com/Unknwon/gowalker/routers"
 	"github.com/Unknwon/gowalker/routers/apiv1"
 )
 
-const APP_VER = "1.3.5.0126"
+const APP_VER = "1.3.6.0304"
 
 func init() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
@@ -83,9 +84,9 @@ Disallow: /search`
 	})
 	m.Get("/*", routers.Docs)
 
-	listenAddr := "0.0.0.0:" + setting.HttpPort
+	listenAddr := fmt.Sprintf("0.0.0.0:%d", setting.HTTPPort)
 	log.Info("Listen: http://%s", listenAddr)
 	if err := http.ListenAndServe(listenAddr, m); err != nil {
-		log.Fatal(4, "Error starting server: %v", err)
+		log.FatalD(4, "Error starting server: %v", err)
 	}
 }
