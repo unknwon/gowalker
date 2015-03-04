@@ -79,6 +79,8 @@ p.large {
 }
 .form.search .result {
   text-align: left;
+}
+.form.search .result .title .description {
   margin-left: 2px;
 }
 .ui.stackable.middle .column {
