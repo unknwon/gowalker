@@ -19,5 +19,5 @@ import (
 )
 
 func Badge(ctx *middleware.Context) {
-	ctx.Redirect("/img/badge.svg")
+	ctx.ServeFile("public/img/badge.svg")
 }
