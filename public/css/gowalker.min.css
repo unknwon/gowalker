@@ -70,15 +70,12 @@ body {
 p.large {
   font-size: 16px;
 }
-.form.search.main .input {
-  width: 70%;
-}
 .form.search.real .input {
   width: 50%;
 }
-.form.search .results {
-  left: 5%;
-  width: 70%;
+.form.search.main .field {
+  width: 80%;
+  margin: 0 auto;
 }
 .ui.stackable.middle .column {
   padding-bottom: 30px !important;

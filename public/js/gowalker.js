@@ -15,6 +15,9 @@ $(document).ready(function () {
         searchDelay: 500,
         searchFullText: false
     });
+    $('.main.search .search.icon').click(function () {
+        $('.main.search').submit();
+    });
 
     $('.ex-link').click(function () {
         $($(this).data("name")).addClass("active");
