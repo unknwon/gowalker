@@ -127,5 +127,5 @@ func SearchPkgInfo(limit int, keyword string) ([]*PkgInfo, error) {
 		return nil, nil
 	}
 	pkgs := make([]*PkgInfo, 0, limit)
-	return pkgs, x.Limit(limit).Where("import_path like ?", "%"+keyword+"%").Find(&pkgs)
+	return pkgs, x.Limit(limit).Desc("views").Where("import_path like ?", "%"+keyword+"%").Find(&pkgs)
 }

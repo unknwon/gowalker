@@ -19,5 +19,5 @@ import (
 )
 
 func Badge(ctx *middleware.Context) {
-	ctx.ServeFile("public/img/badge.svg")
+	ctx.Redirect("https://img.shields.io/badge/Go%20Walker-API%20Documentation-green.svg?style=flat-square")
 }
