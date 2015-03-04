@@ -32,7 +32,7 @@
 .markdown h6:hover .octicon-link {
   display: inline-block;
 }
-.markdown a span.oction {
+.markdown a span.octicon {
   font: normal normal 16px octicons;
   line-height: 1;
   display: inline-block;

@@ -720,15 +720,19 @@ func CheckPackage(importPath string, render macaron.Render, rt requestType) (*mo
 				pdoc := new(Package)
 				fr, err := os.Open(fpath)
 				if err != nil {
-					return nil, fmt.Errorf("error reading gob: %v", err)
+					return nil, fmt.Errorf("read gob: %v", err)
 				} else if err = gob.NewDecoder(fr).Decode(pdoc); err != nil {
 					fr.Close()
-					return nil, fmt.Errorf("error decoding gob: %v", err)
+					return nil, fmt.Errorf("decode gob: %v", err)
 				}
 				fr.Close()
 
 				if err = renderDoc(render, pdoc, importPath); err != nil {
-					return nil, fmt.Errorf("error rendering cached doc: %v", err)
+					return nil, fmt.Errorf("render cached doc: %v", err)
+				}
+				pinfo.Views++
+				if err = models.SavePkgInfo(pinfo); err != nil {
+					return nil, fmt.Errorf("update views: %v", err)
 				}
 			}
 			return pinfo, nil
@@ -771,7 +775,7 @@ func CheckPackage(importPath string, render macaron.Render, rt requestType) (*mo
 		} else if err == ErrInvalidRemotePath {
 			return nil, ErrInvalidRemotePath // Allow caller to make redirect to search.
 		}
-		return nil, fmt.Errorf("error checking package: %v", err)
+		return nil, fmt.Errorf("check package: %v", err)
 	}
 
 	if !setting.ProdMode {
@@ -779,25 +783,26 @@ func CheckPackage(importPath string, render macaron.Render, rt requestType) (*mo
 		os.MkdirAll(path.Dir(fpath), os.ModePerm)
 		fw, err := os.Create(fpath)
 		if err != nil {
-			return nil, fmt.Errorf("error creating gob: %v", err)
+			return nil, fmt.Errorf("create gob: %v", err)
 		}
 		defer fw.Close()
 		if err = gob.NewEncoder(fw).Encode(pdoc); err != nil {
-			return nil, fmt.Errorf("error encoding gob: %v", err)
+			return nil, fmt.Errorf("encode gob: %v", err)
 		}
 	}
 
 	log.Info("Walked package: %s, Goroutine #%d", pdoc.ImportPath, runtime.NumGoroutine())
 
 	if err = renderDoc(render, pdoc, importPath); err != nil {
-		return nil, fmt.Errorf("error rendering doc: %v", err)
+		return nil, fmt.Errorf("render doc: %v", err)
 	}
 
 	if pinfo != nil {
 		pdoc.Id = pinfo.Id
 	}
+
 	if err = models.SavePkgInfo(pdoc.PkgInfo); err != nil {
-		return nil, fmt.Errorf("error saving PkgInfo: %v", err)
+		return nil, fmt.Errorf("SavePkgInfo: %v", err)
 	}
 
 	return pdoc.PkgInfo, nil
