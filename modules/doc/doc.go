@@ -730,10 +730,11 @@ func CheckPackage(importPath string, render macaron.Render, rt requestType) (*mo
 				if err = renderDoc(render, pdoc, importPath); err != nil {
 					return nil, fmt.Errorf("render cached doc: %v", err)
 				}
-				pinfo.Views++
-				if err = models.SavePkgInfo(pinfo); err != nil {
-					return nil, fmt.Errorf("update views: %v", err)
-				}
+			}
+
+			pinfo.Views++
+			if err = models.SavePkgInfo(pinfo); err != nil {
+				return nil, fmt.Errorf("update views: %v", err)
 			}
 			return pinfo, nil
 		}
