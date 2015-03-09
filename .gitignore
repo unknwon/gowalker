@@ -7,3 +7,4 @@ gowalker.sublime-project
 gowalker.sublime-workspace
 public/sass/.sass-cache
 .idea
+.DS_Store

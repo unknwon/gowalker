@@ -23,6 +23,7 @@ import (
 	"github.com/Unknwon/com"
 
 	"github.com/Unknwon/gowalker/models"
+	"github.com/Unknwon/gowalker/modules/base"
 	"github.com/Unknwon/gowalker/modules/setting"
 )
 
@@ -32,12 +33,14 @@ var (
 )
 
 func getGolangDoc(importPath, etag string) (*Package, error) {
-	match := map[string]string{"cred": setting.GitHubCredentials}
+	match := map[string]string{
+		"cred": setting.GitHubCredentials,
+	}
 
 	// Check revision.
 	commit, err := getGithubRevision("github.com/golang/go")
 	if err != nil {
-		return nil, fmt.Errorf("error getting revision: %v", err)
+		return nil, fmt.Errorf("get revision: %v", err)
 	}
 	if commit == etag {
 		return nil, ErrPackageNotModified
@@ -55,11 +58,14 @@ func getGolangDoc(importPath, etag string) (*Package, error) {
 
 	if err := com.HttpGetJSON(Client,
 		com.Expand("https://api.github.com/repos/golang/go/git/trees/master?recursive=1&{cred}", match), &tree); err != nil {
-		return nil, fmt.Errorf("error getting tree: %v", err)
+		return nil, fmt.Errorf("get tree: %v", err)
 	}
 
 	dirPrefix := "src/" + importPath + "/"
+	dirLevel := len(strings.Split(dirPrefix, "/"))
+	dirLength := len(dirPrefix)
 	files := make([]com.RawFile, 0, 10)
+	dirMap := make(map[string]bool)
 	for _, node := range tree.Tree {
 		// Skip directories and files in irrelevant directories.
 		if node.Type != "blob" || !strings.HasPrefix(node.Path, dirPrefix) {
@@ -75,14 +81,23 @@ func getGolangDoc(importPath, etag string) (*Package, error) {
 					BrowseUrl: com.Expand("github.com/golang/go/blob/master/{0}", nil, node.Path),
 					RawSrcUrl: com.Expand("https://raw.github.com/golang/go/master/{0}?{1}", nil, node.Path, setting.GitHubCredentials),
 				})
+				continue
+			}
+
+			// Otherwise, check if it's a direct sub-directory of import path.
+			if len(strings.Split(d, "/"))-dirLevel == 1 {
+				dirMap[d[dirLength:len(d)-1]] = true
+				continue
 			}
 		}
 	}
 
-	if len(files) == 0 {
+	dirs := base.MapToSortedStrings(dirMap)
+
+	if len(files) == 0 && len(dirs) == 0 {
 		return nil, ErrPackageNoGoFile
 	} else if err := com.FetchFiles(Client, files, githubRawHeader); err != nil {
-		return nil, fmt.Errorf("error fetching files: %v", err)
+		return nil, fmt.Errorf("fetch files: %v", err)
 	}
 
 	// Start generating data.
@@ -95,6 +110,7 @@ func getGolangDoc(importPath, etag string) (*Package, error) {
 				ViewDirPath: "github.com/golang/go/tree/master/" + importPath,
 				Etag:        commit,
 				IsGoRepo:    true,
+				Subdirs:     strings.Join(dirs, "|"),
 			},
 		},
 	}
@@ -102,7 +118,7 @@ func getGolangDoc(importPath, etag string) (*Package, error) {
 	srcs := make([]*Source, 0, len(files))
 	srcMap := make(map[string]*Source)
 	for _, f := range files {
-		s, _ := f.(*Source)
+		s := f.(*Source)
 		srcs = append(srcs, s)
 
 		if !strings.HasSuffix(f.Name(), "_test.go") {
@@ -117,7 +133,7 @@ func getGolangDoc(importPath, etag string) (*Package, error) {
 		Srcs:      srcs,
 	})
 	if err != nil {
-		return nil, fmt.Errorf("error walking package: %v", err)
+		return nil, fmt.Errorf("walk package: %v", err)
 	}
 
 	return pdoc, nil

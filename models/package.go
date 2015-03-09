@@ -52,6 +52,9 @@ type PkgInfo struct {
 	// Indicate how many JS should be downloaded(JsNum=total num - 1)
 	JsNum int
 
+	ImportPaths string `xorm:"TEXT"`
+	Subdirs     string `xorm:"TEXT"`
+
 	LastView int64 `xorm:"-"`
 	Created  int64
 }
