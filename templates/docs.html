@@ -20,11 +20,11 @@
 			<script type="text/javascript" src="/{{doc}}?={{Timestamp}}"></script>
 			{% endfor %}
 
+			{% if IsHasSubdirs %}
 			<h3 id="_subdirs">
 				<a target="_blank" href="http{{Secure}}://{{ViewDirPath}}">{{Tr(Lang, "docs.directories")}}</a>
 			</h3>
 
-			{% if Subdirs|length > 0 %}
 			<table class="ui very basic table">
 				<thead>
 					<tr>
@@ -32,7 +32,6 @@
 						<th>{{Tr(Lang, "docs.synopsis")}}</th>
 					</tr>
 				</thead>
-
 				<tbody>
 					{% for dir in Subdirs %}
 					<tr>

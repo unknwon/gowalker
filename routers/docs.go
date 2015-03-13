@@ -109,6 +109,7 @@ func Docs(ctx *middleware.Context) {
 	ctx.Data["Timestamp"] = pinfo.Created
 
 	if len(pinfo.Subdirs) > 0 {
+		ctx.Data["IsHasSubdirs"] = true
 		ctx.Data["ViewDirPath"] = pinfo.ViewDirPath
 		ctx.Data["Subdirs"] = models.GetSubPkgs(pinfo.ImportPath, strings.Split(pinfo.Subdirs, "|"))
 	}
