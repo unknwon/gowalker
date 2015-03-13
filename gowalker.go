@@ -33,7 +33,7 @@ import (
 	"github.com/Unknwon/gowalker/routers/apiv1"
 )
 
-const APP_VER = "1.3.8.0309"
+const APP_VER = "1.3.9.0312"
 
 func init() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
@@ -88,6 +88,6 @@ Disallow: /search`
 	listenAddr := fmt.Sprintf("0.0.0.0:%d", setting.HTTPPort)
 	log.Info("Listen: http://%s", listenAddr)
 	if err := http.ListenAndServe(listenAddr, m); err != nil {
-		log.FatalD(4, "Error starting server: %v", err)
+		log.FatalD(4, "Fail to start server: %v", err)
 	}
 }

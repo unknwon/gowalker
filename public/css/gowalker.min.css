@@ -101,24 +101,25 @@ p.large {
   padding-left: 0!important;
   padding-right: 0!important;
 }
-.ui.accordion {
+.ui.collapse {
   margin-bottom: 10px;
 }
-.ui.accordion .title:not(.ui) {
+.ui.collapse div:first-child {
   padding: 0;
 }
-.ui.accordion .title:not(.ui) pre {
+.ui.collapse div:first-child pre {
   margin-bottom: 0;
 }
-.ui.accordion .content {
+.ui.collapse div:nth-child(2) {
+  display: none;
   padding-top: 0 !important;
 }
-.ui.accordion .content pre {
+.ui.collapse div:nth-child(2) pre {
   margin-top: 0;
   border-top: 0;
 }
-.ui.accordion.example pre {
-  border-top: 1px solid #ccc;
+.ui.collapse.example pre {
+  border-top: 1px solid #ccc!important;
 }
 .readme {
   padding: 10px 15px;

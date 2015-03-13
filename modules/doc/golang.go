@@ -107,7 +107,7 @@ func getGolangDoc(importPath, etag string) (*Package, error) {
 			PkgInfo: &models.PkgInfo{
 				ImportPath:  importPath,
 				ProjectPath: "github.com/golang/go",
-				ViewDirPath: "github.com/golang/go/tree/master/" + importPath,
+				ViewDirPath: "github.com/golang/go/tree/master/src/" + importPath,
 				Etag:        commit,
 				IsGoRepo:    true,
 				Subdirs:     strings.Join(dirs, "|"),

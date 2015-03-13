@@ -33,6 +33,7 @@ var (
 // PkgInfo represents the package information.
 type PkgInfo struct {
 	Id         int64
+	Name       string `xorm:"-"`
 	ImportPath string `xorm:"UNIQUE"`
 	Etag       string
 
@@ -103,6 +104,28 @@ func GetPkgInfo(importPath string) (*PkgInfo, error) {
 	}
 
 	return pinfo, nil
+}
+
+// GetSubPkgs returns sub-projects by given sub-directories.
+func GetSubPkgs(importPath string, dirs []string) []*PkgInfo {
+	pinfos := make([]*PkgInfo, 0, len(dirs))
+	for _, dir := range dirs {
+		if len(dir) == 0 {
+			continue
+		}
+
+		fullPath := importPath + "/" + dir
+		if pinfo, err := GetPkgInfo(fullPath); err == nil {
+			pinfo.Name = dir
+			pinfos = append(pinfos, pinfo)
+		} else {
+			pinfos = append(pinfos, &PkgInfo{
+				Name:       dir,
+				ImportPath: fullPath,
+			})
+		}
+	}
+	return pinfos
 }
 
 // GetPkgInfoById returns package information by given ID.

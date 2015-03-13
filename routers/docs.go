@@ -22,6 +22,7 @@ import (
 
 	"github.com/Unknwon/com"
 
+	"github.com/Unknwon/gowalker/models"
 	"github.com/Unknwon/gowalker/modules/base"
 	"github.com/Unknwon/gowalker/modules/doc"
 	"github.com/Unknwon/gowalker/modules/middleware"
@@ -106,6 +107,11 @@ func Docs(ctx *middleware.Context) {
 	}
 	ctx.Data["DocJS"] = docJS
 	ctx.Data["Timestamp"] = pinfo.Created
+
+	if len(pinfo.Subdirs) > 0 {
+		ctx.Data["ViewDirPath"] = pinfo.ViewDirPath
+		ctx.Data["Subdirs"] = models.GetSubPkgs(pinfo.ImportPath, strings.Split(pinfo.Subdirs, "|"))
+	}
 
 	updateHistory(ctx, pinfo.Id)
 

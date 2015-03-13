@@ -59,23 +59,26 @@ p.large {
 		padding-right: 0!important;
 	}
 }
-.ui.accordion {
+.ui.collapse {
 	margin-bottom: 10px;
-	.title:not(.ui) {
-		padding: 0;
-		pre {
-			margin-bottom: 0;
+	div {
+		&:first-child {
+			padding: 0;
+			pre {
+				margin-bottom: 0;
+			}
 		}
-	}
-	.content {
-		padding-top: 0 !important;
-		pre {
-			margin-top: 0;
-			border-top: 0;
+		&:nth-child(2) {
+			display: none;
+			padding-top: 0 !important;
+			pre {
+				margin-top: 0;
+				border-top: 0;
+			}
 		}
 	}
 	&.example pre {
-			border-top: 1px solid #ccc;
+			border-top: 1px solid #ccc!important;
 	}
 }
 .readme {

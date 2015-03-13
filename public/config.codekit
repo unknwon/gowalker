@@ -33,8 +33,8 @@
 		},
 	"\/js\/gowalker.js": {
 		"fileType": 64,
-		"ignore": 0,
-		"ignoreWasSetByUser": 0,
+		"ignore": 1,
+		"ignoreWasSetByUser": 1,
 		"inputAbbreviatedPath": "\/js\/gowalker.js",
 		"outputAbbreviatedPath": "\/js\/min\/gowalker-min.js",
 		"outputPathIsOutsideProject": 0,
@@ -48,6 +48,17 @@
 		"ignoreWasSetByUser": 0,
 		"inputAbbreviatedPath": "\/js\/jquery-1.11.2.min.js",
 		"outputAbbreviatedPath": "\/js\/min\/jquery-1.11.2.min-min.js",
+		"outputPathIsOutsideProject": 0,
+		"outputPathIsSetByUser": 0,
+		"outputStyle": 1,
+		"syntaxCheckerStyle": 1
+		},
+	"\/js\/min\/gowalker-min.js": {
+		"fileType": 64,
+		"ignore": 1,
+		"ignoreWasSetByUser": 0,
+		"inputAbbreviatedPath": "\/js\/min\/gowalker-min.js",
+		"outputAbbreviatedPath": "\/js\/min\/min\/gowalker-min-min.js",
 		"outputPathIsOutsideProject": 0,
 		"outputPathIsSetByUser": 0,
 		"outputStyle": 1,

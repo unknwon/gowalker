@@ -19,9 +19,20 @@ $(document).ready(function () {
         $('.main.search').submit();
     });
 
-    $('.ex-link').click(function () {
-        $($(this).data("name")).addClass("active");
+    // View code.
+    $('.show.code').click(function () {
+        $($(this).data('target')).toggle();
     });
+
+    // Show example.
+    $('.ex-link').click(function () {
+        $($(this).data("name")).show();
+    });
+    $('.show.example').click(function (event) {
+        $($(this).attr('href')).toggle();
+        event.preventDefault();
+    });
+
 
     // Browse history.
     if ($('#browse_history').length) {
