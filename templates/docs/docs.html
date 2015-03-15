@@ -1,14 +1,8 @@
-{% extends "base/base.html" %}
+{% extends "../base/base.html" %}
 {% block body %}
 <div class="ui stackable very relaxed page grid">
 	<div class="sixteen wide aligned centered column">
-		<div class="ui segment">
-			<div class="ui breadcrumb">
-			  <a class="section" href="/{{ParentPath}}">{{ParentPath}}</a>
-			  <div class="divider"> / </div>
-			  <div class="active section">{{ProjectName}}</div>
-			</div>
-		</div>
+		{% include "header.html" %}
 
 		{% if IsHasReadme %}
 		<div id="readme" class="readme"><script type="text/javascript" src="/{{ReadmePath}}?={{Timestamp}}"></script></div>
@@ -43,7 +37,9 @@
 			</table>
 			{% endif %}
 		</div>
-
+		
+		<div class="ui divider"></div>
+		<p>{{Tr(Lang, "docs.note.package")}} {{ProjectName}} {{Tr(Lang, "docs.note.import", Link, ImportNum) | safe}}</p>
 	</div>
 </div>
 {% endblock %}

@@ -30,7 +30,8 @@ import (
 )
 
 const (
-	DOCS base.TplName = "docs"
+	DOCS         base.TplName = "docs/docs"
+	DOCS_IMPORTS base.TplName = "docs/imports"
 )
 
 // updateHistory updates browser history.
@@ -75,14 +76,20 @@ func Docs(ctx *middleware.Context) {
 	}
 
 	ctx.Data["PageIsDocs"] = true
+	ctx.Data["Title"] = pinfo.ImportPath
+	ctx.Data["ParentPath"] = path.Dir(pinfo.ImportPath)
+	ctx.Data["ProjectName"] = path.Base(pinfo.ImportPath)
+
+	// Only show imports.
+	if strings.HasSuffix(ctx.Req.RequestURI, "?imports") {
+		ctx.Data["Packages"] = models.GetPkgInfosByPaths(strings.Split(pinfo.ImportPaths, "|"))
+		ctx.HTML(200, DOCS_IMPORTS)
+		return
+	}
 
 	if pinfo.IsGoRepo {
 		ctx.Flash.Info(ctx.Tr("docs.turn_into_search", importPath), true)
 	}
-
-	ctx.Data["Title"] = pinfo.ImportPath
-	ctx.Data["ParentPath"] = path.Dir(pinfo.ImportPath)
-	ctx.Data["ProjectName"] = path.Base(pinfo.ImportPath)
 
 	ctx.Data["PkgDesc"] = pinfo.Synopsis
 
@@ -113,6 +120,8 @@ func Docs(ctx *middleware.Context) {
 		ctx.Data["ViewDirPath"] = pinfo.ViewDirPath
 		ctx.Data["Subdirs"] = models.GetSubPkgs(pinfo.ImportPath, strings.Split(pinfo.Subdirs, "|"))
 	}
+
+	ctx.Data["ImportNum"] = len(strings.Split(pinfo.ImportPaths, "|"))
 
 	updateHistory(ctx, pinfo.Id)
 

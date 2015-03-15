@@ -549,15 +549,6 @@ func renderDoc(render macaron.Render, pdoc *Package, docPath string) error {
 		pdoc.Vars[i] = v
 	}
 
-	// Dirs.
-	// pinfos := models.GetSubPkgs(pdoc.ImportPath, tag, pdoc.Dirs)
-	// if len(pinfos) > 0 {
-	// 	pdoc.IsHasSubdir = true
-	// 	data["IsHasSubdirs"] = pdoc.IsHasSubdir
-	// 	data["Subdirs"] = pinfos
-	// 	data["ViewDirPath"] = pdoc.ViewDirPath
-	// }
-
 	// Files.
 	if len(pdoc.Files) > 0 {
 		pdoc.IsHasFile = true
@@ -684,7 +675,7 @@ func renderDoc(render macaron.Render, pdoc *Package, docPath string) error {
 		data["Secure"] = "s"
 	}
 
-	result, err := render.HTMLBytes("docs_tpl", data)
+	result, err := render.HTMLBytes("docs/tpl", data)
 	if err != nil {
 		return fmt.Errorf("error rendering HTML: %v", err)
 	}

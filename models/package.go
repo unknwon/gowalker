@@ -128,6 +128,27 @@ func GetSubPkgs(importPath string, dirs []string) []*PkgInfo {
 	return pinfos
 }
 
+// GetPkgInfosByPaths returns a list of packages by given import paths.
+func GetPkgInfosByPaths(paths []string) []*PkgInfo {
+	pinfos := make([]*PkgInfo, 0, len(paths))
+	for _, p := range paths {
+		if len(p) == 0 {
+			continue
+		}
+
+		if pinfo, err := GetPkgInfo(p); err == nil {
+			pinfo.Name = path.Base(p)
+			pinfos = append(pinfos, pinfo)
+		} else {
+			pinfos = append(pinfos, &PkgInfo{
+				Name:       path.Base(p),
+				ImportPath: p,
+			})
+		}
+	}
+	return pinfos
+}
+
 // GetPkgInfoById returns package information by given ID.
 func GetPkgInfoById(id int64) (*PkgInfo, error) {
 	pinfo := new(PkgInfo)
