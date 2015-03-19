@@ -40,6 +40,11 @@
 		
 		<div class="ui divider"></div>
 		<p>{{Tr(Lang, "docs.note.package")}} {{ProjectName}} {{Tr(Lang, "docs.note.import", Link, ImportNum) | safe}}</p>
+		{% if CanRefresh %}
+		<a class="ui green basic small button" href="{{Link}}?refresh">
+		  {{Tr(Lang, "docs.refresh")}}
+		</a>
+		{% endif %}
 	</div>
 </div>
 {% endblock %}

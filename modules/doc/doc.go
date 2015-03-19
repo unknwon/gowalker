@@ -763,7 +763,10 @@ func CheckPackage(importPath string, render macaron.Render, rt requestType) (*mo
 
 	if err != nil {
 		if err == ErrPackageNotModified {
-			return pinfo, nil
+			log.Debug("Package has not been modified: %s", pinfo.ImportPath)
+			// Update time so cannot refresh too often.
+			pinfo.Created = time.Now().UTC().Unix()
+			return pinfo, models.SavePkgInfo(pinfo)
 		} else if err == ErrInvalidRemotePath {
 			return nil, ErrInvalidRemotePath // Allow caller to make redirect to search.
 		}
@@ -793,6 +796,7 @@ func CheckPackage(importPath string, render macaron.Render, rt requestType) (*mo
 		pdoc.Id = pinfo.Id
 	}
 
+	pdoc.Created = time.Now().UTC().Unix()
 	if err = models.SavePkgInfo(pdoc.PkgInfo); err != nil {
 		return nil, fmt.Errorf("SavePkgInfo: %v", err)
 	}

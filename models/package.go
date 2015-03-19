@@ -64,13 +64,18 @@ func (p *PkgInfo) JSPath() string {
 	return path.Join(setting.DocsJsPath, p.ImportPath) + ".js"
 }
 
+// CanRefresh returns true if package is available to refresh.
+func (p *PkgInfo) CanRefresh() bool {
+	println(time.Now().UTC().Add(-1*setting.RefreshInterval).Unix(), p.Created)
+	return time.Now().UTC().Add(-1*setting.RefreshInterval).Unix() > p.Created
+}
+
 // PACKAGE_VER is modified when previously stored packages are invalid.
 const PACKAGE_VER = 1
 
 // SavePkgInfo saves package information.
 func SavePkgInfo(pinfo *PkgInfo) (err error) {
 	pinfo.PkgVer = PACKAGE_VER
-	pinfo.Created = time.Now().UTC().Unix()
 
 	if pinfo.Id == 0 {
 		pinfo.Views = 1

@@ -61,17 +61,49 @@ func updateHistory(ctx *middleware.Context, id int64) {
 	ctx.SetCookie("user_history", strings.Join(pairs, "|"), 9999999)
 }
 
+func handleError(ctx *middleware.Context, err error) {
+	importPath := ctx.Params("*")
+	if err == doc.ErrInvalidRemotePath {
+		ctx.Redirect("/search?q=" + importPath)
+		return
+	}
+	ctx.Flash.Error(importPath+": "+err.Error(), true)
+	ctx.Flash.Info(ctx.Tr("form.click_to_search", importPath), true)
+	Home(ctx)
+}
+
+func specialHandles(ctx *middleware.Context, pinfo *models.PkgInfo) bool {
+	// Only show imports.
+	if strings.HasSuffix(ctx.Req.RequestURI, "?imports") {
+		ctx.Data["Packages"] = models.GetPkgInfosByPaths(strings.Split(pinfo.ImportPaths, "|"))
+		ctx.HTML(200, DOCS_IMPORTS)
+		return true
+	}
+
+	// Refresh documentation.
+	if strings.HasSuffix(ctx.Req.RequestURI, "?refresh") {
+		if !pinfo.CanRefresh() {
+			ctx.Flash.Info(ctx.Tr("docs.refresh.too_often"))
+		} else {
+			importPath := ctx.Params("*")
+			_, err := doc.CheckPackage(importPath, ctx.Render, doc.REQUEST_TYPE_REFRESH)
+			if err != nil {
+				handleError(ctx, err)
+				return true
+			}
+		}
+		ctx.Redirect(ctx.Data["Link"].(string))
+		return true
+	}
+
+	return false
+}
+
 func Docs(ctx *middleware.Context) {
 	importPath := ctx.Params("*")
 	pinfo, err := doc.CheckPackage(importPath, ctx.Render, doc.REQUEST_TYPE_HUMAN)
 	if err != nil {
-		if err == doc.ErrInvalidRemotePath {
-			ctx.Redirect("/search?q=" + importPath)
-			return
-		}
-		ctx.Flash.Error(importPath+": "+err.Error(), true)
-		ctx.Flash.Info(ctx.Tr("form.click_to_search", importPath), true)
-		Home(ctx)
+		handleError(ctx, err)
 		return
 	}
 
@@ -80,10 +112,7 @@ func Docs(ctx *middleware.Context) {
 	ctx.Data["ParentPath"] = path.Dir(pinfo.ImportPath)
 	ctx.Data["ProjectName"] = path.Base(pinfo.ImportPath)
 
-	// Only show imports.
-	if strings.HasSuffix(ctx.Req.RequestURI, "?imports") {
-		ctx.Data["Packages"] = models.GetPkgInfosByPaths(strings.Split(pinfo.ImportPaths, "|"))
-		ctx.HTML(200, DOCS_IMPORTS)
+	if specialHandles(ctx, pinfo) {
 		return
 	}
 
@@ -107,6 +136,7 @@ func Docs(ctx *middleware.Context) {
 		}
 	}
 
+	// Documentation.
 	docJS := make([]string, 0, pinfo.JsNum+1)
 	docJS = append(docJS, setting.DocsJsPath+importPath+".js")
 	for i := 1; i <= pinfo.JsNum; i++ {
@@ -115,6 +145,7 @@ func Docs(ctx *middleware.Context) {
 	ctx.Data["DocJS"] = docJS
 	ctx.Data["Timestamp"] = pinfo.Created
 
+	// Notes.
 	if len(pinfo.Subdirs) > 0 {
 		ctx.Data["IsHasSubdirs"] = true
 		ctx.Data["ViewDirPath"] = pinfo.ViewDirPath
@@ -122,6 +153,9 @@ func Docs(ctx *middleware.Context) {
 	}
 
 	ctx.Data["ImportNum"] = len(strings.Split(pinfo.ImportPaths, "|"))
+
+	// Tools.
+	ctx.Data["CanRefresh"] = pinfo.CanRefresh()
 
 	updateHistory(ctx, pinfo.Id)
 

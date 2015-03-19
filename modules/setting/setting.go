@@ -37,6 +37,7 @@ var (
 	// Global settings.
 	Cfg               *ini.File
 	GitHubCredentials string
+	RefreshInterval   = 5 * time.Minute
 )
 
 func init() {
