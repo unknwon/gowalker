@@ -26,6 +26,7 @@ import (
 	"github.com/Unknwon/com"
 
 	"github.com/Unknwon/gowalker/models"
+	"github.com/Unknwon/gowalker/modules/base"
 	"github.com/Unknwon/gowalker/modules/setting"
 )
 
@@ -38,17 +39,17 @@ var (
 func getGithubRevision(importPath string) (string, error) {
 	data, err := com.HttpGetBytes(Client, fmt.Sprintf("https://%s/commits/master", importPath), nil)
 	if err != nil {
-		return "", fmt.Errorf("error fetching revision page: %v", err)
+		return "", fmt.Errorf("fetch revision page: %v", err)
 	}
 
-	i := bytes.Index(data, []byte(`button-outline`))
+	i := bytes.Index(data, []byte(`btn-outline`))
 	if i == -1 {
-		return "", errors.New("error finding revision locater: not found")
+		return "", errors.New("find revision locater: not found")
 	}
 	data = data[i+1:]
 	m := githubRevisionPattern.FindSubmatch(data)
 	if m == nil {
-		return "", fmt.Errorf("error finding revision: not found")
+		return "", fmt.Errorf("find revision: not found")
 	}
 	return strings.TrimPrefix(string(m[0]), `data-clipboard-text="`), nil
 }
@@ -59,7 +60,7 @@ func getGithubDoc(match map[string]string, etag string) (*Package, error) {
 	// Check revision.
 	commit, err := getGithubRevision(com.Expand("github.com/{owner}/{repo}", match))
 	if err != nil {
-		return nil, fmt.Errorf("error getting revision: %v", err)
+		return nil, fmt.Errorf("get revision: %v", err)
 	}
 	if commit == etag {
 		return nil, ErrPackageNotModified
@@ -77,7 +78,7 @@ func getGithubDoc(match map[string]string, etag string) (*Package, error) {
 
 	if err := com.HttpGetJSON(Client,
 		com.Expand("https://api.github.com/repos/{owner}/{repo}/git/trees/master?recursive=1&{cred}", match), &tree); err != nil {
-		return nil, fmt.Errorf("error getting tree: %v", err)
+		return nil, fmt.Errorf("get tree: %v", err)
 	}
 
 	// Because Github API URLs are case-insensitive, we need to check that the
@@ -91,8 +92,11 @@ func getGithubDoc(match map[string]string, etag string) (*Package, error) {
 	if dirPrefix != "" {
 		dirPrefix = dirPrefix[1:] + "/"
 	}
-
+	dirLevel := len(strings.Split(dirPrefix, "/"))
+	dirLength := len(dirPrefix)
+	dirMap := make(map[string]bool)
 	files := make([]com.RawFile, 0, 10)
+
 	for _, node := range tree.Tree {
 		// Skip directories and files in wrong directories, get them later.
 		if node.Type != "blob" || !strings.HasPrefix(node.Path, dirPrefix) {
@@ -108,14 +112,23 @@ func getGithubDoc(match map[string]string, etag string) (*Package, error) {
 					BrowseUrl: com.Expand("github.com/{owner}/{repo}/blob/master/{0}", match, node.Path),
 					RawSrcUrl: com.Expand("https://raw.github.com/{owner}/{repo}/master/{0}?{1}", match, node.Path, setting.GitHubCredentials),
 				})
+				continue
+			}
+
+			// Otherwise, check if it's a direct sub-directory of import path.
+			if len(strings.Split(d, "/"))-dirLevel == 1 {
+				dirMap[d[dirLength:len(d)-1]] = true
+				continue
 			}
 		}
 	}
 
-	if len(files) == 0 {
+	dirs := base.MapToSortedStrings(dirMap)
+
+	if len(files) == 0 && len(dirs) == 0 {
 		return nil, ErrPackageNoGoFile
 	} else if err := com.FetchFiles(Client, files, githubRawHeader); err != nil {
-		return nil, fmt.Errorf("error fetching files: %v", err)
+		return nil, fmt.Errorf("fetch files: %v", err)
 	}
 
 	// Start generating data.
@@ -127,6 +140,7 @@ func getGithubDoc(match map[string]string, etag string) (*Package, error) {
 				ProjectPath: com.Expand("github.com/{owner}/{repo}", match),
 				ViewDirPath: com.Expand("github.com/{owner}/{repo}/tree/master/{importPath}", match),
 				Etag:        commit,
+				Subdirs:     strings.Join(dirs, "|"),
 			},
 		},
 	}

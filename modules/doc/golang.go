@@ -64,8 +64,9 @@ func getGolangDoc(importPath, etag string) (*Package, error) {
 	dirPrefix := "src/" + importPath + "/"
 	dirLevel := len(strings.Split(dirPrefix, "/"))
 	dirLength := len(dirPrefix)
-	files := make([]com.RawFile, 0, 10)
 	dirMap := make(map[string]bool)
+	files := make([]com.RawFile, 0, 10)
+
 	for _, node := range tree.Tree {
 		// Skip directories and files in irrelevant directories.
 		if node.Type != "blob" || !strings.HasPrefix(node.Path, dirPrefix) {

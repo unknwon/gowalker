@@ -66,7 +66,6 @@ func (p *PkgInfo) JSPath() string {
 
 // CanRefresh returns true if package is available to refresh.
 func (p *PkgInfo) CanRefresh() bool {
-	println(time.Now().UTC().Add(-1*setting.RefreshInterval).Unix(), p.Created)
 	return time.Now().UTC().Add(-1*setting.RefreshInterval).Unix() > p.Created
 }
 
