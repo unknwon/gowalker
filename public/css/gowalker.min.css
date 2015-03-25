@@ -137,6 +137,9 @@ p.large {
   list-style: none outside none;
   padding: 0;
 }
+.ui.breadcrumb .project.icon {
+  color: #930000;
+}
 /* Comment, String, Internal, External, Return/Break, Keyword, Boolean/nil, Builtin */
 pre {
   padding: 9px;

@@ -111,6 +111,7 @@ func Docs(ctx *middleware.Context) {
 	ctx.Data["Title"] = pinfo.ImportPath
 	ctx.Data["ParentPath"] = path.Dir(pinfo.ImportPath)
 	ctx.Data["ProjectName"] = path.Base(pinfo.ImportPath)
+	ctx.Data["ProjectPath"] = pinfo.ProjectPath
 
 	if specialHandles(ctx, pinfo) {
 		return
@@ -144,6 +145,9 @@ func Docs(ctx *middleware.Context) {
 	}
 	ctx.Data["DocJS"] = docJS
 	ctx.Data["Timestamp"] = pinfo.Created
+	if time.Now().UTC().Add(-5*time.Second).Unix() < pinfo.Created {
+		ctx.Flash.Success(ctx.Tr("docs.generate_success"), true)
+	}
 
 	// Notes.
 	if len(pinfo.Subdirs) > 0 {

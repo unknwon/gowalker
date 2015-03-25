@@ -62,6 +62,16 @@
 					  {{Flash.InfoMsg|safe}}
 					</div>
 					{% endif %}
+					{% if Flash.SuccessMsg %}
+					<div class="ui success message">
+						{% if InfoHeader %}
+					  <div class="header">
+					    {{SuccessHeader}}
+					  </div>
+					  {% endif %}
+					  {{Flash.SuccessMsg|safe}}
+					</div>
+					{% endif %}
 				</div>
 			</div>
 
