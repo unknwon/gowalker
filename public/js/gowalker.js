@@ -19,6 +19,48 @@ $(document).ready(function () {
         $('.main.search').submit();
     });
 
+    // Control panel.
+    var $control_panel = $('.control.panel');
+    $('#control-panel').click(function (event) {
+        $control_panel.modal('show');
+        event.preventDefault();
+    });
+
+    var preKeyG = 0;
+
+    function Gkey(callback) {
+        if (preKeyG === 1) {
+            callback();
+        }
+        preKeyG = 0;
+    }
+
+    $(document).keypress(function (event) {
+        var code = event.keyCode ? event.keyCode : event.charCode;
+        if (code === 63) {              // for '?' 63
+            $control_panel.modal('show');
+        } else if (code === 103) {      // for 'g then g'   'g' 103
+            $control_panel.modal('hide');
+            if (preKeyG === 0) {
+                preKeyG = 1;
+                setTimeout(function () {
+                    preKeyG = 0;
+                }, 2000);
+                return false;
+            }
+            Gkey(function () {
+                $('html,body').animate({scrollTop: 0}, 120);
+            });
+        } else if (code === 98) {        // for 'g then b'  'b' 98
+            $control_panel.modal('hide');
+            Gkey(function () {
+                $('html,body').animate({scrollTop: $(document).height()}, 120);
+            });
+        } else {
+            preKeyG = 0;
+        }
+    });
+
     // View code.
     $('.show.code').click(function () {
         $($(this).data('target')).toggle();

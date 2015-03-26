@@ -37,6 +37,7 @@
 			        {# <a class="view-ui item {% if PageIsIndex %}active{% endif %}" href="/-/index">{{Tr(Lang, "index")}}</a> #}
 			        {# <a class="view-ui item {% if PageIsApi %}active{% endif %}" href="/api/docs">{{Tr(Lang, "api_service")}}</a> #}
 			        {# <a class="view-ui item {% if PageIsAbout %}active{% endif %}" href="/about">{{Tr(Lang, "about")}}</a> #}
+			        <a id="control-panel" class="view-ui item" href="#">{{Tr(Lang, "help")}}</a>
 			      </div>
 			    </div>
 			  </div>
@@ -107,6 +108,75 @@
 			      </div>
 			    </div>
 			  </div>
+			</div>
+			<div class="ui small modal control panel">
+				<div class="header">
+					{{Tr(Lang, "help.title")}}
+				</div>
+				<div class="content">
+					<p>{{Tr(Lang, "help.desc")}}</p>
+          <table class="ui table">
+          		<thead>
+          			<th width="30%">{{Tr(Lang, "help.shortcut")}}</th>
+          			<th width="70%">{{Tr(Lang, "help.usage")}}</th>
+          		</thead>
+          		{% if Lang=="zh-CN" %}
+              <tbody>
+              	<tr>
+              		<td>
+              			<b>?</b>
+              		</td>
+            			<td>
+            				显示控制面板
+            			</td>
+              	</tr>
+              	<tr>
+              		<td>
+              			<b>g</b> + <b>g</b>
+              		</td>
+            			<td>
+            				跳转至顶部
+            			</td>
+              	</tr>
+              	<tr>
+              		<td>
+              			<b>g</b> + <b>b</b>
+              		</td>
+            			<td>
+            				跳转至底部
+            			</td>
+              	</tr>
+              </tbody>
+              {% else %}
+              <tbody>
+              	<tr>
+              		<td>
+              			<b>?</b>
+              		</td>
+            			<td>
+            				Show control panel
+            			</td>
+              	</tr>
+              	<tr>
+              		<td>
+              			<b>g</b> + <b>g</b>
+              		</td>
+            			<td>
+            				Go to top of page
+            			</td>
+              	</tr>
+              	<tr>
+              		<td>
+              			<b>g</b> + <b>b</b>
+              		</td>
+            			<td>
+            				Go to bottom of page
+            			</td>
+              	</tr>
+              </tbody>
+              {% endif %}
+          </table>
+				</div>
 			</div>
 			{% if ProdMode %}
 			<script>
