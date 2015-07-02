@@ -8,12 +8,12 @@
 		<meta name="keywords" content="{{Tr(Lang, "head_keywords")}}">
 		<title>{% block title %}{{Title}} - Go Walker{% endblock %}</title>
 
-		<link href="/css/semantic.min.css" rel="stylesheet" />
-		<link href="/css/gowalker.min.css" rel="stylesheet" />
+		<link href="/css/semantic.min.css?v={{AppVer}}" rel="stylesheet" />
+		<link href="/css/gowalker.min.css?v={{AppVer}}" rel="stylesheet" />
 
-		<script type="text/javascript" src="/js/jquery-1.11.2.min.js"></script>
-		<script type="text/javascript" src="/js/semantic.min.js"></script>
-		<script type="text/javascript" src="/js/gowalker.js"></script>
+		<script type="text/javascript" src="/js/jquery-1.11.3.min.js"></script>
+		<script type="text/javascript" src="/js/semantic.min.js?v={{AppVer}}"></script>
+		<script type="text/javascript" src="/js/gowalker.js?v={{AppVer}}"></script>
 	</head>
 	<body>
 		<noscript>Please enable JavaScript in your browser!</noscript>
@@ -81,7 +81,7 @@
 			  <div class="fourteen wide center aligned centered column">
 			    <div class="ui stackable inverted divided relaxed grid">
 			      <div class="eight wide column">
-			        <h3 class="ui inverted header">Copyright © 2015 Go Walker</h3>
+			        <h4 class="ui inverted header">Copyright © 2015 Go Walker</h4>
 			        {% if Lang == "zh-CN" %}
 			        <p>网站由 <i class="user icon"></i><a target="_blank" href="https://github.com/Unknwon">@Unknwon</a> 建设，并由 <a target="_blank" href="http://gowalker.org/github.com/Unknwon/macaron">Macaron</a> 和 <a target="_blank" href="/github.com/go-xorm/xorm">Xorm</a> 提供动力。</p>
 			        <p>请给 <i class="mail icon"></i>我们（u@gogs.io）发送反馈信息或提交 <i class="tasks icon"></i><a target="_blank" href="https://github.com/Unknwon/gowalker/issues">网站问题</a>。</p>
@@ -89,6 +89,7 @@
 			        <p>Website built by <i class="user icon"></i><a target="_blank" href="https://github.com/Unknwon">@Unknwon</a>. Powered by <a target="_blank" href="/github.com/Unknwon/macaron">Macaron</a> and <a target="_blank" href="http://gowalker.org/github.com/go-xorm/xorm">Xorm</a>.</p>
 			        <p>Send us <i class="mail icon"></i>Feedback(u@gogs.io) or submit <i class="tasks icon"></i><a target="_blank" href="https://github.com/Unknwon/gowalker/issues">Website Issues</a>.</p>
 			        {% endif %}
+			        <img class="qiniu-logo" src="http://assets.qiniu.com/qiniu-transparent.png">
 			      </div>
 			      <div class="four wide column">
 			        <h5 class="ui teal inverted header">{{Tr(Lang, "home.more_projects")}}</h5>
@@ -109,6 +110,7 @@
 			    </div>
 			  </div>
 			</div>
+
 			<div class="ui small modal control panel">
 				<div class="header">
 					{{Tr(Lang, "help.title")}}

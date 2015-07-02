@@ -41,6 +41,12 @@ $(document).ready(function () {
             $control_panel.modal('show');
         } else if (code === 103) {      // for 'g then g'   'g' 103
             $control_panel.modal('hide');
+
+            // Check if any input box is focused.
+            if ($(':focus').length > 0) {
+                return true;
+            }
+
             if (preKeyG === 0) {
                 preKeyG = 1;
                 setTimeout(function () {

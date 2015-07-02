@@ -46,6 +46,13 @@
 .markdown a span.octicon-link:before {
   content: '\f05c';
 }
+.search.icon.button {
+  pointer-events: all !important;
+  opacity: 1 !important;
+}
+.qiniu-logo {
+  margin-top: -20px;
+}
 body {
   font-family: 'Helvetica Neue', Arial, Helvetica, sans-serif, '微软雅黑';
   background-color: #FFFFFF;
@@ -70,17 +77,17 @@ body {
 p.large {
   font-size: 16px;
 }
-.form.search.real .input {
+.ui.search.real .input {
   width: 65%;
 }
-.form.search.main .field {
+.ui.search.main .field {
   width: 80%;
   margin: 0 auto;
 }
-.form.search .result {
+.ui.search .result {
   text-align: left;
 }
-.form.search .result .title .description {
+.ui.search .result .title .description {
   margin-left: 2px;
 }
 .ui.stackable.middle .column {

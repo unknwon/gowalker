@@ -87,6 +87,7 @@ func Contexter() macaron.Handler {
 		// Compute current URL for real-time change language.
 		ctx.Data["Link"] = ctx.Req.URL.Path
 
+		ctx.Data["AppVer"] = setting.AppVer
 		ctx.Data["ProdMode"] = setting.ProdMode
 		ctx.Data["SubStr"] = base.SubStr
 		ctx.Data["RearSubStr"] = base.RearSubStr
