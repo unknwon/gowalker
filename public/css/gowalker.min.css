@@ -46,13 +46,6 @@
 .markdown a span.octicon-link:before {
   content: '\f05c';
 }
-.search.icon.button {
-  pointer-events: all !important;
-  opacity: 1 !important;
-}
-.qiniu-logo {
-  margin-top: -20px;
-}
 body {
   font-family: 'Helvetica Neue', Arial, Helvetica, sans-serif, '微软雅黑';
   background-color: #FFFFFF;
@@ -177,4 +170,11 @@ pre .key {
 }
 pre .bui {
   color: #009393;
+}
+.search.icon.button {
+  pointer-events: all !important;
+  opacity: 1 !important;
+}
+.qiniu-logo {
+  margin-top: -20px;
 }

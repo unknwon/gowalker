@@ -19,9 +19,25 @@ $(document).ready(function () {
         $('.main.search').submit();
     });
 
+    var is_page_docs = $('#readme').length > 0;
+
+    if (is_page_docs) {
+        // Search export objects.
+        var $searchExportPanel = $('.search.export.panel');
+        var $searchExportForm = $('.ui.form.search.export');
+        var $searchExportInput = $('.ui.form.search.export input');
+        $searchExportForm.search({source: exportDataSrc});
+        $searchExportForm.submit(function (event) {
+            $searchExportPanel.modal("hide");
+            window.location.href = "#" + $searchExportInput.val().replace(/\./g, "_");
+            event.preventDefault();
+        });
+    }
+
     // Control panel.
     var $control_panel = $('.control.panel');
     $('#control-panel').click(function (event) {
+        $(this).blur();
         $control_panel.modal('show');
         event.preventDefault();
     });
@@ -36,34 +52,42 @@ $(document).ready(function () {
     }
 
     $(document).keypress(function (event) {
+        // Check if any input box is focused.
+        if ($(':focus').length > 0) {
+            return true;
+        }
+
         var code = event.keyCode ? event.keyCode : event.charCode;
-        if (code === 63) {              // for '?' 63
-            $control_panel.modal('show');
-        } else if (code === 103) {      // for 'g then g'   'g' 103
-            $control_panel.modal('hide');
+        switch (code) {
+            case 63:                    // for '?' 63
+                $control_panel.modal('show');
+                break;
+            case 98:                    // for 'g then b'  'b' 98
+                $control_panel.modal('hide');
+                Gkey(function () {
+                    $('html,body').animate({scrollTop: $(document).height()}, 120);
+                });
+                break;
+            case 103:                   // for 'g then g'   'g' 103
+                $control_panel.modal('hide');
 
-            // Check if any input box is focused.
-            if ($(':focus').length > 0) {
-                return true;
-            }
-
-            if (preKeyG === 0) {
-                preKeyG = 1;
-                setTimeout(function () {
-                    preKeyG = 0;
-                }, 2000);
-                return false;
-            }
-            Gkey(function () {
-                $('html,body').animate({scrollTop: 0}, 120);
-            });
-        } else if (code === 98) {        // for 'g then b'  'b' 98
-            $control_panel.modal('hide');
-            Gkey(function () {
-                $('html,body').animate({scrollTop: $(document).height()}, 120);
-            });
-        } else {
-            preKeyG = 0;
+                if (preKeyG === 0) {
+                    preKeyG = 1;
+                    setTimeout(function () {
+                        preKeyG = 0;
+                    }, 2000);
+                    return false;
+                }
+                Gkey(function () {
+                    $('html,body').animate({scrollTop: 0}, 120);
+                });
+                break;
+            case 115:                   // for 's' 105
+                if (!is_page_docs)return true;
+                $searchExportPanel.modal('show');
+                break;
+            default:
+                preKeyG = 0;
         }
     });
 

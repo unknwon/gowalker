@@ -450,9 +450,15 @@ func SavePkgDoc(docPath string, readmes map[string][]byte) {
 	}
 }
 
+type exportSearchObject struct {
+	Title string `json:"title"`
+}
+
 func renderDoc(render macaron.Render, pdoc *Package, docPath string) error {
 	data := make(map[string]interface{})
 	data["PkgFullIntro"] = pdoc.Doc
+
+	exports := make([]exportSearchObject, 0, 10)
 
 	var buf bytes.Buffer
 	links := make([]*Link, 0, len(pdoc.Types)+len(pdoc.Imports)+len(pdoc.TestImports)+
@@ -463,7 +469,8 @@ func renderDoc(render macaron.Render, pdoc *Package, docPath string) error {
 			Name:    t.Name,
 			Comment: template.HTMLEscapeString(t.Doc),
 		})
-		buf.WriteString("'" + t.Name + "',")
+		exports = append(exports, exportSearchObject{t.Name})
+		// buf.WriteString("'" + t.Name + "',")
 	}
 
 	for _, f := range pdoc.Funcs {
@@ -472,7 +479,8 @@ func renderDoc(render macaron.Render, pdoc *Package, docPath string) error {
 			Name:    f.Name,
 			Comment: template.HTMLEscapeString(f.Doc),
 		})
-		buf.WriteString("'" + f.Name + "',")
+		exports = append(exports, exportSearchObject{f.Name})
+		// buf.WriteString("'" + f.Name + "',")
 	}
 
 	for _, t := range pdoc.Types {
@@ -481,11 +489,13 @@ func renderDoc(render macaron.Render, pdoc *Package, docPath string) error {
 				Name:    f.Name,
 				Comment: template.HTMLEscapeString(f.Doc),
 			})
-			buf.WriteString("'" + f.Name + "',")
+			exports = append(exports, exportSearchObject{f.Name})
+			// buf.WriteString("'" + f.Name + "',")
 		}
 
 		for _, m := range t.Methods {
-			buf.WriteString("'" + t.Name + "_" + m.Name + "',")
+			exports = append(exports, exportSearchObject{t.Name + "." + m.Name})
+			// buf.WriteString("'" + t.Name + "_" + m.Name + "',")
 		}
 	}
 
@@ -500,13 +510,12 @@ func renderDoc(render macaron.Render, pdoc *Package, docPath string) error {
 	}
 
 	// Set exported objects type-ahead.
-	exportDataSrc := buf.String()
-	if len(exportDataSrc) > 0 {
+	// exportDataSrc := buf.String()
+	if len(exports) > 0 {
 		pdoc.IsHasExport = true
 		data["IsHasExports"] = true
-		// exportDataSrc = exportDataSrc[:len(exportDataSrc)-1]
-		// data["ExportDataSrc"] = "<script>$('.search-export').typeahead({local: [" +
-		// 	exportDataSrc + "],limit: 10});</script>"
+		exportDataSrc, _ := json.Marshal(exports)
+		data["ExportDataSrc"] = "<script>var exportDataSrc = " + string(exportDataSrc) + ";</script>"
 	}
 
 	pdoc.IsHasConst = len(pdoc.Consts) > 0

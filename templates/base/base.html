@@ -37,7 +37,7 @@
 			        {# <a class="view-ui item {% if PageIsIndex %}active{% endif %}" href="/-/index">{{Tr(Lang, "index")}}</a> #}
 			        {# <a class="view-ui item {% if PageIsApi %}active{% endif %}" href="/api/docs">{{Tr(Lang, "api_service")}}</a> #}
 			        {# <a class="view-ui item {% if PageIsAbout %}active{% endif %}" href="/about">{{Tr(Lang, "about")}}</a> #}
-			        <a id="control-panel" class="view-ui item" href="#">{{Tr(Lang, "help")}}</a>
+			        <a id="control-panel" class="view-ui item" href="#">{{Tr(Lang, "help")}} (new!)</a>
 			      </div>
 			    </div>
 			  </div>
@@ -132,6 +132,14 @@
             				显示控制面板
             			</td>
               	</tr>
+              	<tr {% if not PageIsDocs%}class="ui disabled"{% endif %}>
+              		<td>
+              			<b>s</b>
+              		</td>
+            			<td>
+            				搜索导出对象（文档页面）
+            			</td>
+              	</tr>
               	<tr>
               		<td>
               			<b>g</b> + <b>g</b>
@@ -157,6 +165,14 @@
               		</td>
             			<td>
             				Show control panel
+            			</td>
+              	</tr>
+              	<tr {% if not PageIsDocs%}class="ui disabled"{% endif %}>
+              		<td>
+              			<b>s</b>
+              		</td>
+            			<td>
+            				Show search exports panel(Documentation page)
             			</td>
               	</tr>
               	<tr>

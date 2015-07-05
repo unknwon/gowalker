@@ -47,4 +47,26 @@
 		{% endif %}
 	</div>
 </div>
+
+
+<div class="ui small modal search export panel">
+	<div class="header">
+		{{Tr(Lang, "docs.search.title")}}
+	</div>
+	<div class="content">
+		<p>{{Tr(Lang, "docs.search.desc")}}</p>
+		<form class="ui form search export">
+		  <div class="field">
+		    <div class="ui fluid search">
+		      <div class="ui large action input">
+		        <input class="prompt" placeholder="{{Tr(Lang, "docs.search.holder")}}">
+			      <button type="submit" class="ui submit green button">
+			        {{Tr(Lang, "docs.search.button")}}
+			      </button>
+		      </div>
+		    </div>
+		  </div>
+		</form>
+	</div>
+</div>
 {% endblock %}
