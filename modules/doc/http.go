@@ -20,7 +20,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/Unknwon/gowalker/modules/log"
+	"github.com/Unknwon/log"
 )
 
 var (

@@ -15,6 +15,8 @@
 package routers
 
 import (
+	"github.com/Unknwon/log"
+
 	"github.com/Unknwon/gowalker/models"
 	"github.com/Unknwon/gowalker/modules/base"
 	"github.com/Unknwon/gowalker/modules/doc"
@@ -34,7 +36,7 @@ func Search(ctx *middleware.Context) {
 		return
 	}
 
-	results, err := models.SearchPkgInfo(q)
+	results, err := models.SearchPkgInfo(100, q)
 	if err != nil {
 		ctx.Flash.Error(err.Error(), true)
 	} else {
@@ -43,4 +45,30 @@ func Search(ctx *middleware.Context) {
 
 	ctx.Data["Keyword"] = q
 	ctx.HTML(200, SEARCH)
+}
+
+type searchResult struct {
+	Title       string `json:"title"`
+	Description string `json:"description"`
+}
+
+func SearchJSON(ctx *middleware.Context) {
+	q := ctx.QueryEscape("q")
+	pinfos, err := models.SearchPkgInfo(7, q)
+	if err != nil {
+		log.ErrorD(4, "SearchPkgInfo '%s': %v", q, err)
+		return
+	}
+
+	results := make([]*searchResult, len(pinfos))
+	for i := range pinfos {
+		results[i] = &searchResult{
+			Title:       pinfos[i].ImportPath,
+			Description: pinfos[i].Synopsis,
+		}
+	}
+
+	ctx.JSON(200, map[string]interface{}{
+		"results": results,
+	})
 }

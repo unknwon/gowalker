@@ -46,13 +46,13 @@
 {% endif %}
 
 {% macro example_detail(ex) %}
-<div class="ui fluid accordion example">
-	<div class="title">
+<div class="ui collapse example">
+	<div>
 		<h3>
-			<a id="_ex_btn_{{ex.Name}}">Example({{ex.Name}})</a>
+			<a class="show example" id="_ex_btn_{{ex.Name}}" href="#_ex_{{ex.Name}}">Example({{ex.Name}})</a>
 		</h3>
 	</div>
-	<div id="_ex_{{ex.Name}}" class="content">
+	<div id="_ex_{{ex.Name}}">
 		<p>Code:</p>
 		<pre>{{ex.Code | safe}}</pre>
 		{% if ex.Output %}
@@ -103,7 +103,7 @@
 
 {% macro sg_link(name) %}
 	{% if HasPrefix(ProjectPath, "github.com") == True %}
-	<a class="mini ui icon basic button sg" target="_blank" href="https://sourcegraph.com/{{ProjectPath}}/.GoPackage/{{ImportPath}}/.def/{{name}}">
+	<a class="ui button sg" target="_blank" href="https://sourcegraph.com/{{ProjectPath}}/.GoPackage/{{ImportPath}}/.def/{{name}}">
   	<i class="icon asterisk"></i>
 	</a>
 	{% endif %}
@@ -114,13 +114,16 @@
 	<h3 id="{{fn.Name}}">
 		func 
 		<a target="_blank" href="http{{Secure}}://{{fn.URL}}">{{fn.Name}}</a> 
-		{{sg_link(fn.Name)}}
+		<div class="mini icon ui basic buttons">
+			<div class="ui button show code" data-target="#collapse_{{fn.Name}}"><i class="code icon"></i></div>
+			{{sg_link(fn.Name)}}
+		</div>
 	</h3>
-	<div class="ui fluid accordion">
-		<div class="title">
+	<div class="ui collapse">
+		<div>
 			<pre id="decl_{{fn.Name}}">{{fn.FmtDecl | safe}}</pre>
 		</div>
-		<div id="collapse_{{fn.Name}}" class="content">
+		<div id="collapse_{{fn.Name}}">
 			<pre class="code">{{fn.Code | safe}}</pre>
 		</div>
 	</div>
@@ -139,7 +142,9 @@
 	<h3 id="{{tp.Name}}">
 		type 
 		<a target="_blank" href="http{{Secure}}://{{tp.URL}}">{{tp.Name}}</a>
-		{{sg_link(tp.Name)}}
+		<div class="mini icon ui basic buttons">
+			{{sg_link(tp.Name)}}
+		</div>
 	</h3>
 
 	<pre>{{tp.FmtDecl | safe}}</pre>
@@ -169,14 +174,17 @@
 	{% for fn in tp.Funcs %}
 		<h4 id="{{fn.Name}}">
 			func 
-			<a target="_blank" href="http{{Secure}}://{{fn.URL}}">{{fn.Name}}</a> 
-			{{sg_link(fn.Name)}}
-		</h4>
-		<div class="ui fluid accordion">
-			<div class="title">
-				<pre id="decl_{{fn.Name}}">{{fn.FmtDecl | safe}}</pre>
+			<a target="_blank" href="http{{Secure}}://{{fn.URL}}">{{fn.Name}}</a>
+			<div class="mini icon ui basic buttons"> 
+				<div class="ui button show code" data-target="#collapse_{{fn.Name}}"><i class="code icon"></i></div>
+				{{sg_link(fn.Name)}}
 			</div>
-			<div id="collapse_{{fn.Name}}" class="content">
+		</h4>
+		<div class="ui collapse">
+			<div>
+				<pre>{{fn.FmtDecl | safe}}</pre>
+			</div>
+			<div id="collapse_{{fn.Name}}">
 				<pre class="code">{{fn.Code | safe}}</pre>
 			</div>
 		</div>
@@ -195,14 +203,17 @@
 		<h4 id="{{fn.FullName}}">
 			func 
 			<a target="_blank" href="http{{Secure}}://{{fn.URL}}">{{fn.Name}}</a> 
-			{{sg_link(tp.Name|add:"/"|add:fn.Name)}}
+			<div class="mini icon ui basic buttons"> 
+				<div class="ui button show code" data-target="#collapse_{{fn.FullName}}"><i class="code icon"></i></div>
+				{{sg_link(tp.Name|add:"/"|add:fn.Name)}}
+			</div>
 		</h4>
 
-		<div class="ui fluid accordion">
-			<div class="title">
-				<pre id="decl_{{fn.Name}}">{{fn.FmtDecl | safe}}</pre>
+		<div class="ui collapse">
+			<div>
+				<pre>{{fn.FmtDecl | safe}}</pre>
 			</div>
-			<div id="collapse_{{fn.FullName}}" class="content">
+			<div id="collapse_{{fn.FullName}}">
 				<pre class="code">{{fn.Code | safe}}</pre>
 			</div>
 		</div>
@@ -229,26 +240,4 @@
 </p>
 {% endif %}
 
-{% if IsHasSubdirs %}
-<h3 id="_subdirs">
-	<a target="_blank" href="http{{Secure}}://{{ViewDirPath}}">Directories</a>
-</h3>
-
-<table class="ui basic table">
-	<thead>
-		<tr>
-			<th>Import Path</th>
-			<th>Synopsis</th>
-		</tr>
-	</thead>
-
-	<tbody>
-		{% for dir in Subdirs %}
-		<tr>
-			<td><a href="/{{dir.ImportPath}}">{{dir.ImportPath}}</a></td>
-			<td>{{dir.Synopsis}}</td>
-		</tr>
-		{% endfor %}
-	</tbody>
-</table>
-{% endif %}
+{{ExportDataSrc|safe}}

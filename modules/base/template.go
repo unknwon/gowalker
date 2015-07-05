@@ -19,18 +19,18 @@ import (
 	"strings"
 
 	"github.com/Unknwon/i18n"
+	"github.com/Unknwon/log"
 	"gopkg.in/fsnotify.v1"
 
-	"github.com/Unknwon/gowalker/modules/log"
 	"github.com/Unknwon/gowalker/modules/setting"
 )
 
 func monitorI18nLocale() {
-	log.Trace("Monitor i18n locale files enabled")
+	log.Info("Monitor i18n locale files enabled")
 
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
-		log.Fatal(4, "Fail to init locale watcher: %v", err)
+		log.FatalD(4, "Fail to init locale watcher: %v", err)
 	}
 
 	go func() {
@@ -40,16 +40,16 @@ func monitorI18nLocale() {
 				switch filepath.Ext(event.Name) {
 				case ".ini":
 					if err := i18n.ReloadLangs(); err != nil {
-						log.Error(4, "Fail to relaod locale file reloaded: %v", err)
+						log.ErrorD(4, "Fail to relaod locale file reloaded: %v", err)
 					}
-					log.Trace("Locale file reloaded: %s", strings.TrimPrefix(event.Name, "conf/locale/"))
+					log.Debug("Locale file reloaded: %s", strings.TrimPrefix(event.Name, "conf/locale/"))
 				}
 			}
 		}
 	}()
 
 	if err := watcher.Add("conf/locale"); err != nil {
-		log.Fatal(4, "Fail to start locale watcher: %v", err)
+		log.FatalD(4, "Fail to start locale watcher: %v", err)
 	}
 }
 

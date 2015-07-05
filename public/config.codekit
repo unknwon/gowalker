@@ -4,7 +4,7 @@
 "files": {
 	"\/css\/gowalker.min.css": {
 		"fileType": 16,
-		"ignore": 0,
+		"ignore": 1,
 		"ignoreWasSetByUser": 0,
 		"inputAbbreviatedPath": "\/css\/gowalker.min.css",
 		"outputAbbreviatedPath": "No Output Path",
@@ -31,10 +31,21 @@
 		"outputPathIsSetByUser": 0,
 		"processed": 0
 		},
-	"\/js\/gowalker.js": {
-		"fileType": 64,
+	"\/img\/qiniu-transparent.png": {
+		"fileType": 32768,
 		"ignore": 0,
 		"ignoreWasSetByUser": 0,
+		"initialSize": 21891,
+		"inputAbbreviatedPath": "\/img\/qiniu-transparent.png",
+		"outputAbbreviatedPath": "\/img\/qiniu-transparent.png",
+		"outputPathIsOutsideProject": 0,
+		"outputPathIsSetByUser": 0,
+		"processed": 0
+		},
+	"\/js\/gowalker.js": {
+		"fileType": 64,
+		"ignore": 1,
+		"ignoreWasSetByUser": 1,
 		"inputAbbreviatedPath": "\/js\/gowalker.js",
 		"outputAbbreviatedPath": "\/js\/min\/gowalker-min.js",
 		"outputPathIsOutsideProject": 0,
@@ -42,12 +53,12 @@
 		"outputStyle": 1,
 		"syntaxCheckerStyle": 1
 		},
-	"\/js\/jquery-1.11.2.min.js": {
+	"\/js\/jquery-1.11.3.min.js": {
 		"fileType": 64,
 		"ignore": 0,
 		"ignoreWasSetByUser": 0,
-		"inputAbbreviatedPath": "\/js\/jquery-1.11.2.min.js",
-		"outputAbbreviatedPath": "\/js\/min\/jquery-1.11.2.min-min.js",
+		"inputAbbreviatedPath": "\/js\/jquery-1.11.3.min.js",
+		"outputAbbreviatedPath": "\/js\/min\/jquery-1.11.3.min-min.js",
 		"outputPathIsOutsideProject": 0,
 		"outputPathIsSetByUser": 0,
 		"outputStyle": 1,
@@ -93,9 +104,9 @@
 		"ignore": 0,
 		"ignoreWasSetByUser": 0,
 		"inputAbbreviatedPath": "\/less\/main.less",
-		"outputAbbreviatedPath": "\/css\/main.css",
+		"outputAbbreviatedPath": "\/css\/gowalker.min.css",
 		"outputPathIsOutsideProject": 0,
-		"outputPathIsSetByUser": 0,
+		"outputPathIsSetByUser": 1,
 		"outputStyle": 0,
 		"relativeURLS": 0,
 		"shouldRunAutoprefixer": 0,

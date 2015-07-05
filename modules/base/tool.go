@@ -12,12 +12,18 @@
 // License for the specific language governing permissions and limitations
 // under the License.
 
-package apiv1
+package base
 
 import (
-	"github.com/Unknwon/gowalker/modules/middleware"
+	"sort"
 )
 
-func Badge(ctx *middleware.Context) {
-	ctx.Redirect("https://img.shields.io/badge/Go%20Walker-API%20Documentation-green.svg?style=flat-square")
+// MapToSortedStrings converts a string map to a alphabet sorted slice without duplication.
+func MapToSortedStrings(m map[string]bool) []string {
+	strs := make([]string, 0, len(m))
+	for s := range m {
+		strs = append(strs, s)
+	}
+	sort.Strings(strs)
+	return strs
 }

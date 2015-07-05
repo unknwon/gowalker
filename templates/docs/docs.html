@@ -1,0 +1,72 @@
+{% extends "../base/base.html" %}
+{% block body %}
+<div class="ui stackable very relaxed page grid">
+	<div class="sixteen wide aligned centered column">
+		{% include "header.html" %}
+
+		{% if IsHasReadme %}
+		<div id="readme" class="readme"><script type="text/javascript" src="/{{ReadmePath}}?={{Timestamp}}"></script></div>
+		<br>	
+		{% endif %}
+
+		<div id="markdown" class="markdown">
+			{% for doc in DocJS %}
+			<script type="text/javascript" src="/{{doc}}?={{Timestamp}}"></script>
+			{% endfor %}
+
+			{% if IsHasSubdirs %}
+			<h3 id="_subdirs">
+				<a target="_blank" href="http{{Secure}}://{{ViewDirPath}}">{{Tr(Lang, "docs.directories")}}</a>
+			</h3>
+
+			<table class="ui very basic table">
+				<thead>
+					<tr>
+						<th>{{Tr(Lang, "docs.path")}}</th>
+						<th>{{Tr(Lang, "docs.synopsis")}}</th>
+					</tr>
+				</thead>
+				<tbody>
+					{% for dir in Subdirs %}
+					<tr>
+						<td><a href="/{{dir.ImportPath}}">{{dir.Name}}</a></td>
+						<td>{{dir.Synopsis}}</td>
+					</tr>
+					{% endfor %}
+				</tbody>
+			</table>
+			{% endif %}
+		</div>
+		
+		<div class="ui divider"></div>
+		<p>{{Tr(Lang, "docs.note.package")}} {{ProjectName}} {{Tr(Lang, "docs.note.import", Link, ImportNum) | safe}}</p>
+		{% if CanRefresh %}
+		<a class="ui green basic small button" href="{{Link}}?refresh">
+		  {{Tr(Lang, "docs.refresh")}}
+		</a>
+		{% endif %}
+	</div>
+</div>
+
+
+<div class="ui small modal search export panel">
+	<div class="header">
+		{{Tr(Lang, "docs.search.title")}}
+	</div>
+	<div class="content">
+		<p>{{Tr(Lang, "docs.search.desc")}}</p>
+		<form class="ui form search export">
+		  <div class="field">
+		    <div class="ui fluid search">
+		      <div class="ui large action input">
+		        <input class="prompt" placeholder="{{Tr(Lang, "docs.search.holder")}}">
+			      <button type="submit" class="ui submit green button">
+			        {{Tr(Lang, "docs.search.button")}}
+			      </button>
+		      </div>
+		    </div>
+		  </div>
+		</form>
+	</div>
+</div>
+{% endblock %}

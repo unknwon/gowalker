@@ -1,18 +1,110 @@
-var search_content;
-
 $(document).ready(function () {
     $('.dropdown').dropdown({
         transition: 'drop'
     });
     $('.popup').popup();
     $('.ui.accordion').accordion();
-    $('.ui.search').search({
-        source: search_content
+    $('.ui.main.search').search({
+        type: "standard",
+        apiSettings: {
+            url: '/search/json?q={query}'
+        },
+        searchFields: [
+            'title'
+        ],
+        searchDelay: 500,
+        searchFullText: false
+    });
+    $('.main.search .search.icon').click(function () {
+        $('.main.search').submit();
     });
 
-    $('.ex-link').click(function () {
-        $($(this).data("name")).addClass("active");
+    var is_page_docs = $('#readme').length > 0;
+
+    if (is_page_docs) {
+        // Search export objects.
+        var $searchExportPanel = $('.search.export.panel');
+        var $searchExportForm = $('.ui.form.search.export');
+        var $searchExportInput = $('.ui.form.search.export input');
+        $searchExportForm.search({source: exportDataSrc});
+        $searchExportForm.submit(function (event) {
+            $searchExportPanel.modal("hide");
+            window.location.href = "#" + $searchExportInput.val().replace(/\./g, "_");
+            event.preventDefault();
+        });
+    }
+
+    // Control panel.
+    var $control_panel = $('.control.panel');
+    $('#control-panel').click(function (event) {
+        $(this).blur();
+        $control_panel.modal('show');
+        event.preventDefault();
     });
+
+    var preKeyG = 0;
+
+    function Gkey(callback) {
+        if (preKeyG === 1) {
+            callback();
+        }
+        preKeyG = 0;
+    }
+
+    $(document).keypress(function (event) {
+        // Check if any input box is focused.
+        if ($(':focus').length > 0) {
+            return true;
+        }
+
+        var code = event.keyCode ? event.keyCode : event.charCode;
+        switch (code) {
+            case 63:                    // for '?' 63
+                $control_panel.modal('show');
+                break;
+            case 98:                    // for 'g then b'  'b' 98
+                $control_panel.modal('hide');
+                Gkey(function () {
+                    $('html,body').animate({scrollTop: $(document).height()}, 120);
+                });
+                break;
+            case 103:                   // for 'g then g'   'g' 103
+                $control_panel.modal('hide');
+
+                if (preKeyG === 0) {
+                    preKeyG = 1;
+                    setTimeout(function () {
+                        preKeyG = 0;
+                    }, 2000);
+                    return false;
+                }
+                Gkey(function () {
+                    $('html,body').animate({scrollTop: 0}, 120);
+                });
+                break;
+            case 115:                   // for 's' 105
+                if (!is_page_docs)return true;
+                $searchExportPanel.modal('show');
+                break;
+            default:
+                preKeyG = 0;
+        }
+    });
+
+    // View code.
+    $('.show.code').click(function () {
+        $($(this).data('target')).toggle();
+    });
+
+    // Show example.
+    $('.ex-link').click(function () {
+        $($(this).data("name")).show();
+    });
+    $('.show.example').click(function (event) {
+        $($(this).attr('href')).toggle();
+        event.preventDefault();
+    });
+
 
     // Browse history.
     if ($('#browse_history').length) {

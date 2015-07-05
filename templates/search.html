@@ -7,13 +7,12 @@
 		<form class="ui form real search" action="/search">
 		  <div class="field">
 		    <div class="ui fluid search">
-		      <div class="ui large input">
+		      <div class="ui large action input">
 		        <input class="prompt" name="q" placeholder="{{Tr(Lang, "search.search_holder")}}" value="{{Keyword}}">
+			      <button type="submit" class="ui large submit green button">
+			        {{Tr(Lang, "search.search_btn")}}
+			      </button>
 		      </div>
-		      <div class="results"></div>
-		      <button type="submit" class="ui large submit green button">
-		        {{Tr(Lang, "search.search_btn")}}
-		      </button>
 		    </div>
 		  </div>
 		</form>

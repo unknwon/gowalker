@@ -8,13 +8,12 @@
 		<meta name="keywords" content="{{Tr(Lang, "head_keywords")}}">
 		<title>{% block title %}{{Title}} - Go Walker{% endblock %}</title>
 
-		 <!-- Stylesheets -->
-		<link href="/css/semantic.min.css" rel="stylesheet" />
-		<link href="/css/gowalker.min.css" rel="stylesheet" />
+		<link href="/css/semantic.min.css?v={{AppVer}}" rel="stylesheet" />
+		<link href="/css/gowalker.min.css?v={{AppVer}}" rel="stylesheet" />
 
-		<script type="text/javascript" src="/js/jquery-1.11.2.min.js"></script>
-		<script type="text/javascript" src="/js/semantic.min.js"></script>
-		<script type="text/javascript" src="/js/gowalker.js"></script>
+		<script type="text/javascript" src="/js/jquery-1.11.3.min.js"></script>
+		<script type="text/javascript" src="/js/semantic.min.js?v={{AppVer}}"></script>
+		<script type="text/javascript" src="/js/gowalker.js?v={{AppVer}}"></script>
 	</head>
 	<body>
 		<noscript>Please enable JavaScript in your browser!</noscript>
@@ -38,6 +37,7 @@
 			        {# <a class="view-ui item {% if PageIsIndex %}active{% endif %}" href="/-/index">{{Tr(Lang, "index")}}</a> #}
 			        {# <a class="view-ui item {% if PageIsApi %}active{% endif %}" href="/api/docs">{{Tr(Lang, "api_service")}}</a> #}
 			        {# <a class="view-ui item {% if PageIsAbout %}active{% endif %}" href="/about">{{Tr(Lang, "about")}}</a> #}
+			        <a id="control-panel" class="view-ui item" href="#">{{Tr(Lang, "help")}} (new!)</a>
 			      </div>
 			    </div>
 			  </div>
@@ -63,6 +63,16 @@
 					  {{Flash.InfoMsg|safe}}
 					</div>
 					{% endif %}
+					{% if Flash.SuccessMsg %}
+					<div class="ui success message">
+						{% if InfoHeader %}
+					  <div class="header">
+					    {{SuccessHeader}}
+					  </div>
+					  {% endif %}
+					  {{Flash.SuccessMsg|safe}}
+					</div>
+					{% endif %}
 				</div>
 			</div>
 
@@ -71,7 +81,7 @@
 			  <div class="fourteen wide center aligned centered column">
 			    <div class="ui stackable inverted divided relaxed grid">
 			      <div class="eight wide column">
-			        <h3 class="ui inverted header">Copyright © 2015 Go Walker</h3>
+			        <h4 class="ui inverted header">Copyright © 2015 Go Walker</h4>
 			        {% if Lang == "zh-CN" %}
 			        <p>网站由 <i class="user icon"></i><a target="_blank" href="https://github.com/Unknwon">@Unknwon</a> 建设，并由 <a target="_blank" href="http://gowalker.org/github.com/Unknwon/macaron">Macaron</a> 和 <a target="_blank" href="/github.com/go-xorm/xorm">Xorm</a> 提供动力。</p>
 			        <p>请给 <i class="mail icon"></i>我们（u@gogs.io）发送反馈信息或提交 <i class="tasks icon"></i><a target="_blank" href="https://github.com/Unknwon/gowalker/issues">网站问题</a>。</p>
@@ -79,6 +89,7 @@
 			        <p>Website built by <i class="user icon"></i><a target="_blank" href="https://github.com/Unknwon">@Unknwon</a>. Powered by <a target="_blank" href="/github.com/Unknwon/macaron">Macaron</a> and <a target="_blank" href="http://gowalker.org/github.com/go-xorm/xorm">Xorm</a>.</p>
 			        <p>Send us <i class="mail icon"></i>Feedback(u@gogs.io) or submit <i class="tasks icon"></i><a target="_blank" href="https://github.com/Unknwon/gowalker/issues">Website Issues</a>.</p>
 			        {% endif %}
+			        <img class="qiniu-logo" src="/img/qiniu-transparent.png">
 			      </div>
 			      <div class="four wide column">
 			        <h5 class="ui teal inverted header">{{Tr(Lang, "home.more_projects")}}</h5>
@@ -98,6 +109,92 @@
 			      </div>
 			    </div>
 			  </div>
+			</div>
+
+			<div class="ui small modal control panel">
+				<div class="header">
+					{{Tr(Lang, "help.title")}}
+				</div>
+				<div class="content">
+					<p>{{Tr(Lang, "help.desc")}}</p>
+          <table class="ui table">
+          		<thead>
+          			<th width="30%">{{Tr(Lang, "help.shortcut")}}</th>
+          			<th width="70%">{{Tr(Lang, "help.usage")}}</th>
+          		</thead>
+          		{% if Lang=="zh-CN" %}
+              <tbody>
+              	<tr>
+              		<td>
+              			<b>?</b>
+              		</td>
+            			<td>
+            				显示控制面板
+            			</td>
+              	</tr>
+              	<tr {% if not PageIsDocs%}class="ui disabled"{% endif %}>
+              		<td>
+              			<b>s</b>
+              		</td>
+            			<td>
+            				搜索导出对象（文档页面）
+            			</td>
+              	</tr>
+              	<tr>
+              		<td>
+              			<b>g</b> + <b>g</b>
+              		</td>
+            			<td>
+            				跳转至顶部
+            			</td>
+              	</tr>
+              	<tr>
+              		<td>
+              			<b>g</b> + <b>b</b>
+              		</td>
+            			<td>
+            				跳转至底部
+            			</td>
+              	</tr>
+              </tbody>
+              {% else %}
+              <tbody>
+              	<tr>
+              		<td>
+              			<b>?</b>
+              		</td>
+            			<td>
+            				Show control panel
+            			</td>
+              	</tr>
+              	<tr {% if not PageIsDocs%}class="ui disabled"{% endif %}>
+              		<td>
+              			<b>s</b>
+              		</td>
+            			<td>
+            				Show search exports panel(Documentation page)
+            			</td>
+              	</tr>
+              	<tr>
+              		<td>
+              			<b>g</b> + <b>g</b>
+              		</td>
+            			<td>
+            				Go to top of page
+            			</td>
+              	</tr>
+              	<tr>
+              		<td>
+              			<b>g</b> + <b>b</b>
+              		</td>
+            			<td>
+            				Go to bottom of page
+            			</td>
+              	</tr>
+              </tbody>
+              {% endif %}
+          </table>
+				</div>
 			</div>
 			{% if ProdMode %}
 			<script>

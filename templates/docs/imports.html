@@ -1,0 +1,32 @@
+{% extends "../base/base.html" %}
+{% block body %}
+<div class="ui stackable very relaxed page grid">
+	<div class="sixteen wide aligned centered column">
+		{% include "header.html" %}
+		
+		<h2>
+			{{Tr(Lang, "docs.imports.title", ProjectName)}}
+		</h2>
+
+		<table class="ui very basic table">
+			<thead>
+				<tr>
+					<th>{{Tr(Lang, "docs.path")}}</th>
+					<th>{{Tr(Lang, "docs.synopsis")}}</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for pkg in Packages %}
+				<tr>
+					<td><a href="/{{pkg.ImportPath}}">{{pkg.ImportPath}}</a></td>
+					<td>{{pkg.Synopsis}}</td>
+				</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+
+		<div class="ui divider"></div>
+		<p>{{Tr(Lang, "docs.imports.go_back", Link) | safe}}</p>
+	</div>
+</div>
+{% endblock %}

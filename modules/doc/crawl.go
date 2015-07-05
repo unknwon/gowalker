@@ -24,9 +24,9 @@ import (
 	"strings"
 
 	"github.com/Unknwon/com"
+	"github.com/Unknwon/log"
 
 	"github.com/Unknwon/gowalker/modules/httplib"
-	"github.com/Unknwon/gowalker/modules/log"
 	"github.com/Unknwon/gowalker/modules/setting"
 )
 
@@ -66,7 +66,7 @@ func getStatic(importPath, etag string) (pdoc *Package, err error) {
 		m := s.pattern.FindStringSubmatch(importPath)
 		if m == nil {
 			if s.prefix != "" {
-				log.Trace("Import path prefix matches known service, but regexp does not: %s", importPath)
+				log.Debug("Import path prefix matches known service, but regexp does not: %s", importPath)
 				return nil, ErrInvalidRemotePath
 			}
 			continue
@@ -234,7 +234,7 @@ func crawlDoc(importPath, etag string) (pdoc *Package, err error) {
 
 	// Render README.
 	for name, content := range pdoc.Readme {
-		p, err := httplib.Post("https://api.github.com/markdown/raw?"+setting.GithubCredentials).
+		p, err := httplib.Post("https://api.github.com/markdown/raw?"+setting.GitHubCredentials).
 			Header("Content-Type", "text/plain").Body(content).Bytes()
 		if err != nil {
 			return nil, fmt.Errorf("error rendering README: %v", err)

@@ -31,11 +31,11 @@ import (
 	"time"
 
 	"github.com/Unknwon/com"
+	"github.com/Unknwon/log"
 	"github.com/Unknwon/macaron"
 	// "github.com/davecgh/go-spew/spew"
 
 	"github.com/Unknwon/gowalker/models"
-	"github.com/Unknwon/gowalker/modules/log"
 	"github.com/Unknwon/gowalker/modules/setting"
 )
 
@@ -57,7 +57,7 @@ func RefreshSearchContent() {
 	}
 	data, err := json.Marshal(&items)
 	if err != nil {
-		log.Error(4, "Fail to marshal search content: %v", err)
+		log.ErrorD(4, "Fail to marshal search content: %v", err)
 		return
 	}
 	SearchContent = string(data)
@@ -372,7 +372,7 @@ func SaveDocPage(docPath string, data []byte) int {
 
 		os.MkdirAll(path.Dir(docPath+".js"), os.ModePerm)
 		if err := ioutil.WriteFile(docPath+".js", buf.Bytes(), 0655); err != nil {
-			log.Error(4, "SaveDocPage( %s ): %v", docPath, err)
+			log.ErrorD(4, "SaveDocPage( %s ): %v", docPath, err)
 			return -1
 		}
 	} else {
@@ -407,7 +407,7 @@ func SaveDocPage(docPath string, data []byte) int {
 
 			os.MkdirAll(path.Dir(p+".js"), os.ModePerm)
 			if err := ioutil.WriteFile(p+".js", buf.Bytes(), 0655); err != nil {
-				log.Error(4, "SaveDocPage( %s ): %v", p, err)
+				log.ErrorD(4, "SaveDocPage( %s ): %v", p, err)
 				return -1
 			}
 
@@ -445,14 +445,20 @@ func SavePkgDoc(docPath string, readmes map[string][]byte) {
 		buf.Write(data)
 		buf.WriteString("\")")
 		if err := ioutil.WriteFile(localeDocPath+".js", buf.Bytes(), 0655); err != nil {
-			log.Error(4, "SavePkgDoc( %s ): %v", localeDocPath, err)
+			log.ErrorD(4, "SavePkgDoc( %s ): %v", localeDocPath, err)
 		}
 	}
+}
+
+type exportSearchObject struct {
+	Title string `json:"title"`
 }
 
 func renderDoc(render macaron.Render, pdoc *Package, docPath string) error {
 	data := make(map[string]interface{})
 	data["PkgFullIntro"] = pdoc.Doc
+
+	exports := make([]exportSearchObject, 0, 10)
 
 	var buf bytes.Buffer
 	links := make([]*Link, 0, len(pdoc.Types)+len(pdoc.Imports)+len(pdoc.TestImports)+
@@ -463,7 +469,8 @@ func renderDoc(render macaron.Render, pdoc *Package, docPath string) error {
 			Name:    t.Name,
 			Comment: template.HTMLEscapeString(t.Doc),
 		})
-		buf.WriteString("'" + t.Name + "',")
+		exports = append(exports, exportSearchObject{t.Name})
+		// buf.WriteString("'" + t.Name + "',")
 	}
 
 	for _, f := range pdoc.Funcs {
@@ -472,7 +479,8 @@ func renderDoc(render macaron.Render, pdoc *Package, docPath string) error {
 			Name:    f.Name,
 			Comment: template.HTMLEscapeString(f.Doc),
 		})
-		buf.WriteString("'" + f.Name + "',")
+		exports = append(exports, exportSearchObject{f.Name})
+		// buf.WriteString("'" + f.Name + "',")
 	}
 
 	for _, t := range pdoc.Types {
@@ -481,11 +489,13 @@ func renderDoc(render macaron.Render, pdoc *Package, docPath string) error {
 				Name:    f.Name,
 				Comment: template.HTMLEscapeString(f.Doc),
 			})
-			buf.WriteString("'" + f.Name + "',")
+			exports = append(exports, exportSearchObject{f.Name})
+			// buf.WriteString("'" + f.Name + "',")
 		}
 
 		for _, m := range t.Methods {
-			buf.WriteString("'" + t.Name + "_" + m.Name + "',")
+			exports = append(exports, exportSearchObject{t.Name + "." + m.Name})
+			// buf.WriteString("'" + t.Name + "_" + m.Name + "',")
 		}
 	}
 
@@ -500,13 +510,12 @@ func renderDoc(render macaron.Render, pdoc *Package, docPath string) error {
 	}
 
 	// Set exported objects type-ahead.
-	exportDataSrc := buf.String()
-	if len(exportDataSrc) > 0 {
+	// exportDataSrc := buf.String()
+	if len(exports) > 0 {
 		pdoc.IsHasExport = true
 		data["IsHasExports"] = true
-		// exportDataSrc = exportDataSrc[:len(exportDataSrc)-1]
-		// data["ExportDataSrc"] = "<script>$('.search-export').typeahead({local: [" +
-		// 	exportDataSrc + "],limit: 10});</script>"
+		exportDataSrc, _ := json.Marshal(exports)
+		data["ExportDataSrc"] = "<script>var exportDataSrc = " + string(exportDataSrc) + ";</script>"
 	}
 
 	pdoc.IsHasConst = len(pdoc.Consts) > 0
@@ -548,15 +557,6 @@ func renderDoc(render macaron.Render, pdoc *Package, docPath string) error {
 		v.FmtDecl = buf.String()
 		pdoc.Vars[i] = v
 	}
-
-	// Dirs.
-	// pinfos := models.GetSubPkgs(pdoc.ImportPath, tag, pdoc.Dirs)
-	// if len(pinfos) > 0 {
-	// 	pdoc.IsHasSubdir = true
-	// 	data["IsHasSubdirs"] = pdoc.IsHasSubdir
-	// 	data["Subdirs"] = pinfos
-	// 	data["ViewDirPath"] = pdoc.ViewDirPath
-	// }
 
 	// Files.
 	if len(pdoc.Files) > 0 {
@@ -684,7 +684,7 @@ func renderDoc(render macaron.Render, pdoc *Package, docPath string) error {
 		data["Secure"] = "s"
 	}
 
-	result, err := render.HTMLBytes("docs_tpl", data)
+	result, err := render.HTMLBytes("docs/tpl", data)
 	if err != nil {
 		return fmt.Errorf("error rendering HTML: %v", err)
 	}
@@ -720,16 +720,21 @@ func CheckPackage(importPath string, render macaron.Render, rt requestType) (*mo
 				pdoc := new(Package)
 				fr, err := os.Open(fpath)
 				if err != nil {
-					return nil, fmt.Errorf("error reading gob: %v", err)
+					return nil, fmt.Errorf("read gob: %v", err)
 				} else if err = gob.NewDecoder(fr).Decode(pdoc); err != nil {
 					fr.Close()
-					return nil, fmt.Errorf("error decoding gob: %v", err)
+					return nil, fmt.Errorf("decode gob: %v", err)
 				}
 				fr.Close()
 
 				if err = renderDoc(render, pdoc, importPath); err != nil {
-					return nil, fmt.Errorf("error rendering cached doc: %v", err)
+					return nil, fmt.Errorf("render cached doc: %v", err)
 				}
+			}
+
+			pinfo.Views++
+			if err = models.SavePkgInfo(pinfo); err != nil {
+				return nil, fmt.Errorf("update views: %v", err)
 			}
 			return pinfo, nil
 		}
@@ -767,11 +772,14 @@ func CheckPackage(importPath string, render macaron.Render, rt requestType) (*mo
 
 	if err != nil {
 		if err == ErrPackageNotModified {
-			return pinfo, nil
+			log.Debug("Package has not been modified: %s", pinfo.ImportPath)
+			// Update time so cannot refresh too often.
+			pinfo.Created = time.Now().UTC().Unix()
+			return pinfo, models.SavePkgInfo(pinfo)
 		} else if err == ErrInvalidRemotePath {
 			return nil, ErrInvalidRemotePath // Allow caller to make redirect to search.
 		}
-		return nil, fmt.Errorf("error checking package: %v", err)
+		return nil, fmt.Errorf("check package: %v", err)
 	}
 
 	if !setting.ProdMode {
@@ -779,25 +787,27 @@ func CheckPackage(importPath string, render macaron.Render, rt requestType) (*mo
 		os.MkdirAll(path.Dir(fpath), os.ModePerm)
 		fw, err := os.Create(fpath)
 		if err != nil {
-			return nil, fmt.Errorf("error creating gob: %v", err)
+			return nil, fmt.Errorf("create gob: %v", err)
 		}
 		defer fw.Close()
 		if err = gob.NewEncoder(fw).Encode(pdoc); err != nil {
-			return nil, fmt.Errorf("error encoding gob: %v", err)
+			return nil, fmt.Errorf("encode gob: %v", err)
 		}
 	}
 
 	log.Info("Walked package: %s, Goroutine #%d", pdoc.ImportPath, runtime.NumGoroutine())
 
 	if err = renderDoc(render, pdoc, importPath); err != nil {
-		return nil, fmt.Errorf("error rendering doc: %v", err)
+		return nil, fmt.Errorf("render doc: %v", err)
 	}
 
 	if pinfo != nil {
 		pdoc.Id = pinfo.Id
 	}
+
+	pdoc.Created = time.Now().UTC().Unix()
 	if err = models.SavePkgInfo(pdoc.PkgInfo); err != nil {
-		return nil, fmt.Errorf("error saving PkgInfo: %v", err)
+		return nil, fmt.Errorf("SavePkgInfo: %v", err)
 	}
 
 	return pdoc.PkgInfo, nil
