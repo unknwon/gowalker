@@ -5,7 +5,11 @@
 		{% include "header.html" %}
 		
 		<h2>
+			{% if PageIsImports %}
 			{{Tr(Lang, "docs.imports.title", ProjectName)}}
+			{% else %}
+			{{Tr(Lang, "docs.refs.title", ProjectName)}}
+			{% endif %}
 		</h2>
 
 		<table class="ui very basic table">

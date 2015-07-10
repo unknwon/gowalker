@@ -104,7 +104,7 @@ func getGithubDoc(match map[string]string, etag string) (*Package, error) {
 		}
 
 		// Get files and check if directories have acceptable files.
-		if d, f := path.Split(node.Path); IsDocFile(f) {
+		if d, f := path.Split(node.Path); base.IsDocFile(f) {
 			// Check if file is in the directory that is corresponding to import path.
 			if d == dirPrefix {
 				files = append(files, &Source{

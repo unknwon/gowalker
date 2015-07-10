@@ -75,7 +75,16 @@ func handleError(ctx *middleware.Context, err error) {
 func specialHandles(ctx *middleware.Context, pinfo *models.PkgInfo) bool {
 	// Only show imports.
 	if strings.HasSuffix(ctx.Req.RequestURI, "?imports") {
+		ctx.Data["PageIsImports"] = true
 		ctx.Data["Packages"] = models.GetPkgInfosByPaths(strings.Split(pinfo.ImportPaths, "|"))
+		ctx.HTML(200, DOCS_IMPORTS)
+		return true
+	}
+
+	// Only show references.
+	if strings.HasSuffix(ctx.Req.RequestURI, "?refs") {
+		ctx.Data["PageIsRefs"] = true
+		ctx.Data["Packages"] = pinfo.GetRefs()
 		ctx.HTML(200, DOCS_IMPORTS)
 		return true
 	}
@@ -149,19 +158,22 @@ func Docs(ctx *middleware.Context) {
 		ctx.Flash.Success(ctx.Tr("docs.generate_success"), true)
 	}
 
-	// Notes.
+	// Subdirs.
 	if len(pinfo.Subdirs) > 0 {
 		ctx.Data["IsHasSubdirs"] = true
 		ctx.Data["ViewDirPath"] = pinfo.ViewDirPath
 		ctx.Data["Subdirs"] = models.GetSubPkgs(pinfo.ImportPath, strings.Split(pinfo.Subdirs, "|"))
 	}
 
-	ctx.Data["ImportNum"] = len(strings.Split(pinfo.ImportPaths, "|"))
+	// Imports and references.
+	ctx.Data["ImportNum"] = pinfo.ImportNum
+	ctx.Data["RefNum"] = pinfo.RefNum
 
 	// Tools.
+	ctx.Data["TimeDuration"] = base.TimeSince(time.Unix(pinfo.Created, 0), ctx.Locale.Language())
 	ctx.Data["CanRefresh"] = pinfo.CanRefresh()
 
-	updateHistory(ctx, pinfo.Id)
+	updateHistory(ctx, pinfo.ID)
 
 	ctx.HTML(200, DOCS)
 }

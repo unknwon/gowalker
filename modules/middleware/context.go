@@ -92,6 +92,7 @@ func Contexter() macaron.Handler {
 		ctx.Data["SubStr"] = base.SubStr
 		ctx.Data["RearSubStr"] = base.RearSubStr
 		ctx.Data["HasPrefix"] = strings.HasPrefix
+		ctx.Data["int64"] = base.Int64
 
 		c.Map(ctx)
 	}

@@ -15,12 +15,16 @@
 package models
 
 import (
+	"bytes"
 	"errors"
+	"fmt"
 	"path"
+	"strings"
 	"time"
 
 	"github.com/Unknwon/com"
 
+	"github.com/Unknwon/gowalker/modules/base"
 	"github.com/Unknwon/gowalker/modules/setting"
 )
 
@@ -32,7 +36,7 @@ var (
 
 // PkgInfo represents the package information.
 type PkgInfo struct {
-	Id         int64
+	ID         int64  `xorm:"pk autoincr"`
 	Name       string `xorm:"-"`
 	ImportPath string `xorm:"UNIQUE"`
 	Etag       string
@@ -48,13 +52,19 @@ type PkgInfo struct {
 
 	PkgVer int
 
-	Views  int64
-	RefNum int64
+	Views int64
 	// Indicate how many JS should be downloaded(JsNum=total num - 1)
 	JsNum int
 
+	ImportNum int64
+	ImportIDs string `xorm:"import_ids TEXT"`
+	// Import num usually is small so save it to reduce a database query.
 	ImportPaths string `xorm:"TEXT"`
-	Subdirs     string `xorm:"TEXT"`
+
+	RefNum int64
+	RefIDs string `xorm:"ref_ids TEXT"`
+
+	Subdirs string `xorm:"TEXT"`
 
 	LastView int64 `xorm:"-"`
 	Created  int64
@@ -69,20 +79,178 @@ func (p *PkgInfo) CanRefresh() bool {
 	return time.Now().UTC().Add(-1*setting.RefreshInterval).Unix() > p.Created
 }
 
+// GetRefs returns a list of packages that import this one.
+func (p *PkgInfo) GetRefs() []*PkgInfo {
+	pinfos := make([]*PkgInfo, 0, p.RefNum)
+	refIDs := strings.Split(p.RefIDs, "|")
+	for i := range refIDs {
+		if len(refIDs[i]) == 0 {
+			continue
+		}
+
+		id := com.StrTo(refIDs[i][1:]).MustInt64()
+		if pinfo, _ := GetPkgInfoById(id); pinfo != nil {
+			pinfo.Name = path.Base(pinfo.ImportPath)
+			pinfos = append(pinfos, pinfo)
+		}
+	}
+	return pinfos
+}
+
 // PACKAGE_VER is modified when previously stored packages are invalid.
 const PACKAGE_VER = 1
 
+// PkgRef represents temporary reference information of a package.
+type PkgRef struct {
+	ID         int64  `xorm:"pk autoincr"`
+	ImportPath string `xorm:"UNIQUE"`
+	RefNum     int64
+	RefIDs     string `xorm:"ref_ids TEXT"`
+}
+
+func updatePkgRef(pid int64, refPath string) error {
+	if base.IsGoRepoPath(refPath) {
+		return nil
+	}
+
+	ref := new(PkgRef)
+	has, err := x.Where("import_path=?", refPath).Get(ref)
+	if err != nil {
+		return fmt.Errorf("get PkgRef: %v", err)
+	}
+
+	queryStr := "$" + com.ToStr(pid) + "|"
+	if !has {
+		if _, err = x.Insert(&PkgRef{
+			ImportPath: refPath,
+			RefNum:     1,
+			RefIDs:     queryStr,
+		}); err != nil {
+			return fmt.Errorf("insert PkgRef: %v", err)
+		}
+		return nil
+	}
+
+	i := strings.Index(ref.RefIDs, queryStr)
+	if i > -1 {
+		return nil
+	}
+
+	ref.RefIDs += queryStr
+	ref.RefNum++
+	_, err = x.Id(ref.ID).AllCols().Update(ref)
+	return err
+}
+
+// checkRefs checks if given packages are still referencing this one.
+func checkRefs(pinfo *PkgInfo) {
+	var buf bytes.Buffer
+	pinfo.RefNum = 0
+	refIDs := strings.Split(pinfo.RefIDs, "|")
+	for i := range refIDs {
+		if len(refIDs[i]) == 0 {
+			continue
+		}
+
+		fmt.Println(com.StrTo(refIDs[i][1:]).MustInt64())
+		pkg, _ := GetPkgInfoById(com.StrTo(refIDs[i][1:]).MustInt64())
+		if pkg == nil {
+			continue
+		}
+
+		if strings.Index(pkg.ImportIDs, "$"+com.ToStr(pinfo.ID)+"|") == -1 {
+			continue
+		}
+
+		buf.WriteString("$")
+		buf.WriteString(com.ToStr(pkg.ID))
+		buf.WriteString("|")
+		pinfo.RefNum++
+	}
+	pinfo.RefIDs = buf.String()
+}
+
+// updateRef updates or crates corresponding reference import information.
+func updateRef(pid int64, refPath string) (int64, error) {
+	pinfo, err := GetPkgInfo(refPath)
+	if err != nil && pinfo == nil {
+		if err == ErrPackageNotFound ||
+			err == ErrPackageVersionTooOld {
+			// Package hasn't existed yet, save to temporary place.
+			return 0, updatePkgRef(pid, refPath)
+		}
+		return 0, fmt.Errorf("GetPkgInfo(%s): %v", refPath, err)
+	}
+
+	// Check if reference information has beed recorded.
+	queryStr := "$" + com.ToStr(pid) + "|"
+	i := strings.Index(pinfo.RefIDs, queryStr)
+	if i > -1 {
+		return pinfo.ID, nil
+	}
+
+	// Add new as needed.
+	pinfo.RefIDs += queryStr
+	pinfo.RefNum++
+	_, err = x.Id(pinfo.ID).AllCols().Update(pinfo)
+	return pinfo.ID, err
+}
+
 // SavePkgInfo saves package information.
-func SavePkgInfo(pinfo *PkgInfo) (err error) {
+func SavePkgInfo(pinfo *PkgInfo, updateRefs bool) (err error) {
 	pinfo.PkgVer = PACKAGE_VER
 
-	if pinfo.Id == 0 {
+	// Create or update package info itself.
+	// Note(Unknwon): do this because we need ID field later.
+	if pinfo.ID == 0 {
 		pinfo.Views = 1
+
+		// First time created, check PkgRef.
+		ref := new(PkgRef)
+		has, err := x.Where("import_path=?", pinfo.ImportPath).Get(ref)
+		if err != nil {
+			return fmt.Errorf("get PkgRef: %v", err)
+		} else if has {
+			pinfo.RefNum = ref.RefNum
+			pinfo.RefIDs = ref.RefIDs
+			if _, err = x.Id(ref.ID).Delete(ref); err != nil {
+				return fmt.Errorf("delete PkgRef: %v", err)
+			}
+		}
+
 		_, err = x.Insert(pinfo)
 	} else {
-		_, err = x.Id(pinfo.Id).AllCols().Update(pinfo)
+		_, err = x.Id(pinfo.ID).AllCols().Update(pinfo)
 	}
-	return err
+	if err != nil {
+		return fmt.Errorf("update package info: %v", err)
+	}
+
+	// Update package import references.
+	// Note(Unknwon): I just don't see the value of who imports STD
+	//	when you don't even import and uses what objects.
+	if updateRefs && !pinfo.IsGoRepo {
+		var buf bytes.Buffer
+		paths := strings.Split(pinfo.ImportPaths, "|")
+		for i := range paths {
+			refID, err := updateRef(pinfo.ID, paths[i])
+			if err != nil {
+				return fmt.Errorf("updateRef: %v", err)
+			} else if refID == 0 {
+				continue
+			}
+			buf.WriteString("$")
+			buf.WriteString(com.ToStr(refID))
+			buf.WriteString("|")
+		}
+		pinfo.ImportIDs = buf.String()
+
+		// Check packages who import this is still importing.
+		checkRefs(pinfo)
+		_, err = x.Id(pinfo.ID).AllCols().Update(pinfo)
+		return err
+	}
+	return nil
 }
 
 // GetPkgInfo returns package information by given import path.

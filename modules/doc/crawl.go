@@ -26,6 +26,7 @@ import (
 	"github.com/Unknwon/com"
 	"github.com/Unknwon/log"
 
+	"github.com/Unknwon/gowalker/modules/base"
 	"github.com/Unknwon/gowalker/modules/httplib"
 	"github.com/Unknwon/gowalker/modules/setting"
 )
@@ -217,9 +218,9 @@ func getDynamic(importPath, etag string) (pdoc *Package, err error) {
 
 func crawlDoc(importPath, etag string) (pdoc *Package, err error) {
 	switch {
-	case IsGoRepoPath(importPath):
+	case base.IsGoRepoPath(importPath):
 		pdoc, err = getGolangDoc(importPath, etag)
-	case IsValidRemotePath(importPath):
+	case base.IsValidRemotePath(importPath):
 		pdoc, err = getStatic(importPath, etag)
 		if err == ErrNoServiceMatch {
 			pdoc, err = getDynamic(importPath, etag)

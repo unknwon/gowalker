@@ -39,15 +39,14 @@
 		</div>
 		
 		<div class="ui divider"></div>
-		<p>{{Tr(Lang, "docs.note.package")}} {{ProjectName}} {{Tr(Lang, "docs.note.import", Link, ImportNum) | safe}}</p>
+		<p>{{Tr(Lang, "docs.note.package")}} {{ProjectName}} {% if RefNum == int64(0) %}{{Tr(Lang, "docs.note.import", Link, ImportNum) | safe}}{% else %}{{Tr(Lang, "docs.note.import_ref", Link, ImportNum, RefNum) | safe}}{% endif %} {{Tr(Lang, "docs.note.generated", TimeDuration)}}</p>
 		{% if CanRefresh %}
-		<a class="ui green basic small button" href="{{Link}}?refresh">
+		<a class="ui green basic small button" href="{{Link}}?refresh" rel="nofollow">
 		  {{Tr(Lang, "docs.refresh")}}
 		</a>
 		{% endif %}
 	</div>
 </div>
-
 
 <div class="ui small modal search export panel">
 	<div class="header">

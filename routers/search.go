@@ -19,7 +19,6 @@ import (
 
 	"github.com/Unknwon/gowalker/models"
 	"github.com/Unknwon/gowalker/modules/base"
-	"github.com/Unknwon/gowalker/modules/doc"
 	"github.com/Unknwon/gowalker/modules/middleware"
 )
 
@@ -31,7 +30,7 @@ func Search(ctx *middleware.Context) {
 	q := ctx.Query("q")
 
 	if ctx.Query("auto_redirect") == "true" &&
-		(doc.IsGoRepoPath(q) || doc.IsValidRemotePath(q)) {
+		(base.IsGoRepoPath(q) || base.IsValidRemotePath(q)) {
 		ctx.Redirect("/" + q)
 		return
 	}

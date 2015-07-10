@@ -3,14 +3,14 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package doc
+package base
 
 const (
 	goRepoPath  = 1
 	packagePath = 2
 )
 
-var pathFlags = map[string]int{
+var PathFlags = map[string]int{
 	"C":                   2,
 	"archive":             1,
 	"archive/tar":         3,

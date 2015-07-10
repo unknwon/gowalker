@@ -19,6 +19,7 @@ import (
 
 	"github.com/Unknwon/log"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/go-xorm/core"
 	"github.com/go-xorm/xorm"
 
 	"github.com/Unknwon/gowalker/modules/setting"
@@ -38,8 +39,9 @@ func init() {
 		log.FatalD(4, "Fail to init new engine: %v", err)
 	}
 	x.SetLogger(nil)
+	x.SetMapper(core.GonicMapper{})
 
-	if err = x.Sync(new(PkgInfo)); err != nil {
+	if err = x.Sync(new(PkgInfo), new(PkgRef)); err != nil {
 		log.FatalD(4, "Fail to sync database: %v", err)
 	}
 }

@@ -36,6 +36,7 @@ import (
 	// "github.com/davecgh/go-spew/spew"
 
 	"github.com/Unknwon/gowalker/models"
+	"github.com/Unknwon/gowalker/modules/base"
 	"github.com/Unknwon/gowalker/modules/setting"
 )
 
@@ -51,8 +52,8 @@ type searchItem struct {
 }
 
 func RefreshSearchContent() {
-	items := make([]searchItem, 0, len(pathFlags))
-	for name := range pathFlags {
+	items := make([]searchItem, 0, len(base.PathFlags))
+	for name := range base.PathFlags {
 		items = append(items, searchItem{Title: name})
 	}
 	data, err := json.Marshal(&items)
@@ -470,7 +471,6 @@ func renderDoc(render macaron.Render, pdoc *Package, docPath string) error {
 			Comment: template.HTMLEscapeString(t.Doc),
 		})
 		exports = append(exports, exportSearchObject{t.Name})
-		// buf.WriteString("'" + t.Name + "',")
 	}
 
 	for _, f := range pdoc.Funcs {
@@ -480,7 +480,6 @@ func renderDoc(render macaron.Render, pdoc *Package, docPath string) error {
 			Comment: template.HTMLEscapeString(f.Doc),
 		})
 		exports = append(exports, exportSearchObject{f.Name})
-		// buf.WriteString("'" + f.Name + "',")
 	}
 
 	for _, t := range pdoc.Types {
@@ -490,12 +489,10 @@ func renderDoc(render macaron.Render, pdoc *Package, docPath string) error {
 				Comment: template.HTMLEscapeString(f.Doc),
 			})
 			exports = append(exports, exportSearchObject{f.Name})
-			// buf.WriteString("'" + f.Name + "',")
 		}
 
 		for _, m := range t.Methods {
 			exports = append(exports, exportSearchObject{t.Name + "." + m.Name})
-			// buf.WriteString("'" + t.Name + "_" + m.Name + "',")
 		}
 	}
 
@@ -510,7 +507,6 @@ func renderDoc(render macaron.Render, pdoc *Package, docPath string) error {
 	}
 
 	// Set exported objects type-ahead.
-	// exportDataSrc := buf.String()
 	if len(exports) > 0 {
 		pdoc.IsHasExport = true
 		data["IsHasExports"] = true
@@ -696,7 +692,6 @@ func renderDoc(render macaron.Render, pdoc *Package, docPath string) error {
 	SavePkgDoc(pdoc.ImportPath, pdoc.Readme)
 
 	data["UtcTime"] = time.Unix(pdoc.Created, 0).UTC()
-	// data["TimeSince"] = calTimeSince(time.Unix(pdoc.Created, 0))
 	return nil
 }
 
@@ -733,7 +728,7 @@ func CheckPackage(importPath string, render macaron.Render, rt requestType) (*mo
 			}
 
 			pinfo.Views++
-			if err = models.SavePkgInfo(pinfo); err != nil {
+			if err = models.SavePkgInfo(pinfo, false); err != nil {
 				return nil, fmt.Errorf("update views: %v", err)
 			}
 			return pinfo, nil
@@ -775,7 +770,7 @@ func CheckPackage(importPath string, render macaron.Render, rt requestType) (*mo
 			log.Debug("Package has not been modified: %s", pinfo.ImportPath)
 			// Update time so cannot refresh too often.
 			pinfo.Created = time.Now().UTC().Unix()
-			return pinfo, models.SavePkgInfo(pinfo)
+			return pinfo, models.SavePkgInfo(pinfo, false)
 		} else if err == ErrInvalidRemotePath {
 			return nil, ErrInvalidRemotePath // Allow caller to make redirect to search.
 		}
@@ -802,11 +797,13 @@ func CheckPackage(importPath string, render macaron.Render, rt requestType) (*mo
 	}
 
 	if pinfo != nil {
-		pdoc.Id = pinfo.Id
+		pdoc.ID = pinfo.ID
+		pdoc.RefIDs = pinfo.RefIDs
+		pdoc.RefNum = pinfo.RefNum
 	}
 
 	pdoc.Created = time.Now().UTC().Unix()
-	if err = models.SavePkgInfo(pdoc.PkgInfo); err != nil {
+	if err = models.SavePkgInfo(pdoc.PkgInfo, true); err != nil {
 		return nil, fmt.Errorf("SavePkgInfo: %v", err)
 	}
 

@@ -13,7 +13,7 @@
 // License for the specific language governing permissions and limitations
 // under the License.
 
-package doc
+package base
 
 import (
 	"path"
@@ -51,12 +51,12 @@ func IsValidRemotePath(importPath string) bool {
 
 // IsGoRepoPath returns true if path is in $GOROOT/src.
 func IsGoRepoPath(path string) bool {
-	return pathFlags[path]&goRepoPath != 0
+	return PathFlags[path]&goRepoPath != 0
 }
 
 // IsValidPath returns true if importPath is structurally valid.
 func IsValidPath(importPath string) bool {
-	return pathFlags[importPath]&packagePath != 0 || IsValidRemotePath(importPath)
+	return PathFlags[importPath]&packagePath != 0 || IsValidRemotePath(importPath)
 }
 
 func IsDocFile(n string) bool {

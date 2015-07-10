@@ -588,6 +588,7 @@ func (w *Walker) Build(wr *WalkRes) (*Package, error) {
 	w.Pdoc.Types, w.Pdoc.Itypes = w.types(pdoc.Types)
 	w.Pdoc.Vars = w.values(pdoc.Vars)
 	w.Pdoc.ImportPaths = strings.Join(pdoc.Imports, "|")
+	w.Pdoc.ImportNum = int64(len(pdoc.Imports))
 	//w.Pdoc.Notes = w.notes(pdoc.Notes)
 
 	return w.Pdoc, nil
