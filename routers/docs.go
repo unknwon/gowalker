@@ -67,7 +67,7 @@ func handleError(ctx *middleware.Context, err error) {
 		ctx.Redirect("/search?q=" + importPath)
 		return
 	}
-	ctx.Flash.Error(importPath+": "+err.Error(), true)
+	ctx.Flash.Error(importPath+": "+strings.Replace(err.Error(), setting.GitHubCredentials, "<GitHubCredentials>", -1), true)
 	ctx.Flash.Info(ctx.Tr("form.click_to_search", importPath), true)
 	Home(ctx)
 }

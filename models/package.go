@@ -109,7 +109,9 @@ type PkgRef struct {
 }
 
 func updatePkgRef(pid int64, refPath string) error {
-	if base.IsGoRepoPath(refPath) || refPath == "C" {
+	if base.IsGoRepoPath(refPath) ||
+		refPath == "C" ||
+		refPath[1] == '.' {
 		return nil
 	}
 
