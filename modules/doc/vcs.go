@@ -19,6 +19,7 @@ import (
 	"archive/zip"
 	"bytes"
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
@@ -160,9 +161,32 @@ func downloadGit(schemes []string, repo, savedEtag string) (string, string, erro
 	return tag, etag, nil
 }
 
-var vcsPattern = regexp.MustCompile(`^(?P<repo>(?:[a-z0-9.\-]+\.)+[a-z0-9.\-]+(?::[0-9]+)?/[A-Za-z0-9_.\-/]*?)\.(?P<vcs>bzr|git|hg|svn)(?P<dir>/[A-Za-z0-9_.\-/]*)?$`)
+var (
+	vcsPattern       = regexp.MustCompile(`^(?P<repo>(?:[a-z0-9.\-]+\.)+[a-z0-9.\-]+(?::[0-9]+)?/[A-Za-z0-9_.\-/]*?)\.(?P<vcs>bzr|git|hg|svn)(?P<dir>/[A-Za-z0-9_.\-/]*)?$`)
+	gopkgPathPattern = regexp.MustCompile(`^/(?:([a-zA-Z0-9][-a-zA-Z0-9]+)/)?([a-zA-Z][-.a-zA-Z0-9]*)\.((?:v0|v[1-9][0-9]*)(?:\.0|\.[1-9][0-9]*){0,2})(?:\.git)?((?:/[a-zA-Z0-9][-.a-zA-Z0-9]*)*)$`)
+)
 
 func getVCSDoc(match map[string]string, etagSaved string) (*Package, error) {
+	if strings.HasPrefix(match["importPath"], "golang.org/x/") {
+		match["owner"] = "golang"
+		match["repo"] = path.Dir(strings.TrimPrefix(match["importPath"], "golang.org/x/"))
+		return getGithubDoc(match, etagSaved)
+	} else if strings.HasPrefix(match["importPath"], "gopkg.in/") {
+		m := gopkgPathPattern.FindStringSubmatch(strings.TrimPrefix(match["importPath"], "gopkg.in"))
+		if m == nil {
+			return nil, fmt.Errorf("unsupported gopkg.in import path: %s", match["importPath"])
+		}
+		user := m[1]
+		repo := m[2]
+		if len(user) == 0 {
+			user = "go-" + repo
+		}
+		match["owner"] = user
+		match["repo"] = repo
+		match["tag"] = m[3]
+		return getGithubDoc(match, etagSaved)
+	}
+
 	cmd := vcsCmds[match["vcs"]]
 	if cmd == nil {
 		return nil, com.NotFoundError{com.Expand("VCS not supported: {vcs}", match)}
@@ -237,10 +261,6 @@ func getVCSDoc(match map[string]string, etagSaved string) (*Package, error) {
 				ImportPath: match["importPath"],
 			},
 		},
-	}
-
-	if strings.HasPrefix(w.Pdoc.ImportPath, "golang.org/x/") {
-		w.Pdoc.IsGoSubrepo = true
 	}
 
 	srcs := make([]*Source, 0, len(files))

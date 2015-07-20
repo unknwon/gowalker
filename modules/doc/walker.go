@@ -514,7 +514,7 @@ func (w *Walker) Build(wr *WalkRes) (*Package, error) {
 			if nogo {
 				err = nil
 			} else {
-				return nil, errors.New("hv.Walker.Build -> ImportDir: " + err.Error())
+				return nil, errors.New("Walker.Build -> ImportDir: " + err.Error())
 			}
 		}
 	}
@@ -537,7 +537,7 @@ func (w *Walker) Build(wr *WalkRes) (*Package, error) {
 	for _, name := range append(bpkg.GoFiles, bpkg.CgoFiles...) {
 		file, err := parser.ParseFile(w.Fset, name, w.SrcFiles[name].Data(), parser.ParseComments)
 		if err != nil {
-			return nil, errors.New("hv.Walker.Build -> parse Go files: " + err.Error())
+			return nil, errors.New("Walker.Build -> parse Go files: " + err.Error())
 			continue
 		}
 		w.Pdoc.Files = append(w.Pdoc.Files, w.SrcFiles[name])
@@ -551,7 +551,7 @@ func (w *Walker) Build(wr *WalkRes) (*Package, error) {
 	for _, name := range append(bpkg.TestGoFiles, bpkg.XTestGoFiles...) {
 		file, err := parser.ParseFile(w.Fset, name, w.SrcFiles[name].Data(), parser.ParseComments)
 		if err != nil {
-			return nil, errors.New("hv.Walker.Build -> find examples: " + err.Error())
+			return nil, errors.New("Walker.Build -> find examples: " + err.Error())
 			continue
 		}
 		w.Pdoc.TestFiles = append(w.Pdoc.TestFiles, w.SrcFiles[name])

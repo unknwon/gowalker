@@ -1,6 +1,6 @@
 {{ PkgFullIntro | safe }}
 
-<!-- START: Index -->
+{# START: Index #}
 {% if IsHasExports %}
 <h2 class="ui header" id="_index">
 	Index
@@ -78,9 +78,9 @@
 </ul>
 {% endif %}
 <b></b>
-<!-- END: Index -->
+{# END: Index #}
 
-<!-- START: Constants -->
+{# START: Constants #}
 {% if IsHasConst %}
 <h2 class="ui header" id="_constants">Constants</h2>
 	{% for c in Consts %}
@@ -88,9 +88,9 @@
 		{{c.Doc | safe}}
 	{% endfor %}
 {% endif %}
-<!-- END: Constants -->
+{# END: Constants #}
 
-<!-- START: Variables -->
+{# START: Variables #}
 {% if IsHasVar %}
 <h2 class="ui header" id="_variables">Variables</h2>
 	{% for v in Vars %}
@@ -99,7 +99,7 @@
 	{% endfor %}
 {% endif %}
 <b></b>
-<!-- END: Variables -->
+{# END: Variables #}
 
 {% macro sg_link(name) %}
 	{% if HasPrefix(ProjectPath, "github.com") == True %}
@@ -109,7 +109,7 @@
 	{% endif %}
 {% endmacro %}
 
-<!-- START: Functions -->
+{# START: Functions #}
 {% for fn in Funcs%}
 	<h3 id="{{fn.Name}}">
 		func 
@@ -135,9 +135,9 @@
 	{% endfor %}
 {% endfor %}
 <b></b>
-<!-- END: Functions -->
+{# END: Functions #}
 
-<!-- START: Types -->
+{# START: Types #}
 {% for tp in Types %}
 	<h3 id="{{tp.Name}}">
 		type 
@@ -155,22 +155,22 @@
 		{{example_detail(ex)}}
 	{% endfor %}
 
-	<!-- START: Types.Constants -->
+	{# START: Types.Constants #}
 	{% for c in tp.Consts %}
 		<pre>{{c.FmtDecl | safe}}</pre>
 		{{c.Doc | safe}}
 	{% endfor %}
-	<!-- END: Types.Constants -->
+	{# END: Types.Constants #}
 
-	<!-- START: Types.Variables -->
+	{# START: Types.Variables #}
 	{% for v in tp.Vars %}
 		<pre>{{v.FmtDecl | safe}}</pre>
 		{{v.Doc | safe}}
 	{% endfor %}
 	<b></b>
-	<!-- END: Types.Variables -->
+	{# END: Types.Variables #}
 
-	<!-- START: Types.Functions -->
+	{# START: Types.Functions #}
 	{% for fn in tp.Funcs %}
 		<h4 id="{{fn.Name}}">
 			func 
@@ -196,9 +196,9 @@
 		{% endfor %}
 	{% endfor %}
 	<b></b>
-	<!-- END: Types.Functions -->
+	{# END: Types.Functions #}
 
-	<!-- START: Types.Methods -->
+	{# START: Types.Methods #}
 	{% for fn in tp.Methods %}
 		<h4 id="{{fn.FullName}}">
 			func 
@@ -224,14 +224,13 @@
 			{{example_detail(ex)}}
 		{% endfor %}
 	{% endfor %}
-	<!-- END: Types.Methods -->
+	{# END: Types.Methods #}
 {% endfor %}
 <b></b>
-<!-- END: Types -->
+{# END: Types #}
 
 {% if IsHasFiles and ViewFilePath != "./" %}
 <h3 id="_files">
-{{ViewFilePath}}
 	<a target="_blank" href="http{{Secure}}://{{ViewFilePath}}">Files</a>
 </h3>
 <p>

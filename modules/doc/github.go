@@ -56,6 +56,9 @@ func getGithubRevision(importPath string) (string, error) {
 
 func getGithubDoc(match map[string]string, etag string) (*Package, error) {
 	match["cred"] = setting.GitHubCredentials
+	if len(match["tag"]) == 0 {
+		match["tag"] = "master"
+	}
 
 	// Check revision.
 	commit, err := getGithubRevision(com.Expand("github.com/{owner}/{repo}", match))
@@ -77,7 +80,7 @@ func getGithubDoc(match map[string]string, etag string) (*Package, error) {
 	}
 
 	if err := com.HttpGetJSON(Client,
-		com.Expand("https://api.github.com/repos/{owner}/{repo}/git/trees/master?recursive=1&{cred}", match), &tree); err != nil {
+		com.Expand("https://api.github.com/repos/{owner}/{repo}/git/trees/{tag}?recursive=1&{cred}", match), &tree); err != nil {
 		return nil, fmt.Errorf("get tree: %v", err)
 	}
 
@@ -109,8 +112,8 @@ func getGithubDoc(match map[string]string, etag string) (*Package, error) {
 			if d == dirPrefix {
 				files = append(files, &Source{
 					SrcName:   f,
-					BrowseUrl: com.Expand("github.com/{owner}/{repo}/blob/master/{0}", match, node.Path),
-					RawSrcUrl: com.Expand("https://raw.github.com/{owner}/{repo}/master/{0}?{1}", match, node.Path, setting.GitHubCredentials),
+					BrowseUrl: com.Expand("github.com/{owner}/{repo}/blob/{tag}/{0}", match, node.Path),
+					RawSrcUrl: com.Expand("https://raw.github.com/{owner}/{repo}/{tag}/{0}?{1}", match, node.Path, setting.GitHubCredentials),
 				})
 				continue
 			}
@@ -138,8 +141,9 @@ func getGithubDoc(match map[string]string, etag string) (*Package, error) {
 			PkgInfo: &models.PkgInfo{
 				ImportPath:  match["importPath"],
 				ProjectPath: com.Expand("github.com/{owner}/{repo}", match),
-				ViewDirPath: com.Expand("github.com/{owner}/{repo}/tree/master/{importPath}", match),
+				ViewDirPath: com.Expand("github.com/{owner}/{repo}/tree/{tag}/{importPath}", match),
 				Etag:        commit,
+				IsGoSubrepo: strings.HasPrefix(match["importPath"], "golang.org/x/"),
 				Subdirs:     strings.Join(dirs, "|"),
 			},
 		},

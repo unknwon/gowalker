@@ -208,8 +208,8 @@ func getDynamic(importPath, etag string) (pdoc *Package, err error) {
 	}
 
 	if pdoc != nil {
-		pdoc.ImportPath = importPath
-		pdoc.ProjectPath = importPath
+		// pdoc.ImportPath = importPath
+		// pdoc.ProjectPath = importPath
 		// pdoc.ProjectName = match["projectName"]
 	}
 
