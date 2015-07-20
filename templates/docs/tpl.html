@@ -229,8 +229,9 @@
 <b></b>
 <!-- END: Types -->
 
-{% if IsHasFiles %}
+{% if IsHasFiles and ViewFilePath != "./" %}
 <h3 id="_files">
+{{ViewFilePath}}
 	<a target="_blank" href="http{{Secure}}://{{ViewFilePath}}">Files</a>
 </h3>
 <p>

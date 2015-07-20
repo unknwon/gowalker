@@ -65,3 +65,16 @@ func IsDocFile(n string) bool {
 	}
 	return strings.HasPrefix(strings.ToLower(n), "readme")
 }
+
+var filterDirNames = []string{
+	"static", "docs", "views", "js", "assets", "public", "img", "css"}
+
+// FilterDirName guess the file or directory is or contains Go source files.
+func FilterDirName(name string) bool {
+	for _, v := range filterDirNames {
+		if strings.Contains(strings.ToLower(name), "/"+v+"/") {
+			return false
+		}
+	}
+	return true
+}
