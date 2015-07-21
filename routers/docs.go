@@ -110,6 +110,13 @@ func specialHandles(ctx *middleware.Context, pinfo *models.PkgInfo) bool {
 
 func Docs(ctx *middleware.Context) {
 	importPath := ctx.Params("*")
+
+	importPath = strings.TrimPrefix(importPath, "github.com/golang/")
+	if base.IsGAERepoPath(importPath) {
+		ctx.Redirect("/google.golang.org/" + importPath)
+		return
+	}
+
 	pinfo, err := doc.CheckPackage(importPath, ctx.Render, doc.REQUEST_TYPE_HUMAN)
 	if err != nil {
 		handleError(ctx, err)

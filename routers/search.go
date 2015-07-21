@@ -30,7 +30,8 @@ func Search(ctx *middleware.Context) {
 	q := ctx.Query("q")
 
 	if ctx.Query("auto_redirect") == "true" &&
-		(base.IsGoRepoPath(q) || base.IsValidRemotePath(q)) {
+		(base.IsGoRepoPath(q) || base.IsGAERepoPath(q) ||
+			base.IsValidRemotePath(q)) {
 		ctx.Redirect("/" + q)
 		return
 	}

@@ -1,0 +1,5 @@
+1. Run following code when Go version upgrades:
+
+	go run gen.go -output data.go
+
+2. 

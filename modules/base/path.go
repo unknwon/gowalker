@@ -51,12 +51,17 @@ func IsValidRemotePath(importPath string) bool {
 
 // IsGoRepoPath returns true if path is in $GOROOT/src.
 func IsGoRepoPath(path string) bool {
-	return PathFlags[path]&goRepoPath != 0
+	return PathFlag(path)&goRepoPath != 0
+}
+
+// IsGAERepoPath returns true if path is from appengine SDK.
+func IsGAERepoPath(path string) bool {
+	return PathFlag(path)&gaeRepoPath != 0
 }
 
 // IsValidPath returns true if importPath is structurally valid.
 func IsValidPath(importPath string) bool {
-	return PathFlags[importPath]&packagePath != 0 || IsValidRemotePath(importPath)
+	return PathFlag(importPath)&packagePath != 0 || IsValidRemotePath(importPath)
 }
 
 func IsDocFile(n string) bool {

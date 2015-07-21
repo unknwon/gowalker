@@ -49,6 +49,7 @@ type PkgInfo struct {
 	IsCgo       bool
 	IsGoRepo    bool
 	IsGoSubrepo bool
+	IsGaeRepo   bool
 
 	PkgVer int
 

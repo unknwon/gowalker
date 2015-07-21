@@ -52,8 +52,8 @@ type searchItem struct {
 }
 
 func RefreshSearchContent() {
-	items := make([]searchItem, 0, len(base.PathFlags))
-	for name := range base.PathFlags {
+	items := make([]searchItem, 0, base.NumOfPathFlags())
+	for _, name := range base.Paths() {
 		items = append(items, searchItem{Title: name})
 	}
 	data, err := json.Marshal(&items)

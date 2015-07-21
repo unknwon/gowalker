@@ -207,12 +207,6 @@ func getDynamic(importPath, etag string) (pdoc *Package, err error) {
 		return nil, err
 	}
 
-	if pdoc != nil {
-		// pdoc.ImportPath = importPath
-		// pdoc.ProjectPath = importPath
-		// pdoc.ProjectName = match["projectName"]
-	}
-
 	return pdoc, err
 }
 
@@ -220,6 +214,12 @@ func crawlDoc(importPath, etag string) (pdoc *Package, err error) {
 	switch {
 	case base.IsGoRepoPath(importPath):
 		pdoc, err = getGolangDoc(importPath, etag)
+	case base.IsGAERepoPath(strings.TrimPrefix(importPath, "google.golang.org/")):
+		subPath := strings.TrimPrefix(importPath, "google.golang.org/")
+		pdoc, err = getStatic("github.com/golang/"+subPath, etag)
+		if pdoc != nil {
+			pdoc.ImportPath = importPath
+		}
 	case base.IsValidRemotePath(importPath):
 		pdoc, err = getStatic(importPath, etag)
 		if err == ErrNoServiceMatch {
