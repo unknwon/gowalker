@@ -214,9 +214,13 @@ func SavePkgInfo(pinfo *PkgInfo, updateRefs bool) (err error) {
 		pinfo.Priority = 99
 	}
 
+	// When package is not created, there is no ID so check will certainly fail.
+	var ignoreCheckRefs bool
+
 	// Create or update package info itself.
 	// Note(Unknwon): do this because we need ID field later.
 	if pinfo.ID == 0 {
+		ignoreCheckRefs = true
 		pinfo.Views = 1
 
 		// First time created, check PkgRef.
@@ -263,8 +267,10 @@ func SavePkgInfo(pinfo *PkgInfo, updateRefs bool) (err error) {
 		}
 		pinfo.ImportIDs = buf.String()
 
-		// Check packages who import this is still importing.
-		checkRefs(pinfo)
+		if !ignoreCheckRefs {
+			// Check packages who import this is still importing.
+			checkRefs(pinfo)
+		}
 		_, err = x.Id(pinfo.ID).AllCols().Update(pinfo)
 		return err
 	}
