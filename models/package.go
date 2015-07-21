@@ -368,6 +368,23 @@ func GetPkgInfoById(id int64) (*PkgInfo, error) {
 	return pinfo, nil
 }
 
+func getRepos(trueCondition string) ([]*PkgInfo, error) {
+	pkgs := make([]*PkgInfo, 0, 100)
+	return pkgs, x.Desc("views").Where(trueCondition+"=?", true).Find(&pkgs)
+}
+
+func GetGoRepos() ([]*PkgInfo, error) {
+	return getRepos("is_go_repo")
+}
+
+func GetGoSubepos() ([]*PkgInfo, error) {
+	return getRepos("is_go_subrepo")
+}
+
+func GetGAERepos() ([]*PkgInfo, error) {
+	return getRepos("is_gae_repo")
+}
+
 // SearchPkgInfo searches package information by given keyword.
 func SearchPkgInfo(limit int, keyword string) ([]*PkgInfo, error) {
 	if len(keyword) == 0 {

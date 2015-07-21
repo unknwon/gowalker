@@ -36,7 +36,20 @@ func Search(ctx *middleware.Context) {
 		return
 	}
 
-	results, err := models.SearchPkgInfo(100, q)
+	var (
+		results []*models.PkgInfo
+		err     error
+	)
+	switch q {
+	case "gorepos":
+		results, err = models.GetGoRepos()
+	case "gosubrepos":
+		results, err = models.GetGoSubepos()
+	case "gaesdk":
+		results, err = models.GetGAERepos()
+	default:
+		results, err = models.SearchPkgInfo(100, q)
+	}
 	if err != nil {
 		ctx.Flash.Error(err.Error(), true)
 	} else {
