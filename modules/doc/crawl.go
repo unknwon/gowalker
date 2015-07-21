@@ -219,6 +219,7 @@ func crawlDoc(importPath, etag string) (pdoc *Package, err error) {
 		pdoc, err = getStatic("github.com/golang/"+subPath, etag)
 		if pdoc != nil {
 			pdoc.ImportPath = importPath
+			pdoc.IsGaeRepo = true
 		}
 	case base.IsValidRemotePath(importPath):
 		pdoc, err = getStatic(importPath, etag)

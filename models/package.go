@@ -53,7 +53,8 @@ type PkgInfo struct {
 
 	PkgVer int
 
-	Views int64
+	Priority int `xorm:" NOT NULL"`
+	Views    int64
 	// Indicate how many JS should be downloaded(JsNum=total num - 1)
 	JsNum int
 
@@ -203,6 +204,15 @@ func updateRef(pid int64, refPath string) (int64, error) {
 func SavePkgInfo(pinfo *PkgInfo, updateRefs bool) (err error) {
 	pinfo.PkgVer = PACKAGE_VER
 
+	switch {
+	case pinfo.IsGaeRepo:
+		pinfo.Priority = 70
+	case pinfo.IsGoSubrepo:
+		pinfo.Priority = 80
+	case pinfo.IsGoRepo:
+		pinfo.Priority = 99
+	}
+
 	// Create or update package info itself.
 	// Note(Unknwon): do this because we need ID field later.
 	if pinfo.ID == 0 {
@@ -349,5 +359,5 @@ func SearchPkgInfo(limit int, keyword string) ([]*PkgInfo, error) {
 		return nil, nil
 	}
 	pkgs := make([]*PkgInfo, 0, limit)
-	return pkgs, x.Limit(limit).Desc("views").Where("import_path like ?", "%"+keyword+"%").Find(&pkgs)
+	return pkgs, x.Limit(limit).Desc("priority").Desc("views").Where("import_path like ?", "%"+keyword+"%").Find(&pkgs)
 }
