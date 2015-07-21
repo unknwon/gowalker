@@ -203,6 +203,10 @@ func updateRef(pid int64, refPath string) (int64, error) {
 
 // SavePkgInfo saves package information.
 func SavePkgInfo(pinfo *PkgInfo, updateRefs bool) (err error) {
+	if len(pinfo.Synopsis) > 255 {
+		pinfo.Synopsis = pinfo.Synopsis[:255]
+	}
+
 	pinfo.PkgVer = PACKAGE_VER
 
 	switch {
