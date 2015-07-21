@@ -59,12 +59,12 @@ type PkgInfo struct {
 	JsNum int
 
 	ImportNum int64
-	ImportIDs string `xorm:"import_ids TEXT"`
+	ImportIDs string `xorm:"import_ids LONGTEXT"`
 	// Import num usually is small so save it to reduce a database query.
-	ImportPaths string `xorm:"TEXT"`
+	ImportPaths string `xorm:"LONGTEXT"`
 
 	RefNum int64
-	RefIDs string `xorm:"ref_ids TEXT"`
+	RefIDs string `xorm:"ref_ids LONGTEXT"`
 
 	Subdirs string `xorm:"TEXT"`
 
@@ -107,7 +107,7 @@ type PkgRef struct {
 	ID         int64  `xorm:"pk autoincr"`
 	ImportPath string `xorm:"UNIQUE"`
 	RefNum     int64
-	RefIDs     string `xorm:"ref_ids TEXT"`
+	RefIDs     string `xorm:"ref_ids LONGTEXT"`
 }
 
 func updatePkgRef(pid int64, refPath string) error {
@@ -246,6 +246,10 @@ func SavePkgInfo(pinfo *PkgInfo, updateRefs bool) (err error) {
 		var buf bytes.Buffer
 		paths := strings.Split(pinfo.ImportPaths, "|")
 		for i := range paths {
+			if base.IsGoRepoPath(paths[i]) {
+				continue
+			}
+
 			refID, err := updateRef(pinfo.ID, paths[i])
 			if err != nil {
 				return fmt.Errorf("updateRef: %v", err)
