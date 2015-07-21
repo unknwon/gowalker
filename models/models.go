@@ -21,6 +21,7 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/go-xorm/core"
 	"github.com/go-xorm/xorm"
+	"github.com/robfig/cron"
 
 	"github.com/Unknwon/gowalker/modules/setting"
 )
@@ -44,4 +45,17 @@ func init() {
 	if err = x.Sync(new(PkgInfo), new(PkgRef)); err != nil {
 		log.FatalD(4, "Fail to sync database: %v", err)
 	}
+
+	numOfPackages, _ = x.Count(new(PkgInfo))
+	c := cron.New()
+	c.AddFunc("@every 5m", func() {
+		numOfPackages, _ = x.Count(new(PkgInfo))
+	})
+	c.Start()
+}
+
+var numOfPackages int64
+
+func NumOfPackages() int64 {
+	return numOfPackages
 }

@@ -58,6 +58,7 @@ func getHistory(ctx *middleware.Context) []*models.PkgInfo {
 
 func Home(ctx *middleware.Context) {
 	ctx.Data["PageIsHome"] = true
+	ctx.Data["NumOfPackages"] = base.FormatNumString(models.NumOfPackages())
 	ctx.Data["SearchContent"] = doc.SearchContent
 	ctx.Data["BrowseHistory"] = getHistory(ctx)
 	ctx.HTML(200, HOME)

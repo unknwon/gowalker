@@ -18,6 +18,7 @@ import (
 	"sort"
 	"time"
 
+	"github.com/Unknwon/com"
 	"github.com/Unknwon/i18n"
 )
 
@@ -93,4 +94,21 @@ func TimeSince(then time.Time, lang string) string {
 	default:
 		return i18n.Tr(lang, "tool.years", diff/Year, lbl)
 	}
+}
+
+func FormatNumString(num int64) (s string) {
+	if num < 1000 {
+		return com.ToStr(num)
+	}
+
+	for {
+		d := num / 1000
+		r := num % 1000
+		s = "," + com.ToStr(r) + s
+		if d == 0 {
+			break
+		}
+		num = d
+	}
+	return s[1:]
 }
