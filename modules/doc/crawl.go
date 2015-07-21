@@ -202,6 +202,8 @@ func getDynamic(importPath, etag string) (pdoc *Package, err error) {
 	pdoc, err = getStatic(com.Expand("{repo}{dir}", match), etag)
 	if err == ErrNoServiceMatch {
 		pdoc, err = getVCSDoc(match, etag)
+	} else if pdoc != nil {
+		pdoc.ImportPath = importPath
 	}
 	if err != nil {
 		return nil, err
