@@ -177,6 +177,10 @@ func checkRefs(pinfo *PkgInfo) {
 
 // updateRef updates or crates corresponding reference import information.
 func updateRef(pid int64, refPath string) (int64, error) {
+	if len(refPath) == 0 {
+		return 0, nil
+	}
+
 	pinfo, err := GetPkgInfo(refPath)
 	if err != nil && pinfo == nil {
 		if err == ErrPackageNotFound ||
