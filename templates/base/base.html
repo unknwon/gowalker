@@ -21,16 +21,6 @@
 			<div class="following bar light">
 			  <div class="ui page grid">
 			    <div class="column">
-			      <div class="ui right floated secondary menu">
-			        <div class="ui language floating dropdown link item">
-			          <i class="world icon"></i>
-			          <div class="text">{{LangName}}</div>
-			          	<div class="menu">
-			  						<a class="item {% if Lang == "en-US"%}active selected{% endif %}" href="{{Link}}?lang=en-US">English</a>
-			  						<a class="item {% if Lang == "zh-CN"%}active selected{% endif %}"  href="{{Link}}?lang=zh-CN">简体中文</a>
-									</div>
-			        </div>
-			      </div>
 			      <div class="ui large secondary network menu">
 			      	<span class="view-ui item">Go Walker</span>
 			        <a class="view-ui item {% if PageIsHome %}active{% endif %}" href="/">{{Tr(Lang, "home")}}</a>
@@ -38,6 +28,17 @@
 			        {# <a class="view-ui item {% if PageIsApi %}active{% endif %}" href="/api/docs">{{Tr(Lang, "api_service")}}</a> #}
 			        {# <a class="view-ui item {% if PageIsAbout %}active{% endif %}" href="/about">{{Tr(Lang, "about")}}</a> #}
 			        <a id="control-panel" class="view-ui item" href="#">{{Tr(Lang, "help")}}</a>
+
+				      <div class="right menu">
+				        <div class="ui language floating dropdown link item">
+				          <i class="world icon"></i>
+				          <div class="text">{{LangName}}</div>
+				          	<div class="menu">
+				  						<a class="item {% if Lang == "en-US"%}active selected{% endif %}" href="{{Link}}?lang=en-US">English</a>
+				  						<a class="item {% if Lang == "zh-CN"%}active selected{% endif %}"  href="{{Link}}?lang=zh-CN">简体中文</a>
+										</div>
+				        </div>
+				      </div>
 			      </div>
 			    </div>
 			  </div>
