@@ -199,6 +199,11 @@ func getDynamic(importPath, etag string) (pdoc *Package, err error) {
 		}
 	}
 
+	if strings.HasPrefix(match["repo"], "go.googlesource.com") {
+		match["dir"] = "/" + path.Base(match["repo"])
+		match["repo"] = "github.com/golang"
+	}
+
 	pdoc, err = getStatic(com.Expand("{repo}{dir}", match), etag)
 	if err == ErrNoServiceMatch {
 		pdoc, err = getVCSDoc(match, etag)
