@@ -355,8 +355,9 @@ CutCode:
 }
 
 func (w *Walker) funcs(fdocs []*doc.Func) (funcs []*Func, ifuncs []*Func) {
+	isBuiltIn := w.Pdoc.ImportPath == "builtin"
 	for _, d := range fdocs {
-		if unicode.IsUpper(rune(d.Name[0])) {
+		if unicode.IsUpper(rune(d.Name[0])) || isBuiltIn {
 			// var exampleName string
 			// switch {
 			// case d.Recv == "":
