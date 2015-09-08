@@ -36,8 +36,8 @@ var (
 	githubPattern         = regexp.MustCompile(`^github\.com/(?P<owner>[a-z0-9A-Z_.\-]+)/(?P<repo>[a-z0-9A-Z_.\-]+)(?P<dir>/[a-z0-9A-Z_.\-/]*)?$`)
 )
 
-func getGithubRevision(importPath string) (string, error) {
-	data, err := com.HttpGetBytes(Client, fmt.Sprintf("https://%s/commits/master", importPath), nil)
+func getGithubRevision(importPath, tag string) (string, error) {
+	data, err := com.HttpGetBytes(Client, fmt.Sprintf("https://%s/commits/"+tag, importPath), nil)
 	if err != nil {
 		return "", fmt.Errorf("fetch revision page: %v", err)
 	}
@@ -54,14 +54,23 @@ func getGithubRevision(importPath string) (string, error) {
 	return strings.TrimPrefix(string(m[0]), `data-clipboard-text="`), nil
 }
 
+type RepoInfo struct {
+	DefaultBranch string `json:"default_branch"`
+}
+
 func getGithubDoc(match map[string]string, etag string) (*Package, error) {
 	match["cred"] = setting.GitHubCredentials
 	if len(match["tag"]) == 0 {
-		match["tag"] = "master"
+		repoInfo := new(RepoInfo)
+		if err := com.HttpGetJSON(Client, com.Expand("https://api.github.com/repos/{owner}/{repo}?{cred}", match), repoInfo); err != nil {
+			return nil, fmt.Errorf("get repo default branch: %v", err)
+		}
+
+		match["tag"] = repoInfo.DefaultBranch
 	}
 
 	// Check revision.
-	commit, err := getGithubRevision(com.Expand("github.com/{owner}/{repo}", match))
+	commit, err := getGithubRevision(com.Expand("github.com/{owner}/{repo}", match), match["tag"])
 	if err != nil {
 		return nil, fmt.Errorf("get revision: %v", err)
 	}

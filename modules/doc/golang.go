@@ -38,7 +38,7 @@ func getGolangDoc(importPath, etag string) (*Package, error) {
 	}
 
 	// Check revision.
-	commit, err := getGithubRevision("github.com/golang/go")
+	commit, err := getGithubRevision("github.com/golang/go", "master")
 	if err != nil {
 		return nil, fmt.Errorf("get revision: %v", err)
 	}
