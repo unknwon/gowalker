@@ -15,6 +15,10 @@
 package routers
 
 import (
+	"fmt"
+	"strings"
+	"unicode"
+
 	"github.com/Unknwon/log"
 
 	"github.com/Unknwon/gowalker/models"
@@ -28,6 +32,11 @@ const (
 
 func Search(ctx *middleware.Context) {
 	q := ctx.Query("q")
+
+	// Clean up keyword.
+	q = strings.TrimFunc(q, func(c rune) bool {
+		return unicode.IsSpace(c) || c == '"'
+	})
 
 	if ctx.Query("auto_redirect") == "true" &&
 		(base.IsGoRepoPath(q) || base.IsGAERepoPath(q) ||
@@ -66,7 +75,14 @@ type searchResult struct {
 }
 
 func SearchJSON(ctx *middleware.Context) {
-	q := ctx.QueryEscape("q")
+	q := ctx.Query("q")
+
+	// Clean up keyword.
+	q = strings.TrimFunc(q, func(c rune) bool {
+		return unicode.IsSpace(c) || c == '"'
+	})
+	fmt.Println(q)
+
 	pinfos, err := models.SearchPkgInfo(7, q)
 	if err != nil {
 		log.ErrorD(4, "SearchPkgInfo '%s': %v", q, err)
