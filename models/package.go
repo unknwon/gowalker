@@ -397,3 +397,8 @@ func SearchPkgInfo(limit int, keyword string) ([]*PkgInfo, error) {
 	pkgs := make([]*PkgInfo, 0, limit)
 	return pkgs, x.Limit(limit).Desc("priority").Desc("views").Where("import_path like ?", "%"+keyword+"%").Find(&pkgs)
 }
+
+func DeletePackageByPath(importPath string) error {
+	_, err := x.Delete(&PkgInfo{ImportPath: importPath})
+	return err
+}

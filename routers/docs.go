@@ -67,6 +67,12 @@ func handleError(ctx *middleware.Context, err error) {
 		ctx.Redirect("/search?q=" + importPath)
 		return
 	}
+
+	if strings.Contains(err.Error(), "<meta> not found") ||
+		strings.Contains(err.Error(), "resource not found") {
+		models.DeletePackageByPath(importPath)
+	}
+
 	ctx.Flash.Error(importPath+": "+strings.Replace(err.Error(), setting.GitHubCredentials, "<GitHubCredentials>", -1), true)
 	ctx.Flash.Info(ctx.Tr("form.click_to_search", importPath), true)
 	Home(ctx)

@@ -204,7 +204,6 @@ func getDynamic(importPath, etag string) (pdoc *Package, err error) {
 		match["repo"] = "github.com/golang"
 	}
 
-	fmt.Println(com.Expand("{repo}{dir}", match))
 	pdoc, err = getStatic(com.Expand("{repo}{dir}", match), etag)
 	if err == ErrNoServiceMatch {
 		pdoc, err = getVCSDoc(match, etag)
