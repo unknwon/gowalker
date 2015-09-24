@@ -144,6 +144,7 @@ func getGithubDoc(match map[string]string, etag string) (*Package, error) {
 	}
 
 	// Start generating data.
+	// IsGoSubrepo check has been placed to crawl.getDynamic.
 	w := &Walker{
 		LineFmt: "#L%d",
 		Pdoc: &Package{
@@ -152,7 +153,6 @@ func getGithubDoc(match map[string]string, etag string) (*Package, error) {
 				ProjectPath: com.Expand("github.com/{owner}/{repo}", match),
 				ViewDirPath: com.Expand("github.com/{owner}/{repo}/tree/{tag}/{importPath}", match),
 				Etag:        commit,
-				IsGoSubrepo: strings.HasPrefix(match["importPath"], "golang.org/x/"),
 				Subdirs:     strings.Join(dirs, "|"),
 			},
 		},
