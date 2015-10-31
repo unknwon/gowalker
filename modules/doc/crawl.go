@@ -199,7 +199,9 @@ func getDynamic(importPath, etag string) (pdoc *Package, err error) {
 		}
 	}
 
+	isGoSubrepo := false
 	if strings.HasPrefix(match["repo"], "go.googlesource.com") {
+		isGoSubrepo = true
 		match["dir"] = "/" + path.Base(match["repo"]) + match["dir"]
 		match["repo"] = "github.com/golang"
 	}
@@ -209,6 +211,7 @@ func getDynamic(importPath, etag string) (pdoc *Package, err error) {
 		pdoc, err = getVCSDoc(match, etag)
 	} else if pdoc != nil {
 		pdoc.ImportPath = importPath
+		pdoc.IsGoSubrepo = isGoSubrepo
 	}
 	if err != nil {
 		return nil, err
