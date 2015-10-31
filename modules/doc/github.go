@@ -184,7 +184,7 @@ func getGithubDoc(match map[string]string, etag string) (*Package, error) {
 		Stars int64 `json:"watchers"`
 	}
 	if err := com.HttpGetJSON(Client,
-		com.Expand("https://api.github.com/repos/{owner}/{repo}", match), &repoTree); err != nil {
+		com.Expand("https://api.github.com/repos/{owner}/{repo}?{cred}", match), &repoTree); err != nil {
 		return nil, fmt.Errorf("get repoTree: %v", err)
 	}
 	pdoc.Stars = repoTree.Stars
