@@ -83,6 +83,9 @@ p.large {
 .ui.search .result .title .description {
   margin-left: 2px;
 }
+.ui.search .result .title {
+  overflow-x: hidden;
+}
 .ui.stackable.middle .column {
   padding-bottom: 30px !important;
   border-bottom: 1px solid rgba(0, 0, 0, 0.1);
@@ -121,6 +124,9 @@ p.large {
 .ui.collapse.example pre {
   border-top: 1px solid #ccc!important;
 }
+.ui.right {
+  float: right;
+}
 .readme {
   padding: 10px 15px;
   border: 1px solid #d9d9d9;
@@ -139,6 +145,9 @@ p.large {
 }
 .ui.breadcrumb .project.icon {
   color: #930000;
+}
+tbody td.stars {
+  text-align: center !important;
 }
 /* Comment, String, Internal, External, Return/Break, Keyword, Boolean/nil, Builtin */
 pre {

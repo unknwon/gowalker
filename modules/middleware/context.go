@@ -19,8 +19,8 @@ import (
 	"strings"
 
 	"github.com/Unknwon/log"
-	"github.com/Unknwon/macaron"
-	"github.com/macaron-contrib/session"
+	"github.com/go-macaron/session"
+	"gopkg.in/macaron.v1"
 
 	"github.com/Unknwon/gowalker/modules/base"
 	"github.com/Unknwon/gowalker/modules/setting"

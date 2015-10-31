@@ -22,10 +22,10 @@ import (
 	"strings"
 
 	"github.com/Unknwon/log"
-	"github.com/Unknwon/macaron"
-	"github.com/macaron-contrib/i18n"
-	"github.com/macaron-contrib/pongo2"
-	"github.com/macaron-contrib/session"
+	"github.com/go-macaron/i18n"
+	"github.com/go-macaron/pongo2"
+	"github.com/go-macaron/session"
+	"gopkg.in/macaron.v1"
 
 	"github.com/Unknwon/gowalker/modules/middleware"
 	"github.com/Unknwon/gowalker/modules/setting"
@@ -33,7 +33,7 @@ import (
 	"github.com/Unknwon/gowalker/routers/apiv1"
 )
 
-const APP_VER = "1.6.8.0913"
+const APP_VER = "1.7.0.1031"
 
 func init() {
 	runtime.GOMAXPROCS(runtime.NumCPU())

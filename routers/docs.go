@@ -133,6 +133,7 @@ func Docs(ctx *middleware.Context) {
 	ctx.Data["ParentPath"] = path.Dir(pinfo.ImportPath)
 	ctx.Data["ProjectName"] = path.Base(pinfo.ImportPath)
 	ctx.Data["ProjectPath"] = pinfo.ProjectPath
+	ctx.Data["NumStars"] = pinfo.Stars
 
 	if specialHandles(ctx, pinfo) {
 		return

@@ -23,6 +23,7 @@
 		    <tr>
 		      <th>{{Tr(Lang, "import_path")}}</th>
 		      <th>{{Tr(Lang, "short_intro")}}</th>
+		      <th><i class="star icon"></i></th>
 		    </tr>
 		  </thead>
 		  <tbody>
@@ -30,6 +31,7 @@
 		    <tr>
 		      <td><a href="{{p.ImportPath}}">{{p.ImportPath}}</a></td>
 		      <td>{{p.Synopsis}}</td>
+		      <td class="stars">{{p.Stars}}</td>
 		    </tr>
 		    {% endfor %}
 		  </tbody>

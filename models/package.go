@@ -55,6 +55,7 @@ type PkgInfo struct {
 
 	Priority int `xorm:" NOT NULL"`
 	Views    int64
+	Stars    int64
 	// Indicate how many JS should be downloaded(JsNum=total num - 1)
 	JsNum int
 
@@ -395,7 +396,7 @@ func SearchPkgInfo(limit int, keyword string) ([]*PkgInfo, error) {
 		return nil, nil
 	}
 	pkgs := make([]*PkgInfo, 0, limit)
-	return pkgs, x.Limit(limit).Desc("priority").Desc("views").Where("import_path like ?", "%"+keyword+"%").Find(&pkgs)
+	return pkgs, x.Limit(limit).Desc("priority").Desc("stars").Desc("views").Where("import_path like ?", "%"+keyword+"%").Find(&pkgs)
 }
 
 func DeletePackageByPath(importPath string) error {

@@ -32,7 +32,7 @@ import (
 
 	"github.com/Unknwon/com"
 	"github.com/Unknwon/log"
-	"github.com/Unknwon/macaron"
+	"gopkg.in/macaron.v1"
 	// "github.com/davecgh/go-spew/spew"
 
 	"github.com/Unknwon/gowalker/models"

@@ -19,8 +19,8 @@ import (
 
 	"github.com/Unknwon/com"
 	"github.com/Unknwon/log"
-	"github.com/Unknwon/macaron"
 	"gopkg.in/ini.v1"
+	"gopkg.in/macaron.v1"
 )
 
 var (
