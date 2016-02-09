@@ -58,7 +58,7 @@ type RepoInfo struct {
 	DefaultBranch string `json:"default_branch"`
 }
 
-func getGithubDoc(match map[string]string, etag string) (*Package, error) {
+func getGithubDoc(match map[string]string, etag string) (_ *Package, err error) {
 	match["cred"] = setting.GitHubCredentials
 	if len(match["tag"]) == 0 {
 		repoInfo := new(RepoInfo)
@@ -70,12 +70,29 @@ func getGithubDoc(match map[string]string, etag string) (*Package, error) {
 	}
 
 	// Check revision.
-	commit, err := getGithubRevision(com.Expand("github.com/{owner}/{repo}", match), match["tag"])
-	if err != nil {
-		return nil, fmt.Errorf("get revision: %v", err)
-	}
-	if commit == etag {
-		return nil, ErrPackageNotModified
+	var commit string
+	if strings.HasPrefix(match["importPath"], "gopkg.in") {
+		// FIXME: get commit ID of gopkg.in indepdently.
+		var obj struct {
+			Sha string `json:"sha"`
+		}
+
+		if err := com.HttpGetJSON(Client,
+			com.Expand("https://gopm.io/api/v1/revision?pkgname={importPath}", match), &obj); err != nil {
+			return nil, fmt.Errorf("get gopkg.in revision: %v", err)
+		}
+
+		commit = obj.Sha
+		match["tag"] = commit
+		fmt.Println(commit)
+	} else {
+		commit, err = getGithubRevision(com.Expand("github.com/{owner}/{repo}", match), match["tag"])
+		if err != nil {
+			return nil, fmt.Errorf("get revision: %v", err)
+		}
+		if commit == etag {
+			return nil, ErrPackageNotModified
+		}
 	}
 
 	// Get files.
