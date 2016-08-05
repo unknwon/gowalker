@@ -1,5 +1,6 @@
 [run]
 init_cmds = [
+	["make"],
 	["./gowalker"]
 ]
 watch_all = true
@@ -12,7 +13,6 @@ watch_dirs = [
 watch_exts = [".go"]
 build_delay = 1500
 cmds = [
-	["go", "install"],# redis memcache
-	["go", "build"],
+	["make"],
 	["./gowalker"]
 ]

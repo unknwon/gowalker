@@ -24,8 +24,8 @@ import (
 
 	"github.com/Unknwon/gowalker/models"
 	"github.com/Unknwon/gowalker/modules/base"
+	"github.com/Unknwon/gowalker/modules/context"
 	"github.com/Unknwon/gowalker/modules/doc"
-	"github.com/Unknwon/gowalker/modules/middleware"
 	"github.com/Unknwon/gowalker/modules/setting"
 )
 
@@ -35,7 +35,7 @@ const (
 )
 
 // updateHistory updates browser history.
-func updateHistory(ctx *middleware.Context, id int64) {
+func updateHistory(ctx *context.Context, id int64) {
 	pairs := make([]string, 1, 10)
 	pairs[0] = com.ToStr(id) + ":" + com.ToStr(time.Now().UTC().Unix())
 
@@ -61,7 +61,7 @@ func updateHistory(ctx *middleware.Context, id int64) {
 	ctx.SetCookie("user_history", strings.Join(pairs, "|"), 9999999)
 }
 
-func handleError(ctx *middleware.Context, err error) {
+func handleError(ctx *context.Context, err error) {
 	importPath := ctx.Params("*")
 	if err == doc.ErrInvalidRemotePath {
 		ctx.Redirect("/search?q=" + importPath)
@@ -78,7 +78,7 @@ func handleError(ctx *middleware.Context, err error) {
 	Home(ctx)
 }
 
-func specialHandles(ctx *middleware.Context, pinfo *models.PkgInfo) bool {
+func specialHandles(ctx *context.Context, pinfo *models.PkgInfo) bool {
 	// Only show imports.
 	if strings.HasSuffix(ctx.Req.RequestURI, "?imports") {
 		ctx.Data["PageIsImports"] = true
@@ -114,7 +114,7 @@ func specialHandles(ctx *middleware.Context, pinfo *models.PkgInfo) bool {
 	return false
 }
 
-func Docs(ctx *middleware.Context) {
+func Docs(ctx *context.Context) {
 	importPath := ctx.Params("*")
 
 	if base.IsGAERepoPath(importPath) {

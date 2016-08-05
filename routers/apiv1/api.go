@@ -15,9 +15,9 @@
 package apiv1
 
 import (
-	"github.com/Unknwon/gowalker/modules/middleware"
+	"github.com/Unknwon/gowalker/modules/context"
 )
 
-func Badge(ctx *middleware.Context) {
+func Badge(ctx *context.Context) {
 	ctx.Redirect("https://img.shields.io/badge/Go%20Walker-API%20Documentation-green.svg?style=flat-square")
 }

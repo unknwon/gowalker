@@ -21,8 +21,8 @@ import (
 
 	"github.com/Unknwon/gowalker/models"
 	"github.com/Unknwon/gowalker/modules/base"
+	"github.com/Unknwon/gowalker/modules/context"
 	"github.com/Unknwon/gowalker/modules/doc"
-	"github.com/Unknwon/gowalker/modules/middleware"
 )
 
 const (
@@ -30,7 +30,7 @@ const (
 )
 
 // getHistory returns browse history.
-func getHistory(ctx *middleware.Context) []*models.PkgInfo {
+func getHistory(ctx *context.Context) []*models.PkgInfo {
 	pairs := strings.Split(ctx.GetCookie("user_history"), "|")
 	pkgs := make([]*models.PkgInfo, 0, len(pairs))
 
@@ -56,7 +56,7 @@ func getHistory(ctx *middleware.Context) []*models.PkgInfo {
 	return pkgs
 }
 
-func Home(ctx *middleware.Context) {
+func Home(ctx *context.Context) {
 	ctx.Data["PageIsHome"] = true
 	ctx.Data["NumOfPackages"] = base.FormatNumString(models.NumOfPackages())
 	ctx.Data["SearchContent"] = doc.SearchContent

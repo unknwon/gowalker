@@ -27,13 +27,13 @@ import (
 	"github.com/go-macaron/session"
 	"gopkg.in/macaron.v1"
 
-	"github.com/Unknwon/gowalker/modules/middleware"
+	"github.com/Unknwon/gowalker/modules/context"
 	"github.com/Unknwon/gowalker/modules/setting"
 	"github.com/Unknwon/gowalker/routers"
 	"github.com/Unknwon/gowalker/routers/apiv1"
 )
 
-const APP_VER = "1.7.2.0209"
+const APP_VER = "1.7.3.0804"
 
 func init() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
@@ -60,7 +60,7 @@ func newMacaron() *macaron.Macaron {
 	}))
 	m.Use(i18n.I18n())
 	m.Use(session.Sessioner())
-	m.Use(middleware.Contexter())
+	m.Use(context.Contexter())
 	return m
 }
 

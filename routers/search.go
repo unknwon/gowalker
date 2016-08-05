@@ -23,14 +23,14 @@ import (
 
 	"github.com/Unknwon/gowalker/models"
 	"github.com/Unknwon/gowalker/modules/base"
-	"github.com/Unknwon/gowalker/modules/middleware"
+	"github.com/Unknwon/gowalker/modules/context"
 )
 
 const (
 	SEARCH base.TplName = "search"
 )
 
-func Search(ctx *middleware.Context) {
+func Search(ctx *context.Context) {
 	q := ctx.Query("q")
 
 	// Clean up keyword.
@@ -74,7 +74,7 @@ type searchResult struct {
 	Description string `json:"description"`
 }
 
-func SearchJSON(ctx *middleware.Context) {
+func SearchJSON(ctx *context.Context) {
 	q := ctx.Query("q")
 
 	// Clean up keyword.
