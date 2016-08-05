@@ -48,7 +48,7 @@ func init() {
 
 	numTotalPackages, _ = x.Count(new(PkgInfo))
 	c := cron.New()
-	c.AddFunc("@every 5m", func() {
+	c.AddFunc("@every 1m", func() {
 		numTotalPackages, _ = x.Count(new(PkgInfo))
 	})
 	c.Start()
