@@ -15,7 +15,10 @@
 package routers
 
 import (
-	"fmt"
+	"encoding/json"
+	"io/ioutil"
+	"net/http"
+	"net/url"
 	"strings"
 	"unicode"
 
@@ -72,6 +75,86 @@ func Search(ctx *context.Context) {
 type searchResult struct {
 	Title       string `json:"title"`
 	Description string `json:"description"`
+	URL         string `json:"url"`
+}
+
+type semanticSearchResultDefDocs struct {
+	Data string
+}
+
+type semanticSearchResultDef struct {
+	Exported bool
+	Kind     string
+	Unit     string
+	Path     string
+	Docs     []*semanticSearchResultDefDocs
+}
+
+type semanticSearchResult struct {
+	Defs []*semanticSearchResultDef
+}
+
+// semanticSearch sends search request to sourcegraph.com.
+func semanticSearch(ctx *context.Context, query string) {
+	resp, err := http.Get("https://sourcegraph.com/.api/global-search?Query=golang+" + url.QueryEscape(query) + "&Limit=30&Fast=1")
+	if err != nil {
+		log.Error("semanticSearch.http.Get: %v", err)
+		return
+	}
+
+	data, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Error("semanticSearch.ioutil.ReadAll: %v", err)
+		return
+	}
+
+	var sgResults semanticSearchResult
+	if err = json.Unmarshal(data, &sgResults); err != nil {
+		log.Error("semanticSearch.json.Unmarshal: %v", err)
+		return
+	}
+
+	maxResults := 7
+	results := make([]*searchResult, 0, maxResults)
+	for _, def := range sgResults.Defs {
+		if !def.Exported {
+			continue
+		}
+
+		var title, desc, url string
+		switch def.Kind {
+		case "package":
+			title = def.Unit
+		case "func":
+			anchor := strings.Replace(def.Path, "/", "_", 1)
+			title = def.Unit + "#" + anchor
+		default:
+			continue
+		}
+
+		if len(def.Docs) > 0 {
+			if len(def.Docs[0].Data) > 100 {
+				desc = def.Docs[0].Data[:100] + "..."
+			} else {
+				desc = def.Docs[0].Data
+			}
+		}
+		url = "/" + title
+
+		results = append(results, &searchResult{
+			Title:       title,
+			Description: desc,
+			URL:         url,
+		})
+
+		if len(results) >= maxResults {
+			break
+		}
+	}
+
+	ctx.JSON(200, map[string]interface{}{
+		"results": results,
+	})
 }
 
 func SearchJSON(ctx *context.Context) {
@@ -81,7 +164,11 @@ func SearchJSON(ctx *context.Context) {
 	q = strings.TrimFunc(q, func(c rune) bool {
 		return unicode.IsSpace(c) || c == '"'
 	})
-	fmt.Println(q)
+
+	if ctx.Query("semantic_search") == "true" {
+		semanticSearch(ctx, q)
+		return
+	}
 
 	pinfos, err := models.SearchPkgInfo(7, q)
 	if err != nil {
@@ -94,6 +181,7 @@ func SearchJSON(ctx *context.Context) {
 		results[i] = &searchResult{
 			Title:       pinfos[i].ImportPath,
 			Description: pinfos[i].Synopsis,
+			URL:         "/" + pinfos[i].ImportPath,
 		}
 	}
 

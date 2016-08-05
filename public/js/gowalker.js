@@ -4,19 +4,52 @@ $(document).ready(function () {
     });
     $('.popup').popup();
     $('.ui.accordion').accordion();
-    $('.ui.main.search').search({
-        type: "standard",
-        apiSettings: {
-            url: '/search/json?q={query}'
-        },
-        searchFields: [
-            'title'
-        ],
-        searchDelay: 500,
-        searchFullText: false
-    });
+
+    function setSearchAPIURL(semantic_search) {
+        $('.ui.main.search').search({
+            type: "standard",
+            minCharacters: 3,
+            apiSettings: {
+                url: '/search/json?q={query}&semantic_search=' + semantic_search,
+                onResponse: function (json) {
+                    var response = {
+                        results: []
+                    };
+
+                    var maxResults = 7;
+                    $.each(json.results, function (index, item) {
+                        if (index > maxResults) {
+                            return false;
+                        }
+
+                        response.results.push({
+                            title: item.title,
+                            description: item.description,
+                            url: item.url
+                        });
+                    });
+
+                    return response;
+                }
+            },
+            searchDelay: 500,
+            searchFullText: false
+        });
+    }
+    setSearchAPIURL(false);
+
     $('.main.search .search.icon').click(function () {
         $('.main.search').submit();
+    });
+
+    // Toggle semantic search
+    $('#semantic_search').change(function () {
+        if (this.checked) {
+            setSearchAPIURL(true);
+        } else{
+            setSearchAPIURL(false);
+        }
+        $('.ui.main.search').search("clear cache", $('#search_input').value)
     });
 
     var is_page_docs = $('#readme').length > 0;
