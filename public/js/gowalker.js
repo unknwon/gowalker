@@ -5,7 +5,7 @@ $(document).ready(function () {
     $('.popup').popup();
     $('.ui.accordion').accordion();
 
-    function setSearchAPIURL(semantic_search) {
+    function setSearchOptions(semantic_search) {
         $('.ui.main.search').search({
             type: "standard",
             minCharacters: 3,
@@ -37,7 +37,7 @@ $(document).ready(function () {
         });
     }
 
-    setSearchAPIURL(localStorage.enable_semantic_search);
+    setSearchOptions(localStorage.enable_semantic_search);
     if (localStorage.enable_semantic_search == 'true') {
         $('#semantic_search_checkbox').checkbox('check');
     }
@@ -49,9 +49,9 @@ $(document).ready(function () {
     // Toggle semantic search
     $('#semantic_search').change(function () {
         if (this.checked) {
-            setSearchAPIURL(true);
+            setSearchOptions(true);
         } else {
-            setSearchAPIURL(false);
+            setSearchOptions(false);
         }
         $('.ui.main.search').search('clear cache', $('#search_input').value)
         localStorage.enable_semantic_search = this.checked;
