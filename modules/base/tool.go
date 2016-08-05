@@ -114,6 +114,7 @@ func FormatNumString(num int64) (s string) {
 }
 
 // Int64sToStrings converts a slice of int64 to a slice of string.
+// CR: copied from github.com/gogits/gogs/modules/base/tool.go
 func Int64sToStrings(ints []int64) []string {
 	strs := make([]string, len(ints))
 	for i := range ints {
