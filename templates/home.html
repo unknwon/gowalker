@@ -5,15 +5,13 @@
 	<div class="fourteen wide center aligned centered column">
     <h1 class="ui icon header">
       <i class="terminal icon"></i>
-      {{Tr(Lang, "home.hero_title", NumOfPackages)}}
+      {{Tr(Lang, "home.hero_title", NumTotalPackages)}}
     </h1>
     <p class="large">
     {% if Lang == "zh-CN" %}
-			Go Walker 是一个可以在线生成并浏览 <a target="_blank" href="http://golang.org/">Go</a> 项目 API 文档的 Web 服务器，目前已支持包括 <b>GitHub</b> 等代码托管平台。
-      {# 、<b>Google Code</b>、<b>BitBucket</b> 和 <b>Launchpad</b> #}
+			Go Walker 是一个可以在线生成并浏览 <a target="_blank" href="https://golang.org/">Go</a> 项目 API 文档的 Web 服务器，目前已支持包括 <b>GitHub</b> 等代码托管平台。
     {% else %}
-			Go Walker is a server that generates <a target="_blank" href="http://golang.org/">Go</a> projects API documentation on the fly for the projects on <b>GitHub</b>.
-      {# , <b>Google Code</b>, <b>BitBucket</b> and <b>Launchpad</b> #}
+			Go Walker is a server that generates <a target="_blank" href="https://golang.org/">Go</a> projects API documentation on the fly for the projects on <b>GitHub</b>.
     {% endif %}
     </p>
     <form class="ui form main search" action="/search">
@@ -45,7 +43,7 @@
         </tr>
       </thead>
       <tbody id="browse_history">
-        {% for p in BrowseHistory %}
+        {% for p in BrowsingHistory %}
         <tr>
           <td {% if p.ImportPath|length >= 40 %}class="popup" data-content="{{p.ImportPath}}"{% endif %}>
             <a href="/{{p.ImportPath}}">{{RearSubStr(p.ImportPath,40)}}</a>
@@ -53,7 +51,7 @@
             <a class="ui blue label" href="/search?q=gorepos">{{Tr(Lang, "home.standard")}}</a>
             {% endif %}
           </td>
-          <td class="meta-time">{{p.LastView}}</td>
+          <td class="meta-time">{{p.LastViewed}}</td>
           <td {% if p.Synopsis|length >= 80 %}class="popup" data-content="{{p.Synopsis}}"{% endif %}">{{SubStr(p.Synopsis, 0, 80)}}</td>
         </tr>
         {% endfor %}
@@ -61,7 +59,4 @@
     </table>
   </div>
 </div>
-<script>
-  search_content = {{SearchContent|safe}}
-</script>
 {% endblock %}

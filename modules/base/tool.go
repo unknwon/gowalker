@@ -112,3 +112,12 @@ func FormatNumString(num int64) (s string) {
 	}
 	return s[1:]
 }
+
+// Int64sToStrings converts a slice of int64 to a slice of string.
+func Int64sToStrings(ints []int64) []string {
+	strs := make([]string, len(ints))
+	for i := range ints {
+		strs[i] = com.ToStr(ints[i])
+	}
+	return strs
+}

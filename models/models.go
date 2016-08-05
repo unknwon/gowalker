@@ -46,16 +46,16 @@ func init() {
 		log.FatalD(4, "Fail to sync database: %v", err)
 	}
 
-	numOfPackages, _ = x.Count(new(PkgInfo))
+	numTotalPackages, _ = x.Count(new(PkgInfo))
 	c := cron.New()
 	c.AddFunc("@every 5m", func() {
-		numOfPackages, _ = x.Count(new(PkgInfo))
+		numTotalPackages, _ = x.Count(new(PkgInfo))
 	})
 	c.Start()
 }
 
-var numOfPackages int64
+var numTotalPackages int64
 
-func NumOfPackages() int64 {
-	return numOfPackages
+func NumTotalPackages() int64 {
+	return numTotalPackages
 }

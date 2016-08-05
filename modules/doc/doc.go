@@ -36,37 +36,12 @@ import (
 	// "github.com/davecgh/go-spew/spew"
 
 	"github.com/Unknwon/gowalker/models"
-	"github.com/Unknwon/gowalker/modules/base"
 	"github.com/Unknwon/gowalker/modules/setting"
 )
 
 var (
 	ErrFetchTimeout = errors.New("Fetch package timeout")
 )
-
-var SearchContent string
-
-type searchItem struct {
-	Title       string `json:"title"`
-	Description string `json:"description"`
-}
-
-func RefreshSearchContent() {
-	items := make([]searchItem, 0, base.NumOfPathFlags())
-	for _, name := range base.Paths() {
-		items = append(items, searchItem{Title: name})
-	}
-	data, err := json.Marshal(&items)
-	if err != nil {
-		log.ErrorD(4, "Fail to marshal search content: %v", err)
-		return
-	}
-	SearchContent = string(data)
-}
-
-func init() {
-	RefreshSearchContent()
-}
 
 // A link describes the (HTML) link information for an identifier.
 // The zero value of a link represents "no link".

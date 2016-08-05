@@ -15,6 +15,7 @@
 package routers
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/Unknwon/com"
@@ -22,44 +23,60 @@ import (
 	"github.com/Unknwon/gowalker/models"
 	"github.com/Unknwon/gowalker/modules/base"
 	"github.com/Unknwon/gowalker/modules/context"
-	"github.com/Unknwon/gowalker/modules/doc"
 )
 
 const (
 	HOME base.TplName = "home"
 )
 
-// getHistory returns browse history.
-func getHistory(ctx *context.Context) []*models.PkgInfo {
-	pairs := strings.Split(ctx.GetCookie("user_history"), "|")
-	pkgs := make([]*models.PkgInfo, 0, len(pairs))
-
-	for _, pair := range pairs {
-		infos := strings.Split(pair, ":")
-		if len(infos) != 2 {
+func getBrowsingHistory(ctx *context.Context) []*models.PkgInfo {
+	rawInfos := strings.Split(ctx.GetCookie("user_history"), "|")
+	pkgIDs := make([]int64, 0, len(rawInfos)) // ID -> Unix
+	lastViewedTimes := make(map[int64]int64)
+	for _, rawInfo := range rawInfos {
+		fields := strings.Split(rawInfo, ":")
+		if len(fields) != 2 {
 			continue
 		}
 
-		pid := com.StrTo(infos[0]).MustInt64()
-		if pid == 0 {
+		pkgID := com.StrTo(fields[0]).MustInt64()
+		if pkgID == 0 {
 			continue
 		}
+		pkgIDs = append(pkgIDs, pkgID)
 
-		pinfo, _ := models.GetPkgInfoById(pid)
-		if pinfo == nil {
-			continue
-		}
-
-		pinfo.LastView = com.StrTo(infos[1]).MustInt64()
-		pkgs = append(pkgs, pinfo)
+		lastViewedTimes[pkgID] = com.StrTo(fields[1]).MustInt64()
 	}
-	return pkgs
+
+	// Get all package info in one single query.
+	pkgInfos, err := models.GetPkgInfosByIDs(pkgIDs)
+	if err != nil {
+		ctx.Flash.Error(fmt.Sprintf("Cannot get browsing history: %v", err), true)
+		return nil
+	}
+
+	pkgInfosSet := make(map[int64]*models.PkgInfo)
+	for i := range pkgInfos {
+		pkgInfosSet[pkgInfos[i].ID] = pkgInfos[i]
+	}
+
+	// Assign package info in the same order they stored in cookie.
+	pkgInfos = make([]*models.PkgInfo, 0, len(pkgIDs))
+	for i := range pkgIDs {
+		if pkgInfosSet[pkgIDs[i]] == nil {
+			continue
+		}
+
+		pkgInfosSet[pkgIDs[i]].LastViewed = lastViewedTimes[pkgIDs[i]]
+		pkgInfos = append(pkgInfos, pkgInfosSet[pkgIDs[i]])
+	}
+
+	return pkgInfos
 }
 
 func Home(ctx *context.Context) {
 	ctx.Data["PageIsHome"] = true
-	ctx.Data["NumOfPackages"] = base.FormatNumString(models.NumOfPackages())
-	ctx.Data["SearchContent"] = doc.SearchContent
-	ctx.Data["BrowseHistory"] = getHistory(ctx)
+	ctx.Data["NumTotalPackages"] = base.FormatNumString(models.NumTotalPackages())
+	ctx.Data["BrowsingHistory"] = getBrowsingHistory(ctx)
 	ctx.HTML(200, HOME)
 }

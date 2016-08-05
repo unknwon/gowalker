@@ -69,8 +69,8 @@ type PkgInfo struct {
 
 	Subdirs string `xorm:"TEXT"`
 
-	LastView int64 `xorm:"-"`
-	Created  int64
+	LastViewed int64 `xorm:"-"`
+	Created    int64
 }
 
 func (p *PkgInfo) JSPath() string {
@@ -371,6 +371,12 @@ func GetPkgInfoById(id int64) (*PkgInfo, error) {
 	}
 
 	return pinfo, nil
+}
+
+// GetPkgInfosByIDs returns a list of package info by given IDs.
+func GetPkgInfosByIDs(ids []int64) ([]*PkgInfo, error) {
+	pkgInfos := make([]*PkgInfo, 0, len(ids))
+	return pkgInfos, x.Where("id > 0").In("id", base.Int64sToStrings(ids)).Find(&pkgInfos)
 }
 
 func getRepos(trueCondition string) ([]*PkgInfo, error) {
