@@ -36,7 +36,11 @@ $(document).ready(function () {
             searchFullText: false
         });
     }
-    setSearchAPIURL(false);
+
+    setSearchAPIURL(localStorage.enable_semantic_search);
+    if (localStorage.enable_semantic_search == 'true') {
+        $('#semantic_search_checkbox').checkbox('check');
+    }
 
     $('.main.search .search.icon').click(function () {
         $('.main.search').submit();
@@ -46,10 +50,11 @@ $(document).ready(function () {
     $('#semantic_search').change(function () {
         if (this.checked) {
             setSearchAPIURL(true);
-        } else{
+        } else {
             setSearchAPIURL(false);
         }
-        $('.ui.main.search').search("clear cache", $('#search_input').value)
+        $('.ui.main.search').search('clear cache', $('#search_input').value)
+        localStorage.enable_semantic_search = this.checked;
     });
 
     var is_page_docs = $('#readme').length > 0;

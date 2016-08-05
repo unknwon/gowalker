@@ -126,12 +126,14 @@ func semanticSearch(ctx *context.Context, query string) {
 		case "package":
 			title = def.Unit
 		case "func":
+			// recevier/method -> recevier_method
 			anchor := strings.Replace(def.Path, "/", "_", 1)
 			title = def.Unit + "#" + anchor
 		default:
 			continue
 		}
 
+		// Limit length of description to 100.
 		if len(def.Docs) > 0 {
 			if len(def.Docs[0].Data) > 100 {
 				desc = def.Docs[0].Data[:100] + "..."
