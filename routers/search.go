@@ -15,6 +15,7 @@
 package routers
 
 import (
+	"bytes"
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
@@ -95,22 +96,38 @@ type semanticSearchResult struct {
 }
 
 // semanticSearch sends search request to sourcegraph.com.
-func semanticSearch(ctx *context.Context, query string) {
-	resp, err := http.Get("https://sourcegraph.com/.api/global-search?Query=golang+" + url.QueryEscape(query) + "&Limit=30&Fast=1")
+// If repo is empty, try again when no results found in first attempt,
+// otherwise, response no results tp client.
+func semanticSearch(ctx *context.Context, query, repo string) {
+	url := "https://sourcegraph.com/.api/global-search?Query=golang+" + url.QueryEscape(query) + "&Limit=30&Fast=1&Repos=" + url.QueryEscape(repo)
+	resp, err := http.Get(url)
 	if err != nil {
-		log.Error("semanticSearch.http.Get: %v", err)
+		log.Error("semanticSearch.http.Get (%s): %v", url, err)
 		return
 	}
 
 	data, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		log.Error("semanticSearch.ioutil.ReadAll: %v", err)
+		log.Error("semanticSearch.ioutil.ReadAll (%s): %v", url, err)
+		return
+	}
+	data = bytes.TrimSpace(data)
+
+	if len(data) == 0 {
+		if len(repo) == 0 {
+			semanticSearch(ctx, query, "github.com/golang/go")
+		} else {
+			ctx.JSON(200, map[string]interface{}{
+				"results": nil,
+			})
+		}
 		return
 	}
 
 	var sgResults semanticSearchResult
 	if err = json.Unmarshal(data, &sgResults); err != nil {
-		log.Error("semanticSearch.json.Unmarshal: %v", err)
+		log.Error("semanticSearch.json.Unmarshal (%s): %v", url, err)
+		log.Error("JSON: %s", string(data))
 		return
 	}
 
@@ -168,7 +185,7 @@ func SearchJSON(ctx *context.Context) {
 	})
 
 	if ctx.Query("semantic_search") == "true" {
-		semanticSearch(ctx, q)
+		semanticSearch(ctx, q, "")
 		return
 	}
 
