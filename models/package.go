@@ -375,6 +375,10 @@ func GetPkgInfoById(id int64) (*PkgInfo, error) {
 
 // GetPkgInfosByIDs returns a list of package info by given IDs.
 func GetPkgInfosByIDs(ids []int64) ([]*PkgInfo, error) {
+	if len(ids) == 0 {
+		return []*PkgInfo{}, nil
+	}
+
 	pkgInfos := make([]*PkgInfo, 0, len(ids))
 	return pkgInfos, x.Where("id > 0").In("id", base.Int64sToStrings(ids)).Find(&pkgInfos)
 }
