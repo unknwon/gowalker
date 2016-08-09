@@ -8,8 +8,11 @@
 }
 .markdown h1 a,
 .markdown h2 a,
-.markdown h3 a {
-  color: #4183c4;
+.markdown h3 a,
+.markdown h4 a,
+.markdown h5 a,
+.markdown h6 a {
+  color: #4368b3;
   text-decoration: none;
 }
 .markdown h1 a.anchor,
@@ -154,7 +157,7 @@ pre {
   font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
   padding: 9px;
   border: 1px solid #ccc;
-  border-radius: 4px;
+  border-radius: 2px;
   background-color: #f5f5f5;
 }
 pre .com {
@@ -173,13 +176,16 @@ pre .ext {
   color: #6F00D2;
 }
 pre .ret {
-  color: #CE0000;
+  color: #db2828;
 }
 pre .key {
-  color: #F00078;
+  color: #e03997;
 }
 pre .bui {
   color: #009393;
+}
+pre a:hover {
+  text-decoration: underline;
 }
 .search.icon.button {
   pointer-events: all !important;

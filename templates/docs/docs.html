@@ -5,8 +5,16 @@
 		{% include "header.html" %}
 
 		{% if IsHasReadme %}
-		<div id="readme" class="readme"><script type="text/javascript" src="/{{ReadmePath}}?={{Timestamp}}"></script></div>
-		<br>	
+		<div class="ui accordion">
+			<div class="title">
+				<i class="dropdown icon"></i>
+				<strong>{{Tr(Lang, "docs.display_readme")}}</strong>
+			</div>
+			<div class="content">
+				<div id="readme" class="readme"><script type="text/javascript" src="/{{ReadmePath}}?={{Timestamp}}"></script></div>
+				<br>
+			</div>
+		</div>
 		{% else %}
 		<div id="readme"></div>
 		{% endif %}

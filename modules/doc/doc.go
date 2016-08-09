@@ -433,6 +433,7 @@ type exportSearchObject struct {
 func renderDoc(render macaron.Render, pdoc *Package, docPath string) error {
 	data := make(map[string]interface{})
 	data["PkgFullIntro"] = pdoc.Doc
+	data["IsGoRepo"] = pdoc.IsGoRepo
 
 	exports := make([]exportSearchObject, 0, 10)
 

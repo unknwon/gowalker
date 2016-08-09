@@ -106,7 +106,7 @@ func getPathFlags() map[string]int {
 		"C":       packagePath,
 	}
 	for _, path := range strings.Fields(string(p)) {
-		if strings.HasPrefix(path, "cmd/") {
+		if strings.HasPrefix(path, "cmd/") || strings.HasPrefix(path, "vendor/") {
 			continue
 		}
 		pathFlags[path] |= packagePath | goRepoPath

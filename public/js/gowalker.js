@@ -3,7 +3,17 @@ $(document).ready(function () {
         transition: 'drop'
     });
     $('.popup').popup();
-    $('.ui.accordion').accordion();
+    $('.ui.accordion').accordion({
+        onOpen: function () {
+            // Resize images if too large.
+            if ($('#readme').length) {
+                $(this).find("img").each(function () {
+                    var w = $(this).width();
+                    $(this).width(w > 600 ? 600 : w);
+                });
+            }
+        }
+    });
 
     function setSearchOptions(semantic_search) {
         $('.ui.main.search').search({
@@ -150,14 +160,6 @@ $(document).ready(function () {
             $(this).find('.meta-time').each(function () {
                 $(this).text(new Date(parseInt($(this).text()) * 1000).toLocaleString());
             });
-        });
-    }
-
-    // Resize images if too large.
-    if ($('#readme').length) {
-        $(this).find("img").load(function () {
-            var w = $(this).width();
-            $(this).width(w > 600 ? 600 : w);
         });
     }
 
