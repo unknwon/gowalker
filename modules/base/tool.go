@@ -105,10 +105,12 @@ func FormatNumString(num int64) (s string) {
 	for {
 		d := num / 1000
 		r := num % 1000
-		s = fmt.Sprintf(",%03d", r) + s
 		if d == 0 {
+			// Don't need leading 0's.
+			s = com.ToStr(r) + s
 			break
 		}
+		s = fmt.Sprintf(",%03d", r) + s
 		num = d
 	}
 	return s[1:]
