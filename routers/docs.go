@@ -73,7 +73,7 @@ func handleError(ctx *context.Context, err error) {
 		models.DeletePackageByPath(importPath)
 	}
 
-	ctx.Flash.Error(importPath+": "+strings.Replace(err.Error(), setting.GitHubCredentials, "<GitHubCredentials>", -1), true)
+	ctx.Flash.Error(importPath+": "+strings.Replace(err.Error(), setting.GitHubCredentials, "{GitHubCredentials}", -1), true)
 	ctx.Flash.Info(ctx.Tr("form.click_to_search", importPath), true)
 	Home(ctx)
 }

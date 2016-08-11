@@ -22,6 +22,7 @@ import (
 	"path"
 	"regexp"
 	"strings"
+	"time"
 
 	"github.com/Unknwon/com"
 
@@ -56,17 +57,57 @@ func getGithubRevision(importPath, tag string) (string, error) {
 
 type RepoInfo struct {
 	DefaultBranch string `json:"default_branch"`
+	Fork          bool   `json:"fork"`
+	Parent        struct {
+		FullName string `json:"full_name"`
+	} `json:"parent"`
+}
+
+type RepoCommit struct {
+	Commit struct {
+		Committer struct {
+			Date time.Time `json:"date"`
+		} `json:"committer"`
+	} `json:"commit"`
 }
 
 func getGithubDoc(match map[string]string, etag string) (_ *Package, err error) {
 	match["cred"] = setting.GitHubCredentials
+
+	repoInfo := new(RepoInfo)
+	if err := com.HttpGetJSON(Client, com.Expand("https://api.github.com/repos/{owner}/{repo}?{cred}", match), repoInfo); err != nil {
+		return nil, fmt.Errorf("get repo default branch: %v", err)
+	}
+
+	// Set default branch if not presented.
 	if len(match["tag"]) == 0 {
-		repoInfo := new(RepoInfo)
-		if err := com.HttpGetJSON(Client, com.Expand("https://api.github.com/repos/{owner}/{repo}?{cred}", match), repoInfo); err != nil {
-			return nil, fmt.Errorf("get repo default branch: %v", err)
+		match["tag"] = repoInfo.DefaultBranch
+	}
+
+	// Check if last commit time is behind upstream for fork repository.
+	if repoInfo.Fork {
+		url := com.Expand("https://api.github.com/repos/{owner}/{repo}/commits?per_page=1&{cred}", match)
+		forkCommits := make([]*RepoCommit, 0, 1)
+		if err := com.HttpGetJSON(Client, url, &forkCommits); err != nil {
+			return nil, fmt.Errorf("get fork repository commits: %v", err)
+		}
+		if len(forkCommits) == 0 {
+			return nil, fmt.Errorf("unexpected zero number of fork repository commits: %s", url)
 		}
 
-		match["tag"] = repoInfo.DefaultBranch
+		match["parent"] = repoInfo.Parent.FullName
+		url = com.Expand("https://api.github.com/repos/{parent}/commits?per_page=1&{cred}", match)
+		parentCommits := make([]*RepoCommit, 0, 1)
+		if err := com.HttpGetJSON(Client, url, &parentCommits); err != nil {
+			return nil, fmt.Errorf("get parent repository commits: %v", err)
+		}
+		if len(parentCommits) == 0 {
+			return nil, fmt.Errorf("unexpected zero number of parent repository commits: %s", url)
+		}
+
+		if parentCommits[0].Commit.Committer.Date.After(forkCommits[0].Commit.Committer.Date) {
+			return nil, fmt.Errorf("commits of this fork repository are behind or equal to its parent: %s", repoInfo.Parent.FullName)
+		}
 	}
 
 	// Check revision.

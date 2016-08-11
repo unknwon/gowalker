@@ -33,7 +33,7 @@ import (
 	"github.com/Unknwon/gowalker/routers/apiv1"
 )
 
-const APP_VER = "1.8.4.0808"
+const APP_VER = "1.9.0.0811"
 
 func init() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
