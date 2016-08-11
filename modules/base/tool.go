@@ -107,7 +107,7 @@ func FormatNumString(num int64) (s string) {
 		r := num % 1000
 		if d == 0 {
 			// Don't need leading 0's.
-			s = com.ToStr(r) + s
+			s = "," + com.ToStr(r) + s
 			break
 		}
 		s = fmt.Sprintf(",%03d", r) + s
