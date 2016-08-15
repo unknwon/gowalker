@@ -105,7 +105,7 @@ func getGithubDoc(match map[string]string, etag string) (_ *Package, err error) 
 			return nil, fmt.Errorf("unexpected zero number of parent repository commits: %s", url)
 		}
 
-		if !parentCommits[0].Commit.Committer.Date.After(forkCommits[0].Commit.Committer.Date) {
+		if !forkCommits[0].Commit.Committer.Date.After(parentCommits[0].Commit.Committer.Date) {
 			return nil, fmt.Errorf("commits of this fork repository are behind or equal to its parent: %s", repoInfo.Parent.FullName)
 		}
 	}
