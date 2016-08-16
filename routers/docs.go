@@ -15,6 +15,7 @@
 package routers
 
 import (
+	"errors"
 	"fmt"
 	"path"
 	"strings"
@@ -116,6 +117,12 @@ func specialHandles(ctx *context.Context, pinfo *models.PkgInfo) bool {
 
 func Docs(ctx *context.Context) {
 	importPath := ctx.Params("*")
+
+	// Check if import path looks like a vendor directory.
+	if strings.Contains(importPath, "/vendor/") {
+		handleError(ctx, errors.New("import path looks like is a vendor directory, don't try to fool me!"))
+		return
+	}
 
 	if base.IsGAERepoPath(importPath) {
 		ctx.Redirect("/google.golang.org/" + importPath)
