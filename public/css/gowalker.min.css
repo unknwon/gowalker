@@ -149,6 +149,10 @@ p.large {
 .ui.breadcrumb .project.icon {
   color: #930000;
 }
+.ui.breadcrumb .sg.icon img {
+  width: 16px;
+  margin-bottom: -3px;
+}
 tbody td.stars {
   text-align: center !important;
 }

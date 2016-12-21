@@ -184,10 +184,10 @@ func SearchJSON(ctx *context.Context) {
 		return unicode.IsSpace(c) || c == '"'
 	})
 
-	if ctx.Query("semantic_search") == "true" {
-		semanticSearch(ctx, q, "")
-		return
-	}
+	// if ctx.Query("semantic_search") == "true" {
+	// 	semanticSearch(ctx, q, "")
+	// 	return
+	// }
 
 	pinfos, err := models.SearchPkgInfo(7, q)
 	if err != nil {
