@@ -103,7 +103,7 @@
 
 {% macro sg_link(name) %}
 	{% if HasPrefix(ProjectPath, "github.com") == True %}
-	<a class="ui button sg" target="_blank" href="https://sourcegraph.com/{{ProjectPath}}/.GoPackage/{% if IsGoRepo %}{{ImportPath}}{% else %}{{ProjectPath}}{% endif %}/.def/{{name}}">
+	<a class="ui button sg" target="_blank" href="https://sourcegraph.com/go/{{ProjectPath}}/-/{{name}}">
   	<i class="icon asterisk"></i>
 	</a>
 	{% endif %}
