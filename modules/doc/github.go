@@ -33,26 +33,26 @@ import (
 
 var (
 	githubRawHeader       = http.Header{"Accept": {"application/vnd.github-blob.raw"}}
-	githubRevisionPattern = regexp.MustCompile(`data-clipboard-text="[a-z0-9A-Z]+`)
+	githubRevisionPattern = regexp.MustCompile(`value="[a-z0-9A-Z]+"`)
 	githubPattern         = regexp.MustCompile(`^github\.com/(?P<owner>[a-z0-9A-Z_.\-]+)/(?P<repo>[a-z0-9A-Z_.\-]+)(?P<dir>/[a-z0-9A-Z_.\-/]*)?$`)
 )
 
 func getGithubRevision(importPath, tag string) (string, error) {
 	data, err := com.HttpGetBytes(Client, fmt.Sprintf("https://%s/commits/"+tag, importPath), nil)
 	if err != nil {
-		return "", fmt.Errorf("fetch revision page: %v", err)
+		return "", fmt.Errorf("fail to get revision(%s): %v", importPath, err)
 	}
 
-	i := bytes.Index(data, []byte(`btn-outline`))
+	i := bytes.Index(data, []byte(`commit-links-group BtnGroup`))
 	if i == -1 {
-		return "", errors.New("find revision locater: not found")
+		return "", fmt.Errorf("cannot find locater in page: %s", importPath)
 	}
 	data = data[i+1:]
 	m := githubRevisionPattern.FindSubmatch(data)
 	if m == nil {
-		return "", fmt.Errorf("find revision: not found")
+		return "", fmt.Errorf("cannot find revision in page: %s", importPath)
 	}
-	return strings.TrimPrefix(string(m[0]), `data-clipboard-text="`), nil
+	return strings.TrimSuffix(strings.TrimPrefix(string(m[0]), `value="`), `"`), nil
 }
 
 type RepoInfo struct {
