@@ -59,24 +59,26 @@
 		</p>
 	</div>
 
-<!-- <div class="ui small modal search export panel">
-	<div class="header">
-		{{Tr(Lang, "docs.search.title")}}
+	<div class="modal" id="search-export-panel">
+		<a href="#close" class="modal-overlay" aria-label="Close"></a>
+		<div class="modal-container">
+			<div class="modal-header">
+				<a href="#close" class="btn btn-clear float-right" aria-label="Close"></a>
+				<div class="modal-title h5">{{Tr(Lang, "docs.search.title")}}</div>
+			</div>
+			<div class="modal-body" style="min-height: 450px">
+				<div class="content">
+					<div class="form-autocomplete">
+						<div class="form-autocomplete-input form-input">
+							<input id="exports-search" class="form-input" name="q" placeholder="{{Tr(Lang, "docs.search.holder")}}" autocomplete="off" autofocus>
+							<ul class="menu text-left">
+								<li id="search-results" class="menu-item">
+								</li>
+							</ul>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
 	</div>
-	<div class="content">
-		<p>{{Tr(Lang, "docs.search.desc")}}</p>
-		<form class="ui form search export">
-		  <div class="field">
-		    <div class="ui fluid search">
-		      <div class="ui large action input">
-		        <input class="prompt" placeholder="{{Tr(Lang, "docs.search.holder")}}">
-			      <button type="submit" class="ui submit green button">
-			        {{Tr(Lang, "docs.search.button")}}
-			      </button>
-		      </div>
-		    </div>
-		  </div>
-		</form>
-	</div>
-</div> -->
 {% endblock %}

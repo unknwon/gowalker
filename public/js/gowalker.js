@@ -68,24 +68,37 @@ $(document).ready(function () {
 
     if (is_page_docs) {
         // Search export objects.
-        var $searchExportPanel = $('.search.export.panel');
-        var $searchExportForm = $('.ui.form.search.export');
-        var $searchExportInput = $('.ui.form.search.export input');
-        $searchExportForm.search({source: exportDataSrc});
-        $searchExportForm.submit(function (event) {
-            $searchExportPanel.modal("hide");
-            window.location.href = "#" + $searchExportInput.val().replace(/\./g, "_");
-            event.preventDefault();
+        var $searchExportPanel = $('#search-export-panel');
+        $searchExportPanel.find('.btn-clear').click(function () {
+            $searchExportPanel.removeClass('active');
+        })
+        $('#exports-search').keyup(function () {
+            if ($(this).val().length < 1) {
+                return;
+            }
+
+            $('#search-results').html("");
+            for (var i = 0; i < exportDataSrc.length; i++) {
+                if (exportDataSrc[i].title.toLowerCase().includes($(this).val().toLowerCase())) {
+                    $('#search-results').append(`<a href="#` + exportDataSrc[i].title.replace(/\./g, "_") + `">
+                    <div class="tile tile-centered">
+                        <div class="tile-content">` + exportDataSrc[i].title + `</div>
+                    </div>
+                </a>`)
+                }
+            }
+
+            $('#search-results a').click(function () {
+                $searchExportPanel.removeClass('active');
+            });
         });
     }
 
-    // Control panel.
-    var $control_panel = $('.control.panel');
-    $('#control-panel').click(function (event) {
-        $(this).blur();
-        $control_panel.modal('show');
-        event.preventDefault();
-    });
+    // Help panel
+    var $help_panel = $('#help-panel');
+    $help_panel.find('.btn-clear').click(function () {
+        $help_panel.removeClass('active');
+    })
 
     var preKeyG = 0;
 
@@ -98,23 +111,23 @@ $(document).ready(function () {
 
     $(document).keypress(function (event) {
         // Check if any input box is focused.
-        if ($(':focus').length > 0) {
+        if ($('input:focus').length > 0) {
             return true;
         }
 
         var code = event.keyCode ? event.keyCode : event.charCode;
         switch (code) {
             case 63:                    // for '?' 63
-                $control_panel.modal('show');
+                $help_panel.addClass('active');
                 break;
             case 98:                    // for 'g then b'  'b' 98
-                $control_panel.modal('hide');
+                $help_panel.removeClass('active');
                 Gkey(function () {
                     $('html,body').animate({scrollTop: $(document).height()}, 120);
                 });
                 break;
             case 103:                   // for 'g then g'   'g' 103
-                $control_panel.modal('hide');
+                $help_panel.removeClass('active');
 
                 if (preKeyG === 0) {
                     preKeyG = 1;
@@ -128,8 +141,8 @@ $(document).ready(function () {
                 });
                 break;
             case 115:                   // for 's' 105
-                if (!is_page_docs)return true;
-                $searchExportPanel.modal('show');
+                if (!is_page_docs) return true;
+                $searchExportPanel.addClass('active');
                 break;
             default:
                 preKeyG = 0;
