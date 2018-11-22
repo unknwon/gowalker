@@ -3,20 +3,20 @@
 <div class="page-docs">
 	{% include "docs/header.html" %}
 
-		<!-- {% if IsHasReadme %}
-		<div class="ui accordion">
-			<div class="title">
-				<i class="dropdown icon"></i>
-				<strong>{{Tr(Lang, "docs.display_readme")}}</strong>
+		{% if IsHasReadme %}
+			<div class="ui accordion">
+				<div class="title c-hand">
+					<i class="fas fa-caret-right"></i>
+					<strong>{{Tr(Lang, "docs.display_readme")}}</strong>
+				</div>
+				<div class="content d-hide" style="padding-top: 10px">
+					<div id="readme" class="readme"><script type="text/javascript" src="/{{ReadmePath}}?={{Timestamp}}"></script></div>
+					<br>
+				</div>
 			</div>
-			<div class="content">
-				<div id="readme" class="readme"><script type="text/javascript" src="/{{ReadmePath}}?={{Timestamp}}"></script></div>
-				<br>
-			</div>
-		</div>
 		{% else %}
-		<div id="readme"></div>
-		{% endif %} -->
+			<div id="readme"></div>
+		{% endif %}
 
 		<div id="markdown" class="markdown">
 			{% for doc in DocJS %}

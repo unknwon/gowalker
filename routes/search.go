@@ -179,15 +179,10 @@ func semanticSearch(ctx *context.Context, query, repo string) {
 func SearchJSON(ctx *context.Context) {
 	q := ctx.Query("q")
 
-	// Clean up keyword.
+	// Clean up keyword
 	q = strings.TrimFunc(q, func(c rune) bool {
 		return unicode.IsSpace(c) || c == '"'
 	})
-
-	// if ctx.Query("semantic_search") == "true" {
-	// 	semanticSearch(ctx, q, "")
-	// 	return
-	// }
 
 	pinfos, err := models.SearchPkgInfo(7, q)
 	if err != nil {

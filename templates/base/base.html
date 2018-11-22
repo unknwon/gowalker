@@ -43,6 +43,29 @@
 				</div>
 
 				<div class="column col-lg-12 col-10 col-mr-auto col-ml-auto">
+					{% if Flash.ErrorMsg %}
+					<div class="toast toast-error">
+						<h6>{{Tr(Lang, "form.flash_error_title")}}</h6>
+						<p>{{Flash.ErrorMsg|safe}}</p>
+					</div>
+					{% endif %}
+					{% if Flash.InfoMsg %}
+					<div class="toast">
+						{% if InfoHeader %}
+							<h6>{{InfoHeader}}</h6>
+						{% endif %}
+						{{Flash.InfoMsg|safe}}
+					</div>
+					{% endif %}
+					{% if Flash.SuccessMsg %}
+					<div class="toast toast-success">
+						{% if InfoHeader %}
+							<h6>{{SuccessHeader}}</h6>
+						{% endif %}
+						{{Flash.SuccessMsg|safe}}
+					</div>
+					{% endif %}
+
 					{% block body %}{% endblock %}
 				</div>
 
@@ -102,39 +125,6 @@
 			      </div>
 			    </div>
 			  </div>
-			</div>
-			
-			<div class="ui page grid alert">
-				<div class="{% if PageIsDocs %}fifteen{% else %}thirteen{% endif %} wide center aligned centered column">
-					{% if Flash.ErrorMsg %}
-					<div class="ui negative message">
-					  <div class="header">
-					    {{Tr(Lang, "form.flash_error_title")}}
-					  </div>
-					  <p>{{Flash.ErrorMsg|safe}}</p>
-					</div>
-					{% endif %}
-					{% if Flash.InfoMsg %}
-					<div class="ui info message">
-						{% if InfoHeader %}
-					  <div class="header">
-					    {{InfoHeader}}
-					  </div>
-					  {% endif %}
-					  {{Flash.InfoMsg|safe}}
-					</div>
-					{% endif %}
-					{% if Flash.SuccessMsg %}
-					<div class="ui success message">
-						{% if InfoHeader %}
-					  <div class="header">
-					    {{SuccessHeader}}
-					  </div>
-					  {% endif %}
-					  {{Flash.SuccessMsg|safe}}
-					</div>
-					{% endif %}
-				</div>
 			</div>
 
 			<div class="ui small modal control panel">

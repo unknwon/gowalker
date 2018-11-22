@@ -101,6 +101,22 @@ tbody td.stars {
   -moz-border-radius: 3px;
   -webkit-border-radius: 3px;
 }
+.toast {
+  margin-bottom: 5px;
+}
+.form-autocomplete .menu {
+  padding: 0;
+  font-size: 15px;
+  overflow-y: auto;
+  max-height: 350px;
+}
+.form-autocomplete .divider {
+  margin: 0;
+}
+.form-autocomplete .tile-subtitle {
+  font-size: 14px;
+  white-space: inherit !important;
+}
 /* Comment, String, Internal, External, Return/Break, Keyword, Boolean/nil, Builtin */
 pre {
   font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;

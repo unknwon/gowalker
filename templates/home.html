@@ -14,13 +14,17 @@
         {% endif %}
       </p>
 
-      <form class="form-autocomplete col-xs-12 col-5 col-mr-auto col-ml-auto" action="/search">
+      <form class="form-autocomplete col-xs-12 col-7 col-mr-auto col-ml-auto" action="/search">
         <div class="input-group">
           <div class="form-autocomplete-input form-input">
-            <input class="form-input" name="q" placeholder="{{Tr(Lang, "home.search_holder")}}" autocomplete="off" autofocus>
+            <input id="import-search" class="form-input" name="q" placeholder="{{Tr(Lang, "home.search_holder")}}" autocomplete="off" autofocus>
             <input type="hidden" name="auto_redirect" value="true">
+            <ul class="menu text-left">
+              <li id="search-results" class="menu-item">
+              </li>
+            </ul>
           </div>
-          <button class="btn input-group-btn"><i class="fas fa-search"></i></button>
+          <button class="btn input-group-btn"><i class="fas fa-search"></i><div class="loading d-hide p-2"></div></button>
         </div>
       </form>
     </div>
