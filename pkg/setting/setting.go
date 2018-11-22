@@ -24,17 +24,17 @@ import (
 )
 
 var (
-	// Application settings.
+	// Application settings
 	AppVer   string
 	ProdMode bool
 
-	// Server settings.
+	// Server settings
 	HTTPPort     int
 	FetchTimeout time.Duration
 	DocsJsPath   string
 	DocsGobPath  string
 
-	// Global settings.
+	// Global settings
 	Cfg               *ini.File
 	GitHubCredentials string
 	RefreshInterval   = 5 * time.Minute

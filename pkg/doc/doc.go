@@ -36,7 +36,7 @@ import (
 	// "github.com/davecgh/go-spew/spew"
 
 	"github.com/Unknwon/gowalker/models"
-	"github.com/Unknwon/gowalker/modules/setting"
+	"github.com/Unknwon/gowalker/pkg/setting"
 )
 
 var (

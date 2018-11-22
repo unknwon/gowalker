@@ -15,7 +15,7 @@
 package apiv1
 
 import (
-	"github.com/Unknwon/gowalker/modules/context"
+	"github.com/Unknwon/gowalker/pkg/context"
 )
 
 func Badge(ctx *context.Context) {

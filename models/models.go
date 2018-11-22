@@ -23,7 +23,7 @@ import (
 	"github.com/go-xorm/xorm"
 	"github.com/robfig/cron"
 
-	"github.com/Unknwon/gowalker/modules/setting"
+	"github.com/Unknwon/gowalker/pkg/setting"
 )
 
 var x *xorm.Engine

@@ -18,7 +18,6 @@ package main
 import (
 	"fmt"
 	"net/http"
-	"runtime"
 	"strings"
 
 	"github.com/Unknwon/log"
@@ -27,17 +26,16 @@ import (
 	"github.com/go-macaron/session"
 	"gopkg.in/macaron.v1"
 
-	"github.com/Unknwon/gowalker/modules/context"
-	"github.com/Unknwon/gowalker/modules/setting"
+	"github.com/Unknwon/gowalker/pkg/context"
+	"github.com/Unknwon/gowalker/pkg/setting"
 	"github.com/Unknwon/gowalker/routers"
 	"github.com/Unknwon/gowalker/routers/apiv1"
 )
 
-const APP_VER = "1.9.7.0527"
+const Version = "2.0.0.1122"
 
 func init() {
-	runtime.GOMAXPROCS(runtime.NumCPU())
-	setting.AppVer = APP_VER
+	setting.AppVer = Version
 }
 
 // newMacaron initializes Macaron instance.
@@ -65,7 +63,7 @@ func newMacaron() *macaron.Macaron {
 }
 
 func main() {
-	log.Info("Go Walker %s", APP_VER)
+	log.Info("Go Walker %s", Version)
 	log.Info("Run Mode: %s", strings.Title(macaron.Env))
 
 	m := newMacaron()

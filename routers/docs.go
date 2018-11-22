@@ -24,10 +24,10 @@ import (
 	"github.com/Unknwon/com"
 
 	"github.com/Unknwon/gowalker/models"
-	"github.com/Unknwon/gowalker/modules/base"
-	"github.com/Unknwon/gowalker/modules/context"
-	"github.com/Unknwon/gowalker/modules/doc"
-	"github.com/Unknwon/gowalker/modules/setting"
+	"github.com/Unknwon/gowalker/pkg/base"
+	"github.com/Unknwon/gowalker/pkg/context"
+	"github.com/Unknwon/gowalker/pkg/doc"
+	"github.com/Unknwon/gowalker/pkg/setting"
 )
 
 const (

@@ -26,8 +26,8 @@ import (
 	"github.com/Unknwon/log"
 
 	"github.com/Unknwon/gowalker/models"
-	"github.com/Unknwon/gowalker/modules/base"
-	"github.com/Unknwon/gowalker/modules/context"
+	"github.com/Unknwon/gowalker/pkg/base"
+	"github.com/Unknwon/gowalker/pkg/context"
 )
 
 const (
