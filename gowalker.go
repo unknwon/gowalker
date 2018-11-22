@@ -28,8 +28,8 @@ import (
 
 	"github.com/Unknwon/gowalker/pkg/context"
 	"github.com/Unknwon/gowalker/pkg/setting"
-	"github.com/Unknwon/gowalker/routers"
-	"github.com/Unknwon/gowalker/routers/apiv1"
+	"github.com/Unknwon/gowalker/routes"
+	"github.com/Unknwon/gowalker/routes/apiv1"
 )
 
 const Version = "2.0.0.1122"
@@ -67,9 +67,9 @@ func main() {
 	log.Info("Run Mode: %s", strings.Title(macaron.Env))
 
 	m := newMacaron()
-	m.Get("/", routers.Home)
-	m.Get("/search", routers.Search)
-	m.Get("/search/json", routers.SearchJSON)
+	m.Get("/", routes.Home)
+	m.Get("/search", routes.Search)
+	m.Get("/search/json", routes.SearchJSON)
 
 	m.Group("/api", func() {
 		m.Group("/v1", func() {
@@ -81,7 +81,7 @@ func main() {
 		return `User-agent: *
 Disallow: /search`
 	})
-	m.Get("/*", routers.Docs)
+	m.Get("/*", routes.Docs)
 
 	listenAddr := fmt.Sprintf("0.0.0.0:%d", setting.HTTPPort)
 	log.Info("Listen: http://%s", listenAddr)
