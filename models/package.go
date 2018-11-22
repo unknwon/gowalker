@@ -158,7 +158,6 @@ func checkRefs(pinfo *PkgInfo) {
 			continue
 		}
 
-		fmt.Println(com.StrTo(refIDs[i][1:]).MustInt64())
 		pkg, _ := GetPkgInfoById(com.StrTo(refIDs[i][1:]).MustInt64())
 		if pkg == nil {
 			continue

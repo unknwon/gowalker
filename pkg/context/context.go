@@ -17,6 +17,7 @@ package context
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/Unknwon/log"
 	"github.com/go-macaron/session"
@@ -93,6 +94,7 @@ func Contexter() macaron.Handler {
 		ctx.Data["RearSubStr"] = base.RearSubStr
 		ctx.Data["HasPrefix"] = strings.HasPrefix
 		ctx.Data["int64"] = base.Int64
+		ctx.Data["Year"] = time.Now().Year()
 
 		c.Map(ctx)
 	}

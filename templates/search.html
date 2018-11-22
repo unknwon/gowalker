@@ -1,46 +1,37 @@
 {% extends "base/base.html" %}
 {% block title %}{{Tr(Lang, "search.search")}} - Go Walker{% endblock %}
 {% block body %}
-<div class="ui stackable very relaxed page grid">
-	<div class="sixteen wide aligned centered column">
-		<h1 class="ui header">{{Tr(Lang, "search.search")}}</h1>
-		<form class="ui form real search" action="/search">
-		  <div class="field">
-		    <div class="ui fluid search">
-		      <div class="ui large action input">
-		        <input class="prompt" name="q" placeholder="{{Tr(Lang, "search.search_holder")}}" value="{{Keyword}}">
-			      <button type="submit" class="ui large submit green button">
-			        {{Tr(Lang, "search.search_btn")}}
-			      </button>
-		      </div>
-		    </div>
-		  </div>
-		</form>
-
-		{% if Results %}
-		<table class="ui very basic table">
-		  <thead>
-		    <tr>
-		      <th>{{Tr(Lang, "import_path")}}</th>
-		      <th>{{Tr(Lang, "short_intro")}}</th>
-		      <th><i class="star icon"></i></th>
-		    </tr>
-		  </thead>
-		  <tbody>
-		  	{% for p in Results %}
-		    <tr>
-		      <td><a href="{{p.ImportPath}}">{{p.ImportPath}}</a></td>
-		      <td>{{p.Synopsis}}</td>
-		      <td class="stars">{{p.Stars}}</td>
-		    </tr>
-		    {% endfor %}
-		  </tbody>
-		</table>
-		{% else %}
-		<div class="ui basic segment">
-  		<p>{{Tr(Lang, "search.not_found")}}</p>
+<div class="page-search p-2">
+	<h1 class="ui header">{{Tr(Lang, "search.search")}}</h1>
+	<form action="/search">
+		<div class="input-group">
+			<input type="text" class="form-input" placeholder="{{Tr(Lang, "search.search_holder")}}" name="q" value="{{Keyword}}">
+			<button class="btn input-group-btn">{{Tr(Lang, "search.search_btn")}}</button>
 		</div>
-		{% endif %}
-	</div>
+	</form>
+	<br>
+
+	{% if Results %}
+		<table class="table col-12">
+			<thead>
+				<tr>
+					<th>{{Tr(Lang, "import_path")}}</th>
+					<th class="hide-sm">{{Tr(Lang, "short_intro")}}</th>
+					<th class="text-center"><i class="fas fa-star"></i></th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for p in Results %}
+				<tr>
+					<td class="break-word"><a href="{{p.ImportPath}}">{{p.ImportPath}}</a></td>
+					<td class="break-word hide-sm">{{p.Synopsis}}</td>
+					<td class="stars">{{p.Stars}}</td>
+				</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+	{% else %}
+		<p>{{Tr(Lang, "search.not_found")}}</p>
+	{% endif %}
 </div>
 {% endblock %}

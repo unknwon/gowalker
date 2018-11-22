@@ -1,74 +1,52 @@
 {% extends "base/base.html" %}
 {% block title %}Go Walker - {{Tr(Lang, "app_desc")}}{% endblock %}
 {% block body %}
-<div class="ui stackable middle very relaxed page grid">
-	<div class="fourteen wide center aligned centered column">
-    <h1 class="ui icon header">
-      <i class="terminal icon"></i>
-      {{Tr(Lang, "home.hero_title", NumTotalPackages)}}
-    </h1>
-    <p class="large">
-    {% if Lang == "zh-CN" %}
-			Go Walker 是一个可以在线生成并浏览 <a target="_blank" href="https://golang.org/">Go</a> 项目 API 文档的 Web 服务器，目前已支持包括 <b>GitHub</b> 等代码托管平台。
-    {% else %}
-			Go Walker is a server that generates <a target="_blank" href="https://golang.org/">Go</a> projects API documentation on the fly for the projects on <b>GitHub</b>.
-    {% endif %}
-    </p>
-    <form class="ui form main search" action="/search">
-      <div class="field">
-        <div class="ui fluid search">
-          <div class="ui large icon input">
-            <input id="search_input" class="prompt" name="q" placeholder="{{Tr(Lang, "home.search_holder")}}" autocomplete="off">
-            <i class="search icon button"></i>
+<div class="page-home text-center">
+  <div class="hero">
+    <div class="hero-body">
+      <i class="fas fa-terminal fa-5x pb-2 hide-sm"></i>
+      <h1>{{Tr(Lang, "home.hero_title", NumTotalPackages)}}</h1>
+      <p>
+        {% if Lang == "zh-CN" %}
+          Go Walker 是一个可以在线生成并浏览 <a target="_blank" href="https://golang.org/">Go</a> 项目 API 文档的 Web 服务器，目前已支持包括 <b>GitHub</b> 等代码托管平台。
+        {% else %}
+          Go Walker is a server that generates <a target="_blank" href="https://golang.org/">Go</a> projects API documentation on the fly for the projects on <b>GitHub</b>.
+        {% endif %}
+      </p>
+
+      <form class="form-autocomplete col-xs-12 col-5 col-mr-auto col-ml-auto" action="/search">
+        <div class="input-group">
+          <div class="form-autocomplete-input form-input">
+            <input class="form-input" name="q" placeholder="{{Tr(Lang, "home.search_holder")}}" autocomplete="off" autofocus>
             <input type="hidden" name="auto_redirect" value="true">
           </div>
-          <div class="results"></div>
+          <button class="btn input-group-btn"><i class="fas fa-search"></i></button>
         </div>
-      </div>
+      </form>
+    </div>
 
-      {# <br> #}
-      {# <div class="field"> #}
-          {# <div class="ui toggle checkbox" id="semantic_search_checkbox"> #}
-            {# <input id="semantic_search" type="checkbox" name="semantic_search"> #}
-            {# <label>{{Tr(Lang, "home.semantic_search_desc")}}</label> #}
-          {# </div> #}
-      {# </div> #}
-      {# <p> #}
-        {# <a href="https://sourcegraph.com" target="_blank"><img src="/img/sourcegraph-logo.svg" height="30"></a> #}
-      {# </p> #}
-      </div>
-    </form>
-  </div>
-</div>
-<div class="ui stackable very relaxed page grid">
-	<div class="fourteen wide center aligned centered column">
-    <h1 class="ui icon header">
-      <i class="browser icon"></i>
-      {{Tr(Lang, "home.browse_history")}}
-    </h1>
-    <table class="ui basic table">
-      <thead>
-        <tr>
-          <th width="35%">{{Tr(Lang, "import_path")}}</th>
-          <th width="25%">{{Tr(Lang, "home.view_time")}}</th>
-          <th>{{Tr(Lang, "short_intro")}}</th>
-        </tr>
-      </thead>
-      <tbody id="browse_history">
-        {% for p in BrowsingHistory %}
-        <tr>
-          <td {% if p.ImportPath|length >= 40 %}class="popup" data-content="{{p.ImportPath}}"{% endif %}>
-            <a href="/{{p.ImportPath}}">{{RearSubStr(p.ImportPath,40)}}</a>
-            {% if p.IsGoRepo %}
-            <a class="ui blue label" href="/search?q=gorepos">{{Tr(Lang, "home.standard")}}</a>
-            {% endif %}
-          </td>
-          <td class="meta-time">{{p.LastViewed}}</td>
-          <td {% if p.Synopsis|length >= 80 %}class="popup" data-content="{{p.Synopsis}}"{% endif %}">{{SubStr(p.Synopsis, 0, 80)}}</td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+    {% if BrowsingHistory %}
+      <br><br>
+      <div class="divider"></div>
+      <br><br>
+
+      <h2><i class="fas fa-list-ul"></i> {{Tr(Lang, "home.browse_history")}}</h2>
+      <table class="table col-xs-12 col-8 col-mr-auto col-ml-auto">
+        <tbody id="browse_history">
+          {% for p in BrowsingHistory %}
+            <tr>
+              <td {% if p.ImportPath|length >= 40 %}class="popup" data-content="{{p.ImportPath}}"{% endif %}>
+                <a href="/{{p.ImportPath}}">{{RearSubStr(p.ImportPath, 40)}}</a>
+                {% if p.IsGoRepo %}
+                <a class="label label-rounded" href="/search?q=gorepos">{{Tr(Lang, "home.standard")}}</a>
+                {% endif %}
+              </td>
+              <td class="meta-time hide-sm">{{p.LastViewed}}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% endif %}
   </div>
 </div>
 {% endblock %}

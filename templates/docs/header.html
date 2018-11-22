@@ -1,12 +1,19 @@
-<div class="ui segment">
-	<div class="ui breadcrumb">
-		<a class="sg icon popup" href="https://sourcegraph.com/{{ProjectPath}}" data-content="{{Tr(Lang, "docs.view_on_sg")}}" data-variation="small inverted"><img src="/img/sourcegraph.svg"></a>
-		<a class="project icon popup" href="https://{{ProjectPath}}" data-content="{{Tr(Lang, "docs.view_on_github")}}" data-variation="small inverted"><i class="code icon"></i></a>
-	  <a class="section" href="/{{ParentPath}}">{{ParentPath}}</a>
-	  <div class="divider"> / </div>
-	  <div class="active section">{{ProjectName}}</div>
-	</div>
-	<div class="ui right">
-		<i class="star icon"></i>{{NumStars}}
-	</div>
+<div class="pr-2">
+	<ul class="breadcrumb">
+		<li class="breadcrumb-item">
+			<a class="text-primary" href="/{{ParentPath}}">{{ParentPath}}</a>
+		</li>
+		<li class="breadcrumb-item">
+			<span class="text-dark">{{ProjectName}}</span>
+		</li>
+		<div class="float-right tools">
+			<i class="fas fa-star"></i> {{NumStars}}
+			<a class="tooltip" href="https://{{ProjectPath}}" data-tooltip="{{Tr(Lang, "docs.view_on_github")}}">
+				<i class="fab fa-github text-dark"></i>
+			</a>
+			<a class="tooltip" href="https://sourcegraph.com/{{ProjectPath}}" data-tooltip="{{Tr(Lang, "docs.view_on_sg")}}">
+				<img class="srcgraph" src="/img/sourcegraph.svg" height="16">
+			</a>
+		</div>
+	</ul>
 </div>

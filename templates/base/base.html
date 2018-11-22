@@ -3,12 +3,15 @@
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 		<link rel="shortcut icon" href="/img/favicon.png" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 		<meta name="author" content="Unknwon" />
 		<meta name="description" content="{% if PkgDesc %}{{PkgDesc}}{% else %}Go Walker is a server that generates Go projects API documentation on the fly.{% endif %}" />
 		<meta name="keywords" content="{{Tr(Lang, "head_keywords")}}">
 		<title>{% block title %}{{Title}} - Go Walker{% endblock %}</title>
 
-		<link href="/css/semantic.min.css?v={{AppVer}}" rel="stylesheet" />
+		<link rel="stylesheet" href="https://unpkg.com/spectre.css/dist/spectre.min.css?v={{AppVer}}">
+		<link rel="stylesheet" href="https://unpkg.com/spectre.css/dist/spectre-exp.min.css">
+		<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
 		<link href="/css/gowalker.min.css?v={{AppVer}}" rel="stylesheet" />
 
 		<script type="text/javascript" src="/js/jquery-1.11.3.min.js"></script>
@@ -17,18 +20,75 @@
 	</head>
 	<body>
 		<noscript>Please enable JavaScript in your browser!</noscript>
-		<div class="full height">
+		<div class="container">
+			<div class="columns">
+				<div class="column col-lg-12 col-10 col-mr-auto col-ml-auto">
+					<header class="navbar pt-2">
+						<section class="navbar-section">
+							<a href="/" class="btn btn-link {% if PageIsHome %}active{% endif %}">{{Tr(Lang, "home")}}</a>
+							<a href="#" class="btn btn-link">{{Tr(Lang, "help")}}</a>
+						</section>
+						<section class="navbar-center">
+							<a href="/"><img src="/img/favicon.png" alt="Logo" height="36"></a>
+						</section>
+						<section class="navbar-section">
+							<a target="_blank" href="https://twitter.com/jc_unknwon" class="btn btn-link">Twitter</a>
+							<a target="_blank" href="https://github.com/Unknwon/gowalker" class="btn btn-link">GitHub</a>
+						</section>
+					</header>
+				</div>
+
+				<div class="column col-12">
+					<div class="divider"></div>
+				</div>
+
+				<div class="column col-lg-12 col-10 col-mr-auto col-ml-auto">
+					{% block body %}{% endblock %}
+				</div>
+
+				<footer class="column col-12 bg-gray p-2 text-center">
+					<div class="columns">
+						<div class="column col-xs-12 col-8 p-2">
+							{% if Lang == "zh-CN" %}
+								网站由 <a target="_blank" href="https://github.com/Unknwon">@Unknwon</a> 建设，并由 <a target="_blank" href="/gopkg.in/macaron.v1">Macaron</a> 和 <a target="_blank" href="/github.com/go-xorm/xorm">Xorm</a> 提供动力。<br>
+								请到 <a target="_blank" href="https://github.com/Unknwon/gowalker/issues">GitHub</a> 给我们发送反馈信息。
+							{% else %}
+								Website built by <a target="_blank" href="https://github.com/Unknwon">@Unknwon</a>. Powered by <a target="_blank" href="/gopkg.in/macaron.v1">Macaron</a> and <a target="_blank" href="/github.com/go-xorm/xorm">Xorm</a>. <br>
+								Send us feedback on <a target="_blank" href="https://github.com/Unknwon/gowalker/issues">GitHub</a>.
+							{% endif %}
+							<br>
+							Copyright © {{Year}} Go Walker
+						</div>
+						<div class="column col-xs-12 col-4 p-2 mt-2">
+							<a target="_blank" href="https://m.do.co/c/5aeb02268b55">
+								<img src="/img/digitalocean.png" alt="DigitalOcean" height="48">
+							</a>
+						</div>
+					</div>
+				</footer>
+			</div>
+		</div>
+
+		{% if ProdMode %}
+			<script>
+				(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+				(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+				m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+				})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+				ga('create', 'UA-40109089-2', 'gowalker.org');
+				ga('send', 'pageview');
+			</script>
+		{% endif %}
+
+
+
+
+		<!-- <div class="full height">
 			<div class="following bar light">
 			  <div class="ui page grid">
 			    <div class="column">
 			      <div class="ui large secondary network menu">
-			      	<span class="item">Go Walker</span>
-			        <a class="item {% if PageIsHome %}active{% endif %}" href="/">{{Tr(Lang, "home")}}</a>
-			        {# <a class="item {% if PageIsSettings %}active{% endif %}" href="/settings">{{Tr(Lang, "settings")}}</a> #}
-			        {# <a class="view-ui item {% if PageIsApi %}active{% endif %}" href="/api/docs">{{Tr(Lang, "api_service")}}</a> #}
-			        {# <a class="view-ui item {% if PageIsAbout %}active{% endif %}" href="/about">{{Tr(Lang, "about")}}</a> #}
-			        <a id="control-panel" class="view-ui item" href="#">{{Tr(Lang, "help")}}</a>
-
 				      <div class="right menu">
 				        <div class="ui language floating dropdown link item">
 				          <i class="world icon"></i>
@@ -75,42 +135,6 @@
 					</div>
 					{% endif %}
 				</div>
-			</div>
-
-			{% block body %}{% endblock %}
-			<div class="ui inverted black footer vertical segment grid">
-			  <div class="fourteen wide center aligned centered column">
-			    <div class="ui stackable inverted divided relaxed grid">
-			      <div class="eight wide column">
-			        <h4 class="ui inverted header">Copyright © 2017 Go Walker</h4>
-			        {% if Lang == "zh-CN" %}
-			        <p>网站由 <a target="_blank" href="https://github.com/Unknwon">@Unknwon</a> 建设，并由 <a target="_blank" href="/gopkg.in/macaron.v1">Macaron</a> 和 <a target="_blank" href="/github.com/go-xorm/xorm">Xorm</a> 提供动力。</p>
-			        <p>请到 <a target="_blank" href="https://github.com/Unknwon/gowalker/issues">GitHub</a> 给我们发送反馈信息。</p>
-			        {% else %}
-			        <p>Website built by <a target="_blank" href="https://github.com/Unknwon">@Unknwon</a>. Powered by <a target="_blank" href="/gopkg.in/macaron.v1">Macaron</a> and <a target="_blank" href="/github.com/go-xorm/xorm">Xorm</a>.</p>
-			        <p>Send us feedback on <a target="_blank" href="https://github.com/Unknwon/gowalker/issues">GitHub</a>.</p>
-			        {% endif %}
-			        <img class="qiniu-logo" src="/img/qiniu-transparent.png">
-			      </div>
-			      <div class="four wide column">
-			        <h5 class="ui teal inverted header">{{Tr(Lang, "home.more_projects")}}</h5>
-			        <div class="ui inverted link list">
-			          <a class="item" href="/search?q=gorepos">{{Tr(Lang, "home.gorepos")}}</a>
-			          <a class="item" href="/search?q=gosubrepos">{{Tr(Lang, "home.gosubrepos")}}</a>
-			          <a class="item" href="/search?q=gaesdk">{{Tr(Lang, "home.gaesdk")}}</a>
-			          <a class="item" href="https://sourcegraph.com/" target="_blank">Sourcegraph </a>
-			        </div>
-			      </div>
-			      <div class="four wide column">
-			        <h5 class="ui teal inverted header">{{Tr(Lang, "home.community")}}</h5>
-			        <div class="ui inverted link list">
-			          <a class="item" href="https://forum.golangbridge.org/" target="_blank">Go Forum</a>
-			          <a class="item" href="http://golangtc.com" target="_blank">Golang 中国</a>
-			          <a class="item" href="https://blog.gopheracademy.com/" target="_blank">Gopher Academy</a>
-			        </div>
-			      </div>
-			    </div>
-			  </div>
 			</div>
 
 			<div class="ui small modal control panel">
@@ -198,17 +222,6 @@
           </table>
 				</div>
 			</div>
-			{% if ProdMode %}
-			<script>
-				(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-				(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-				m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-				})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
-
-				ga('create', 'UA-40109089-2', 'gowalker.org');
-				ga('send', 'pageview');
-			</script>
-			{% endif %}
-		</div>
+		</div> -->
 	</body>
 </html>

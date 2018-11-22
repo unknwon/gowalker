@@ -109,7 +109,7 @@ func (w *Walker) openFile(path string) (io.ReadCloser, error) {
 func (w *Walker) setMemoryContext(ctxt *build.Context) {
 	ctxt.JoinPath = path.Join
 	ctxt.IsAbsPath = path.IsAbs
-	ctxt.IsDir = func(path string) bool { panic("unexpected") }
+	ctxt.IsDir = func(path string) bool { return true }
 	ctxt.HasSubdir = func(root, dir string) (rel string, ok bool) { panic("unexpected") }
 	ctxt.ReadDir = func(dir string) (fi []os.FileInfo, err error) { return w.readDir(dir) }
 	ctxt.OpenFile = func(path string) (r io.ReadCloser, err error) { return w.openFile(path) }

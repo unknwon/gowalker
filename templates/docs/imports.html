@@ -1,9 +1,9 @@
 {% extends "base/base.html" %}
 {% block body %}
-<div class="ui stackable very relaxed page grid">
-	<div class="sixteen wide aligned centered column">
-		{% include "docs/header.html" %}
-		
+<div class="page-imports">
+	{% include "docs/header.html" %}
+	
+	<div class="p-2">
 		<h2>
 			{% if PageIsImports %}
 			{{Tr(Lang, "docs.imports.title", ProjectName)}}
@@ -11,8 +11,8 @@
 			{{Tr(Lang, "docs.refs.title", ProjectName)}}
 			{% endif %}
 		</h2>
-
-		<table class="ui very basic table">
+	
+		<table class="table">
 			<thead>
 				<tr>
 					<th>{{Tr(Lang, "docs.path")}}</th>
@@ -21,15 +21,15 @@
 			</thead>
 			<tbody>
 				{% for pkg in Packages %}
-				<tr>
-					<td><a href="/{{pkg.ImportPath}}">{{pkg.ImportPath}}</a></td>
-					<td>{{pkg.Synopsis}}</td>
-				</tr>
+					<tr>
+						<td><a href="/{{pkg.ImportPath}}">{{pkg.ImportPath}}</a></td>
+						<td>{{pkg.Synopsis}}</td>
+					</tr>
 				{% endfor %}
 			</tbody>
 		</table>
-
-		<div class="ui divider"></div>
+	
+		<br>
 		<p>{{Tr(Lang, "docs.imports.go_back", Link) | safe}}</p>
 	</div>
 </div>
