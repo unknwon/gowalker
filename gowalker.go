@@ -32,7 +32,7 @@ import (
 	"github.com/Unknwon/gowalker/routes/apiv1"
 )
 
-const Version = "2.0.0.1122"
+const Version = "2.0.1.1123"
 
 func init() {
 	setting.AppVer = Version

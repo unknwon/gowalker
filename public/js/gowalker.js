@@ -38,6 +38,7 @@ $(document).ready(function () {
         delay(function () {
             var $this = $('#import-search');
             if ($this.val().length < 3) {
+                $('#search-results').html("");
                 return;
             }
 
@@ -74,6 +75,7 @@ $(document).ready(function () {
         })
         $('#exports-search').keyup(function () {
             if ($(this).val().length < 1) {
+                $('#search-results').html("");
                 return;
             }
 
@@ -162,7 +164,6 @@ $(document).ready(function () {
         $($(this).attr('href')).toggle();
         event.preventDefault();
     });
-
 
     // Browse history.
     if ($('#browse_history').length) {
