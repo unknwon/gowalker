@@ -792,7 +792,7 @@ func CheckPackage(importPath string, render macaron.Render, rt requestType) (*mo
 		return nil, fmt.Errorf("SavePkgInfo: %v", err)
 	}
 
-	jsFile.PkgID = pinfo.ID
+	jsFile.PkgID = pdoc.PkgInfo.ID
 	if err = models.SaveJSFile(jsFile); err != nil {
 		return nil, fmt.Errorf("SaveJSFile: %v", err)
 	}
