@@ -31,7 +31,7 @@ import (
 	"time"
 
 	"github.com/Unknwon/com"
-	"github.com/Unknwon/log"
+	log "gopkg.in/clog.v1"
 	"gopkg.in/macaron.v1"
 	// "github.com/davecgh/go-spew/spew"
 
@@ -335,7 +335,7 @@ func getExamples(pdoc *Package, typeName, name string) (exams []*Example) {
 // it returns -1 when error occurs.
 func SaveDocPage(docPath string, data []byte) int {
 	data = com.Html2JS(data)
-	docPath = setting.DocsJsPath + docPath
+	docPath = setting.DocsJSPath + docPath
 
 	buf := new(bytes.Buffer)
 	count := 0
@@ -348,7 +348,7 @@ func SaveDocPage(docPath string, data []byte) int {
 
 		os.MkdirAll(path.Dir(docPath+".js"), os.ModePerm)
 		if err := ioutil.WriteFile(docPath+".js", buf.Bytes(), 0655); err != nil {
-			log.ErrorD(4, "SaveDocPage( %s ): %v", docPath, err)
+			log.Error(2, "SaveDocPage %q: %v", docPath, err)
 			return -1
 		}
 	} else {
@@ -383,7 +383,7 @@ func SaveDocPage(docPath string, data []byte) int {
 
 			os.MkdirAll(path.Dir(p+".js"), os.ModePerm)
 			if err := ioutil.WriteFile(p+".js", buf.Bytes(), 0655); err != nil {
-				log.ErrorD(4, "SaveDocPage( %s ): %v", p, err)
+				log.Error(2, "SaveDocPage %q: %v", p, err)
 				return -1
 			}
 
@@ -413,7 +413,7 @@ func SavePkgDoc(docPath string, readmes map[string][]byte) {
 		}
 
 		data = com.Html2JS(data)
-		localeDocPath := setting.DocsJsPath + docPath + "_RM_" + lang
+		localeDocPath := setting.DocsJSPath + docPath + "_RM_" + lang
 		os.MkdirAll(path.Dir(localeDocPath), os.ModePerm)
 
 		buf := new(bytes.Buffer)
@@ -421,7 +421,7 @@ func SavePkgDoc(docPath string, readmes map[string][]byte) {
 		buf.Write(data)
 		buf.WriteString("\")")
 		if err := ioutil.WriteFile(localeDocPath+".js", buf.Bytes(), 0655); err != nil {
-			log.ErrorD(4, "SavePkgDoc( %s ): %v", localeDocPath, err)
+			log.Error(2, "SavePkgDoc %q: %v", localeDocPath, err)
 		}
 	}
 }
@@ -430,7 +430,9 @@ type exportSearchObject struct {
 	Title string `json:"title"`
 }
 
-func renderDoc(render macaron.Render, pdoc *Package, docPath string) error {
+// renderDoc renders and saves the documentation file,
+// and returns the new JSFile object corresponding to this generation.
+func renderDoc(render macaron.Render, pdoc *Package, docPath string) (*models.JSFile, error) {
 	data := make(map[string]interface{})
 	data["PkgFullIntro"] = pdoc.Doc
 	data["IsGoRepo"] = pdoc.IsGoRepo
@@ -658,38 +660,42 @@ func renderDoc(render macaron.Render, pdoc *Package, docPath string) error {
 
 	result, err := render.HTMLBytes("docs/tpl", data)
 	if err != nil {
-		return fmt.Errorf("error rendering HTML: %v", err)
+		return nil, fmt.Errorf("rendering HTML: %v", err)
 	}
 
-	pdoc.JsNum = SaveDocPage(docPath, result)
-	if pdoc.JsNum == -1 {
-		return errors.New("Save JS file wasn't successful")
+	numExtraFiles := SaveDocPage(docPath, result)
+	if numExtraFiles == -1 {
+		return nil, errors.New("save JS file wasn't successful")
 	}
 	SavePkgDoc(pdoc.ImportPath, pdoc.Readme)
 
 	data["UtcTime"] = time.Unix(pdoc.Created, 0).UTC()
-	return nil
+	return &models.JSFile{
+		Etag:          pdoc.Etag,
+		Status:        models.JSFileStatusGenerated,
+		NumExtraFiles: numExtraFiles,
+	}, nil
 }
 
 type requestType int
 
 const (
-	REQUEST_TYPE_HUMAN requestType = iota
-	REQUEST_TYPE_REFRESH
+	RequestTypeHuman requestType = iota
+	RequestTypeRefresh
 )
 
-// CheckGoPackage checks package by import path.
+// CheckPackage checks package by import path.
 func CheckPackage(importPath string, render macaron.Render, rt requestType) (*models.PkgInfo, error) {
-	// Trim prefix of standard library.
+	// Trim prefix of standard library
 	importPath = strings.TrimPrefix(importPath, "github.com/golang/go/tree/master/src")
 
 	pinfo, err := models.GetPkgInfo(importPath)
-	if rt != REQUEST_TYPE_REFRESH {
+	if rt != RequestTypeRefresh {
 		if err == nil {
-			fpath := setting.DocsGobPath + importPath + ".gob"
-			if !setting.ProdMode && com.IsFile(fpath) {
+			gobPath := setting.DocsGobPath + importPath + ".gob"
+			if !setting.ProdMode && com.IsFile(gobPath) {
 				pdoc := new(Package)
-				fr, err := os.Open(fpath)
+				fr, err := os.Open(gobPath)
 				if err != nil {
 					return nil, fmt.Errorf("read gob: %v", err)
 				} else if err = gob.NewDecoder(fr).Decode(pdoc); err != nil {
@@ -698,12 +704,14 @@ func CheckPackage(importPath string, render macaron.Render, rt requestType) (*mo
 				}
 				fr.Close()
 
-				if err = renderDoc(render, pdoc, importPath); err != nil {
+				_, err = renderDoc(render, pdoc, importPath)
+				if err != nil {
 					return nil, fmt.Errorf("render cached doc: %v", err)
 				}
 			}
 
 			pinfo.Views++
+			pinfo.LastViewed = time.Now().Unix()
 			if err = models.SavePkgInfo(pinfo, false); err != nil {
 				return nil, fmt.Errorf("update views: %v", err)
 			}
@@ -711,7 +719,7 @@ func CheckPackage(importPath string, render macaron.Render, rt requestType) (*mo
 		}
 	}
 
-	// Just in case, should never happen.
+	// Just in case, should never happen
 	if err == models.ErrEmptyPackagePath {
 		return nil, err
 	}
@@ -721,7 +729,7 @@ func CheckPackage(importPath string, render macaron.Render, rt requestType) (*mo
 		etag = pinfo.Etag
 	}
 
-	// Fetch package from VCS.
+	// Fetch package from VCS
 	c := make(chan crawlResult, 1)
 	go func() {
 		pdoc, err := crawlDoc(importPath, etag)
@@ -729,7 +737,7 @@ func CheckPackage(importPath string, render macaron.Render, rt requestType) (*mo
 	}()
 
 	var pdoc *Package
-	err = nil // Reset.
+	err = nil // Reset
 	select {
 	case cr := <-c:
 		if cr.err == nil {
@@ -743,8 +751,8 @@ func CheckPackage(importPath string, render macaron.Render, rt requestType) (*mo
 
 	if err != nil {
 		if err == ErrPackageNotModified {
-			log.Debug("Package has not been modified: %s", pinfo.ImportPath)
-			// Update time so cannot refresh too often.
+			log.Trace("Package has not been modified: %s", pinfo.ImportPath)
+			// Update time so cannot refresh too often
 			pinfo.Created = time.Now().UTC().Unix()
 			return pinfo, models.SavePkgInfo(pinfo, false)
 		} else if err == ErrInvalidRemotePath {
@@ -754,9 +762,9 @@ func CheckPackage(importPath string, render macaron.Render, rt requestType) (*mo
 	}
 
 	if !setting.ProdMode {
-		fpath := setting.DocsGobPath + importPath + ".gob"
-		os.MkdirAll(path.Dir(fpath), os.ModePerm)
-		fw, err := os.Create(fpath)
+		gobPath := setting.DocsGobPath + importPath + ".gob"
+		os.MkdirAll(path.Dir(gobPath), os.ModePerm)
+		fw, err := os.Create(gobPath)
 		if err != nil {
 			return nil, fmt.Errorf("create gob: %v", err)
 		}
@@ -766,9 +774,10 @@ func CheckPackage(importPath string, render macaron.Render, rt requestType) (*mo
 		}
 	}
 
-	log.Info("Walked package: %s, Goroutine #%d", pdoc.ImportPath, runtime.NumGoroutine())
+	log.Trace("Walked package %q, Goroutine #%d", pdoc.ImportPath, runtime.NumGoroutine())
 
-	if err = renderDoc(render, pdoc, importPath); err != nil {
+	jsFile, err := renderDoc(render, pdoc, importPath)
+	if err != nil {
 		return nil, fmt.Errorf("render doc: %v", err)
 	}
 
@@ -782,6 +791,12 @@ func CheckPackage(importPath string, render macaron.Render, rt requestType) (*mo
 	if err = models.SavePkgInfo(pdoc.PkgInfo, true); err != nil {
 		return nil, fmt.Errorf("SavePkgInfo: %v", err)
 	}
+
+	jsFile.PkgID = pinfo.ID
+	if err = models.SaveJSFile(jsFile); err != nil {
+		return nil, fmt.Errorf("SaveJSFile: %v", err)
+	}
+	pdoc.JSFile = jsFile
 
 	return pdoc.PkgInfo, nil
 }

@@ -15,15 +15,10 @@
 package routes
 
 import (
-	"bytes"
-	"encoding/json"
-	"io/ioutil"
-	"net/http"
-	"net/url"
 	"strings"
 	"unicode"
 
-	"github.com/Unknwon/log"
+	log "gopkg.in/clog.v1"
 
 	"github.com/Unknwon/gowalker/models"
 	"github.com/Unknwon/gowalker/pkg/base"
@@ -31,7 +26,7 @@ import (
 )
 
 const (
-	SEARCH base.TplName = "search"
+	SEARCH = "search"
 )
 
 func Search(ctx *context.Context) {
@@ -79,103 +74,6 @@ type searchResult struct {
 	URL         string `json:"url"`
 }
 
-type semanticSearchResultDefDocs struct {
-	Data string
-}
-
-type semanticSearchResultDef struct {
-	Exported bool
-	Kind     string
-	Unit     string
-	Path     string
-	Docs     []*semanticSearchResultDefDocs
-}
-
-type semanticSearchResult struct {
-	Defs []*semanticSearchResultDef
-}
-
-// semanticSearch sends search request to sourcegraph.com.
-// If repo is empty, try again when no results found in first attempt,
-// otherwise, response no results tp client.
-func semanticSearch(ctx *context.Context, query, repo string) {
-	url := "https://sourcegraph.com/.api/global-search?Query=golang+" + url.QueryEscape(query) + "&Limit=30&Fast=1&Repos=" + url.QueryEscape(repo)
-	resp, err := http.Get(url)
-	if err != nil {
-		log.Error("semanticSearch.http.Get (%s): %v", url, err)
-		return
-	}
-
-	data, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		log.Error("semanticSearch.ioutil.ReadAll (%s): %v", url, err)
-		return
-	}
-	data = bytes.TrimSpace(data)
-
-	if len(data) == 0 {
-		if len(repo) == 0 {
-			semanticSearch(ctx, query, "github.com/golang/go")
-		} else {
-			ctx.JSON(200, map[string]interface{}{
-				"results": nil,
-			})
-		}
-		return
-	}
-
-	var sgResults semanticSearchResult
-	if err = json.Unmarshal(data, &sgResults); err != nil {
-		log.Error("semanticSearch.json.Unmarshal (%s): %v", url, err)
-		log.Error("JSON: %s", string(data))
-		return
-	}
-
-	maxResults := 7
-	results := make([]*searchResult, 0, maxResults)
-	for _, def := range sgResults.Defs {
-		if !def.Exported {
-			continue
-		}
-
-		var title, desc, url string
-		switch def.Kind {
-		case "package":
-			title = def.Unit
-		case "func":
-			// recevier/method -> recevier_method
-			anchor := strings.Replace(def.Path, "/", "_", 1)
-			title = def.Unit + "#" + anchor
-		default:
-			continue
-		}
-
-		// Limit length of description to 100.
-		if len(def.Docs) > 0 {
-			if len(def.Docs[0].Data) > 100 {
-				desc = def.Docs[0].Data[:100] + "..."
-			} else {
-				desc = def.Docs[0].Data
-			}
-		}
-		url = "/" + title
-
-		results = append(results, &searchResult{
-			Title:       title,
-			Description: desc,
-			URL:         url,
-		})
-
-		if len(results) >= maxResults {
-			break
-		}
-	}
-
-	ctx.JSON(200, map[string]interface{}{
-		"results": results,
-	})
-}
-
 func SearchJSON(ctx *context.Context) {
 	q := ctx.Query("q")
 
@@ -186,7 +84,7 @@ func SearchJSON(ctx *context.Context) {
 
 	pinfos, err := models.SearchPkgInfo(7, q)
 	if err != nil {
-		log.ErrorD(4, "SearchPkgInfo '%s': %v", q, err)
+		log.Error(2, "SearchPkgInfo '%s': %v", q, err)
 		return
 	}
 

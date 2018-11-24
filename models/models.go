@@ -17,11 +17,11 @@ package models
 import (
 	"fmt"
 
-	"github.com/Unknwon/log"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/go-xorm/core"
 	"github.com/go-xorm/xorm"
 	"github.com/robfig/cron"
+	log "gopkg.in/clog.v1"
 
 	"github.com/Unknwon/gowalker/pkg/setting"
 )
@@ -37,20 +37,22 @@ func init() {
 		sec.Key("HOST").String(),
 		sec.Key("NAME").String()))
 	if err != nil {
-		log.FatalD(4, "Fail to init new engine: %v", err)
+		log.Fatal(2, "Failed to init new engine: %v", err)
 	}
 	x.SetLogger(nil)
 	x.SetMapper(core.GonicMapper{})
 
-	if err = x.Sync(new(PkgInfo), new(PkgRef)); err != nil {
-		log.FatalD(4, "Fail to sync database: %v", err)
+	if err = x.Sync(new(PkgInfo), new(PkgRef), new(JSFile)); err != nil {
+		log.Fatal(2, "Failed to sync database: %v", err)
 	}
 
 	numTotalPackages, _ = x.Count(new(PkgInfo))
 	c := cron.New()
-	c.AddFunc("@every 1m", func() {
+	if err = c.AddFunc("@every 1m", func() {
 		numTotalPackages, _ = x.Count(new(PkgInfo))
-	})
+	}); err != nil {
+		log.Fatal(2, "Failed to add func: %v", err)
+	}
 	c.Start()
 }
 

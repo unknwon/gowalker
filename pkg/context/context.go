@@ -16,11 +16,12 @@ package context
 
 import (
 	"fmt"
+	"net/http"
 	"strings"
 	"time"
 
-	"github.com/Unknwon/log"
 	"github.com/go-macaron/session"
+	log "gopkg.in/clog.v1"
 	"gopkg.in/macaron.v1"
 
 	"github.com/Unknwon/gowalker/pkg/base"
@@ -33,48 +34,63 @@ type Context struct {
 	Flash *session.Flash
 }
 
+// Title sets "Title" field in template data.
+func (c *Context) Title(locale string) {
+	c.Data["Title"] = c.Tr(locale)
+}
+
+// PageIs sets "PageIsxxx" field in template data.
+func (c *Context) PageIs(name string) {
+	c.Data["PageIs"+name] = true
+}
+
 // HasError returns true if error occurs in form validation.
-func (ctx *Context) HasError() bool {
-	hasErr, ok := ctx.Data["HasError"]
+func (c *Context) HasError() bool {
+	hasErr, ok := c.Data["HasError"]
 	if !ok {
 		return false
 	}
-	ctx.Flash.ErrorMsg = ctx.Data["ErrorMsg"].(string)
-	ctx.Data["Flash"] = ctx.Flash
+	c.Flash.ErrorMsg = c.Data["ErrorMsg"].(string)
+	c.Data["Flash"] = c.Flash
 	return hasErr.(bool)
 }
 
 // HTML calls Context.HTML and converts template name to string.
-func (ctx *Context) HTML(status int, name base.TplName) {
-	ctx.Context.HTML(status, string(name))
+func (c *Context) HTML(status int, name string) {
+	c.Context.HTML(status, name)
+}
+
+// Success responses template with status http.StatusOK.
+func (c *Context) Success(name string) {
+	c.HTML(http.StatusOK, name)
 }
 
 // RenderWithErr used for page has form validation but need to prompt error to users.
-func (ctx *Context) RenderWithErr(msg string, tpl base.TplName, form interface{}) {
+func (c *Context) RenderWithErr(msg string, tpl string, form interface{}) {
 	if form != nil {
-		// auth.AssignForm(form, ctx.Data)
+		// auth.AssignForm(form, c.Data)
 	}
-	ctx.Flash.ErrorMsg = msg
-	ctx.Data["Flash"] = ctx.Flash
-	ctx.HTML(200, tpl)
+	c.Flash.ErrorMsg = msg
+	c.Data["Flash"] = c.Flash
+	c.Success(tpl)
 }
 
 // Handle handles and logs error by given status.
-func (ctx *Context) Handle(status int, title string, err error) {
+func (c *Context) Handle(status int, title string, err error) {
 	if err != nil {
-		log.ErrorD(4, "%s: %v", title, err)
+		log.Error(2, "%s: %v", title, err)
 		if macaron.Env != macaron.PROD {
-			ctx.Data["ErrorMsg"] = err
+			c.Data["ErrorMsg"] = err
 		}
 	}
 
 	switch status {
 	case 404:
-		ctx.Data["Title"] = "Page Not Found"
+		c.Data["Title"] = "Page Not Found"
 	case 500:
-		ctx.Data["Title"] = "Internal Server Error"
+		c.Data["Title"] = "Internal Server Error"
 	}
-	ctx.HTML(status, base.TplName(fmt.Sprintf("status/%d", status)))
+	c.HTML(status, fmt.Sprintf("status/%d", status))
 }
 
 // Contexter initializes a classic context for a request.

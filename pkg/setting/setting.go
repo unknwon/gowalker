@@ -18,7 +18,7 @@ import (
 	"time"
 
 	"github.com/Unknwon/com"
-	"github.com/Unknwon/log"
+	log "gopkg.in/clog.v1"
 	"gopkg.in/ini.v1"
 	"gopkg.in/macaron.v1"
 )
@@ -31,7 +31,7 @@ var (
 	// Server settings
 	HTTPPort     int
 	FetchTimeout time.Duration
-	DocsJsPath   string
+	DocsJSPath   string
 	DocsGobPath  string
 
 	// Global settings
@@ -41,7 +41,7 @@ var (
 )
 
 func init() {
-	log.Prefix = "[Go Walker]"
+	log.New(log.CONSOLE, log.ConsoleConfig{})
 
 	sources := []interface{}{"conf/app.ini"}
 	if com.IsFile("custom/app.ini") {
@@ -51,19 +51,24 @@ func init() {
 	var err error
 	Cfg, err = macaron.SetConfig(sources[0], sources[1:]...)
 	if err != nil {
-		log.FatalD(4, "Fail to set configuration: %v", err)
+		log.Fatal(2, "Failed to set configuration: %v", err)
 	}
 
 	if Cfg.Section("").Key("RUN_MODE").String() == "prod" {
 		ProdMode = true
 		macaron.Env = macaron.PROD
 		macaron.ColorLog = false
+
+		log.New(log.CONSOLE, log.ConsoleConfig{
+			Level:      log.INFO,
+			BufferSize: 100,
+		})
 	}
 
 	sec := Cfg.Section("server")
 	HTTPPort = sec.Key("HTTP_PORT").MustInt(8080)
 	FetchTimeout = time.Duration(sec.Key("FETCH_TIMEOUT").MustInt(60)) * time.Second
-	DocsJsPath = sec.Key("DOCS_JS_PATH").MustString("raw/docs/")
+	DocsJSPath = sec.Key("DOCS_JS_PATH").MustString("raw/docs/")
 	DocsGobPath = sec.Key("DOCS_GOB_PATH").MustString("raw/gob/")
 
 	GitHubCredentials = "client_id=" + Cfg.Section("github").Key("CLIENT_ID").String() +

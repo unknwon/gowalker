@@ -25,6 +25,7 @@ import (
 	"time"
 
 	"github.com/Unknwon/com"
+	log "gopkg.in/clog.v1"
 
 	"github.com/Unknwon/gowalker/models"
 	"github.com/Unknwon/gowalker/pkg/base"
@@ -71,7 +72,7 @@ type RepoCommit struct {
 	} `json:"commit"`
 }
 
-func getGithubDoc(match map[string]string, etag string) (_ *Package, err error) {
+func getGitHubDoc(match map[string]string, etag string) (_ *Package, err error) {
 	match["cred"] = setting.GitHubCredentials
 
 	repoInfo := new(RepoInfo)
@@ -125,7 +126,7 @@ func getGithubDoc(match map[string]string, etag string) (_ *Package, err error) 
 
 		commit = obj.Sha
 		match["tag"] = commit
-		fmt.Println(commit)
+		log.Trace("Import path %q found commit: %s", match["importPath"], commit)
 	} else {
 		commit, err = getGithubRevision(com.Expand("github.com/{owner}/{repo}", match), match["tag"])
 		if err != nil {

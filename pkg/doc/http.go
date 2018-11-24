@@ -20,7 +20,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/Unknwon/log"
+	log "gopkg.in/clog.v1"
 )
 
 var (

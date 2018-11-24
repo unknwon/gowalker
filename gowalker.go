@@ -20,10 +20,10 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/Unknwon/log"
 	"github.com/go-macaron/i18n"
 	"github.com/go-macaron/pongo2"
 	"github.com/go-macaron/session"
+	log "gopkg.in/clog.v1"
 	"gopkg.in/macaron.v1"
 
 	"github.com/Unknwon/gowalker/pkg/context"
@@ -32,7 +32,7 @@ import (
 	"github.com/Unknwon/gowalker/routes/apiv1"
 )
 
-const Version = "2.0.1.1123"
+const Version = "2.1.0.1124"
 
 func init() {
 	setting.AppVer = Version
@@ -86,6 +86,6 @@ Disallow: /search`
 	listenAddr := fmt.Sprintf("0.0.0.0:%d", setting.HTTPPort)
 	log.Info("Listen: http://%s", listenAddr)
 	if err := http.ListenAndServe(listenAddr, m); err != nil {
-		log.FatalD(4, "Fail to start server: %v", err)
+		log.Fatal(2, "Failed to start server: %v", err)
 	}
 }

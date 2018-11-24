@@ -24,7 +24,7 @@ import (
 	"strings"
 
 	"github.com/Unknwon/com"
-	"github.com/Unknwon/log"
+	log "gopkg.in/clog.v1"
 
 	"github.com/Unknwon/gowalker/pkg/base"
 	"github.com/Unknwon/gowalker/pkg/httplib"
@@ -32,8 +32,8 @@ import (
 )
 
 var (
-	ErrInvalidRemotePath = errors.New("Invalid package remote path")
-	ErrNoServiceMatch    = errors.New("Package remote path does not match any service")
+	ErrInvalidRemotePath = errors.New("invalid package remote path")
+	ErrNoServiceMatch    = errors.New("package remote path does not match any service")
 )
 
 type crawlResult struct {
@@ -50,7 +50,7 @@ type service struct {
 
 // services is the list of source code control services handled by gowalker.
 var services = []*service{
-	{githubPattern, "github.com/", getGithubDoc},
+	{githubPattern, "github.com/", getGitHubDoc},
 	// {googlePattern, "code.google.com/", getGoogleDoc},
 	// {bitbucketPattern, "bitbucket.org/", getBitbucketDoc},
 	// {launchpadPattern, "launchpad.net/", getLaunchpadDoc},
@@ -67,7 +67,7 @@ func getStatic(importPath, etag string) (pdoc *Package, err error) {
 		m := s.pattern.FindStringSubmatch(importPath)
 		if m == nil {
 			if s.prefix != "" {
-				log.Debug("Import path prefix matches known service, but regexp does not: %s", importPath)
+				log.Trace("Import path prefix matches known service, but regexp does not: %s", importPath)
 				return nil, ErrInvalidRemotePath
 			}
 			continue
@@ -244,7 +244,7 @@ func crawlDoc(importPath, etag string) (pdoc *Package, err error) {
 		return nil, err
 	}
 
-	// Render README.
+	// Render README
 	for name, content := range pdoc.Readme {
 		p, err := httplib.Post("https://api.github.com/markdown/raw?"+setting.GitHubCredentials).
 			Header("Content-Type", "text/plain").Body(content).Bytes()

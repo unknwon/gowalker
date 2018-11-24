@@ -170,7 +170,7 @@ func getVCSDoc(match map[string]string, etagSaved string) (*Package, error) {
 	if strings.HasPrefix(match["importPath"], "golang.org/x/") {
 		match["owner"] = "golang"
 		match["repo"] = path.Dir(strings.TrimPrefix(match["importPath"], "golang.org/x/"))
-		return getGithubDoc(match, etagSaved)
+		return getGitHubDoc(match, etagSaved)
 	} else if strings.HasPrefix(match["importPath"], "gopkg.in/") {
 		m := gopkgPathPattern.FindStringSubmatch(strings.TrimPrefix(match["importPath"], "gopkg.in"))
 		if m == nil {
@@ -184,7 +184,7 @@ func getVCSDoc(match map[string]string, etagSaved string) (*Package, error) {
 		match["owner"] = user
 		match["repo"] = repo
 		match["tag"] = m[3]
-		return getGithubDoc(match, etagSaved)
+		return getGitHubDoc(match, etagSaved)
 	}
 
 	cmd := vcsCmds[match["vcs"]]

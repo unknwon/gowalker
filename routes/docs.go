@@ -31,8 +31,8 @@ import (
 )
 
 const (
-	DOCS         base.TplName = "docs/docs"
-	DOCS_IMPORTS base.TplName = "docs/imports"
+	DOCS         = "docs/docs"
+	DOCS_IMPORTS = "docs/imports"
 )
 
 // updateHistory updates browser history.
@@ -102,7 +102,7 @@ func specialHandles(ctx *context.Context, pinfo *models.PkgInfo) bool {
 			ctx.Flash.Info(ctx.Tr("docs.refresh.too_often"))
 		} else {
 			importPath := ctx.Params("*")
-			_, err := doc.CheckPackage(importPath, ctx.Render, doc.REQUEST_TYPE_REFRESH)
+			_, err := doc.CheckPackage(importPath, ctx.Render, doc.RequestTypeRefresh)
 			if err != nil {
 				handleError(ctx, err)
 				return true
@@ -115,85 +115,85 @@ func specialHandles(ctx *context.Context, pinfo *models.PkgInfo) bool {
 	return false
 }
 
-func Docs(ctx *context.Context) {
-	importPath := ctx.Params("*")
+func Docs(c *context.Context) {
+	importPath := c.Params("*")
 
-	// Check if import path looks like a vendor directory.
+	// Check if import path looks like a vendor directory
 	if strings.Contains(importPath, "/vendor/") {
-		handleError(ctx, errors.New("import path looks like is a vendor directory, don't try to fool me!"))
+		handleError(c, errors.New("import path looks like is a vendor directory, don't try to fool me! :D"))
 		return
 	}
 
 	if base.IsGAERepoPath(importPath) {
-		ctx.Redirect("/google.golang.org/" + importPath)
+		c.Redirect("/google.golang.org/" + importPath)
 		return
 	}
 
-	pinfo, err := doc.CheckPackage(importPath, ctx.Render, doc.REQUEST_TYPE_HUMAN)
+	pinfo, err := doc.CheckPackage(importPath, c.Render, doc.RequestTypeHuman)
 	if err != nil {
-		handleError(ctx, err)
+		handleError(c, err)
 		return
 	}
 
-	ctx.Data["PageIsDocs"] = true
-	ctx.Data["Title"] = pinfo.ImportPath
-	ctx.Data["ParentPath"] = path.Dir(pinfo.ImportPath)
-	ctx.Data["ProjectName"] = path.Base(pinfo.ImportPath)
-	ctx.Data["ProjectPath"] = pinfo.ProjectPath
-	ctx.Data["NumStars"] = pinfo.Stars
+	c.PageIs("Docs")
+	c.Title(pinfo.ImportPath)
+	c.Data["ParentPath"] = path.Dir(pinfo.ImportPath)
+	c.Data["ProjectName"] = path.Base(pinfo.ImportPath)
+	c.Data["ProjectPath"] = pinfo.ProjectPath
+	c.Data["NumStars"] = pinfo.Stars
 
-	if specialHandles(ctx, pinfo) {
+	if specialHandles(c, pinfo) {
 		return
 	}
 
 	if pinfo.IsGoRepo {
-		ctx.Flash.Info(ctx.Tr("docs.turn_into_search", importPath), true)
+		c.Flash.Info(c.Tr("docs.turn_into_search", importPath), true)
 	}
 
-	ctx.Data["PkgDesc"] = pinfo.Synopsis
+	c.Data["PkgDesc"] = pinfo.Synopsis
 
-	// README.
-	lang := ctx.Data["Lang"].(string)[:2]
-	readmePath := setting.DocsJsPath + pinfo.ImportPath + "_RM_" + lang + ".js"
+	// README
+	lang := c.Data["Lang"].(string)[:2]
+	readmePath := setting.DocsJSPath + pinfo.ImportPath + "_RM_" + lang + ".js"
 	if com.IsFile(readmePath) {
-		ctx.Data["IsHasReadme"] = true
-		ctx.Data["ReadmePath"] = readmePath
+		c.Data["IsHasReadme"] = true
+		c.Data["ReadmePath"] = readmePath
 	} else {
-		readmePath := setting.DocsJsPath + pinfo.ImportPath + "_RM_en.js"
+		readmePath := setting.DocsJSPath + pinfo.ImportPath + "_RM_en.js"
 		if com.IsFile(readmePath) {
-			ctx.Data["IsHasReadme"] = true
-			ctx.Data["ReadmePath"] = readmePath
+			c.Data["IsHasReadme"] = true
+			c.Data["ReadmePath"] = readmePath
 		}
 	}
 
-	// Documentation.
-	docJS := make([]string, 0, pinfo.JsNum+1)
-	docJS = append(docJS, setting.DocsJsPath+importPath+".js")
-	for i := 1; i <= pinfo.JsNum; i++ {
-		docJS = append(docJS, fmt.Sprintf("%s%s-%d.js", setting.DocsJsPath, importPath, i))
+	// Documentation
+	docJS := make([]string, 0, pinfo.JSFile.NumExtraFiles+1)
+	docJS = append(docJS, setting.DocsJSPath+importPath+".js")
+	for i := 1; i <= pinfo.JSFile.NumExtraFiles; i++ {
+		docJS = append(docJS, fmt.Sprintf("%s%s-%d.js", setting.DocsJSPath, importPath, i))
 	}
-	ctx.Data["DocJS"] = docJS
-	ctx.Data["Timestamp"] = pinfo.Created
+	c.Data["DocJS"] = docJS
+	c.Data["Timestamp"] = pinfo.Created
 	if time.Now().UTC().Add(-5*time.Second).Unix() < pinfo.Created {
-		ctx.Flash.Success(ctx.Tr("docs.generate_success"), true)
+		c.Flash.Success(c.Tr("docs.generate_success"), true)
 	}
 
-	// Subdirs.
+	// Subdirs
 	if len(pinfo.Subdirs) > 0 {
-		ctx.Data["IsHasSubdirs"] = true
-		ctx.Data["ViewDirPath"] = pinfo.ViewDirPath
-		ctx.Data["Subdirs"] = models.GetSubPkgs(pinfo.ImportPath, strings.Split(pinfo.Subdirs, "|"))
+		c.Data["IsHasSubdirs"] = true
+		c.Data["ViewDirPath"] = pinfo.ViewDirPath
+		c.Data["Subdirs"] = models.GetSubPkgs(pinfo.ImportPath, strings.Split(pinfo.Subdirs, "|"))
 	}
 
-	// Imports and references.
-	ctx.Data["ImportNum"] = pinfo.ImportNum
-	ctx.Data["RefNum"] = pinfo.RefNum
+	// Imports and references
+	c.Data["ImportNum"] = pinfo.ImportNum
+	c.Data["RefNum"] = pinfo.RefNum
 
-	// Tools.
-	ctx.Data["TimeDuration"] = base.TimeSince(time.Unix(pinfo.Created, 0), ctx.Locale.Language())
-	ctx.Data["CanRefresh"] = pinfo.CanRefresh()
+	// Tools
+	c.Data["TimeDuration"] = base.TimeSince(time.Unix(pinfo.Created, 0), c.Locale.Language())
+	c.Data["CanRefresh"] = pinfo.CanRefresh()
 
-	updateHistory(ctx, pinfo.ID)
+	updateHistory(c, pinfo.ID)
 
-	ctx.HTML(200, DOCS)
+	c.Success(DOCS)
 }

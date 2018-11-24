@@ -23,20 +23,21 @@ import (
 	"time"
 
 	"github.com/Unknwon/com"
+	log "gopkg.in/clog.v1"
 
 	"github.com/Unknwon/gowalker/pkg/base"
 	"github.com/Unknwon/gowalker/pkg/setting"
 )
 
 var (
-	ErrEmptyPackagePath     = errors.New("Package import path is empty")
-	ErrPackageNotFound      = errors.New("Package does not found")
-	ErrPackageVersionTooOld = errors.New("Package version is too old")
+	ErrEmptyPackagePath     = errors.New("package import path is empty")
+	ErrPackageNotFound      = errors.New("package does not found")
+	ErrPackageVersionTooOld = errors.New("package version is too old")
 )
 
 // PkgInfo represents the package information.
 type PkgInfo struct {
-	ID         int64  `xorm:"pk autoincr"`
+	ID         int64
 	Name       string `xorm:"-"`
 	ImportPath string `xorm:"UNIQUE"`
 	Etag       string
@@ -56,8 +57,6 @@ type PkgInfo struct {
 	Priority int `xorm:" NOT NULL"`
 	Views    int64
 	Stars    int64
-	// Indicate how many JS should be downloaded(JsNum=total num - 1)
-	JsNum int
 
 	ImportNum int64
 	ImportIDs string `xorm:"import_ids LONGTEXT"`
@@ -69,12 +68,34 @@ type PkgInfo struct {
 
 	Subdirs string `xorm:"TEXT"`
 
-	LastViewed int64 `xorm:"-"`
+	LastViewed int64 `xorm:"NOT NULL DEFAULT 0"`
 	Created    int64
+
+	JSFile *JSFile `xorm:"-"`
 }
 
-func (p *PkgInfo) JSPath() string {
-	return path.Join(setting.DocsJsPath, p.ImportPath) + ".js"
+// HasJSFile returns false if JS file must be regenerated,
+// it populates the JSFile field when file exists.
+func (p *PkgInfo) HasJSFile() bool {
+	jsFile, err := GetJSFile(p.ID, p.Etag)
+	if err != nil {
+		if err != ErrJSFileNotFound {
+			log.Error(2, "GetJSFile: %v", err)
+		}
+		return false
+	}
+
+	if jsFile.Status == JSFileStatusDistributed ||
+		(jsFile.Status == JSFileStatusGenerated && com.IsFile(p.LocalJSPath())) {
+		p.JSFile = jsFile
+		return true
+	}
+
+	return false
+}
+
+func (p *PkgInfo) LocalJSPath() string {
+	return path.Join(setting.DocsJSPath, p.ImportPath) + ".js"
 }
 
 // CanRefresh returns true if package is available to refresh.
@@ -100,12 +121,12 @@ func (p *PkgInfo) GetRefs() []*PkgInfo {
 	return pinfos
 }
 
-// PACKAGE_VER is modified when previously stored packages are invalid.
-const PACKAGE_VER = 1
+// PackageVersion is modified when previously stored packages are invalid.
+const PackageVersion = 1
 
 // PkgRef represents temporary reference information of a package.
 type PkgRef struct {
-	ID         int64  `xorm:"pk autoincr"`
+	ID         int64
 	ImportPath string `xorm:"UNIQUE"`
 	RefNum     int64
 	RefIDs     string `xorm:"ref_ids LONGTEXT"`
@@ -211,7 +232,7 @@ func SavePkgInfo(pinfo *PkgInfo, updateRefs bool) (err error) {
 		pinfo.Synopsis = pinfo.Synopsis[:255]
 	}
 
-	pinfo.PkgVer = PACKAGE_VER
+	pinfo.PkgVer = PackageVersion
 
 	switch {
 	case pinfo.IsGaeRepo:
@@ -297,12 +318,12 @@ func GetPkgInfo(importPath string) (*PkgInfo, error) {
 		return nil, err
 	} else if !has {
 		return nil, ErrPackageNotFound
-	} else if pinfo.PkgVer < PACKAGE_VER {
+	} else if pinfo.PkgVer < PackageVersion {
 		pinfo.Etag = ""
 		return pinfo, ErrPackageVersionTooOld
 	}
 
-	if !com.IsFile(pinfo.JSPath()) {
+	if !pinfo.HasJSFile() {
 		pinfo.Etag = ""
 		return pinfo, ErrPackageVersionTooOld
 	}
@@ -361,11 +382,11 @@ func GetPkgInfoById(id int64) (*PkgInfo, error) {
 		return nil, err
 	} else if !has {
 		return nil, ErrPackageNotFound
-	} else if pinfo.PkgVer < PACKAGE_VER {
+	} else if pinfo.PkgVer < PackageVersion {
 		return pinfo, ErrPackageVersionTooOld
 	}
 
-	if !com.IsFile(pinfo.JSPath()) {
+	if !pinfo.HasJSFile() {
 		return pinfo, ErrPackageVersionTooOld
 	}
 

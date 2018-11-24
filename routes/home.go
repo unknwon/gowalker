@@ -26,10 +26,16 @@ import (
 )
 
 const (
-	HOME base.TplName = "home"
+	HOME = "home"
 )
 
-func getBrowsingHistory(ctx *context.Context) []*models.PkgInfo {
+type pkgInfo struct {
+	ImportPath string
+	IsGoRepo   bool
+	LastViewed int64
+}
+
+func getBrowsingHistory(ctx *context.Context) []*pkgInfo {
 	rawInfos := strings.Split(ctx.GetCookie("user_history"), "|")
 	pkgIDs := make([]int64, 0, len(rawInfos)) // ID -> Unix
 	lastViewedTimes := make(map[int64]int64)
@@ -54,29 +60,31 @@ func getBrowsingHistory(ctx *context.Context) []*models.PkgInfo {
 		ctx.Flash.Error(fmt.Sprintf("Cannot get browsing history: %v", err), true)
 		return nil
 	}
-
-	pkgInfosSet := make(map[int64]*models.PkgInfo)
+	pkgInfosSet := make(map[int64]*pkgInfo)
 	for i := range pkgInfos {
-		pkgInfosSet[pkgInfos[i].ID] = pkgInfos[i]
+		pkgInfosSet[pkgInfos[i].ID] = &pkgInfo{
+			ImportPath: pkgInfos[i].ImportPath,
+			IsGoRepo:   pkgInfos[i].IsGoRepo,
+		}
 	}
 
 	// Assign package info in the same order they stored in cookie.
-	pkgInfos = make([]*models.PkgInfo, 0, len(pkgIDs))
+	localPkgInfos := make([]*pkgInfo, 0, len(pkgIDs))
 	for i := range pkgIDs {
 		if pkgInfosSet[pkgIDs[i]] == nil {
 			continue
 		}
 
 		pkgInfosSet[pkgIDs[i]].LastViewed = lastViewedTimes[pkgIDs[i]]
-		pkgInfos = append(pkgInfos, pkgInfosSet[pkgIDs[i]])
+		localPkgInfos = append(localPkgInfos, pkgInfosSet[pkgIDs[i]])
 	}
 
-	return pkgInfos
+	return localPkgInfos
 }
 
-func Home(ctx *context.Context) {
-	ctx.Data["PageIsHome"] = true
-	ctx.Data["NumTotalPackages"] = base.FormatNumString(models.NumTotalPackages())
-	ctx.Data["BrowsingHistory"] = getBrowsingHistory(ctx)
-	ctx.HTML(200, HOME)
+func Home(c *context.Context) {
+	c.PageIs("Home")
+	c.Data["NumTotalPackages"] = base.FormatNumString(models.NumTotalPackages())
+	c.Data["BrowsingHistory"] = getBrowsingHistory(c)
+	c.Success(HOME)
 }
