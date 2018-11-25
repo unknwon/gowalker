@@ -98,6 +98,19 @@ func (p *PkgInfo) LocalJSPath() string {
 	return path.Join(setting.DocsJSPath, p.ImportPath) + ".js"
 }
 
+func (p *PkgInfo) LocalJSPaths() []string {
+	if p.JSFile == nil {
+		return []string{p.LocalJSPath()}
+	}
+
+	paths := make([]string, 0, p.JSFile.NumExtraFiles+1)
+	paths = append(paths, setting.DocsJSPath+p.ImportPath+".js")
+	for i := 1; i <= p.JSFile.NumExtraFiles; i++ {
+		paths = append(paths, fmt.Sprintf("%s%s-%d.js", setting.DocsJSPath, p.ImportPath, i))
+	}
+	return paths
+}
+
 // CanRefresh returns true if package is available to refresh.
 func (p *PkgInfo) CanRefresh() bool {
 	return time.Now().UTC().Add(-1*setting.RefreshInterval).Unix() > p.Created
@@ -113,7 +126,7 @@ func (p *PkgInfo) GetRefs() []*PkgInfo {
 		}
 
 		id := com.StrTo(refIDs[i][1:]).MustInt64()
-		if pinfo, _ := GetPkgInfoById(id); pinfo != nil {
+		if pinfo, _ := GetPkgInfoByID(id); pinfo != nil {
 			pinfo.Name = path.Base(pinfo.ImportPath)
 			pinfos = append(pinfos, pinfo)
 		}
@@ -179,7 +192,7 @@ func checkRefs(pinfo *PkgInfo) {
 			continue
 		}
 
-		pkg, _ := GetPkgInfoById(com.StrTo(refIDs[i][1:]).MustInt64())
+		pkg, _ := GetPkgInfoByID(com.StrTo(refIDs[i][1:]).MustInt64())
 		if pkg == nil {
 			continue
 		}
@@ -374,8 +387,8 @@ func GetPkgInfosByPaths(paths []string) []*PkgInfo {
 	return pinfos
 }
 
-// GetPkgInfoById returns package information by given ID.
-func GetPkgInfoById(id int64) (*PkgInfo, error) {
+// GetPkgInfoByID returns package information by given ID.
+func GetPkgInfoByID(id int64) (*PkgInfo, error) {
 	pinfo := new(PkgInfo)
 	has, err := x.Id(id).Get(pinfo)
 	if err != nil {

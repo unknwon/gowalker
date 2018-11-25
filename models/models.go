@@ -16,6 +16,7 @@ package models
 
 import (
 	"fmt"
+	"time"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/go-xorm/core"
@@ -48,12 +49,14 @@ func init() {
 
 	numTotalPackages, _ = x.Count(new(PkgInfo))
 	c := cron.New()
-	if err = c.AddFunc("@every 1m", func() {
-		numTotalPackages, _ = x.Count(new(PkgInfo))
-	}); err != nil {
+	if err = c.AddFunc("@every 1m", RefreshNumTotalPackages); err != nil {
+		log.Fatal(2, "Failed to add func: %v", err)
+	} else if err = c.AddFunc("@every 1m", DistributeJSFiles); err != nil {
 		log.Fatal(2, "Failed to add func: %v", err)
 	}
 	c.Start()
+
+	time.AfterFunc(5*time.Second, DistributeJSFiles)
 }
 
 var numTotalPackages int64

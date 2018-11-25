@@ -20,7 +20,7 @@
 
 		<div id="markdown" class="markdown">
 			{% for doc in DocJS %}
-				<script type="text/javascript" src="/{{doc}}?={{Timestamp}}"></script>
+				<script type="text/javascript" src="{{doc}}?v={{Timestamp}}"></script>
 			{% endfor %}
 
 			{% if IsHasSubdirs %}

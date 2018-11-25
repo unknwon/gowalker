@@ -167,12 +167,21 @@ func Docs(c *context.Context) {
 	}
 
 	// Documentation
-	docJS := make([]string, 0, pinfo.JSFile.NumExtraFiles+1)
-	docJS = append(docJS, setting.DocsJSPath+importPath+".js")
-	for i := 1; i <= pinfo.JSFile.NumExtraFiles; i++ {
-		docJS = append(docJS, fmt.Sprintf("%s%s-%d.js", setting.DocsJSPath, importPath, i))
+	if pinfo.JSFile.Status == models.JSFileStatusDistributed {
+		docJS := models.ComposeSpacesObjectNames(pinfo.ImportPath, pinfo.JSFile.Etag, pinfo.JSFile.NumExtraFiles)
+		for i := range docJS {
+			docJS[i] = setting.DigitalOcean.Spaces.BucketURL + docJS[i]
+		}
+		c.Data["DocJS"] = docJS
+
+	} else {
+		docJS := make([]string, 0, pinfo.JSFile.NumExtraFiles+1)
+		docJS = append(docJS, "/"+setting.DocsJSPath+importPath+".js")
+		for i := 1; i <= pinfo.JSFile.NumExtraFiles; i++ {
+			docJS = append(docJS, fmt.Sprintf("/%s%s-%d.js", setting.DocsJSPath, importPath, i))
+		}
+		c.Data["DocJS"] = docJS
 	}
-	c.Data["DocJS"] = docJS
 	c.Data["Timestamp"] = pinfo.Created
 	if time.Now().UTC().Add(-5*time.Second).Unix() < pinfo.Created {
 		c.Flash.Success(c.Tr("docs.generate_success"), true)

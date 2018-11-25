@@ -34,6 +34,17 @@ var (
 	DocsJSPath   string
 	DocsGobPath  string
 
+	DigitalOcean struct {
+		Spaces struct {
+			Enabled   bool
+			Endpoint  string
+			AccessKey string
+			SecretKey string
+			Bucket    string
+			BucketURL string `ini:"BUCKET_URL"`
+		}
+	}
+
 	// Global settings
 	Cfg               *ini.File
 	GitHubCredentials string
@@ -53,6 +64,7 @@ func init() {
 	if err != nil {
 		log.Fatal(2, "Failed to set configuration: %v", err)
 	}
+	Cfg.NameMapper = ini.AllCapsUnderscore
 
 	if Cfg.Section("").Key("RUN_MODE").String() == "prod" {
 		ProdMode = true
@@ -71,7 +83,10 @@ func init() {
 	DocsJSPath = sec.Key("DOCS_JS_PATH").MustString("raw/docs/")
 	DocsGobPath = sec.Key("DOCS_GOB_PATH").MustString("raw/gob/")
 
+	if err = Cfg.Section("digitalocean.spaces").MapTo(&DigitalOcean.Spaces); err != nil {
+		log.Fatal(2, "Failed to map DigitalOcean.Spaces settings: %v", err)
+	}
+
 	GitHubCredentials = "client_id=" + Cfg.Section("github").Key("CLIENT_ID").String() +
 		"&client_secret=" + Cfg.Section("github").Key("CLIENT_SECRET").String()
-
 }
