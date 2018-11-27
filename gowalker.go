@@ -32,7 +32,7 @@ import (
 	"github.com/Unknwon/gowalker/routes/apiv1"
 )
 
-const Version = "2.2.0.1125"
+const Version = "2.3.0.1127"
 
 func init() {
 	setting.AppVer = Version
@@ -41,7 +41,9 @@ func init() {
 // newMacaron initializes Macaron instance.
 func newMacaron() *macaron.Macaron {
 	m := macaron.New()
-	m.Use(macaron.Logger())
+	if !setting.DisableRouterLog {
+		m.Use(macaron.Logger())
+	}
 	m.Use(macaron.Recovery())
 	m.Use(macaron.Static("public",
 		macaron.StaticOptions{

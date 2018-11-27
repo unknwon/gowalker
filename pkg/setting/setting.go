@@ -25,8 +25,9 @@ import (
 
 var (
 	// Application settings
-	AppVer   string
-	ProdMode bool
+	AppVer           string
+	ProdMode         bool
+	DisableRouterLog bool
 
 	// Server settings
 	HTTPPort     int
@@ -77,16 +78,28 @@ func init() {
 		})
 	}
 
+	DisableRouterLog = Cfg.Section("").Key("DISABLE_ROUTER_LOG").MustBool()
+
 	sec := Cfg.Section("server")
 	HTTPPort = sec.Key("HTTP_PORT").MustInt(8080)
 	FetchTimeout = time.Duration(sec.Key("FETCH_TIMEOUT").MustInt(60)) * time.Second
 	DocsJSPath = sec.Key("DOCS_JS_PATH").MustString("raw/docs/")
 	DocsGobPath = sec.Key("DOCS_GOB_PATH").MustString("raw/gob/")
 
+	GitHubCredentials = "client_id=" + Cfg.Section("github").Key("CLIENT_ID").String() +
+		"&client_secret=" + Cfg.Section("github").Key("CLIENT_SECRET").String()
+
 	if err = Cfg.Section("digitalocean.spaces").MapTo(&DigitalOcean.Spaces); err != nil {
 		log.Fatal(2, "Failed to map DigitalOcean.Spaces settings: %v", err)
 	}
 
-	GitHubCredentials = "client_id=" + Cfg.Section("github").Key("CLIENT_ID").String() +
-		"&client_secret=" + Cfg.Section("github").Key("CLIENT_SECRET").String()
+	sec = Cfg.Section("log.discord")
+	if sec.Key("ENABLED").MustBool() {
+		log.New(log.DISCORD, log.DiscordConfig{
+			Level:      log.ERROR,
+			BufferSize: 100,
+			URL:        sec.Key("URL").MustString(""),
+			Username:   "Go Walker",
+		})
+	}
 }
