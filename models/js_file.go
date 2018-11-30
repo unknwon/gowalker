@@ -51,6 +51,10 @@ func GetJSFile(pkgID int64, etag string) (*JSFile, error) {
 }
 
 func SaveJSFile(jsFile *JSFile) error {
+	if jsFile.PkgID == 0 {
+		return errors.New("PkgID is zero")
+	}
+
 	oldJSFile, err := GetJSFile(jsFile.PkgID, jsFile.Etag)
 	if err != nil && err != ErrJSFileNotFound {
 		return err
