@@ -46,6 +46,10 @@ var (
 		}
 	}
 
+	Maintenance struct {
+		JSRecycleDays int `ini:"JS_RECYCLE_DAYS"`
+	}
+
 	// Global settings
 	Cfg               *ini.File
 	GitHubCredentials string
@@ -91,6 +95,8 @@ func init() {
 
 	if err = Cfg.Section("digitalocean.spaces").MapTo(&DigitalOcean.Spaces); err != nil {
 		log.Fatal(2, "Failed to map DigitalOcean.Spaces settings: %v", err)
+	} else if err = Cfg.Section("maintenance").MapTo(&Maintenance); err != nil {
+		log.Fatal(2, "Failed to map Maintenance settings: %v", err)
 	}
 
 	sec = Cfg.Section("log.discord")

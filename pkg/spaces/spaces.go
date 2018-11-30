@@ -42,8 +42,8 @@ func Client() *minio.Client {
 	return client
 }
 
-// UploadFile uploads a file with given path to the bucket.
-func UploadFile(localPath, objectName string) error {
+// PutObject uploads an object with given path from local file to the bucket.
+func PutObject(localPath, objectName string) error {
 	f, err := os.Open(localPath)
 	if err != nil {
 		return err
@@ -61,4 +61,9 @@ func UploadFile(localPath, objectName string) error {
 		},
 	})
 	return err
+}
+
+// RemoveObject deletes an object with given path from the bucket.
+func RemoveObject(objectName string) error {
+	return Client().RemoveObject(setting.DigitalOcean.Spaces.Bucket, objectName)
 }

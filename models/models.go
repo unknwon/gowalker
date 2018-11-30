@@ -53,10 +53,13 @@ func init() {
 		log.Fatal(2, "Failed to add func: %v", err)
 	} else if err = c.AddFunc("@every 1m", DistributeJSFiles); err != nil {
 		log.Fatal(2, "Failed to add func: %v", err)
+	} else if err = c.AddFunc("@every 1m", RecycleJSFiles); err != nil {
+		log.Fatal(2, "Failed to add func: %v", err)
 	}
 	c.Start()
 
 	time.AfterFunc(5*time.Second, DistributeJSFiles)
+	time.AfterFunc(10*time.Second, RecycleJSFiles)
 }
 
 var numTotalPackages int64
