@@ -788,13 +788,14 @@ func CheckPackage(importPath string, render macaron.Render, rt requestType) (*mo
 	}
 
 	pdoc.Created = time.Now().UTC().Unix()
+	pdoc.LastViewed = time.Now().Unix()
 	if err = models.SavePkgInfo(pdoc.PkgInfo, true); err != nil {
-		return nil, fmt.Errorf("SavePkgInfo: %v", err)
+		return nil, fmt.Errorf("SavePkgInfo[%s]: %v", importPath, err)
 	}
 
 	jsFile.PkgID = pdoc.PkgInfo.ID
 	if err = models.SaveJSFile(jsFile); err != nil {
-		return nil, fmt.Errorf("SaveJSFile: %v", err)
+		return nil, fmt.Errorf("SaveJSFile[%s]: %v", importPath, err)
 	}
 	pdoc.JSFile = jsFile
 
