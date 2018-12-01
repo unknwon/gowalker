@@ -22,7 +22,7 @@ import (
 
 var (
 	totalJSFilesGaugeFunc = prometheus.NewGaugeFunc(prometheus.GaugeOpts{
-		Namespace: "database",
+		Namespace: "gowalker",
 		Subsystem: "js_file",
 		Name:      "total",
 		Help:      "Number of total JS files",
@@ -30,7 +30,7 @@ var (
 		return float64(models.NumTotalJSFiles())
 	})
 	generatedJSFilesGaugeFunc = prometheus.NewGaugeFunc(prometheus.GaugeOpts{
-		Namespace: "database",
+		Namespace: "gowalker",
 		Subsystem: "js_file",
 		Name:      "generated",
 		Help:      "Number of generated JS files",
@@ -38,7 +38,7 @@ var (
 		return float64(models.NumGeneratedJSFiles())
 	})
 	distributedJSFilesGaugeFunc = prometheus.NewGaugeFunc(prometheus.GaugeOpts{
-		Namespace: "database",
+		Namespace: "gowalker",
 		Subsystem: "js_file",
 		Name:      "distributed",
 		Help:      "Number of distributed JS files",
@@ -46,7 +46,7 @@ var (
 		return float64(models.NumDistributedJSFiles())
 	})
 	recycledJSFilesGaugeFunc = prometheus.NewGaugeFunc(prometheus.GaugeOpts{
-		Namespace: "database",
+		Namespace: "gowalker",
 		Subsystem: "js_file",
 		Name:      "recycled",
 		Help:      "Number of recycled JS files",

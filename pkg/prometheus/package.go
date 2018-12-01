@@ -22,7 +22,7 @@ import (
 
 var (
 	totalPackagesGaugeFunc = prometheus.NewGaugeFunc(prometheus.GaugeOpts{
-		Namespace: "database",
+		Namespace: "gowalker",
 		Subsystem: "package",
 		Name:      "total",
 		Help:      "Number of total packages",
@@ -30,7 +30,7 @@ var (
 		return float64(models.NumTotalPackages())
 	})
 	monthlyActivePackagesGaugeFunc = prometheus.NewGaugeFunc(prometheus.GaugeOpts{
-		Namespace: "database",
+		Namespace: "gowalker",
 		Subsystem: "package",
 		Name:      "monthly_active",
 		Help:      "Number of monthly active packages",
@@ -38,7 +38,7 @@ var (
 		return float64(models.NumMonthlyActivePackages())
 	})
 	weeklyActivePackagesGaugeFunc = prometheus.NewGaugeFunc(prometheus.GaugeOpts{
-		Namespace: "database",
+		Namespace: "gowalker",
 		Subsystem: "package",
 		Name:      "weekly_active",
 		Help:      "Number of weekly active packages",
@@ -46,7 +46,7 @@ var (
 		return float64(models.NumWeeklyActivePackages())
 	})
 	dailyActivePackagesGaugeFunc = prometheus.NewGaugeFunc(prometheus.GaugeOpts{
-		Namespace: "database",
+		Namespace: "gowalker",
 		Subsystem: "package",
 		Name:      "daily_active",
 		Help:      "Number of daily active packages",
