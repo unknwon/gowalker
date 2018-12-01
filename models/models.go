@@ -16,6 +16,7 @@ package models
 
 import (
 	"fmt"
+	"sync/atomic"
 	"time"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -62,8 +63,9 @@ func init() {
 	time.AfterFunc(10*time.Second, RecycleJSFiles)
 }
 
+// NOTE: Must be operated atomically
 var numTotalPackages int64
 
 func NumTotalPackages() int64 {
-	return numTotalPackages
+	return atomic.LoadInt64(&numTotalPackages)
 }

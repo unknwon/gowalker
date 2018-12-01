@@ -17,6 +17,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"net/http"
 	"strings"
 
@@ -27,12 +28,13 @@ import (
 	"gopkg.in/macaron.v1"
 
 	"github.com/Unknwon/gowalker/pkg/context"
+	_ "github.com/Unknwon/gowalker/pkg/prometheus"
 	"github.com/Unknwon/gowalker/pkg/setting"
 	"github.com/Unknwon/gowalker/routes"
 	"github.com/Unknwon/gowalker/routes/apiv1"
 )
 
-const Version = "2.4.0.1201"
+const Version = "2.5.0.1201"
 
 func init() {
 	setting.AppVer = Version
@@ -78,6 +80,8 @@ func main() {
 			m.Get("/badge", apiv1.Badge)
 		})
 	})
+
+	m.Get("/-/metrics", promhttp.Handler())
 
 	m.Get("/robots.txt", func() string {
 		return `User-agent: *

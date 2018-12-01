@@ -27,7 +27,8 @@ import (
 )
 
 func RefreshNumTotalPackages() {
-	numTotalPackages, _ = x.Count(new(PkgInfo))
+	count, _ := x.Count(new(PkgInfo))
+	atomic.StoreInt64(&numTotalPackages, count)
 }
 
 func ComposeSpacesObjectNames(importPath, etag string, numExtraFiles int) []string {

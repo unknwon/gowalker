@@ -446,3 +446,18 @@ func DeletePackageByPath(importPath string) error {
 	_, err := x.Delete(&PkgInfo{ImportPath: importPath})
 	return err
 }
+
+func NumMonthlyActivePackages() int64 {
+	count, _ := x.Where("last_viewed >= ?", time.Now().Add(-30*24*time.Hour).Unix()).Count(new(PkgInfo))
+	return count
+}
+
+func NumWeeklyActivePackages() int64 {
+	count, _ := x.Where("last_viewed >= ?", time.Now().Add(-7*24*time.Hour).Unix()).Count(new(PkgInfo))
+	return count
+}
+
+func NumDailyActivePackages() int64 {
+	count, _ := x.Where("last_viewed >= ?", time.Now().Add(-24*time.Hour).Unix()).Count(new(PkgInfo))
+	return count
+}

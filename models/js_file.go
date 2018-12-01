@@ -69,3 +69,23 @@ func SaveJSFile(jsFile *JSFile) error {
 	_, err = x.ID(jsFile.ID).AllCols().Update(jsFile)
 	return err
 }
+
+func NumTotalJSFiles() int64 {
+	count, _ := x.Count(new(JSFile))
+	return count
+}
+
+func NumGeneratedJSFiles() int64 {
+	count, _ := x.Where("status = ?", JSFileStatusGenerated).Count(new(JSFile))
+	return count
+}
+
+func NumDistributedJSFiles() int64 {
+	count, _ := x.Where("status = ?", JSFileStatusDistributed).Count(new(JSFile))
+	return count
+}
+
+func NumRecycledJSFiles() int64 {
+	count, _ := x.Where("status = ?", JSFileStatusRecycled).Count(new(JSFile))
+	return count
+}
