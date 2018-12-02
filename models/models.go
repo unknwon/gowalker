@@ -54,7 +54,7 @@ func init() {
 		log.Fatal(2, "Failed to add func: %v", err)
 	} else if err = c.AddFunc("@every 1m", DistributeJSFiles); err != nil {
 		log.Fatal(2, "Failed to add func: %v", err)
-	} else if err = c.AddFunc("@every 1m", RecycleJSFiles); err != nil {
+	} else if err = c.AddFunc("@every 5m", RecycleJSFiles); err != nil {
 		log.Fatal(2, "Failed to add func: %v", err)
 	}
 	c.Start()

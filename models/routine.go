@@ -71,6 +71,7 @@ func DistributeJSFiles() {
 			log.Error(2, "Failed to get package info by ID[%d]: %v", jsFile.PkgID, err)
 			return nil
 		}
+		log.Trace("DistributeJSFiles[%d]: Distributing %q", jsFile.ID, pinfo.ImportPath)
 
 		// Compose object names
 		localJSPaths := pinfo.LocalJSPaths()
