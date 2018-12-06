@@ -31,8 +31,8 @@ const (
 
 type JSFile struct {
 	ID            int64
-	PkgID         int64 `xorm:"INDEX"`
-	Etag          string
+	PkgID         int64  `xorm:"INDEX UNIQUE(pkg_id_etag)"`
+	Etag          string `xorm:"UNIQUE(pkg_id_etag)"`
 	Status        JSFileStatus
 	IsStale       bool // Indicates whether should be recycled
 	NumExtraFiles int  // Indicates the number of extra JS files generated
