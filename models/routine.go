@@ -133,7 +133,6 @@ func RecycleJSFiles() {
 				log.Error(2, "Failed to get package info by ID[%d]: %v", jsFile.PkgID, err)
 				return nil
 			}
-			fmt.Println(pinfo.ImportPath, time.Unix(pinfo.LastViewed, 0))
 
 			var numFiles int
 			switch jsFile.Status {
