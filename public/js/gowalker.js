@@ -1,8 +1,4 @@
 $(document).ready(function () {
-    $('.dropdown').dropdown({
-        transition: 'drop'
-    });
-    $('.popup').popup();
     $('.ui.accordion .title').click(function () {
         var $icon = $(this).find('.fas');
         var $content = $('.ui.accordion .content');
