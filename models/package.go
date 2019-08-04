@@ -22,11 +22,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Unknwon/com"
+	"github.com/unknwon/com"
 	log "gopkg.in/clog.v1"
 
-	"github.com/Unknwon/gowalker/pkg/base"
-	"github.com/Unknwon/gowalker/pkg/setting"
+	"github.com/unknwon/gowalker/pkg/base"
+	"github.com/unknwon/gowalker/pkg/setting"
 )
 
 var (

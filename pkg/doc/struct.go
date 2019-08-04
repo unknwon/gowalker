@@ -21,7 +21,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/Unknwon/gowalker/models"
+	"github.com/unknwon/gowalker/models"
 )
 
 // Source represents a Source code file.

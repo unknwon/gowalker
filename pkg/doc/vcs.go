@@ -28,10 +28,10 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/Unknwon/com"
+	"github.com/unknwon/com"
 
-	"github.com/Unknwon/gowalker/models"
-	"github.com/Unknwon/gowalker/pkg/base"
+	"github.com/unknwon/gowalker/models"
+	"github.com/unknwon/gowalker/pkg/base"
 )
 
 // TODO: specify with command line flag

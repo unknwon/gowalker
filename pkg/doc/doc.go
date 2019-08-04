@@ -30,13 +30,13 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Unknwon/com"
+	"github.com/unknwon/com"
 	log "gopkg.in/clog.v1"
 	"gopkg.in/macaron.v1"
 	// "github.com/davecgh/go-spew/spew"
 
-	"github.com/Unknwon/gowalker/models"
-	"github.com/Unknwon/gowalker/pkg/setting"
+	"github.com/unknwon/gowalker/models"
+	"github.com/unknwon/gowalker/pkg/setting"
 )
 
 var (

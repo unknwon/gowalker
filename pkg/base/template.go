@@ -18,11 +18,11 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/Unknwon/i18n"
+	"github.com/unknwon/i18n"
 	log "gopkg.in/clog.v1"
 	"gopkg.in/fsnotify.v1"
 
-	"github.com/Unknwon/gowalker/pkg/setting"
+	"github.com/unknwon/gowalker/pkg/setting"
 )
 
 func monitorI18nLocale() {

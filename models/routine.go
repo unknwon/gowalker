@@ -22,8 +22,8 @@ import (
 
 	log "gopkg.in/clog.v1"
 
-	"github.com/Unknwon/gowalker/pkg/setting"
-	"github.com/Unknwon/gowalker/pkg/spaces"
+	"github.com/unknwon/gowalker/pkg/setting"
+	"github.com/unknwon/gowalker/pkg/spaces"
 )
 
 func RefreshNumTotalPackages() {

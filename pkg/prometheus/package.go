@@ -17,7 +17,7 @@ package prometheus
 import (
 	"github.com/prometheus/client_golang/prometheus"
 
-	"github.com/Unknwon/gowalker/models"
+	"github.com/unknwon/gowalker/models"
 )
 
 var (

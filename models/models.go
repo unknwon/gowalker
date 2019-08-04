@@ -20,12 +20,12 @@ import (
 	"time"
 
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/go-xorm/core"
 	"github.com/go-xorm/xorm"
 	"github.com/robfig/cron"
 	log "gopkg.in/clog.v1"
+	"xorm.io/core"
 
-	"github.com/Unknwon/gowalker/pkg/setting"
+	"github.com/unknwon/gowalker/pkg/setting"
 )
 
 var x *xorm.Engine
@@ -41,7 +41,6 @@ func init() {
 	if err != nil {
 		log.Fatal(2, "Failed to init new engine: %v", err)
 	}
-	x.SetLogger(nil)
 	x.SetMapper(core.GonicMapper{})
 
 	if err = x.Sync(new(PkgInfo), new(PkgRef), new(JSFile)); err != nil {

@@ -21,13 +21,13 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Unknwon/com"
+	"github.com/unknwon/com"
 
-	"github.com/Unknwon/gowalker/models"
-	"github.com/Unknwon/gowalker/pkg/base"
-	"github.com/Unknwon/gowalker/pkg/context"
-	"github.com/Unknwon/gowalker/pkg/doc"
-	"github.com/Unknwon/gowalker/pkg/setting"
+	"github.com/unknwon/gowalker/models"
+	"github.com/unknwon/gowalker/pkg/base"
+	"github.com/unknwon/gowalker/pkg/context"
+	"github.com/unknwon/gowalker/pkg/doc"
+	"github.com/unknwon/gowalker/pkg/setting"
 )
 
 const (

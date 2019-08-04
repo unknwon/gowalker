@@ -20,9 +20,9 @@ import (
 
 	log "gopkg.in/clog.v1"
 
-	"github.com/Unknwon/gowalker/models"
-	"github.com/Unknwon/gowalker/pkg/base"
-	"github.com/Unknwon/gowalker/pkg/context"
+	"github.com/unknwon/gowalker/models"
+	"github.com/unknwon/gowalker/pkg/base"
+	"github.com/unknwon/gowalker/pkg/context"
 )
 
 const (

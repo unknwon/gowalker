@@ -19,7 +19,7 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/Unknwon/com"
+	"github.com/unknwon/com"
 )
 
 const (

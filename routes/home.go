@@ -18,10 +18,10 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/Unknwon/com"
-	"github.com/Unknwon/gowalker/models"
-	"github.com/Unknwon/gowalker/pkg/base"
-	"github.com/Unknwon/gowalker/pkg/context"
+	"github.com/unknwon/com"
+	"github.com/unknwon/gowalker/models"
+	"github.com/unknwon/gowalker/pkg/base"
+	"github.com/unknwon/gowalker/pkg/context"
 )
 
 const (

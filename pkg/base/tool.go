@@ -19,8 +19,8 @@ import (
 	"sort"
 	"time"
 
-	"github.com/Unknwon/com"
-	"github.com/Unknwon/i18n"
+	"github.com/unknwon/com"
+	"github.com/unknwon/i18n"
 )
 
 // MapToSortedStrings converts a string map to a alphabet sorted slice without duplication.

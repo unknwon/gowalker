@@ -34,7 +34,7 @@ import (
 	"unicode"
 	"unicode/utf8"
 
-	"github.com/Unknwon/com"
+	"github.com/unknwon/com"
 )
 
 // WalkDepth indicates how far the process goes.

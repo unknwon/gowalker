@@ -17,7 +17,6 @@ package main
 
 import (
 	"fmt"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"net/http"
 	"strings"
 
@@ -26,15 +25,16 @@ import (
 	"github.com/go-macaron/session"
 	log "gopkg.in/clog.v1"
 	"gopkg.in/macaron.v1"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 
-	"github.com/Unknwon/gowalker/pkg/context"
-	_ "github.com/Unknwon/gowalker/pkg/prometheus"
-	"github.com/Unknwon/gowalker/pkg/setting"
-	"github.com/Unknwon/gowalker/routes"
-	"github.com/Unknwon/gowalker/routes/apiv1"
+	"github.com/unknwon/gowalker/pkg/context"
+	_ "github.com/unknwon/gowalker/pkg/prometheus"
+	"github.com/unknwon/gowalker/pkg/setting"
+	"github.com/unknwon/gowalker/routes"
+	"github.com/unknwon/gowalker/routes/apiv1"
 )
 
-const Version = "2.5.2.0705"
+const Version = "2.5.3.0803"
 
 func init() {
 	setting.AppVer = Version
