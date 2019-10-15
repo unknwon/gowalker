@@ -1,6 +1,5 @@
 build:
-	go install -v
-	cp '$(GOPATH)/bin/gowalker' .
+	go build -v -o gowalker
 
 web: build
 	./gowalker
