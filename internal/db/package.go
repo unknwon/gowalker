@@ -12,7 +12,7 @@
 // License for the specific language governing permissions and limitations
 // under the License.
 
-package models
+package db
 
 import (
 	"bytes"
@@ -25,8 +25,8 @@ import (
 	"github.com/unknwon/com"
 	log "gopkg.in/clog.v1"
 
-	"github.com/unknwon/gowalker/pkg/base"
-	"github.com/unknwon/gowalker/pkg/setting"
+	"github.com/unknwon/gowalker/internal/base"
+	"github.com/unknwon/gowalker/internal/setting"
 )
 
 var (

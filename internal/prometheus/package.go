@@ -17,7 +17,7 @@ package prometheus
 import (
 	"github.com/prometheus/client_golang/prometheus"
 
-	"github.com/unknwon/gowalker/models"
+	"github.com/unknwon/gowalker/internal/db"
 )
 
 var (
@@ -27,7 +27,7 @@ var (
 		Name:      "total",
 		Help:      "Number of total packages",
 	}, func() float64 {
-		return float64(models.NumTotalPackages())
+		return float64(db.NumTotalPackages())
 	})
 	monthlyActivePackagesGaugeFunc = prometheus.NewGaugeFunc(prometheus.GaugeOpts{
 		Namespace: "gowalker",
@@ -35,7 +35,7 @@ var (
 		Name:      "monthly_active",
 		Help:      "Number of monthly active packages",
 	}, func() float64 {
-		return float64(models.NumMonthlyActivePackages())
+		return float64(db.NumMonthlyActivePackages())
 	})
 	weeklyActivePackagesGaugeFunc = prometheus.NewGaugeFunc(prometheus.GaugeOpts{
 		Namespace: "gowalker",
@@ -43,7 +43,7 @@ var (
 		Name:      "weekly_active",
 		Help:      "Number of weekly active packages",
 	}, func() float64 {
-		return float64(models.NumWeeklyActivePackages())
+		return float64(db.NumWeeklyActivePackages())
 	})
 	dailyActivePackagesGaugeFunc = prometheus.NewGaugeFunc(prometheus.GaugeOpts{
 		Namespace: "gowalker",
@@ -51,7 +51,7 @@ var (
 		Name:      "daily_active",
 		Help:      "Number of daily active packages",
 	}, func() float64 {
-		return float64(models.NumDailyActivePackages())
+		return float64(db.NumDailyActivePackages())
 	})
 )
 

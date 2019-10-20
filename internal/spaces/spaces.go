@@ -21,7 +21,7 @@ import (
 	"github.com/minio/minio-go"
 	log "gopkg.in/clog.v1"
 
-	"github.com/unknwon/gowalker/pkg/setting"
+	"github.com/unknwon/gowalker/internal/setting"
 )
 
 var client *minio.Client

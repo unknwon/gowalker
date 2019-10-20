@@ -24,8 +24,8 @@ import (
 	log "gopkg.in/clog.v1"
 	"gopkg.in/macaron.v1"
 
-	"github.com/unknwon/gowalker/pkg/base"
-	"github.com/unknwon/gowalker/pkg/setting"
+	"github.com/unknwon/gowalker/internal/base"
+	"github.com/unknwon/gowalker/internal/setting"
 )
 
 // Context represents context of a request.

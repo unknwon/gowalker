@@ -21,7 +21,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/unknwon/gowalker/models"
+	"github.com/unknwon/gowalker/internal/db"
 )
 
 // Source represents a Source code file.
@@ -117,7 +117,7 @@ type PkgDecl struct {
 
 // Package represents the full documentation and declaration of a project or package.
 type Package struct {
-	*models.PkgInfo
+	*db.PkgInfo
 
 	Readme map[string][]byte
 

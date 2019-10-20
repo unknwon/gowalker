@@ -12,7 +12,7 @@
 // License for the specific language governing permissions and limitations
 // under the License.
 
-package models
+package db
 
 import (
 	"fmt"
@@ -22,8 +22,8 @@ import (
 
 	log "gopkg.in/clog.v1"
 
-	"github.com/unknwon/gowalker/pkg/setting"
-	"github.com/unknwon/gowalker/pkg/spaces"
+	"github.com/unknwon/gowalker/internal/setting"
+	"github.com/unknwon/gowalker/internal/spaces"
 )
 
 func RefreshNumTotalPackages() {

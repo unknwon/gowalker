@@ -30,8 +30,8 @@ import (
 
 	"github.com/unknwon/com"
 
-	"github.com/unknwon/gowalker/models"
-	"github.com/unknwon/gowalker/pkg/base"
+	"github.com/unknwon/gowalker/internal/base"
+	"github.com/unknwon/gowalker/internal/db"
 )
 
 // TODO: specify with command line flag
@@ -257,7 +257,7 @@ func getVCSDoc(match map[string]string, etagSaved string) (*Package, error) {
 	w := &Walker{
 		LineFmt: lineFmt,
 		Pdoc: &Package{
-			PkgInfo: &models.PkgInfo{
+			PkgInfo: &db.PkgInfo{
 				ImportPath: match["importPath"],
 			},
 		},

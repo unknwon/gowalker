@@ -35,8 +35,8 @@ import (
 	"gopkg.in/macaron.v1"
 	// "github.com/davecgh/go-spew/spew"
 
-	"github.com/unknwon/gowalker/models"
-	"github.com/unknwon/gowalker/pkg/setting"
+	"github.com/unknwon/gowalker/internal/db"
+	"github.com/unknwon/gowalker/internal/setting"
 )
 
 var (
@@ -432,7 +432,7 @@ type exportSearchObject struct {
 
 // renderDoc renders and saves the documentation file,
 // and returns the new JSFile object corresponding to this generation.
-func renderDoc(render macaron.Render, pdoc *Package, docPath string) (*models.JSFile, error) {
+func renderDoc(render macaron.Render, pdoc *Package, docPath string) (*db.JSFile, error) {
 	data := make(map[string]interface{})
 	data["PkgFullIntro"] = pdoc.Doc
 	data["IsGoRepo"] = pdoc.IsGoRepo
@@ -670,9 +670,9 @@ func renderDoc(render macaron.Render, pdoc *Package, docPath string) (*models.JS
 	SavePkgDoc(pdoc.ImportPath, pdoc.Readme)
 
 	data["UtcTime"] = time.Unix(pdoc.Created, 0).UTC()
-	return &models.JSFile{
+	return &db.JSFile{
 		Etag:          pdoc.Etag,
-		Status:        models.JSFileStatusGenerated,
+		Status:        db.JSFileStatusGenerated,
 		NumExtraFiles: numExtraFiles,
 	}, nil
 }
@@ -685,11 +685,11 @@ const (
 )
 
 // CheckPackage checks package by import path.
-func CheckPackage(importPath string, render macaron.Render, rt requestType) (*models.PkgInfo, error) {
+func CheckPackage(importPath string, render macaron.Render, rt requestType) (*db.PkgInfo, error) {
 	// Trim prefix of standard library
 	importPath = strings.TrimPrefix(importPath, "github.com/golang/go/tree/master/src")
 
-	pinfo, err := models.GetPkgInfo(importPath)
+	pinfo, err := db.GetPkgInfo(importPath)
 	if rt != RequestTypeRefresh {
 		if err == nil {
 			gobPath := setting.DocsGobPath + importPath + ".gob"
@@ -712,7 +712,7 @@ func CheckPackage(importPath string, render macaron.Render, rt requestType) (*mo
 
 			pinfo.Views++
 			pinfo.LastViewed = time.Now().Unix()
-			if err = models.SavePkgInfo(pinfo, false); err != nil {
+			if err = db.SavePkgInfo(pinfo, false); err != nil {
 				return nil, fmt.Errorf("update views: %v", err)
 			}
 			return pinfo, nil
@@ -720,12 +720,12 @@ func CheckPackage(importPath string, render macaron.Render, rt requestType) (*mo
 	}
 
 	// Just in case, should never happen
-	if err == models.ErrEmptyPackagePath {
+	if err == db.ErrEmptyPackagePath {
 		return nil, err
 	}
 
 	var etag string
-	if err != models.ErrPackageVersionTooOld && pinfo != nil {
+	if err != db.ErrPackageVersionTooOld && pinfo != nil {
 		etag = pinfo.Etag
 	}
 
@@ -754,7 +754,7 @@ func CheckPackage(importPath string, render macaron.Render, rt requestType) (*mo
 			log.Trace("Package has not been modified: %s", pinfo.ImportPath)
 			// Update time so cannot refresh too often
 			pinfo.Created = time.Now().UTC().Unix()
-			return pinfo, models.SavePkgInfo(pinfo, false)
+			return pinfo, db.SavePkgInfo(pinfo, false)
 		} else if err == ErrInvalidRemotePath {
 			return nil, ErrInvalidRemotePath // Allow caller to make redirect to search.
 		}
@@ -789,12 +789,12 @@ func CheckPackage(importPath string, render macaron.Render, rt requestType) (*mo
 
 	pdoc.Created = time.Now().UTC().Unix()
 	pdoc.LastViewed = time.Now().Unix()
-	if err = models.SavePkgInfo(pdoc.PkgInfo, true); err != nil {
+	if err = db.SavePkgInfo(pdoc.PkgInfo, true); err != nil {
 		return nil, fmt.Errorf("SavePkgInfo[%s]: %v", importPath, err)
 	}
 
 	jsFile.PkgID = pdoc.PkgInfo.ID
-	if err = models.SaveJSFile(jsFile); err != nil {
+	if err = db.SaveJSFile(jsFile); err != nil {
 		return nil, fmt.Errorf("SaveJSFile[%s]: %v", importPath, err)
 	}
 	pdoc.JSFile = jsFile

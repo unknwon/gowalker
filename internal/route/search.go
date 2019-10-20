@@ -12,7 +12,7 @@
 // License for the specific language governing permissions and limitations
 // under the License.
 
-package routes
+package route
 
 import (
 	"strings"
@@ -20,9 +20,9 @@ import (
 
 	log "gopkg.in/clog.v1"
 
-	"github.com/unknwon/gowalker/models"
-	"github.com/unknwon/gowalker/pkg/base"
-	"github.com/unknwon/gowalker/pkg/context"
+	"github.com/unknwon/gowalker/internal/base"
+	"github.com/unknwon/gowalker/internal/context"
+	"github.com/unknwon/gowalker/internal/db"
 )
 
 const (
@@ -45,18 +45,18 @@ func Search(ctx *context.Context) {
 	}
 
 	var (
-		results []*models.PkgInfo
+		results []*db.PkgInfo
 		err     error
 	)
 	switch q {
 	case "gorepos":
-		results, err = models.GetGoRepos()
+		results, err = db.GetGoRepos()
 	case "gosubrepos":
-		results, err = models.GetGoSubepos()
+		results, err = db.GetGoSubepos()
 	case "gaesdk":
-		results, err = models.GetGAERepos()
+		results, err = db.GetGAERepos()
 	default:
-		results, err = models.SearchPkgInfo(100, q)
+		results, err = db.SearchPkgInfo(100, q)
 	}
 	if err != nil {
 		ctx.Flash.Error(err.Error(), true)
@@ -82,7 +82,7 @@ func SearchJSON(ctx *context.Context) {
 		return unicode.IsSpace(c) || c == '"'
 	})
 
-	pinfos, err := models.SearchPkgInfo(7, q)
+	pinfos, err := db.SearchPkgInfo(7, q)
 	if err != nil {
 		log.Error(2, "SearchPkgInfo '%s': %v", q, err)
 		return

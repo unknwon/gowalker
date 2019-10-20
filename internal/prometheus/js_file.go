@@ -17,7 +17,7 @@ package prometheus
 import (
 	"github.com/prometheus/client_golang/prometheus"
 
-	"github.com/unknwon/gowalker/models"
+	"github.com/unknwon/gowalker/internal/db"
 )
 
 var (
@@ -27,7 +27,7 @@ var (
 		Name:      "total",
 		Help:      "Number of total JS files",
 	}, func() float64 {
-		return float64(models.NumTotalJSFiles())
+		return float64(db.NumTotalJSFiles())
 	})
 	generatedJSFilesGaugeFunc = prometheus.NewGaugeFunc(prometheus.GaugeOpts{
 		Namespace: "gowalker",
@@ -35,7 +35,7 @@ var (
 		Name:      "generated",
 		Help:      "Number of generated JS files",
 	}, func() float64 {
-		return float64(models.NumGeneratedJSFiles())
+		return float64(db.NumGeneratedJSFiles())
 	})
 	distributedJSFilesGaugeFunc = prometheus.NewGaugeFunc(prometheus.GaugeOpts{
 		Namespace: "gowalker",
@@ -43,7 +43,7 @@ var (
 		Name:      "distributed",
 		Help:      "Number of distributed JS files",
 	}, func() float64 {
-		return float64(models.NumDistributedJSFiles())
+		return float64(db.NumDistributedJSFiles())
 	})
 	recycledJSFilesGaugeFunc = prometheus.NewGaugeFunc(prometheus.GaugeOpts{
 		Namespace: "gowalker",
@@ -51,7 +51,7 @@ var (
 		Name:      "recycled",
 		Help:      "Number of recycled JS files",
 	}, func() float64 {
-		return float64(models.NumRecycledJSFiles())
+		return float64(db.NumRecycledJSFiles())
 	})
 )
 

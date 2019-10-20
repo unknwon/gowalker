@@ -23,18 +23,18 @@ import (
 	"github.com/go-macaron/i18n"
 	"github.com/go-macaron/pongo2"
 	"github.com/go-macaron/session"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	log "gopkg.in/clog.v1"
 	"gopkg.in/macaron.v1"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 
-	"github.com/unknwon/gowalker/pkg/context"
-	_ "github.com/unknwon/gowalker/pkg/prometheus"
-	"github.com/unknwon/gowalker/pkg/setting"
-	"github.com/unknwon/gowalker/routes"
-	"github.com/unknwon/gowalker/routes/apiv1"
+	"github.com/unknwon/gowalker/internal/context"
+	_ "github.com/unknwon/gowalker/internal/prometheus"
+	"github.com/unknwon/gowalker/internal/route"
+	"github.com/unknwon/gowalker/internal/route/apiv1"
+	"github.com/unknwon/gowalker/internal/setting"
 )
 
-const Version = "2.5.3.0803"
+const Version = "2.5.3.1020"
 
 func init() {
 	setting.AppVer = Version
@@ -71,9 +71,9 @@ func main() {
 	log.Info("Run Mode: %s", strings.Title(macaron.Env))
 
 	m := newMacaron()
-	m.Get("/", routes.Home)
-	m.Get("/search", routes.Search)
-	m.Get("/search/json", routes.SearchJSON)
+	m.Get("/", route.Home)
+	m.Get("/search", route.Search)
+	m.Get("/search/json", route.SearchJSON)
 
 	m.Group("/api", func() {
 		m.Group("/v1", func() {
@@ -87,7 +87,7 @@ func main() {
 		return `User-agent: *
 Disallow: /search`
 	})
-	m.Get("/*", routes.Docs)
+	m.Get("/*", route.Docs)
 
 	listenAddr := fmt.Sprintf("0.0.0.0:%d", setting.HTTPPort)
 	log.Info("Listen: http://%s", listenAddr)

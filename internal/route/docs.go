@@ -12,7 +12,7 @@
 // License for the specific language governing permissions and limitations
 // under the License.
 
-package routes
+package route
 
 import (
 	"errors"
@@ -23,11 +23,11 @@ import (
 
 	"github.com/unknwon/com"
 
-	"github.com/unknwon/gowalker/models"
-	"github.com/unknwon/gowalker/pkg/base"
-	"github.com/unknwon/gowalker/pkg/context"
-	"github.com/unknwon/gowalker/pkg/doc"
-	"github.com/unknwon/gowalker/pkg/setting"
+	"github.com/unknwon/gowalker/internal/base"
+	"github.com/unknwon/gowalker/internal/context"
+	"github.com/unknwon/gowalker/internal/db"
+	"github.com/unknwon/gowalker/internal/doc"
+	"github.com/unknwon/gowalker/internal/setting"
 )
 
 const (
@@ -71,7 +71,7 @@ func handleError(ctx *context.Context, err error) {
 
 	if strings.Contains(err.Error(), "<meta> not found") ||
 		strings.Contains(err.Error(), "resource not found") {
-		models.DeletePackageByPath(importPath)
+		db.DeletePackageByPath(importPath)
 	}
 
 	ctx.Flash.Error(importPath+": "+strings.Replace(err.Error(), setting.GitHubCredentials, "{GitHubCredentials}", -1), true)
@@ -79,11 +79,11 @@ func handleError(ctx *context.Context, err error) {
 	Home(ctx)
 }
 
-func specialHandles(ctx *context.Context, pinfo *models.PkgInfo) bool {
+func specialHandles(ctx *context.Context, pinfo *db.PkgInfo) bool {
 	// Only show imports.
 	if strings.HasSuffix(ctx.Req.RequestURI, "?imports") {
 		ctx.Data["PageIsImports"] = true
-		ctx.Data["Packages"] = models.GetPkgInfosByPaths(strings.Split(pinfo.ImportPaths, "|"))
+		ctx.Data["Packages"] = db.GetPkgInfosByPaths(strings.Split(pinfo.ImportPaths, "|"))
 		ctx.HTML(200, DOCS_IMPORTS)
 		return true
 	}
@@ -167,8 +167,8 @@ func Docs(c *context.Context) {
 	}
 
 	// Documentation
-	if pinfo.JSFile.Status == models.JSFileStatusDistributed {
-		docJS := models.ComposeSpacesObjectNames(pinfo.ImportPath, pinfo.JSFile.Etag, pinfo.JSFile.NumExtraFiles)
+	if pinfo.JSFile.Status == db.JSFileStatusDistributed {
+		docJS := db.ComposeSpacesObjectNames(pinfo.ImportPath, pinfo.JSFile.Etag, pinfo.JSFile.NumExtraFiles)
 		for i := range docJS {
 			docJS[i] = setting.DigitalOcean.Spaces.BucketURL + docJS[i]
 		}
@@ -191,7 +191,7 @@ func Docs(c *context.Context) {
 	if len(pinfo.Subdirs) > 0 {
 		c.Data["IsHasSubdirs"] = true
 		c.Data["ViewDirPath"] = pinfo.ViewDirPath
-		c.Data["Subdirs"] = models.GetSubPkgs(pinfo.ImportPath, strings.Split(pinfo.Subdirs, "|"))
+		c.Data["Subdirs"] = db.GetSubPkgs(pinfo.ImportPath, strings.Split(pinfo.Subdirs, "|"))
 	}
 
 	// Imports and references

@@ -22,9 +22,9 @@ import (
 
 	"github.com/unknwon/com"
 
-	"github.com/unknwon/gowalker/models"
-	"github.com/unknwon/gowalker/pkg/base"
-	"github.com/unknwon/gowalker/pkg/setting"
+	"github.com/unknwon/gowalker/internal/base"
+	"github.com/unknwon/gowalker/internal/db"
+	"github.com/unknwon/gowalker/internal/setting"
 )
 
 var (
@@ -105,7 +105,7 @@ func getGolangDoc(importPath, etag string) (*Package, error) {
 	w := &Walker{
 		LineFmt: "#L%d",
 		Pdoc: &Package{
-			PkgInfo: &models.PkgInfo{
+			PkgInfo: &db.PkgInfo{
 				ImportPath:  importPath,
 				ProjectPath: "github.com/golang/go",
 				ViewDirPath: "github.com/golang/go/tree/master/src/" + importPath,

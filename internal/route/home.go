@@ -12,16 +12,16 @@
 // License for the specific language governing permissions and limitations
 // under the License.
 
-package routes
+package route
 
 import (
 	"fmt"
 	"strings"
 
 	"github.com/unknwon/com"
-	"github.com/unknwon/gowalker/models"
-	"github.com/unknwon/gowalker/pkg/base"
-	"github.com/unknwon/gowalker/pkg/context"
+	"github.com/unknwon/gowalker/internal/base"
+	"github.com/unknwon/gowalker/internal/context"
+	"github.com/unknwon/gowalker/internal/db"
 )
 
 const (
@@ -54,7 +54,7 @@ func getBrowsingHistory(ctx *context.Context) []*pkgInfo {
 	}
 
 	// Get all package info in one single query.
-	pkgInfos, err := models.GetPkgInfosByIDs(pkgIDs)
+	pkgInfos, err := db.GetPkgInfosByIDs(pkgIDs)
 	if err != nil {
 		ctx.Flash.Error(fmt.Sprintf("Cannot get browsing history: %v", err), true)
 		return nil
@@ -83,7 +83,7 @@ func getBrowsingHistory(ctx *context.Context) []*pkgInfo {
 
 func Home(c *context.Context) {
 	c.PageIs("Home")
-	c.Data["NumTotalPackages"] = base.FormatNumString(models.NumTotalPackages())
+	c.Data["NumTotalPackages"] = base.FormatNumString(db.NumTotalPackages())
 	c.Data["BrowsingHistory"] = getBrowsingHistory(c)
 	c.Success(HOME)
 }

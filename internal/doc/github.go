@@ -27,9 +27,9 @@ import (
 	"github.com/unknwon/com"
 	log "gopkg.in/clog.v1"
 
-	"github.com/unknwon/gowalker/models"
-	"github.com/unknwon/gowalker/pkg/base"
-	"github.com/unknwon/gowalker/pkg/setting"
+	"github.com/unknwon/gowalker/internal/base"
+	"github.com/unknwon/gowalker/internal/db"
+	"github.com/unknwon/gowalker/internal/setting"
 )
 
 var (
@@ -207,7 +207,7 @@ func getGitHubDoc(match map[string]string, etag string) (_ *Package, err error) 
 	w := &Walker{
 		LineFmt: "#L%d",
 		Pdoc: &Package{
-			PkgInfo: &models.PkgInfo{
+			PkgInfo: &db.PkgInfo{
 				ImportPath:  match["importPath"],
 				ProjectPath: com.Expand("github.com/{owner}/{repo}", match),
 				ViewDirPath: com.Expand("github.com/{owner}/{repo}/tree/{tag}/{importPath}", match),

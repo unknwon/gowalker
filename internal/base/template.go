@@ -22,7 +22,7 @@ import (
 	log "gopkg.in/clog.v1"
 	"gopkg.in/fsnotify.v1"
 
-	"github.com/unknwon/gowalker/pkg/setting"
+	"github.com/unknwon/gowalker/internal/setting"
 )
 
 func monitorI18nLocale() {
