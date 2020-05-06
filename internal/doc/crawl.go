@@ -246,8 +246,11 @@ func crawlDoc(importPath, etag string) (pdoc *Package, err error) {
 
 	// Render README
 	for name, content := range pdoc.Readme {
-		p, err := httplib.Post("https://api.github.com/markdown/raw?"+setting.GitHubCredentials).
-			Header("Content-Type", "text/plain").Body(content).Bytes()
+		p, err := httplib.Post("https://api.github.com/markdown/raw").
+			SetBasicAuth(setting.GitHub.ClientID, setting.GitHub.ClientSecret).
+			Header("Content-Type", "text/plain").
+			Body(content).
+			Bytes()
 		if err != nil {
 			return nil, fmt.Errorf("error rendering README: %v", err)
 		}

@@ -24,6 +24,7 @@ import (
 
 	"github.com/unknwon/gowalker/internal/base"
 	"github.com/unknwon/gowalker/internal/db"
+	"github.com/unknwon/gowalker/internal/httplib"
 	"github.com/unknwon/gowalker/internal/setting"
 )
 
@@ -33,10 +34,11 @@ var (
 )
 
 func getGolangDoc(importPath, etag string) (*Package, error) {
-	match := map[string]string{
-		"cred": setting.GitHubCredentials,
+	httpGet := func(url string, v interface{}) error {
+		return httplib.Get(url).
+			SetBasicAuth(setting.GitHub.ClientID, setting.GitHub.ClientSecret).
+			ToJson(v)
 	}
-
 	// Check revision.
 	commit, err := getGithubRevision("github.com/golang/go", "master")
 	if err != nil {
@@ -56,8 +58,7 @@ func getGolangDoc(importPath, etag string) (*Package, error) {
 		Url string
 	}
 
-	if err := com.HttpGetJSON(Client,
-		com.Expand("https://api.github.com/repos/golang/go/git/trees/master?recursive=1&{cred}", match), &tree); err != nil {
+	if err := httpGet("https://api.github.com/repos/golang/go/git/trees/master?recursive=1", &tree); err != nil {
 		return nil, fmt.Errorf("get tree: %v", err)
 	}
 
@@ -80,7 +81,7 @@ func getGolangDoc(importPath, etag string) (*Package, error) {
 				files = append(files, &Source{
 					SrcName:   f,
 					BrowseUrl: com.Expand("github.com/golang/go/blob/master/{0}", nil, node.Path),
-					RawSrcUrl: com.Expand("https://raw.github.com/golang/go/master/{0}?{1}", nil, node.Path, setting.GitHubCredentials),
+					RawSrcUrl: com.Expand("https://raw.github.com/golang/go/master/{0}", nil, node.Path),
 				})
 				continue
 			}

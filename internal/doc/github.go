@@ -29,6 +29,7 @@ import (
 
 	"github.com/unknwon/gowalker/internal/base"
 	"github.com/unknwon/gowalker/internal/db"
+	"github.com/unknwon/gowalker/internal/httplib"
 	"github.com/unknwon/gowalker/internal/setting"
 )
 
@@ -72,11 +73,15 @@ type RepoCommit struct {
 	} `json:"commit"`
 }
 
-func getGitHubDoc(match map[string]string, etag string) (_ *Package, err error) {
-	match["cred"] = setting.GitHubCredentials
-
+func getGitHubDoc(match map[string]string, etag string) (*Package, error) {
+	httpGet := func(url string, v interface{}) error {
+		return httplib.Get(url).
+			SetBasicAuth(setting.GitHub.ClientID, setting.GitHub.ClientSecret).
+			ToJson(v)
+	}
 	repoInfo := new(RepoInfo)
-	if err := com.HttpGetJSON(Client, com.Expand("https://api.github.com/repos/{owner}/{repo}?{cred}", match), repoInfo); err != nil {
+	err := httpGet(com.Expand("https://api.github.com/repos/{owner}/{repo}", match), repoInfo)
+	if err != nil {
 		return nil, fmt.Errorf("get repo default branch: %v", err)
 	}
 
@@ -89,7 +94,7 @@ func getGitHubDoc(match map[string]string, etag string) (_ *Package, err error) 
 	if repoInfo.Fork {
 		url := com.Expand("https://api.github.com/repos/{owner}/{repo}/commits?per_page=1&{cred}", match)
 		forkCommits := make([]*RepoCommit, 0, 1)
-		if err := com.HttpGetJSON(Client, url, &forkCommits); err != nil {
+		if err := httpGet(url, &forkCommits); err != nil {
 			return nil, fmt.Errorf("get fork repository commits: %v", err)
 		}
 		if len(forkCommits) == 0 {
@@ -99,7 +104,7 @@ func getGitHubDoc(match map[string]string, etag string) (_ *Package, err error) 
 		match["parent"] = repoInfo.Parent.FullName
 		url = com.Expand("https://api.github.com/repos/{parent}/commits?per_page=1&{cred}", match)
 		parentCommits := make([]*RepoCommit, 0, 1)
-		if err := com.HttpGetJSON(Client, url, &parentCommits); err != nil {
+		if err := httpGet(url, &parentCommits); err != nil {
 			return nil, fmt.Errorf("get parent repository commits: %v", err)
 		}
 		if len(parentCommits) == 0 {
@@ -147,8 +152,7 @@ func getGitHubDoc(match map[string]string, etag string) (_ *Package, err error) 
 		Url string
 	}
 
-	if err := com.HttpGetJSON(Client,
-		com.Expand("https://api.github.com/repos/{owner}/{repo}/git/trees/{tag}?recursive=1&{cred}", match), &tree); err != nil {
+	if err := httpGet(com.Expand("https://api.github.com/repos/{owner}/{repo}/git/trees/{tag}?recursive=1", match), &tree); err != nil {
 		return nil, fmt.Errorf("get tree: %v", err)
 	}
 
@@ -181,7 +185,7 @@ func getGitHubDoc(match map[string]string, etag string) (_ *Package, err error) 
 				files = append(files, &Source{
 					SrcName:   f,
 					BrowseUrl: com.Expand("github.com/{owner}/{repo}/blob/{tag}/{0}", match, node.Path),
-					RawSrcUrl: com.Expand("https://raw.github.com/{owner}/{repo}/{tag}/{0}?{1}", match, node.Path, setting.GitHubCredentials),
+					RawSrcUrl: com.Expand("https://raw.github.com/{owner}/{repo}/{tag}/{0}", match, node.Path),
 				})
 				continue
 			}
@@ -242,8 +246,7 @@ func getGitHubDoc(match map[string]string, etag string) (_ *Package, err error) 
 	var repoTree struct {
 		Stars int64 `json:"watchers"`
 	}
-	if err := com.HttpGetJSON(Client,
-		com.Expand("https://api.github.com/repos/{owner}/{repo}?{cred}", match), &repoTree); err != nil {
+	if err := httpGet(com.Expand("https://api.github.com/repos/{owner}/{repo}", match), &repoTree); err != nil {
 		return nil, fmt.Errorf("get repoTree: %v", err)
 	}
 	pdoc.Stars = repoTree.Stars

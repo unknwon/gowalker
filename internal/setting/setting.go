@@ -51,9 +51,12 @@ var (
 	}
 
 	// Global settings
-	Cfg               *ini.File
-	GitHubCredentials string
-	RefreshInterval   = 5 * time.Minute
+	Cfg    *ini.File
+	GitHub struct {
+		ClientID     string `ini:"CLIENT_ID"`
+		ClientSecret string
+	}
+	RefreshInterval = 5 * time.Minute
 )
 
 func init() {
@@ -90,10 +93,9 @@ func init() {
 	DocsJSPath = sec.Key("DOCS_JS_PATH").MustString("raw/docs/")
 	DocsGobPath = sec.Key("DOCS_GOB_PATH").MustString("raw/gob/")
 
-	GitHubCredentials = "client_id=" + Cfg.Section("github").Key("CLIENT_ID").String() +
-		"&client_secret=" + Cfg.Section("github").Key("CLIENT_SECRET").String()
-
-	if err = Cfg.Section("digitalocean.spaces").MapTo(&DigitalOcean.Spaces); err != nil {
+	if err = Cfg.Section("github").MapTo(&GitHub); err != nil {
+		log.Fatal(2, "Failed to map GitHub settings: %v", err)
+	} else if err = Cfg.Section("digitalocean.spaces").MapTo(&DigitalOcean.Spaces); err != nil {
 		log.Fatal(2, "Failed to map DigitalOcean.Spaces settings: %v", err)
 	} else if err = Cfg.Section("maintenance").MapTo(&Maintenance); err != nil {
 		log.Fatal(2, "Failed to map Maintenance settings: %v", err)
