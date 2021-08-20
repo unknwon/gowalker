@@ -40,19 +40,19 @@ var (
 )
 
 func getGithubRevision(importPath, tag string) (string, error) {
-	data, err := com.HttpGetBytes(Client, fmt.Sprintf("https://%s/commits/"+tag, importPath), nil)
+	data, err := com.HttpGetBytes(Client, fmt.Sprintf("https://%s/commits/%s", importPath, tag), nil)
 	if err != nil {
-		return "", fmt.Errorf("fail to get revision(%s): %v", importPath, err)
+		return "", fmt.Errorf("fetch commits page for %q: %v", importPath, err)
 	}
 
-	i := bytes.Index(data, []byte(`commit-links-group BtnGroup`))
+	i := bytes.Index(data, []byte(`class="BtnGroup"`))
 	if i == -1 {
-		return "", fmt.Errorf("cannot find locater in page: %s", importPath)
+		return "", fmt.Errorf("find locater in page for %q", importPath)
 	}
 	data = data[i+1:]
 	m := githubRevisionPattern.FindSubmatch(data)
 	if m == nil {
-		return "", fmt.Errorf("cannot find revision in page: %s", importPath)
+		return "", fmt.Errorf("find revision in page for %q", importPath)
 	}
 	return strings.TrimSuffix(strings.TrimPrefix(string(m[0]), `value="`), `"`), nil
 }
