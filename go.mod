@@ -27,6 +27,6 @@ require (
 	gopkg.in/clog.v1 v1.2.0
 	gopkg.in/fsnotify.v1 v1.4.7
 	gopkg.in/ini.v1 v1.46.0
-	gopkg.in/macaron.v1 v1.3.4
+	gopkg.in/macaron.v1 v1.3.7
 	xorm.io/core v0.7.0
 )
